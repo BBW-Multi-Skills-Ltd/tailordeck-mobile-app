@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import Home from './pages/Home'
 import Clients from './pages/Clients'
+import NewClient from './pages/NewClient'
+import ClientProfile from './pages/ClientProfile'
 import Jobs from './pages/Jobs'
 import NewJob from './pages/NewJob'
 import Dashboard from './pages/Dashboard'
@@ -15,6 +17,8 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/clients/new" element={<NewClient />} />
+        <Route path="/clients/:id" element={<ClientProfile />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/dashboard" element={<Dashboard />} />
