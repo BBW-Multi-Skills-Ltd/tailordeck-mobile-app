@@ -5,8 +5,8 @@ import BottomNav from './BottomNav'
 export default function AppLayout() {
   return (
     <>
-      <main className="page">
-        <AppHeader />
+      <AppHeader />
+      <main className="page page-with-header">
         <Outlet />
       </main>
       <BottomNav />

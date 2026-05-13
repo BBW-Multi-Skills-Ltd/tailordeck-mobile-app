@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Home, Scissors, Settings, Users } from 'lucide-react'
+import { Home, LayoutDashboard, Scissors, Settings, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
 type NavItem = {
@@ -12,6 +12,7 @@ const navItems: NavItem[] = [
   { label: 'Home', path: '/', icon: Home },
   { label: 'Clients', path: '/clients', icon: Users },
   { label: 'Jobs', path: '/jobs', icon: Scissors },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Settings', path: '/settings', icon: Settings },
 ]
 
@@ -34,7 +35,7 @@ export default function BottomNav() {
 
         return (
           <Link key={item.path} to={item.path} className={`nav-item${active ? ' active' : ''}`}>
-            <div className="relative flex h-9 w-14 items-center justify-center rounded-2xl">
+            <div className="relative flex h-9 w-12 items-center justify-center rounded-2xl">
               {active ? (
                 <motion.div
                   layoutId="nav-pill"
