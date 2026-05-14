@@ -3,23 +3,7 @@ import { ChevronRight, Phone, Search, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { useClients } from '../hooks/useClients'
-
-function formatIsoDate(date: string): string {
-  const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return 'No jobs yet'
-
-  return parsed.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function getInitial(name: string): string {
-  const trimmed = name.trim()
-  if (!trimmed) return 'C'
-  return trimmed.charAt(0).toUpperCase()
-}
+import { formatDateShort, getInitial } from '../lib/utils'
 
 export default function Clients() {
   const { clients } = useClients()
@@ -77,12 +61,12 @@ export default function Clients() {
                 <div className="client-main">
                   <p className="client-name truncate">{client.name}</p>
 
-                <div className="client-phone-row">
+                  <div className="client-phone-row">
                     <Phone size={15} />
                     <span>{client.phone}</span>
                   </div>
 
-                  <p className="client-last-job">Last job: {formatIsoDate(client.last_job_date)}</p>
+                  <p className="client-last-job">Last job: {formatDateShort(client.last_job_date)}</p>
                 </div>
 
                 <div className="client-arrow">

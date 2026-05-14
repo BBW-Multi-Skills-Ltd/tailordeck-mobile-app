@@ -1,32 +1,72 @@
-export type ClientJobSummary = {
-  id: string
-  clientId: string
-  title: string
-  deadlineDate: string
-  status: 'Pending' | 'In Progress' | 'Completed'
-}
+import type { MockJob } from '../types/job'
 
-export const mockClientJobs: ClientJobSummary[] = [
+export const mockJobs: MockJob[] = [
   {
     id: 'j-001',
     clientId: 'c-001',
+    clientName: 'Adeola Johnson',
+    clientPhone: '08034567890',
     title: 'Wedding Lace Gown',
+    jobType: 'Single',
+    chargeAmount: 300000,
+    createdDate: '2026-05-01',
     deadlineDate: '2026-05-20',
     status: 'In Progress',
   },
   {
     id: 'j-002',
     clientId: 'c-001',
+    clientName: 'Adeola Johnson',
+    clientPhone: '08034567890',
     title: 'Church Native Set',
+    jobType: 'Single',
+    chargeAmount: 180000,
+    createdDate: '2026-05-03',
     deadlineDate: '2026-05-25',
     status: 'Pending',
   },
   {
     id: 'j-003',
     clientId: 'c-002',
+    clientName: 'Emeka Okafor',
+    clientPhone: '08123456789',
     title: 'Senator Suit',
+    jobType: 'Single',
+    chargeAmount: 250000,
+    createdDate: '2026-05-06',
     deadlineDate: '2026-05-18',
     status: 'Completed',
   },
+  {
+    id: 'j-004',
+    clientId: 'c-002',
+    clientName: 'Emeka Okafor',
+    clientPhone: '08123456789',
+    title: 'Agbada Set',
+    jobType: 'Couple',
+    chargeAmount: 350000,
+    createdDate: '2026-05-08',
+    deadlineDate: '2026-05-30',
+    status: 'Pending',
+  },
+  {
+    id: 'j-005',
+    clientId: 'c-001',
+    clientName: 'Adeola Johnson',
+    clientPhone: '08034567890',
+    title: 'Aso-Ebi Family Pack',
+    jobType: 'Family',
+    chargeAmount: 650000,
+    createdDate: '2026-05-10',
+    deadlineDate: '2026-06-05',
+    status: 'In Progress',
+  },
 ]
 
+export const mockClientJobs = mockJobs.map((job) => ({
+  id: job.id,
+  clientId: job.clientId,
+  title: job.title,
+  deadlineDate: job.deadlineDate,
+  status: job.status,
+}))

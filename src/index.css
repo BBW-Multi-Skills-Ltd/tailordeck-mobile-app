@@ -140,7 +140,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 32px);
   padding-top: calc(var(--safe-top));
 }
 
@@ -187,6 +187,10 @@ p { margin: 0; }
 
 .section {
   padding: 20px 16px;
+}
+
+.page-fab-clearance {
+  padding-bottom: 12px;
 }
 
 .stack {
@@ -886,7 +890,7 @@ p { margin: 0; }
 
 .recent-job-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 12px;
 }
@@ -908,8 +912,38 @@ p { margin: 0; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
+}
+
+.recent-job-main {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.recent-job-meta-text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.recent-job-meta-right {
+  margin-left: auto;
+  text-align: right;
+  flex-shrink: 0;
+  max-width: 56%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-job-status {
+  margin-top: 1px;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 /* ============================================
