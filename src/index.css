@@ -1154,29 +1154,32 @@ p { margin: 0; }
 }
 
 .wizard-page {
-  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 92px);
+  padding-bottom: 46px;
 }
 
 .wizard-footer {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+  bottom: calc(var(--nav-height) + var(--safe-bottom));
   width: 100%;
   max-width: 430px;
-  padding: 0 16px;
+  padding: 0;
   z-index: 85;
 }
 
 .wizard-footer-inner {
   display: flex;
   gap: 10px;
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--bg) 90%, white 10%);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--bg) 94%, white 6%);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  padding: 8px;
-  border: 1px solid var(--border);
+  padding: 8px 16px 6px;
+  border-top: 1px solid var(--border);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
 }
 
 .wizard-jobtype-group {
@@ -1208,10 +1211,23 @@ p { margin: 0; }
   color: var(--primary);
 }
 
+.wizard-person-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
 .wizard-measurements-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.wizard-step1-measurements {
+  margin-top: 8px;
 }
 
 /* ============================================

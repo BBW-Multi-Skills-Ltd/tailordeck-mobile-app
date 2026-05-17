@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ChevronUp, Plus, Trash2, UserRound } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Plus, Trash2, UserRound } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatNaira } from '../lib/utils'
 
@@ -109,6 +109,7 @@ function ensurePersonsForJobType(jobType: JobType, prevPersons: PersonForm[], cl
 
 export default function NewJob() {
   const navigate = useNavigate()
+  const sectionRef = useRef<HTMLElement | null>(null)
 
   const [step, setStep] = useState(0)
   const [clientName, setClientName] = useState('')
@@ -132,6 +133,7 @@ export default function NewJob() {
   const [reminder, setReminder] = useState<Reminder>('1 day before')
   const [draftReady, setDraftReady] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
+  const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
 
   const charge = numericValue(chargeAmount)
   const deposit = numericValue(depositAmount)
@@ -205,7 +207,7 @@ export default function NewJob() {
   }
 
   return (
-    <section className="section stack gap-16 wizard-page">
+    <section ref={sectionRef} className="section stack gap-16 wizard-page">
       <div className="row-between">
         <button type="button" className="btn btn-ghost btn-icon" onClick={goBack} aria-label="Back">
           <ArrowLeft size={18} />
@@ -278,10 +280,15 @@ export default function NewJob() {
               </div>
 
               {jobType === 'Single' ? (
-                <div className="stack gap-10">
-                  <h4>Measurements</h4>
+                <div className="stack gap-8 wizard-step1-measurements">
+                  <p className="input-label">Measurements</p>
                   <article className="card stack gap-12">
-                    <div className="row-between">
+                    <button
+                      type="button"
+                      className="row-between wizard-person-toggle"
+                      onClick={() => setSingleMeasurementsOpen((prev) => !prev)}
+                      aria-expanded={singleMeasurementsOpen}
+                    >
                       <div className="row gap-8">
                         <div className="wizard-person-icon center">
                           <UserRound size={14} />
@@ -291,50 +298,54 @@ export default function NewJob() {
                           <p className="text-sm text-muted">{persons[0]?.sex ?? 'Male'} - adult</p>
                         </div>
                       </div>
-                      <ChevronUp size={16} className="text-muted" />
-                    </div>
+                      {singleMeasurementsOpen ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
+                    </button>
 
-                    <div className="input-group">
-                      <span className="input-label">Sex</span>
-                      <div className="wizard-sex-group">
-                        {(['Male', 'Female'] as const).map((sex) => (
-                          <button
-                            key={sex}
-                            type="button"
-                            className={`pill wizard-jobtype-pill${persons[0]?.sex === sex ? ' active' : ''}`}
-                            onClick={() =>
-                              updatePerson(persons[0].id, (person) => ({
-                                ...person,
-                                sex,
-                                role: 'adult',
-                              }))
-                            }
-                          >
-                            {sex}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    {singleMeasurementsOpen ? (
+                      <>
+                        <div className="input-group">
+                          <span className="input-label">Sex</span>
+                          <div className="wizard-sex-group">
+                            {(['Male', 'Female'] as const).map((sex) => (
+                              <button
+                                key={sex}
+                                type="button"
+                                className={`pill wizard-jobtype-pill${persons[0]?.sex === sex ? ' active' : ''}`}
+                                onClick={() =>
+                                  updatePerson(persons[0].id, (person) => ({
+                                    ...person,
+                                    sex,
+                                    role: 'adult',
+                                  }))
+                                }
+                              >
+                                {sex}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
 
-                    <div className="stack gap-8">
-                      <p className="text-sm text-muted">Body Measurements (cm)</p>
-                      <div className="wizard-measurements-grid">
-                        {step1FieldsBySex(persons[0]?.sex ?? 'Male').map((field) => (
-                          <label key={field} className="input-group">
-                            <span className="input-label">
-                              {labelFromField(field)} (cm)
-                            </span>
-                            <input
-                              className="input"
-                              value={persons[0]?.measurements[field] ?? ''}
-                              onChange={(event) => updatePersonMeasurement(persons[0].id, field, event.target.value)}
-                              placeholder="0"
-                              inputMode="decimal"
-                            />
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                        <div className="stack gap-8">
+                          <p className="text-sm text-muted">Body Measurements (cm)</p>
+                          <div className="wizard-measurements-grid">
+                            {step1FieldsBySex(persons[0]?.sex ?? 'Male').map((field) => (
+                              <label key={field} className="input-group">
+                                <span className="input-label">
+                                  {labelFromField(field)} (cm)
+                                </span>
+                                <input
+                                  className="input"
+                                  value={persons[0]?.measurements[field] ?? ''}
+                                  onChange={(event) => updatePersonMeasurement(persons[0].id, field, event.target.value)}
+                                  placeholder="0"
+                                  inputMode="decimal"
+                                />
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    ) : null}
                   </article>
                 </div>
               ) : null}
@@ -643,7 +654,15 @@ export default function NewJob() {
             {step === 0 ? 'Cancel' : 'Back'}
           </button>
           <button type="button" className="btn btn-primary flex-1" onClick={goNext}>
-            {step < 4 ? 'Next' : draftReady ? 'Finalize Job' : 'Generate Draft Summary'}
+            {step < 4 ? (
+              <>
+                Next <ArrowRight size={16} />
+              </>
+            ) : draftReady ? (
+              'Finalize Job'
+            ) : (
+              'Generate Draft Summary'
+            )}
           </button>
         </div>
       </div>
