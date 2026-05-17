@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Plus, Trash2, Upload, UserRound } from 'lucide-react'
+﻿import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, ChevronUp, Plus, Trash2, Upload, UserRound, X } from 'lucide-react'
 import { useRef, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatNaira } from '../lib/utils'
@@ -41,7 +41,7 @@ const stepLabels = [
   'Client Info & Measurements',
   'Material & Pricing',
   'Costing / Expenses',
-  'Deadline & Draft Review',
+  'Deadline',
 ] as const
 
 const reminders: Reminder[] = ['1 day before', '3 days before', '1 week before', 'none']
@@ -169,7 +169,7 @@ function digitsOnly(value: string): string {
 function formatNairaInput(value: string): string {
   const digits = digitsOnly(value)
   if (!digits) return ''
-  return `₦${Number(digits).toLocaleString('en-NG')}`
+  return `â‚¦${Number(digits).toLocaleString('en-NG')}`
 }
 
 function formatPercentInput(value: string): string {
@@ -254,22 +254,27 @@ export default function NewJob() {
   const [depositPercent, setDepositPercent] = useState('')
   const [referencePhotoNames, setReferencePhotoNames] = useState<string[]>([])
 
-  const [expenses, setExpenses] = useState<ExpenseForm[]>([{ id: 'ex-1', name: '', cost: '' }])
+  const [expenses, setExpenses] = useState<ExpenseForm[]>([])
+  const [expenseDraftName, setExpenseDraftName] = useState('')
+  const [expenseDraftCost, setExpenseDraftCost] = useState('')
   const [worthIt, setWorthIt] = useState<'Yes' | 'No'>('Yes')
 
   const [deadlineDate, setDeadlineDate] = useState('')
   const [deadlineTime, setDeadlineTime] = useState('')
   const [reminder, setReminder] = useState<Reminder>('1 day before')
-  const [draftReady, setDraftReady] = useState(false)
+  const [draftSaved, setDraftSaved] = useState(false)
+  const [stepFourReviewMode, setStepFourReviewMode] = useState(false)
+  const [isFinalizing, setIsFinalizing] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
   const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
   const [stepOneMeasurementsOpen, setStepOneMeasurementsOpen] = useState<Record<string, boolean>>({})
+  const [stepFourDetailsOpen, setStepFourDetailsOpen] = useState(true)
 
-  const charge = numericValue(chargeAmount)
+  const charge = numericValue(digitsOnly(chargeAmount))
   const depositPercentValue = Math.max(Math.min(numericValue(depositPercent), 100), 0)
   const deposit = Math.round((charge * depositPercentValue) / 100)
   const balance = Math.max(charge - deposit, 0)
-  const totalExpenses = expenses.reduce((sum, item) => sum + numericValue(item.cost), 0)
+  const totalExpenses = expenses.reduce((sum, item) => sum + numericValue(digitsOnly(item.cost)), 0)
   const projectedProfit = charge - totalExpenses
   const selectedNonBodyFields = nonBodyMeasurementTemplate[itemType] ?? nonBodyMeasurementTemplate.Other
   const selectedMaterialValue = materialType === 'Other Material' ? customMaterialType : materialType
@@ -351,15 +356,24 @@ export default function NewJob() {
   }
 
   function addExpense(): void {
-    setExpenses((prev) => [...prev, { id: `ex-${Date.now()}-${Math.floor(Math.random() * 1000)}`, name: '', cost: '' }])
-  }
+    const cleanName = expenseDraftName.trim()
+    const cleanCost = digitsOnly(expenseDraftCost)
+    if (!cleanName && !cleanCost) return
 
-  function updateExpense(expenseId: string, field: 'name' | 'cost', value: string): void {
-    setExpenses((prev) => prev.map((expense) => (expense.id === expenseId ? { ...expense, [field]: value } : expense)))
+    setExpenses((prev) => [
+      ...prev,
+      {
+        id: `ex-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        name: cleanName || 'Expense',
+        cost: cleanCost || '0',
+      },
+    ])
+    setExpenseDraftName('')
+    setExpenseDraftCost('')
   }
 
   function removeExpense(expenseId: string): void {
-    setExpenses((prev) => (prev.length <= 1 ? prev : prev.filter((expense) => expense.id !== expenseId)))
+    setExpenses((prev) => prev.filter((expense) => expense.id !== expenseId))
   }
 
   function toggleStepOneMeasurements(personId: string): void {
@@ -370,6 +384,11 @@ export default function NewJob() {
   }
 
   function goBack(): void {
+    if (step === 3 && stepFourReviewMode) {
+      setStepFourReviewMode(false)
+      return
+    }
+
     if (step > 0) {
       setStep((prev) => prev - 1)
       return
@@ -380,17 +399,52 @@ export default function NewJob() {
   }
 
   function goNext(): void {
-    if (step === 3) {
-      if (!draftReady) {
-        setDraftReady(true)
-        return
-      }
-
-      setSuccessOpen(true)
-      return
+    if (step === 2) {
+      setStepFourReviewMode(false)
+      setDraftSaved(false)
     }
 
     setStep((prev) => Math.min(prev + 1, stepLabels.length - 1))
+  }
+
+  function handleSaveDraft(): void {
+    setDraftSaved(true)
+  }
+
+  function handleFinalizeJob(): void {
+    setIsFinalizing(true)
+    setDraftSaved(false)
+    window.setTimeout(() => {
+      setIsFinalizing(false)
+      setSuccessOpen(true)
+    }, 1100)
+  }
+
+  if (successOpen) {
+    return (
+      <section className="section stack gap-16 wizard-page wizard-success-page">
+        <div className="stack gap-16 wizard-success-screen">
+          <div className="wizard-success-icon-wrap">
+            <CheckCircle2 size={58} className="wizard-success-icon" />
+          </div>
+          <p className="wizard-success-kicker">JOB CONFIRMED</p>
+          <h2 className="wizard-success-title">Contract Created!</h2>
+          <p className="text-sm text-muted wizard-success-sub">You now have a contract with</p>
+          <p className="wizard-success-client">{clientName || 'Client'}</p>
+
+          <div className="card stack gap-8 wizard-success-summary-card">
+            <div className="row-between"><p className="text-sm text-muted">Type</p><p className="font-semibold">{jobType}</p></div>
+            <div className="row-between"><p className="text-sm text-muted">Charge</p><p className="font-semibold">{formatNaira(charge)}</p></div>
+            <div className="row-between"><p className="text-sm text-muted">Delivery</p><p className="font-semibold">{deadlineDate || '-'}</p></div>
+            <div className="row-between"><p className="text-sm text-muted">Status</p><p className="wizard-pending-text">Pending ⏳</p></div>
+          </div>
+
+          <button type="button" className="btn btn-primary btn-full" onClick={() => navigate('/jobs')}>
+            View in Jobs <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -975,7 +1029,7 @@ export default function NewJob() {
                   className="input"
                   value={formatNairaInput(chargeAmount)}
                   onChange={(event) => setChargeAmount(digitsOnly(event.target.value))}
-                  placeholder="₦0"
+                  placeholder="â‚¦0"
                   inputMode="numeric"
                 />
               </label>
@@ -1042,79 +1096,86 @@ export default function NewJob() {
 
           {step === 2 ? (
             <div className="stack gap-12">
-              <div className="row-between">
-                <h4>Expenses</h4>
-                <button type="button" className="btn btn-secondary btn-sm" onClick={addExpense}>
-                  <Plus size={14} />
-                  Add Expense
-                </button>
+              <div className="stack gap-8">
+                <p className="wizard-section-label">Expenses</p>
+                <div className="wizard-expense-entry-row">
+                  <input
+                    className="input wizard-expense-name-input"
+                    value={expenseDraftName}
+                    onChange={(event) => setExpenseDraftName(event.target.value)}
+                    placeholder="Expense name (e.g. Transport)"
+                  />
+                  <input
+                    className="input wizard-expense-cost-input"
+                    value={formatNairaInput(expenseDraftCost)}
+                    onChange={(event) => setExpenseDraftCost(digitsOnly(event.target.value))}
+                    placeholder="â‚¦ Amount"
+                    inputMode="numeric"
+                  />
+                  <button type="button" className="wizard-expense-add-btn" onClick={addExpense} aria-label="Add expense">
+                    <Plus size={22} />
+                  </button>
+                </div>
               </div>
 
-              {expenses.map((expense, index) => (
-                <article key={expense.id} className="card stack gap-10">
-                  <div className="row-between">
-                    <h5>Expense {index + 1}</h5>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-icon"
-                      onClick={() => removeExpense(expense.id)}
-                      aria-label="Remove expense"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  </div>
+              {expenses.length > 0 ? (
+                <div className="stack gap-8">
+                  {expenses.map((expense) => (
+                    <article key={expense.id} className="card row-between">
+                      <div className="stack gap-4 min-w-0">
+                        <p className="text-sm text-heading truncate">{expense.name}</p>
+                        <p className="text-sm text-muted">{formatNaira(numericValue(expense.cost))}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-icon text-danger"
+                        onClick={() => removeExpense(expense.id)}
+                        aria-label="Remove expense"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              ) : null}
 
-                  <label className="input-group">
-                    <span className="input-label">Name</span>
-                    <input
-                      className="input"
-                      value={expense.name}
-                      onChange={(event) => updateExpense(expense.id, 'name', event.target.value)}
-                      placeholder="Transport, Buttons..."
-                    />
-                  </label>
-
-                  <label className="input-group">
-                    <span className="input-label">Cost</span>
-                    <input
-                      className="input"
-                      value={expense.cost}
-                      onChange={(event) => updateExpense(expense.id, 'cost', event.target.value)}
-                      placeholder="0"
-                      inputMode="numeric"
-                    />
-                  </label>
-                </article>
-              ))}
-
-              <div className="card stack gap-8">
+              <div className="card stack gap-10 wizard-costing-summary">
                 <div className="row-between">
-                  <p className="text-sm text-muted">Total Charge</p>
-                  <p className="font-semibold">{formatNaira(charge)}</p>
+                  <p className="wizard-costing-label">Charge Amount</p>
+                  <p className="wizard-costing-value">{formatNaira(charge)}</p>
                 </div>
                 <div className="row-between">
-                  <p className="text-sm text-muted">Total Expenses</p>
-                  <p className="font-semibold">{formatNaira(totalExpenses)}</p>
+                  <p className="wizard-costing-label">Total Expenses</p>
+                  <p className="wizard-costing-value wizard-costing-expense">- {formatNaira(totalExpenses)}</p>
                 </div>
+                <div className="divider" />
                 <div className="row-between">
-                  <p className="text-sm text-muted">Projected Profit</p>
-                  <p className={projectedProfit >= 0 ? 'profit-positive' : 'profit-negative'}>{formatNaira(projectedProfit)}</p>
+                  <p className="wizard-costing-profit-label">Estimated Profit</p>
+                  <p className={projectedProfit >= 0 ? 'wizard-costing-profit-positive' : 'wizard-costing-profit-negative'}>
+                    {formatNaira(projectedProfit)}
+                  </p>
                 </div>
               </div>
 
               <div className="input-group">
-                <span className="input-label">Is this job worth it?</span>
-                <div className="pill-group">
-                  {(['Yes', 'No'] as const).map((value) => (
-                    <button
-                      type="button"
-                      key={value}
-                      className={`pill${worthIt === value ? ' active' : ''}`}
-                      onClick={() => setWorthIt(value)}
-                    >
-                      {value}
-                    </button>
-                  ))}
+                <span className="wizard-section-label">Is this job worth it?</span>
+                <div className="wizard-worth-grid">
+                  <button
+                    type="button"
+                    className={`wizard-worth-btn${worthIt === 'Yes' ? ' active-yes' : ''}`}
+                    onClick={() => setWorthIt('Yes')}
+                  >
+                    <Check size={16} />
+                    Yes, proceed
+                  </button>
+                  <button
+                    type="button"
+                    className={`wizard-worth-btn danger${worthIt === 'No' ? ' active-no' : ''}`}
+                    onClick={() => setWorthIt('No')}
+                  >
+                    <X size={16} />
+                    Not worth it
+                  </button>
                 </div>
                 {worthIt === 'No' ? (
                   <p className="text-sm text-danger">Consider revising price or reducing costs before finalizing.</p>
@@ -1123,64 +1184,131 @@ export default function NewJob() {
             </div>
           ) : null}
 
-          {step === 3 ? (
+                    {step === 3 ? (
             <div className="stack gap-12">
-              <label className="input-group">
-                <span className="input-label">Delivery Date</span>
-                <input className="input" type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} />
-              </label>
+              {!stepFourReviewMode ? (
+                <>
+                  <article className="card stack gap-8 wizard-deadline-checklist">
+                    <h4>Delivery Checklist</h4>
+                    <p className="text-sm text-muted">Balance due on delivery: <strong>{formatNaira(balance)}</strong></p>
+                    <p className="text-sm text-muted">
+                      Reminder set: <strong>{reminder === 'none' ? 'No reminder' : reminder}</strong>
+                    </p>
+                    <p className="text-sm text-muted">
+                      Deadline readiness:{' '}
+                      <strong className={deadlineDate ? 'text-success' : 'text-danger'}>
+                        {deadlineDate ? 'Ready to proceed' : 'Select delivery date'}
+                      </strong>
+                    </p>
+                  </article>
 
-              <label className="input-group">
-                <span className="input-label">Delivery Time (optional)</span>
-                <input className="input" type="time" value={deadlineTime} onChange={(event) => setDeadlineTime(event.target.value)} />
-              </label>
+                  <label className="input-group">
+                    <span className="wizard-section-label">Delivery Date *</span>
+                    <div className="wizard-select-input-wrap">
+                      <input className="input wizard-select-input" type="date" value={deadlineDate} onChange={(event) => setDeadlineDate(event.target.value)} />
+                      <ChevronDown size={18} className="wizard-select-chevron" />
+                    </div>
+                  </label>
 
-              <div className="input-group">
-                <span className="input-label">Reminder</span>
-                <div className="pill-group">
-                  {reminders.map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`pill${reminder === value ? ' active' : ''}`}
-                      onClick={() => setReminder(value)}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  <label className="input-group">
+                    <span className="wizard-section-label">Delivery Time</span>
+                    <div className="wizard-select-input-wrap">
+                      <input className="input wizard-select-input" type="time" value={deadlineTime} onChange={(event) => setDeadlineTime(event.target.value)} />
+                      <ChevronDown size={18} className="wizard-select-chevron" />
+                    </div>
+                  </label>
 
-              {!draftReady ? (
-                <div className="card stack gap-8">
-                  <h4>Auto Draft Mode</h4>
-                  <p className="text-sm text-muted">
-                    Generate a draft summary before final submission. You can review and edit before finalizing this job.
-                  </p>
-                </div>
-              ) : (
-                <div className="card stack gap-10">
-                  <div className="row-between">
-                    <h4>Draft Summary</h4>
-                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => setDraftReady(false)}>
-                      Edit
-                    </button>
+                  <div className="input-group">
+                    <span className="wizard-section-label">Remind me before deadline</span>
+                    <div className="wizard-reminder-scroll">
+                      {reminders.map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={`pill${reminder === value ? ' active' : ''}`}
+                          onClick={() => setReminder(value)}
+                        >
+                          {value === 'none' ? 'No reminder' : value}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted">Client: {clientName || 'Not set'}</p>
-                  <p className="text-sm text-muted">Category: {makeCategory}</p>
-                  <p className="text-sm text-muted">Item: {(itemType === 'Other' ? customItemType : itemType) || 'Not set'}</p>
-                  <p className="text-sm text-muted">Order Scope: {jobType}</p>
-                  <p className="text-sm text-muted">
-                    {makeCategory === 'Body Wear' ? `Persons: ${persons.length}` : `Quantity: ${nonBodyQuantity || '1'}`}
-                  </p>
-                  <p className="text-sm text-muted">Material: {selectedMaterialValue || 'Not set'}</p>
-                  <p className="text-sm text-muted">Charge: {formatNaira(charge)}</p>
-                  <p className="text-sm text-muted">Deposit Now: {formatNaira(deposit)}</p>
-                  <p className="text-sm text-muted">Balance: {formatNaira(balance)}</p>
-                  <p className="text-sm text-muted">Expenses: {formatNaira(totalExpenses)}</p>
-                  <p className="text-sm text-muted">Profit: {formatNaira(projectedProfit)}</p>
-                  <p className="text-sm text-muted">Deadline: {deadlineDate || 'Not set'} {deadlineTime ? `at ${deadlineTime}` : ''}</p>
-                </div>
+                </>
+              ) : (
+                <>
+                  <div className="card stack gap-10">
+                    <div className="row-between">
+                      <h4>Job Details</h4>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="row-between wizard-person-toggle"
+                      onClick={() => setStepFourDetailsOpen((prev) => !prev)}
+                      aria-expanded={stepFourDetailsOpen}
+                    >
+                      <h5>Review Summary</h5>
+                      {stepFourDetailsOpen ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
+                    </button>
+
+                    <motion.div
+                      className="stack gap-6 wizard-collapsible"
+                      initial={false}
+                      animate={{
+                        height: stepFourDetailsOpen ? 'auto' : 0,
+                        opacity: stepFourDetailsOpen ? 1 : 0,
+                      }}
+                      transition={{
+                        height: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.2, ease: 'easeOut' },
+                      }}
+                      style={{ pointerEvents: stepFourDetailsOpen ? 'auto' : 'none' }}
+                    >
+                      <p className="wizard-detail-line"><span className="text-muted">Client name:</span> <strong>{clientName || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Client phone:</span> <strong>{clientPhone || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Job type:</span> <strong>{makeCategory}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Item type:</span> <strong>{(itemType === 'Other' ? customItemType : itemType) || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Order scope:</span> <strong>{jobType}</strong></p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Measurement:</span>{' '}
+                        <strong>{makeCategory === 'Body Wear' ? `${persons.length} person profile(s) captured` : `${selectedNonBodyFields.length} item dimension(s) captured`}</strong>
+                      </p>
+                      <p className="wizard-detail-line"><span className="text-muted">Material type:</span> <strong>{selectedMaterialValue || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Color:</span> <strong>{materialColor || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Total yard:</span> <strong>{materialYards || '0'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Material quality:</span> <strong>{materialQuality}</strong></p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Material source:</span>{' '}
+                        <strong>{materialSource === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'}</strong>
+                      </p>
+                      <p className="wizard-detail-line"><span className="text-muted">Charged amount:</span> <strong>{formatNaira(charge)}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Deposited collected:</span> <strong>{formatNaira(deposit)}</strong></p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Reference photo:</span>{' '}
+                        <strong>{referencePhotoNames.length ? referencePhotoNames.join(', ') : '-'}</strong>
+                      </p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Expenses list:</span>{' '}
+                        <strong>
+                          {expenses.length
+                            ? expenses.map((expense) => `${expense.name} (${formatNaira(numericValue(expense.cost))})`).join(', ')
+                            : '-'}
+                        </strong>
+                      </p>
+                      <p className="wizard-detail-line"><span className="text-muted">Expenses cost:</span> <strong>{formatNaira(totalExpenses)}</strong></p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Estimated profit:</span>{' '}
+                        <strong className={projectedProfit >= 0 ? 'text-success' : 'text-danger'}>{formatNaira(projectedProfit)}</strong>
+                      </p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Delivery date and time:</span>{' '}
+                        <strong>{deadlineDate || '-'} {deadlineTime ? `at ${deadlineTime}` : ''}</strong>
+                      </p>
+                    </motion.div>
+                  </div>
+
+                  {draftSaved ? <p className="text-sm text-success">Draft saved successfully.</p> : null}
+                </>
               )}
             </div>
           ) : null}
@@ -1189,34 +1317,48 @@ export default function NewJob() {
 
       <div className="wizard-footer">
         <div className="wizard-footer-inner">
-          <button type="button" className="btn btn-secondary flex-1" onClick={goBack}>
-            {step === 0 ? 'Cancel' : 'Back'}
-          </button>
-          <button type="button" className="btn btn-primary flex-1" onClick={goNext}>
-            {step < 3 ? (
-              <>
-                Next <ArrowRight size={16} />
-              </>
-            ) : draftReady ? (
-              'Finalize Job'
-            ) : (
-              'Generate Draft Summary'
-            )}
-          </button>
+          {step < 3 ? (
+            <>
+              <button type="button" className="btn btn-secondary flex-1" onClick={goBack}>
+                {step === 0 ? 'Cancel' : 'Back'}
+              </button>
+              <button type="button" className="btn btn-primary flex-1" onClick={goNext}>
+                <>
+                  Next <ArrowRight size={16} />
+                </>
+              </button>
+            </>
+          ) : !stepFourReviewMode ? (
+            <>
+              <button type="button" className="btn btn-secondary flex-1" onClick={goBack}>
+                Back
+              </button>
+              <button type="button" className="btn btn-primary flex-1" onClick={() => setStepFourReviewMode(true)}>
+                Proceed to Review
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn btn-secondary flex-1" onClick={handleSaveDraft}>
+                Save as Draft
+              </button>
+              <button type="button" className="btn btn-primary flex-1" onClick={handleFinalizeJob} disabled={isFinalizing}>
+                {isFinalizing ? 'Finalizing...' : 'Confirm & Finalize Job'}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {successOpen ? (
-        <div className="sheet-overlay">
-          <div className="sheet p-16 stack gap-12" style={{ borderRadius: '24px 24px 0 0' }}>
-            <h2>Job Saved</h2>
-            <p className="text-sm text-muted">Draft reviewed and job finalized successfully.</p>
-            <button type="button" className="btn btn-primary btn-full" onClick={() => navigate('/jobs')}>
-              Go to Jobs
-            </button>
+      {isFinalizing ? (
+        <div className="sheet-overlay wizard-loading-overlay">
+          <div className="card stack gap-10 wizard-loading-card">
+            <div className="wizard-spinner" />
+            <p className="text-sm text-muted">Creating contract...</p>
           </div>
         </div>
       ) : null}
     </section>
   )
 }
+

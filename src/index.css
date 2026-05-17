@@ -1389,6 +1389,317 @@ p { margin: 0; }
   text-overflow: ellipsis;
 }
 
+.wizard-expense-entry-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.75fr) 64px;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.wizard-expense-name-input,
+.wizard-expense-cost-input {
+  min-height: 58px;
+}
+
+.wizard-expense-add-btn {
+  width: 100%;
+  min-height: 58px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--primary);
+  color: #FAF0E8;
+  box-shadow: var(--shadow-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wizard-expense-add-btn:active {
+  transform: scale(0.96);
+}
+
+.wizard-costing-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.wizard-costing-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  letter-spacing: -0.15px;
+}
+
+.wizard-costing-expense {
+  color: var(--danger);
+}
+
+.wizard-costing-profit-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-h);
+  letter-spacing: -0.15px;
+}
+
+.wizard-costing-profit-positive {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--success);
+  letter-spacing: -0.2px;
+}
+
+.wizard-costing-profit-negative {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--danger);
+  letter-spacing: -0.2px;
+}
+
+.wizard-worth-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.wizard-section-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+}
+
+.wizard-deadline-top-summary {
+  padding: 14px;
+}
+
+.wizard-deadline-top-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.wizard-deadline-top-name {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  line-height: 1.15;
+}
+
+.wizard-deadline-top-meta {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.wizard-select-input-wrap {
+  position: relative;
+}
+
+.wizard-select-input {
+  padding-right: 40px;
+}
+
+.wizard-select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.wizard-detail-line {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-h);
+}
+
+.wizard-reminder-scroll {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.wizard-reminder-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.wizard-reminder-scroll .pill {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.wizard-success-overlay {
+  align-items: center;
+}
+
+.wizard-success-sheet {
+  max-width: 430px;
+  border-radius: 0;
+  background: var(--bg);
+  padding-bottom: calc(20px + var(--safe-bottom));
+}
+
+.wizard-success-page {
+  min-height: 100svh;
+  justify-content: center;
+  padding-top: calc(10px + var(--safe-top));
+  padding-bottom: calc(12px + var(--safe-bottom));
+}
+
+.wizard-success-screen {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.wizard-success-icon-wrap {
+  width: 92px;
+  height: 92px;
+  border-radius: var(--radius-full);
+  background: rgba(5, 150, 105, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px auto 2px;
+}
+
+.wizard-success-icon {
+  color: var(--success);
+}
+
+.wizard-success-kicker {
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--primary);
+}
+
+.wizard-success-title {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-h);
+  line-height: 1.15;
+}
+
+.wizard-success-sub,
+.wizard-success-client {
+  text-align: center;
+}
+
+.wizard-success-client {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.wizard-success-summary-card {
+  margin-top: 2px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.wizard-success-screen .btn-full {
+  width: 100%;
+  max-width: 300px;
+}
+
+.wizard-pending-text {
+  margin: 0;
+  color: var(--gold-dark);
+  font-weight: 700;
+}
+
+.wizard-loading-overlay {
+  align-items: center;
+}
+
+.wizard-loading-card {
+  width: min(300px, calc(100% - 32px));
+  align-items: center;
+  padding: 18px;
+}
+
+.wizard-spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  animation: wizard-spin 0.8s linear infinite;
+}
+
+@keyframes wizard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wizard-costing-summary {
+  padding: 12px;
+  gap: 6px;
+}
+
+.wizard-costing-summary .divider {
+  margin: 2px 0;
+}
+
+.wizard-worth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wizard-worth-btn {
+  min-height: 50px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-strong);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.wizard-worth-btn.active-yes {
+  border-color: rgba(5, 150, 105, 0.85);
+  background: rgba(5, 150, 105, 0.1);
+  color: var(--success);
+}
+
+.wizard-worth-btn.danger {
+  border-color: rgba(220, 38, 38, 0.7);
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.wizard-worth-btn.danger.active-no {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.14);
+}
+
 /* ============================================
    PROFIT DISPLAY
 ============================================ */
