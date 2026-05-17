@@ -1153,6 +1153,67 @@ p { margin: 0; }
   background: var(--primary-light);
 }
 
+.wizard-page {
+  padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 92px);
+}
+
+.wizard-footer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+  width: 100%;
+  max-width: 430px;
+  padding: 0 16px;
+  z-index: 85;
+}
+
+.wizard-footer-inner {
+  display: flex;
+  gap: 10px;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--bg) 90%, white 10%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 8px;
+  border: 1px solid var(--border);
+}
+
+.wizard-jobtype-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.wizard-sex-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.wizard-jobtype-pill {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+.wizard-person-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--primary);
+}
+
+.wizard-measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 /* ============================================
    PROFIT DISPLAY
 ============================================ */
