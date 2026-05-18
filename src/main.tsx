@@ -26,3 +26,11 @@ createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+const splash = document.getElementById('app-splash')
+if (splash) {
+  window.requestAnimationFrame(() => {
+    splash.classList.add('is-hidden')
+    window.setTimeout(() => splash.remove(), 220)
+  })
+}

@@ -25,8 +25,8 @@ export default function AppHeader() {
   return (
     <header className="app-shell-header">
       <div className="app-shell-left">
-        <div className="center app-shell-avatar">TD</div>
-        <p className="app-shell-brand">TailorDeck</p>
+        <img src="/branding/TailorDeck%20app%20logo%20for%20in%20app.png" alt="TailorDeck logo" className="app-shell-logo" />
+        <p className="app-shell-logo-text">TailorDeck</p>
       </div>
 
       <div className="app-shell-right app-header-actions">
