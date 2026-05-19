@@ -1,6 +1,6 @@
 ﻿import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, ChevronUp, Plus, Trash2, Upload, UserRound, X } from 'lucide-react'
-import { useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatNaira } from '../lib/utils'
 
@@ -169,7 +169,7 @@ function digitsOnly(value: string): string {
 function formatNairaInput(value: string): string {
   const digits = digitsOnly(value)
   if (!digits) return ''
-  return `â‚¦${Number(digits).toLocaleString('en-NG')}`
+  return `\u20A6${Number(digits).toLocaleString('en-NG')}`
 }
 
 function formatPercentInput(value: string): string {
@@ -269,6 +269,21 @@ export default function NewJob() {
   const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
   const [stepOneMeasurementsOpen, setStepOneMeasurementsOpen] = useState<Record<string, boolean>>({})
   const [stepFourDetailsOpen, setStepFourDetailsOpen] = useState(true)
+
+  useEffect(() => {
+    const pageElement = document.querySelector('main.page')
+    if (!pageElement) return
+
+    if (successOpen) {
+      pageElement.classList.add('page-no-scroll')
+    } else {
+      pageElement.classList.remove('page-no-scroll')
+    }
+
+    return () => {
+      pageElement.classList.remove('page-no-scroll')
+    }
+  }, [successOpen])
 
   const charge = numericValue(digitsOnly(chargeAmount))
   const depositPercentValue = Math.max(Math.min(numericValue(depositPercent), 100), 0)
@@ -1029,7 +1044,7 @@ export default function NewJob() {
                   className="input"
                   value={formatNairaInput(chargeAmount)}
                   onChange={(event) => setChargeAmount(digitsOnly(event.target.value))}
-                  placeholder="â‚¦0"
+                  placeholder="₦0"
                   inputMode="numeric"
                 />
               </label>
@@ -1109,7 +1124,7 @@ export default function NewJob() {
                     className="input wizard-expense-cost-input"
                     value={formatNairaInput(expenseDraftCost)}
                     onChange={(event) => setExpenseDraftCost(digitsOnly(event.target.value))}
-                    placeholder="â‚¦ Amount"
+                    placeholder="₦ Amount"
                     inputMode="numeric"
                   />
                   <button type="button" className="wizard-expense-add-btn" onClick={addExpense} aria-label="Add expense">

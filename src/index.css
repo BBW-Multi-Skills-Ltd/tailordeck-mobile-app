@@ -166,6 +166,11 @@ body {
   padding-top: calc(var(--safe-top));
 }
 
+.page.page-no-scroll {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
 .page-with-header {
   padding-top: calc(var(--header-height) + var(--safe-top));
 }
@@ -1590,10 +1595,11 @@ p { margin: 0; }
 }
 
 .wizard-success-page {
-  min-height: 100svh;
+  min-height: calc(100svh - var(--header-height) - var(--safe-top));
   justify-content: center;
-  padding-top: calc(10px + var(--safe-top));
-  padding-bottom: calc(12px + var(--safe-bottom));
+  padding-top: 10px;
+  padding-bottom: 10px;
+  overflow: hidden;
 }
 
 .wizard-success-screen {
