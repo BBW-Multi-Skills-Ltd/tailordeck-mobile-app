@@ -1089,6 +1089,92 @@ p { margin: 0; }
   flex-shrink: 0;
 }
 
+.job-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.job-photo-item {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+}
+
+.job-photo-button {
+  border: none;
+  padding: 0;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.job-doc-preview-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.job-doc-preview-bar {
+  width: calc(100% + 32px);
+  height: 6px;
+  margin-top: -16px;
+  margin-left: -16px;
+  margin-right: -16px;
+}
+
+.job-image-viewer {
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+}
+
+.job-image-full {
+  width: min(92vw, 380px);
+  max-height: 70svh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #111;
+}
+
+.job-image-close {
+  position: absolute;
+  top: calc(14px + var(--safe-top));
+  right: 14px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.job-image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.job-image-nav-left {
+  left: 10px;
+}
+
+.job-image-nav-right {
+  right: 10px;
+}
+
+.job-image-counter {
+  position: absolute;
+  bottom: calc(18px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
 /* ============================================
    DIVIDERS
 ============================================ */
