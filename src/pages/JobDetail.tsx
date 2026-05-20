@@ -27,6 +27,7 @@ import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { jobMeasurementById } from '../data/mockJobMeasurements'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
@@ -39,6 +40,7 @@ type DetailedExpense = {
 }
 
 type DetailedJobData = {
+  orderMode: 'New Stitch' | 'Amendment / Repair'
   jobType: 'Body Wear' | 'Non-Body Item'
   itemType: string
   orderScope: string
@@ -64,6 +66,7 @@ type BrandConfig = {
 
 const detailedMockByJobId: Record<string, DetailedJobData> = {
   'j-001': {
+    orderMode: 'New Stitch',
     jobType: 'Body Wear',
     itemType: 'Wedding Lace Gown',
     orderScope: 'Single',
@@ -84,14 +87,15 @@ const detailedMockByJobId: Record<string, DetailedJobData> = {
     depositAmount: 120000,
   },
   'j-002': {
+    orderMode: 'Amendment / Repair',
     jobType: 'Body Wear',
     itemType: 'Church Native Set',
     orderScope: 'Single',
-    measurement: 'Body wear measurement captured (Female)',
-    materialType: 'Ankara',
-    color: 'Royal Blue',
-    totalYard: '6',
-    materialQuality: 'Original',
+    measurement: 'Amendment details captured',
+    materialType: 'Zip',
+    color: 'Navy',
+    totalYard: '1',
+    materialQuality: 'Normal',
     materialSource: 'I Am Getting It',
     deliveryTime: '12:00',
     reminder: '1 day before',
@@ -103,10 +107,11 @@ const detailedMockByJobId: Record<string, DetailedJobData> = {
     depositAmount: 70000,
   },
   'j-003': {
+    orderMode: 'New Stitch',
     jobType: 'Body Wear',
-    itemType: 'Senator Suit',
-    orderScope: 'Single',
-    measurement: 'Body wear measurement captured (Male)',
+    itemType: 'Senator Couple Set',
+    orderScope: 'Couple',
+    measurement: '2 body profiles captured',
     materialType: 'Guinea Brocade',
     color: 'Navy',
     totalYard: '5',
@@ -122,6 +127,7 @@ const detailedMockByJobId: Record<string, DetailedJobData> = {
     depositAmount: 250000,
   },
   'j-004': {
+    orderMode: 'New Stitch',
     jobType: 'Body Wear',
     itemType: 'Agbada Set',
     orderScope: 'Couple',
@@ -141,10 +147,11 @@ const detailedMockByJobId: Record<string, DetailedJobData> = {
     depositAmount: 170000,
   },
   'j-005': {
+    orderMode: 'New Stitch',
     jobType: 'Body Wear',
     itemType: 'Aso-Ebi Family Pack',
     orderScope: 'Family',
-    measurement: '5 person profiles captured',
+    measurement: '3 person profiles captured',
     materialType: 'Ankara',
     color: 'Emerald Green',
     totalYard: '18',
@@ -159,6 +166,27 @@ const detailedMockByJobId: Record<string, DetailedJobData> = {
       { name: 'Finishing', cost: 17000 },
     ],
     depositAmount: 300000,
+  },
+  'j-006': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Family Native Set',
+    orderScope: 'Family',
+    measurement: '3 person profiles captured',
+    materialType: 'Ankara',
+    color: 'Deep Green',
+    totalYard: '14',
+    materialQuality: 'Original',
+    materialSource: 'Client Provided',
+    deliveryTime: '13:00',
+    reminder: '3 days before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Fabric Purchase', cost: 120000 },
+      { name: 'Labor', cost: 50000 },
+      { name: 'Finishing', cost: 14000 },
+    ],
+    depositAmount: 220000,
   },
 }
 
@@ -368,6 +396,7 @@ export default function JobDetail() {
     if (!job) {
       return {
         jobType: 'Body Wear',
+        orderMode: 'New Stitch',
         itemType: '-',
         orderScope: '-',
         measurement: '-',
@@ -387,6 +416,7 @@ export default function JobDetail() {
     return (
       detailedMockByJobId[job.id] ?? {
         itemType: job.title,
+        orderMode: 'New Stitch',
         jobType: 'Body Wear',
         orderScope: job.jobType,
         measurement: `${job.jobType} measurements captured`,
@@ -445,6 +475,11 @@ export default function JobDetail() {
   }
 
   const currentJob = job
+  const measurementSnapshot = jobMeasurementById[currentJob.id]
+  const measurementScopeText =
+    details.jobType === 'Non-Body Item'
+      ? 'Non-body item captured'
+      : measurementSnapshot?.orderScope ?? currentJob.jobType
   const activePhoto = viewerIndex === null ? null : details.referencePhotos[viewerIndex]
 
   async function buildPdfBlob(): Promise<Blob | null> {
@@ -602,10 +637,20 @@ export default function JobDetail() {
         <article className="card stack gap-10">
           <h4>Job Information</h4>
           <div className="stack gap-8">
+            <div className="row-between"><p className="text-sm text-muted row gap-4"><Layers2 size={14} />Order Mode</p><p className="text-sm font-semibold">{details.orderMode}</p></div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Layers2 size={14} />Job Type</p><p className="text-sm font-semibold">{details.jobType}</p></div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Tag size={14} />Item Type</p><p className="text-sm font-semibold">{details.itemType}</p></div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Users size={14} />Order Scope</p><p className="text-sm font-semibold">{currentJob.jobType}</p></div>
-            <div className="row-between"><p className="text-sm text-muted row gap-4"><Ruler size={14} />Measurement</p><p className="text-sm font-semibold">{details.measurement}</p></div>
+            <div className="row-between">
+              <p className="text-sm text-muted row gap-4"><Ruler size={14} />Measurement</p>
+              <div className="row gap-8">
+                <p className="text-sm font-semibold">{measurementScopeText}</p>
+                <Link to={`/jobs/${currentJob.id}/measurements`} className="job-measure-link">
+                  <span>View</span>
+                  <ChevronRight size={13} />
+                </Link>
+              </div>
+            </div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Package size={14} />Material Type</p><p className="text-sm font-semibold">{details.materialType}</p></div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Palette size={14} />Color</p><p className="text-sm font-semibold">{details.color}</p></div>
             <div className="row-between"><p className="text-sm text-muted row gap-4"><Ruler size={14} />Total Yard</p><p className="text-sm font-semibold">{details.totalYard}</p></div>

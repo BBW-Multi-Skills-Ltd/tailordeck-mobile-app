@@ -1,83 +1,51 @@
-import { ArrowLeft, PencilLine, Save, Trash2 } from 'lucide-react'
+import { ArrowLeft, CalendarDays, PencilLine, Phone, Ruler, Save, Trash2, UserRound } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { mockClientJobs } from '../data/mockJobs'
+import { jobMeasurementById, labelFromField, type JobMeasurementSnapshot } from '../data/mockJobMeasurements'
+import { mockJobs } from '../data/mockJobs'
+import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import { useClients } from '../hooks/useClients'
-import type { FormEvent } from 'react'
-import type { ClientMeasurements, ClientSex, MeasurementUnit } from '../types/client'
 
-type MeasurementField = keyof ClientMeasurements
-
-const measurementFields: MeasurementField[] = ['chest', 'shoulder', 'sleeve', 'waist', 'hip', 'thigh', 'inseam', 'ankle', 'neck']
-
-const fieldLabels: Record<MeasurementField, string> = {
-  chest: 'Chest',
-  bust: 'Bust',
-  waist: 'Waist',
-  shoulder: 'Shoulder',
-  hip: 'Hip',
-  inseam: 'Inseam',
-  sleeve: 'Sleeve',
-  neck: 'Neck',
-  thigh: 'Thigh',
-  ankle: 'Ankle',
-  head: 'Head',
-}
-
-function buildMeasurements(values: Record<MeasurementField, string>): ClientMeasurements {
-  return measurementFields.reduce<ClientMeasurements>((acc, field) => {
-    const raw = values[field]
-    const numeric = Number(raw)
-    if (raw && !Number.isNaN(numeric) && numeric > 0) {
-      acc[field] = numeric
-    }
-    return acc
-  }, {})
-}
-
-function formatDate(date: string): string {
-  const parsed = new Date(date)
-  if (Number.isNaN(parsed.getTime())) return date
-
-  return parsed.toLocaleDateString('en-NG', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-function statusClass(status: 'Pending' | 'In Progress' | 'Completed'): string {
-  if (status === 'Completed') return 'badge badge-done'
-  if (status === 'In Progress') return 'badge badge-progress'
-  return 'badge badge-pending'
+function toTitleCase(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
 }
 
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { getClientById, updateClient, deleteClient } = useClients()
+  const { getClientById, deleteClient } = useClients()
 
   const client = id ? getClientById(id) : undefined
-  const [editMode, setEditMode] = useState(false)
-  const [name, setName] = useState(client?.name ?? '')
-  const [phone, setPhone] = useState(client?.phone ?? '')
-  const [sex, setSex] = useState<ClientSex>(client?.sex ?? 'Female')
-  const [unit, setUnit] = useState<MeasurementUnit>(client?.measurement_unit ?? 'cm')
-  const [measurements, setMeasurements] = useState<Record<MeasurementField, string>>({
-    chest: String(client?.measurements.chest ?? ''),
-    bust: String(client?.measurements.bust ?? ''),
-    waist: String(client?.measurements.waist ?? ''),
-    shoulder: String(client?.measurements.shoulder ?? ''),
-    hip: String(client?.measurements.hip ?? ''),
-    inseam: String(client?.measurements.inseam ?? ''),
-    sleeve: String(client?.measurements.sleeve ?? ''),
-    neck: String(client?.measurements.neck ?? ''),
-    thigh: String(client?.measurements.thigh ?? ''),
-    ankle: String(client?.measurements.ankle ?? ''),
-    head: String(client?.measurements.head ?? ''),
-  })
 
-  const jobs = useMemo(() => mockClientJobs.filter((job) => job.clientId === client?.id), [client?.id])
+  const completedJobs = useMemo(
+    () =>
+      mockJobs
+        .filter((job) => job.clientId === client?.id && job.status === 'Completed')
+        .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
+    [client?.id],
+  )
+
+  const measurementJobs = useMemo(
+    () =>
+      mockJobs
+        .filter((job) => job.clientId === client?.id)
+        .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
+    [client?.id],
+  )
+
+  const [measurementDrafts, setMeasurementDrafts] = useState<Record<string, JobMeasurementSnapshot>>(() => {
+    const entries = mockJobs
+      .filter((job) => job.clientId === client?.id)
+      .map((job) => {
+        const snapshot = jobMeasurementById[job.id]
+        if (!snapshot) return [job.id, undefined] as const
+        return [job.id, JSON.parse(JSON.stringify(snapshot)) as JobMeasurementSnapshot] as const
+      })
+      .filter((entry): entry is readonly [string, JobMeasurementSnapshot] => Boolean(entry[1]))
+
+    return Object.fromEntries(entries)
+  })
+  const [editState, setEditState] = useState<Record<string, boolean>>({})
 
   if (!client) {
     return (
@@ -93,148 +61,231 @@ export default function ClientProfile() {
 
   const activeClient = client
 
-  function handleSave(event: FormEvent<HTMLFormElement>): void {
-    event.preventDefault()
-
-    updateClient(activeClient.id, {
-      name: name.trim(),
-      phone: phone.trim(),
-      sex,
-      measurement_unit: unit,
-      measurements: buildMeasurements(measurements),
-    })
-
-    setEditMode(false)
+  function blockKey(jobId: string, personId?: string): string {
+    return personId ? `${jobId}:${personId}` : `${jobId}:non-body`
   }
 
-  function handleDelete(): void {
-    const confirmed = window.confirm(`Delete ${activeClient.name}? This action cannot be undone.`)
+  function isEditing(key: string): boolean {
+    return Boolean(editState[key])
+  }
+
+  function toggleEdit(key: string): void {
+    setEditState((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function updateBodyMeasurement(jobId: string, personId: string, field: string, value: string): void {
+    const parsed = Number(value)
+    setMeasurementDrafts((prev) => {
+      const current = prev[jobId]
+      if (!current || current.kind !== 'body') return prev
+
+      return {
+        ...prev,
+        [jobId]: {
+          ...current,
+          persons: current.persons.map((person) => {
+            if (person.id !== personId) return person
+            return {
+              ...person,
+              measurements: {
+                ...person.measurements,
+                [field]: Number.isNaN(parsed) ? 0 : parsed,
+              },
+            }
+          }),
+        },
+      }
+    })
+  }
+
+  function updateNonBodyMeasurement(jobId: string, field: string, value: string): void {
+    const parsed = Number(value)
+    setMeasurementDrafts((prev) => {
+      const current = prev[jobId]
+      if (!current || current.kind !== 'non-body') return prev
+
+      return {
+        ...prev,
+        [jobId]: {
+          ...current,
+          measurements: {
+            ...current.measurements,
+            [field]: Number.isNaN(parsed) ? 0 : parsed,
+          },
+        },
+      }
+    })
+  }
+
+  function handleDeleteClient(): void {
+    const confirmed = window.confirm(
+      `Delete ${activeClient.name}? This will remove this client profile. This action cannot be undone.`,
+    )
     if (!confirmed) return
 
     deleteClient(activeClient.id)
     navigate('/clients')
   }
 
-  function updateMeasurement(field: MeasurementField, value: string): void {
-    setMeasurements((prev) => ({ ...prev, [field]: value }))
-  }
-
   return (
-    <section className="section stack gap-16">
+    <section className="section stack gap-16 page-fab-clearance">
       <div className="row-between">
         <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
           <ArrowLeft size={18} />
         </Link>
         <h2>Client Profile</h2>
-        {editMode ? (
-          <button type="submit" form="client-profile-form" className="btn btn-primary btn-sm">
-            <Save size={14} />
-            Save
-          </button>
+        <span style={{ width: '44px' }} />
+      </div>
+
+      <article className="card stack gap-12">
+        <div className="row gap-12">
+          <div className="client-avatar" style={{ width: 56, height: 56, fontSize: 22 }}>{getInitial(activeClient.name)}</div>
+          <div className="stack gap-4">
+            <h3>{activeClient.name}</h3>
+            <div className="row gap-12 text-sm text-muted">
+              <span className="row gap-4"><UserRound size={14} />{activeClient.sex}</span>
+              <span className="row gap-4"><Phone size={14} />{activeClient.phone}</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <div className="stack gap-12">
+        {measurementJobs.length === 0 ? (
+          <p className="text-sm text-muted">The profile is not recorded for this client. Create a job for this client first.</p>
         ) : (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setEditMode(true)}>
-            <PencilLine size={14} />
-            Edit
-          </button>
+          measurementJobs.map((job) => {
+            const snapshot = measurementDrafts[job.id]
+            if (!snapshot) return null
+
+            return (
+              <div key={job.id} className="stack gap-10">
+                {snapshot.kind === 'body'
+                  ? snapshot.persons.map((person) => {
+                      const key = blockKey(job.id, person.id)
+                      const editing = isEditing(key)
+
+                      return (
+                        <article key={person.id} className="card stack gap-10">
+                          <div className="row-between">
+                            <div className="stack gap-6">
+                              <p className="row gap-6 text-sm font-semibold">
+                                <Ruler size={16} className="client-measure-title-icon" />
+                                Measurement
+                              </p>
+                              <p className="text-sm text-muted">
+                                {person.name} - {person.sex} ({toTitleCase(person.role)})
+                              </p>
+                            </div>
+                            <button type="button" className={`btn ${editing ? 'btn-primary' : 'btn-secondary'} btn-sm`} onClick={() => toggleEdit(key)}>
+                              {editing ? <Save size={14} /> : <PencilLine size={14} />}
+                              {editing ? 'Save' : 'Edit'}
+                            </button>
+                          </div>
+
+                          {person.description ? <p className="text-sm text-muted">{person.description}</p> : null}
+
+                          <div className="client-measure-grid">
+                            {Object.entries(person.measurements).map(([field, value]) => (
+                              <div key={`${job.id}-${person.id}-${field}`} className="client-measure-item">
+                                <p className="text-sm text-muted">{labelFromField(field)} ({snapshot.unit})</p>
+                                {editing ? (
+                                  <input
+                                    className="input client-measure-input"
+                                    value={String(value)}
+                                    onChange={(event) => updateBodyMeasurement(job.id, person.id, field, event.target.value)}
+                                    inputMode="decimal"
+                                  />
+                                ) : (
+                                  <p className="client-measure-value">{value}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </article>
+                      )
+                    })
+                  : (() => {
+                      const key = blockKey(job.id)
+                      const editing = isEditing(key)
+
+                      return (
+                        <article className="card stack gap-10">
+                          <div className="row-between">
+                            <div className="stack gap-6">
+                              <p className="row gap-6 text-sm font-semibold">
+                                <Ruler size={16} className="client-measure-title-icon" />
+                                Measurement
+                              </p>
+                              <p className="text-sm text-muted">
+                                {snapshot.itemType} - Qty {snapshot.quantity}
+                              </p>
+                            </div>
+                            <button type="button" className={`btn ${editing ? 'btn-primary' : 'btn-secondary'} btn-sm`} onClick={() => toggleEdit(key)}>
+                              {editing ? <Save size={14} /> : <PencilLine size={14} />}
+                              {editing ? 'Save' : 'Edit'}
+                            </button>
+                          </div>
+
+                          {snapshot.description ? <p className="text-sm text-muted">{snapshot.description}</p> : null}
+
+                          <div className="client-measure-grid">
+                            {Object.entries(snapshot.measurements).map(([field, value]) => (
+                              <div key={`${job.id}-${field}`} className="client-measure-item">
+                                <p className="text-sm text-muted">{labelFromField(field)} ({snapshot.unit})</p>
+                                {editing ? (
+                                  <input
+                                    className="input client-measure-input"
+                                    value={String(value)}
+                                    onChange={(event) => updateNonBodyMeasurement(job.id, field, event.target.value)}
+                                    inputMode="decimal"
+                                  />
+                                ) : (
+                                  <p className="client-measure-value">{value}</p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </article>
+                      )
+                    })()}
+              </div>
+            )
+          })
         )}
       </div>
 
-      <form id="client-profile-form" className="stack gap-12" onSubmit={handleSave}>
-        <label className="input-group">
-          <span className="input-label">Full Name</span>
-          <input className="input" value={name} onChange={(event) => setName(event.target.value)} disabled={!editMode} />
-        </label>
-
-        <label className="input-group">
-          <span className="input-label">Phone Number</span>
-          <input className="input" value={phone} onChange={(event) => setPhone(event.target.value)} disabled={!editMode} />
-        </label>
-
-        <div className="input-group">
-          <span className="input-label">Sex</span>
-          <div className="pill-group">
-            {(['Female', 'Male'] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={`pill${sex === value ? ' active' : ''}`}
-                onClick={() => {
-                  if (!editMode) return
-                  setSex(value)
-                }}
-                disabled={!editMode}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="input-group">
-          <span className="input-label">Measurement Unit</span>
-          <div className="pill-group">
-            {(['cm', 'inches'] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                className={`pill${unit === value ? ' active' : ''}`}
-                onClick={() => {
-                  if (!editMode) return
-                  setUnit(value)
-                }}
-                disabled={!editMode}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="card stack gap-12">
-          <h4>Measurements ({unit})</h4>
-          <div className="stack gap-10">
-            {measurementFields.map((field) => (
-              <label key={field} className="input-group">
-                <span className="input-label">{fieldLabels[field]}</span>
-                <input
-                  className="input"
-                  value={measurements[field]}
-                  onChange={(event) => updateMeasurement(field, event.target.value)}
-                  inputMode="decimal"
-                  disabled={!editMode}
-                />
-              </label>
-            ))}
-          </div>
-        </div>
-      </form>
-
-      <div className="card stack gap-12">
+      <section className="stack gap-12">
         <div className="row-between">
-          <h4>Client Jobs</h4>
-          <Link to="/jobs" className="home-link">
-            Open Jobs
-          </Link>
+          <h4>Job History</h4>
+          <p className="text-sm text-muted">{completedJobs.length} job(s)</p>
         </div>
 
-        {jobs.length === 0 ? (
-          <p className="text-sm text-muted">No jobs linked to this client yet.</p>
+        {completedJobs.length === 0 ? (
+          <p className="text-sm text-muted">No job history yet for this client. Create a job for this client.</p>
         ) : (
           <div className="stack gap-8">
-            {jobs.map((job) => (
-              <article key={job.id} className="card-pressable">
-                <div className="row-between">
-                  <p className="font-semibold">{job.title}</p>
-                  <span className={statusClass(job.status)}>{job.status}</span>
+            {completedJobs.map((job) => (
+              <Link key={job.id} to={`/jobs/${job.id}`} className="client-history-row card">
+                <p className="font-semibold truncate">{job.title}</p>
+                <div className="row-between mt-8">
+                  <p className="text-sm text-muted row gap-4">
+                    <CalendarDays size={14} />
+                    Due: {formatDateShort(job.deadlineDate)}
+                  </p>
+                  <p className="text-sm font-semibold">{formatNaira(job.chargeAmount)}</p>
                 </div>
-                <p className="text-sm text-muted mt-4">Due: {formatDate(job.deadlineDate)}</p>
-              </article>
+              </Link>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
-      <button type="button" className="btn btn-danger btn-full" onClick={handleDelete}>
+      <button type="button" className="btn btn-primary btn-full" onClick={() => navigate('/jobs/new')}>
+        Start Another Job for This Client
+      </button>
+
+      <button type="button" className="btn btn-danger btn-full" onClick={handleDeleteClient}>
         <Trash2 size={16} />
         Delete Client
       </button>

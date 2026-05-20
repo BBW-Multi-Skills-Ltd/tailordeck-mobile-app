@@ -31,7 +31,10 @@ function loadInitialClients(): Client[] {
   try {
     const parsed = JSON.parse(stored) as Client[]
     if (!Array.isArray(parsed)) return mockClients
-    return parsed
+
+    const parsedIds = new Set(parsed.map((client) => client.id))
+    const missingSeedClients = mockClients.filter((client) => !parsedIds.has(client.id))
+    return [...parsed, ...missingSeedClients]
   } catch {
     return mockClients
   }

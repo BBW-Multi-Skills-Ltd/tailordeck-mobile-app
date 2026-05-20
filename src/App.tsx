@@ -7,6 +7,7 @@ import ClientProfile from './pages/ClientProfile'
 import Jobs from './pages/Jobs'
 import NewJob from './pages/NewJob'
 import JobDetail from './pages/JobDetail'
+import JobMeasurements from './pages/JobMeasurements'
 import Dashboard from './pages/Dashboard'
 import SettingsPage from './pages/Settings'
 import Onboarding from './pages/Onboarding'
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/jobs/:id" element={<JobDetail />} />
+        <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

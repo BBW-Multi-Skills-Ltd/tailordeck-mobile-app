@@ -7,6 +7,7 @@ import { formatNaira } from '../lib/utils'
 type JobType = 'Single' | 'Couple' | 'Family'
 type PersonSex = 'Male' | 'Female' | 'Boy' | 'Girl'
 type MakeCategory = 'Body Wear' | 'Non-Body Item'
+type OrderMode = 'New Stitch' | 'Amendment / Repair'
 type Reminder = '1 day before' | '3 days before' | '1 week before' | 'none'
 type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 type MaterialSource = 'Client is Providing Material' | 'I Am Getting It'
@@ -28,6 +29,8 @@ type PersonForm = {
   sex: PersonSex
   role: 'adult' | 'child'
   age: string
+  itemType: string
+  description: string
   measurements: Record<string, string>
 }
 
@@ -39,7 +42,7 @@ type ExpenseForm = {
 
 const stepLabels = [
   'Client Info & Measurements',
-  'Material & Pricing',
+  'Materials / Parts & Pricing',
   'Costing / Expenses',
   'Deadline',
 ] as const
@@ -48,8 +51,20 @@ const reminders: Reminder[] = ['1 day before', '3 days before', '1 week before',
 const qualities: MaterialQuality[] = ['Normal', 'Original', 'Fake', 'High Standard']
 const materialSources: MaterialSource[] = ['Client is Providing Material', 'I Am Getting It']
 const makeCategories: MakeCategory[] = ['Body Wear', 'Non-Body Item']
+const orderModes: OrderMode[] = ['New Stitch', 'Amendment / Repair']
 const scopeForBodyWear: JobType[] = ['Single', 'Couple', 'Family']
 const scopeForNonBody: JobType[] = ['Single']
+const amendmentIssueOptions = [
+  'Resize / Tighten',
+  'Loose / Expand',
+  'Zip Replacement',
+  'Patch / Repair Tear',
+  'Shorten Length',
+  'Adjust Sleeve',
+  'Button Replacement',
+  'Other',
+] as const
+const amendmentPartOptions = ['Zip', 'Button', 'Lining', 'Thread', 'Fabric Patch', 'Hook', 'Elastic', 'Other'] as const
 const bodyWearItems = [
   'T-shirt',
   '2-Piece (Up & Down)',
@@ -63,7 +78,6 @@ const bodyWearItems = [
   'Wedding Gown',
   'Agbada',
   'Kaftan',
-  'Other',
 ] as const
 const nonBodyItems = [
   'Bedcover',
@@ -71,7 +85,6 @@ const nonBodyItems = [
   'Duvet',
   'Pillow Case',
   'Face Cap',
-  'Other',
 ] as const
 const nonBodyMeasurementTemplate: Record<string, string[]> = {
   Bedcover: ['length', 'width', 'drop'],
@@ -186,33 +199,37 @@ function newPerson(overrides?: Partial<PersonForm>): PersonForm {
     sex: 'Female',
     role: 'adult',
     age: '',
+    itemType: '',
+    description: '',
     measurements: {},
     ...overrides,
   }
 }
 
 function ensurePersonsForJobType(jobType: JobType, prevPersons: PersonForm[], clientName: string): PersonForm[] {
+  const primaryName = clientName.trim()
+
   if (jobType === 'Single') {
     const existing = prevPersons[0]
     return [
       existing
-        ? { ...existing, name: existing.name || clientName, role: 'adult', sex: existing.sex === 'Boy' || existing.sex === 'Girl' ? 'Female' : existing.sex }
-        : newPerson({ name: clientName, sex: 'Female', role: 'adult' }),
+        ? { ...existing, name: primaryName || existing.name || 'Client', role: 'adult', sex: existing.sex === 'Boy' || existing.sex === 'Girl' ? 'Female' : existing.sex }
+        : newPerson({ name: primaryName || 'Client', sex: 'Female', role: 'adult' }),
     ]
   }
 
   if (jobType === 'Couple') {
-    const first = prevPersons[0] ?? newPerson({ name: clientName || 'Person 1', sex: 'Male', role: 'adult' })
+    const first = prevPersons[0] ?? newPerson({ name: primaryName || 'Client', sex: 'Male', role: 'adult' })
     const second = prevPersons[1] ?? newPerson({ name: 'Person 2', sex: 'Female', role: 'adult' })
     return [
-      { ...first, role: 'adult', sex: first.sex === 'Boy' || first.sex === 'Girl' ? 'Male' : first.sex },
+      { ...first, name: primaryName || first.name || 'Client', role: 'adult', sex: first.sex === 'Boy' || first.sex === 'Girl' ? 'Male' : first.sex },
       { ...second, role: 'adult', sex: second.sex === 'Boy' || second.sex === 'Girl' ? 'Female' : second.sex },
     ]
   }
 
   const adults = prevPersons.filter((person) => person.role === 'adult')
   const children = prevPersons.filter((person) => person.role === 'child')
-  const firstAdult = adults[0] ?? newPerson({ name: clientName || 'Adult 1', sex: 'Male', role: 'adult' })
+  const firstAdult = adults[0] ?? newPerson({ name: primaryName || 'Client', sex: 'Male', role: 'adult' })
   const secondAdult = adults[1] ?? newPerson({ name: 'Adult 2', sex: 'Female', role: 'adult' })
   const extraAdults = adults.slice(2).map((adult, index) => ({
     ...adult,
@@ -221,7 +238,7 @@ function ensurePersonsForJobType(jobType: JobType, prevPersons: PersonForm[], cl
   }))
 
   return [
-    { ...firstAdult, role: 'adult', sex: firstAdult.sex === 'Boy' || firstAdult.sex === 'Girl' ? 'Male' : firstAdult.sex },
+    { ...firstAdult, name: primaryName || firstAdult.name || 'Client', role: 'adult', sex: firstAdult.sex === 'Boy' || firstAdult.sex === 'Girl' ? 'Male' : firstAdult.sex },
     { ...secondAdult, role: 'adult', sex: secondAdult.sex === 'Boy' || secondAdult.sex === 'Girl' ? 'Female' : secondAdult.sex },
     ...extraAdults,
     ...children,
@@ -235,13 +252,22 @@ export default function NewJob() {
   const [step, setStep] = useState(0)
   const [clientName, setClientName] = useState('')
   const [clientPhone, setClientPhone] = useState('')
+  const [orderMode, setOrderMode] = useState<OrderMode>('New Stitch')
   const [makeCategory, setMakeCategory] = useState<MakeCategory>('Body Wear')
-  const [itemType, setItemType] = useState<string>(bodyWearItems[0])
-  const [customItemType, setCustomItemType] = useState('')
+  const [itemType, setItemType] = useState<string>('')
+  const [sameItemForAll, setSameItemForAll] = useState(true)
   const [jobType, setJobType] = useState<JobType>('Single')
   const [persons, setPersons] = useState<PersonForm[]>([newPerson({ sex: 'Female', role: 'adult' })])
   const [nonBodyMeasurements, setNonBodyMeasurements] = useState<Record<string, string>>({})
   const [nonBodyQuantity, setNonBodyQuantity] = useState('1')
+  const [nonBodyDescription, setNonBodyDescription] = useState('')
+  const [amendmentIssueType, setAmendmentIssueType] = useState('')
+  const [amendmentArea, setAmendmentArea] = useState('')
+  const [amendmentTarget, setAmendmentTarget] = useState('')
+  const [amendmentDescription, setAmendmentDescription] = useState('')
+  const [amendmentNeedsMaterials, setAmendmentNeedsMaterials] = useState(false)
+  const [amendmentPartName, setAmendmentPartName] = useState('')
+  const [amendmentPartQuantity, setAmendmentPartQuantity] = useState('')
 
   const [materialType, setMaterialType] = useState('')
   const [customMaterialType, setCustomMaterialType] = useState('')
@@ -285,14 +311,26 @@ export default function NewJob() {
     }
   }, [successOpen])
 
+  useEffect(() => {
+    if (makeCategory !== 'Body Wear' || !sameItemForAll) return
+    setPersons((prev) => prev.map((person) => ({ ...person, itemType })))
+  }, [itemType, sameItemForAll, makeCategory])
+
   const charge = numericValue(digitsOnly(chargeAmount))
   const depositPercentValue = Math.max(Math.min(numericValue(depositPercent), 100), 0)
   const deposit = Math.round((charge * depositPercentValue) / 100)
   const balance = Math.max(charge - deposit, 0)
   const totalExpenses = expenses.reduce((sum, item) => sum + numericValue(digitsOnly(item.cost)), 0)
   const projectedProfit = charge - totalExpenses
-  const selectedNonBodyFields = nonBodyMeasurementTemplate[itemType] ?? nonBodyMeasurementTemplate.Other
+  const effectiveItemType = itemType.trim()
+  const selectedNonBodyFields = nonBodyMeasurementTemplate[effectiveItemType] ?? nonBodyMeasurementTemplate.Other
   const selectedMaterialValue = materialType === 'Other Material' ? customMaterialType : materialType
+  const scopeLabel = makeCategory === 'Body Wear' ? jobType : 'Single'
+  const isAmendmentMode = orderMode === 'Amendment / Repair'
+  const showBodyMeasurementFlow = makeCategory === 'Body Wear' && !isAmendmentMode
+  const showNonBodyMeasurementFlow = makeCategory === 'Non-Body Item' && !isAmendmentMode
+  const showFullMaterialFlow = !isAmendmentMode
+  const showAmendmentMaterialFlow = isAmendmentMode && amendmentNeedsMaterials
 
   function handleClientNameChange(value: string): void {
     setClientName(value)
@@ -307,14 +345,45 @@ export default function NewJob() {
   function handleMakeCategoryChange(nextCategory: MakeCategory): void {
     setMakeCategory(nextCategory)
     if (nextCategory === 'Body Wear') {
-      setItemType(bodyWearItems[0])
+      setItemType('')
+      setSameItemForAll(true)
       setJobType('Single')
       setPersons((prev) => ensurePersonsForJobType('Single', prev, clientName))
       return
     }
 
-    setItemType(nonBodyItems[0])
+    setItemType('')
     setJobType('Single')
+  }
+
+  function handleOrderModeChange(nextMode: OrderMode): void {
+    setOrderMode(nextMode)
+    if (nextMode === 'Amendment / Repair') {
+      setJobType('Single')
+      setSameItemForAll(true)
+      setPersons((prev) => ensurePersonsForJobType('Single', prev, clientName))
+      return
+    }
+
+    setAmendmentIssueType('')
+    setAmendmentArea('')
+    setAmendmentTarget('')
+    setAmendmentDescription('')
+    setAmendmentNeedsMaterials(false)
+    setAmendmentPartName('')
+    setAmendmentPartQuantity('')
+  }
+
+  function handleAmendmentMaterialsToggle(needsMaterials: boolean): void {
+    setAmendmentNeedsMaterials(needsMaterials)
+    if (needsMaterials) return
+
+    setMaterialType('')
+    setCustomMaterialType('')
+    setMaterialColor('')
+    setMaterialYards('')
+    setAmendmentPartName('')
+    setAmendmentPartQuantity('')
   }
 
   function updateNonBodyMeasurement(field: string, value: string): void {
@@ -356,14 +425,53 @@ export default function NewJob() {
     }))
   }
 
+  function updatePersonDescription(personId: string, value: string): void {
+    updatePerson(personId, (person) => ({ ...person, description: value }))
+  }
+
+  function updateSharedItemType(value: string): void {
+    setItemType(value)
+    if (!sameItemForAll || makeCategory !== 'Body Wear') return
+    setPersons((prev) => prev.map((person) => ({ ...person, itemType: value })))
+  }
+
+  function handleSameItemToggle(enabled: boolean): void {
+    setSameItemForAll(enabled)
+    if (!enabled || makeCategory !== 'Body Wear') return
+    setPersons((prev) => {
+      const primaryItem = prev[0]?.itemType?.trim() || itemType.trim()
+      return prev.map((person, index) => ({ ...person, itemType: index === 0 ? primaryItem : primaryItem }))
+    })
+    if (!itemType.trim()) {
+      const firstPersonItem = persons[0]?.itemType?.trim()
+      if (firstPersonItem) setItemType(firstPersonItem)
+    }
+  }
+
   function addChild(): void {
-    setPersons((prev) => [...prev, newPerson({ name: `Child ${prev.filter((p) => p.role === 'child').length + 1}`, sex: 'Boy', role: 'child' })])
+    setPersons((prev) => [
+      ...prev,
+      newPerson({
+        name: `Child ${prev.filter((p) => p.role === 'child').length + 1}`,
+        sex: 'Boy',
+        role: 'child',
+        itemType: sameItemForAll ? itemType : '',
+      }),
+    ])
   }
 
   function addAdult(): void {
     const nextAdultNumber = persons.filter((person) => person.role === 'adult').length + 1
     const nextSex: PersonSex = nextAdultNumber % 2 === 0 ? 'Female' : 'Male'
-    setPersons((prev) => [...prev, newPerson({ name: `Adult ${nextAdultNumber}`, sex: nextSex, role: 'adult' })])
+    setPersons((prev) => [
+      ...prev,
+      newPerson({
+        name: `Adult ${nextAdultNumber}`,
+        sex: nextSex,
+        role: 'adult',
+        itemType: sameItemForAll ? itemType : '',
+      }),
+    ])
   }
 
   function removePerson(personId: string): void {
@@ -520,7 +628,7 @@ export default function NewJob() {
               </label>
 
               <div className="input-group">
-                <span className="input-label">What are you making?</span>
+                <span className="input-label">What type of order is this?</span>
                 <div className="wizard-sex-group">
                   {makeCategories.map((category) => (
                     <button
@@ -535,50 +643,87 @@ export default function NewJob() {
                 </div>
               </div>
 
-              <label className="input-group">
-                <span className="input-label">Item Type</span>
-                <select
-                  className="input"
-                  value={itemType}
-                  onChange={(event) => setItemType(event.target.value)}
-                >
-                  {(makeCategory === 'Body Wear' ? bodyWearItems : nonBodyItems).map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {itemType === 'Other' ? (
-                <label className="input-group">
-                  <span className="input-label">Custom Item Name</span>
-                  <input
-                    className="input"
-                    value={customItemType}
-                    onChange={(event) => setCustomItemType(event.target.value)}
-                    placeholder="Enter custom item"
-                  />
-                </label>
-              ) : null}
-
               <div className="input-group">
-                <span className="input-label">Order Scope</span>
-                <div className="wizard-jobtype-group">
-                  {(makeCategory === 'Body Wear' ? scopeForBodyWear : scopeForNonBody).map((type) => (
+                <span className="input-label">Order Mode</span>
+                <div className="wizard-sex-group">
+                  {orderModes.map((mode) => (
                     <button
-                      key={type}
+                      key={mode}
                       type="button"
-                      className={`pill wizard-jobtype-pill${jobType === type ? ' active' : ''}`}
-                      onClick={() => handleJobTypeChange(type)}
+                      className={`pill wizard-jobtype-pill${orderMode === mode ? ' active' : ''}`}
+                      onClick={() => handleOrderModeChange(mode)}
                     >
-                      {type}
+                      {mode}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {makeCategory === 'Body Wear' && jobType === 'Single' ? (
+              {!(showBodyMeasurementFlow && jobType === 'Single') ? (
+                <label className="input-group">
+                  <span className="input-label">What are you making?</span>
+                  <input
+                    className="input"
+                    value={itemType}
+                    onChange={(event) => updateSharedItemType(event.target.value)}
+                    placeholder={makeCategory === 'Body Wear' ? 'e.g. Wedding gown, Shirt, Agbada' : 'e.g. Bedcover, Pillow case, Face cap'}
+                    list={makeCategory === 'Body Wear' ? 'body-wear-item-options' : 'non-body-item-options'}
+                  />
+                </label>
+              ) : null}
+
+              <datalist id="body-wear-item-options">
+                {bodyWearItems.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
+              <datalist id="non-body-item-options">
+                {nonBodyItems.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
+
+              {!isAmendmentMode ? (
+                <div className="input-group">
+                  <span className="input-label">Order Scope</span>
+                  <div className="wizard-jobtype-group">
+                    {(makeCategory === 'Body Wear' ? scopeForBodyWear : scopeForNonBody).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        className={`pill wizard-jobtype-pill${jobType === type ? ' active' : ''}`}
+                        onClick={() => handleJobTypeChange(type)}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {showBodyMeasurementFlow && jobType !== 'Single' ? (
+                <div className="input-group">
+                  <span className="input-label">Use same item for everyone?</span>
+                  <div className="wizard-sex-group">
+                    <button
+                      type="button"
+                      className={`pill wizard-jobtype-pill${sameItemForAll ? ' active' : ''}`}
+                      onClick={() => handleSameItemToggle(true)}
+                    >
+                      Same Item
+                    </button>
+                    <button
+                      type="button"
+                      className={`pill wizard-jobtype-pill${!sameItemForAll ? ' active' : ''}`}
+                      onClick={() => handleSameItemToggle(false)}
+                    >
+                      Different Items
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {showBodyMeasurementFlow && jobType === 'Single' ? (
                 <div className="stack gap-8 wizard-step1-measurements">
                   <p className="input-label">Measurements</p>
                   <article className="card stack gap-12">
@@ -593,7 +738,7 @@ export default function NewJob() {
                           <UserRound size={14} />
                         </div>
                         <div className="stack gap-4">
-                          <h5>Person 1</h5>
+                          <h5>{persons[0]?.name || clientName || 'Client'}</h5>
                           <p className="text-sm text-muted">{persons[0]?.sex ?? 'Male'} - adult</p>
                         </div>
                       </div>
@@ -635,6 +780,20 @@ export default function NewJob() {
                           </div>
                         </div>
 
+                        <label className="input-group">
+                          <span className="input-label">What are you making for this person?</span>
+                          <input
+                            className="input"
+                            value={persons[0]?.itemType || itemType}
+                            onChange={(event) => {
+                              updateSharedItemType(event.target.value)
+                              updatePerson(persons[0].id, (person) => ({ ...person, itemType: event.target.value }))
+                            }}
+                            placeholder="e.g. Shirt, Gown, Agbada"
+                            list="body-wear-item-options"
+                          />
+                        </label>
+
                         <div className="stack gap-8">
                           <p className="text-sm text-muted">Body Measurements (cm)</p>
                           <div className="wizard-measurements-grid">
@@ -654,12 +813,22 @@ export default function NewJob() {
                             ))}
                           </div>
                         </div>
+
+                        <label className="input-group">
+                          <span className="input-label">Description (optional)</span>
+                          <input
+                            className="input"
+                            value={persons[0]?.description ?? ''}
+                            onChange={(event) => updatePersonDescription(persons[0].id, event.target.value)}
+                            placeholder="Any style notes for this person"
+                          />
+                        </label>
                     </motion.div>
                   </article>
                 </div>
               ) : null}
 
-              {makeCategory === 'Body Wear' && jobType === 'Couple' ? (
+              {showBodyMeasurementFlow && jobType === 'Couple' ? (
                 <div className="stack gap-8 wizard-step1-measurements">
                   <p className="input-label">Measurements</p>
                   {persons.slice(0, 2).map((person, index) => {
@@ -678,7 +847,7 @@ export default function NewJob() {
                               <UserRound size={14} />
                             </div>
                             <div className="stack gap-4">
-                              <h5>Person {index + 1}</h5>
+                              <h5>{index === 0 ? person.name || clientName || 'Client' : `Person ${index + 1}`}</h5>
                               <p className="text-sm text-muted">{person.sex} - adult</p>
                             </div>
                           </div>
@@ -705,6 +874,24 @@ export default function NewJob() {
                               value={person.name}
                               onChange={(event) => updatePerson(person.id, (p) => ({ ...p, name: event.target.value }))}
                               placeholder={`Person ${index + 1} name`}
+                              disabled={index === 0}
+                            />
+                          </label>
+
+                          <label className="input-group">
+                            <span className="input-label">What are you making for this person?</span>
+                            <input
+                              className="input"
+                              value={sameItemForAll ? itemType : person.itemType}
+                              onChange={(event) => {
+                                if (sameItemForAll) {
+                                  updateSharedItemType(event.target.value)
+                                } else {
+                                  updatePerson(person.id, (p) => ({ ...p, itemType: event.target.value }))
+                                }
+                              }}
+                              placeholder="e.g. Suit, Gown, Kaftan"
+                              list="body-wear-item-options"
                             />
                           </label>
 
@@ -749,6 +936,16 @@ export default function NewJob() {
                               ))}
                             </div>
                           </div>
+
+                          <label className="input-group">
+                            <span className="input-label">Description (optional)</span>
+                            <input
+                              className="input"
+                              value={person.description}
+                              onChange={(event) => updatePersonDescription(person.id, event.target.value)}
+                              placeholder="Any style notes for this person"
+                            />
+                          </label>
                         </motion.div>
                       </article>
                     )
@@ -756,14 +953,19 @@ export default function NewJob() {
                 </div>
               ) : null}
 
-              {makeCategory === 'Body Wear' && jobType === 'Family' ? (
+              {showBodyMeasurementFlow && jobType === 'Family' ? (
                 <div className="stack gap-8 wizard-step1-measurements">
                   <p className="input-label">Measurements</p>
 
                   {persons.map((person, index) => {
                     const isOpen = stepOneMeasurementsOpen[person.id] ?? true
                     const adultIndex = persons.filter((p, i) => p.role === 'adult' && i <= index).length
-                    const personLabel = person.role === 'adult' ? `Adult ${adultIndex}` : person.name || 'Child'
+                    const isPrimaryAdult = person.role === 'adult' && adultIndex === 1
+                    const personLabel = isPrimaryAdult
+                      ? person.name || clientName || 'Client'
+                      : person.role === 'adult'
+                        ? `Adult ${adultIndex}`
+                        : person.name || 'Child'
                     const measurementFields = person.role === 'child' ? CHILD_FIELDS : step1FieldsBySex(person.sex)
                     const sexOptions = person.role === 'child' ? (['Boy', 'Girl'] as const) : (['Male', 'Female'] as const)
 
@@ -824,6 +1026,24 @@ export default function NewJob() {
                               value={person.name}
                               onChange={(event) => updatePerson(person.id, (p) => ({ ...p, name: event.target.value }))}
                               placeholder={person.role === 'child' ? 'Child name' : 'Adult name'}
+                              disabled={isPrimaryAdult}
+                            />
+                          </label>
+
+                          <label className="input-group">
+                            <span className="input-label">What are you making for this person?</span>
+                            <input
+                              className="input"
+                              value={sameItemForAll ? itemType : person.itemType}
+                              onChange={(event) => {
+                                if (sameItemForAll) {
+                                  updateSharedItemType(event.target.value)
+                                } else {
+                                  updatePerson(person.id, (p) => ({ ...p, itemType: event.target.value }))
+                                }
+                              }}
+                              placeholder="e.g. Agbada, Gown, Shirt"
+                              list="body-wear-item-options"
                             />
                           </label>
 
@@ -883,6 +1103,16 @@ export default function NewJob() {
                               ))}
                             </div>
                           </div>
+
+                          <label className="input-group">
+                            <span className="input-label">Description (optional)</span>
+                            <input
+                              className="input"
+                              value={person.description}
+                              onChange={(event) => updatePersonDescription(person.id, event.target.value)}
+                              placeholder="Any style notes for this person"
+                            />
+                          </label>
                         </motion.div>
                       </article>
                     )
@@ -900,7 +1130,7 @@ export default function NewJob() {
                 </div>
               ) : null}
 
-              {makeCategory === 'Non-Body Item' ? (
+              {showNonBodyMeasurementFlow ? (
                 <div className="stack gap-8 wizard-step1-measurements">
                   <p className="input-label">Item Measurements</p>
                   <article className="card stack gap-12">
@@ -929,6 +1159,69 @@ export default function NewJob() {
                         </label>
                       ))}
                     </div>
+
+                    <label className="input-group">
+                      <span className="input-label">Description (optional)</span>
+                      <input
+                        className="input"
+                        value={nonBodyDescription}
+                        onChange={(event) => setNonBodyDescription(event.target.value)}
+                        placeholder="Any notes for this non-body item"
+                      />
+                    </label>
+                  </article>
+                </div>
+              ) : null}
+
+              {isAmendmentMode ? (
+                <div className="stack gap-8 wizard-step1-measurements">
+                  <p className="input-label">Amendment / Repair Details</p>
+                  <article className="card stack gap-12">
+                    <label className="input-group">
+                      <span className="input-label">Issue Type</span>
+                      <input
+                        className="input"
+                        value={amendmentIssueType}
+                        onChange={(event) => setAmendmentIssueType(event.target.value)}
+                        placeholder="e.g. Zip replacement, Tighten waist"
+                        list="amendment-issue-options"
+                      />
+                      <datalist id="amendment-issue-options">
+                        {amendmentIssueOptions.map((option) => (
+                          <option key={option} value={option} />
+                        ))}
+                      </datalist>
+                    </label>
+
+                    <label className="input-group">
+                      <span className="input-label">Affected Area</span>
+                      <input
+                        className="input"
+                        value={amendmentArea}
+                        onChange={(event) => setAmendmentArea(event.target.value)}
+                        placeholder="e.g. Waist, Sleeve, Zip area"
+                      />
+                    </label>
+
+                    <label className="input-group">
+                      <span className="input-label">Target Adjustment</span>
+                      <input
+                        className="input"
+                        value={amendmentTarget}
+                        onChange={(event) => setAmendmentTarget(event.target.value)}
+                        placeholder="e.g. Reduce by 2 inches, replace with quality zip"
+                      />
+                    </label>
+
+                    <label className="input-group">
+                      <span className="input-label">Description (optional)</span>
+                      <input
+                        className="input"
+                        value={amendmentDescription}
+                        onChange={(event) => setAmendmentDescription(event.target.value)}
+                        placeholder="Any extra notes about the amendment"
+                      />
+                    </label>
                   </article>
                 </div>
               ) : null}
@@ -937,106 +1230,182 @@ export default function NewJob() {
 
           {step === 1 ? (
             <div className="stack gap-12">
-              <div className="stack gap-8">
-                <span className="input-label">Material Type</span>
-                {materialCategories.map((category) => {
-                  const isOpen = openMaterialCategory === category.id
-
-                  return (
-                    <article key={category.id} className="card stack gap-8">
-                      <button
-                        type="button"
-                        className="row-between wizard-material-category-btn"
-                        onClick={() => setOpenMaterialCategory((prev) => (prev === category.id ? '' : category.id))}
-                        aria-expanded={isOpen}
-                      >
-                        <h5>{category.title}</h5>
-                        {isOpen ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
-                      </button>
-
-                      <AnimatePresence initial={false}>
-                        {isOpen ? (
-                          <motion.div
-                            className="stack gap-8 wizard-collapsible"
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-                          >
-                            {category.options.map((option) => (
-                              <button
-                                key={option.name}
-                                type="button"
-                                className={`wizard-material-option${materialType === option.name ? ' active' : ''}`}
-                                onClick={() => setMaterialType(option.name)}
-                              >
-                                <span className="wizard-material-title">{option.name}</span>
-                                <span className="wizard-material-description">{option.description}</span>
-                              </button>
-                            ))}
-                          </motion.div>
-                        ) : null}
-                      </AnimatePresence>
-                    </article>
-                  )
-                })}
-              </div>
-
-              {materialType === 'Other Material' ? (
-                <label className="input-group">
-                  <span className="input-label">Custom Material</span>
-                  <input
-                    className="input"
-                    value={customMaterialType}
-                    onChange={(event) => setCustomMaterialType(event.target.value)}
-                    placeholder="Type your custom material here..."
-                  />
-                </label>
+              {isAmendmentMode ? (
+                <div className="input-group">
+                  <span className="input-label">Need extra materials or parts?</span>
+                  <div className="wizard-sex-group">
+                    <button
+                      type="button"
+                      className={`pill wizard-jobtype-pill${amendmentNeedsMaterials ? ' active' : ''}`}
+                      onClick={() => handleAmendmentMaterialsToggle(true)}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      className={`pill wizard-jobtype-pill${!amendmentNeedsMaterials ? ' active' : ''}`}
+                      onClick={() => handleAmendmentMaterialsToggle(false)}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
               ) : null}
 
-              <div className="wizard-step2-two-col">
-                <label className="input-group">
-                  <span className="input-label">Color</span>
-                  <input className="input" value={materialColor} onChange={(event) => setMaterialColor(event.target.value)} placeholder="e.g. Navy Blue" />
-                </label>
+              {showFullMaterialFlow ? (
+                <>
+                  <div className="stack gap-8">
+                    <span className="input-label">Material Type</span>
+                    {materialCategories.map((category) => {
+                      const isOpen = openMaterialCategory === category.id
 
-                <label className="input-group">
-                  <span className="input-label">Total Yards</span>
-                  <input className="input" value={materialYards} onChange={(event) => setMaterialYards(event.target.value)} placeholder="0" inputMode="decimal" />
-                </label>
-              </div>
+                      return (
+                        <article key={category.id} className="card stack gap-8">
+                          <button
+                            type="button"
+                            className="row-between wizard-material-category-btn"
+                            onClick={() => setOpenMaterialCategory((prev) => (prev === category.id ? '' : category.id))}
+                            aria-expanded={isOpen}
+                          >
+                            <h5>{category.title}</h5>
+                            {isOpen ? <ChevronUp size={16} className="text-muted" /> : <ChevronDown size={16} className="text-muted" />}
+                          </button>
 
-              <div className="input-group">
-                <span className="input-label">Material Quality</span>
-                <div className="wizard-quality-scroll">
-                  {qualities.map((quality) => (
-                    <button
-                      key={quality}
-                      type="button"
-                      className={`pill${materialQuality === quality ? ' active' : ''}`}
-                      onClick={() => setMaterialQuality(quality)}
-                    >
-                      {quality}
-                    </button>
-                  ))}
+                          <AnimatePresence initial={false}>
+                            {isOpen ? (
+                              <motion.div
+                                className="stack gap-8 wizard-collapsible"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+                              >
+                                {category.options.map((option) => (
+                                  <button
+                                    key={option.name}
+                                    type="button"
+                                    className={`wizard-material-option${materialType === option.name ? ' active' : ''}`}
+                                    onClick={() => setMaterialType(option.name)}
+                                  >
+                                    <span className="wizard-material-title">{option.name}</span>
+                                    <span className="wizard-material-description">{option.description}</span>
+                                  </button>
+                                ))}
+                              </motion.div>
+                            ) : null}
+                          </AnimatePresence>
+                        </article>
+                      )
+                    })}
+                  </div>
+
+                  {materialType === 'Other Material' ? (
+                    <label className="input-group">
+                      <span className="input-label">Custom Material</span>
+                      <input
+                        className="input"
+                        value={customMaterialType}
+                        onChange={(event) => setCustomMaterialType(event.target.value)}
+                        placeholder="Type your custom material here..."
+                      />
+                    </label>
+                  ) : null}
+
+                  <div className="wizard-step2-two-col">
+                    <label className="input-group">
+                      <span className="input-label">Color</span>
+                      <input className="input" value={materialColor} onChange={(event) => setMaterialColor(event.target.value)} placeholder="e.g. Navy Blue" />
+                    </label>
+
+                    <label className="input-group">
+                      <span className="input-label">Total Yards</span>
+                      <input className="input" value={materialYards} onChange={(event) => setMaterialYards(event.target.value)} placeholder="0" inputMode="decimal" />
+                    </label>
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-label">Material Quality</span>
+                    <div className="wizard-quality-scroll">
+                      {qualities.map((quality) => (
+                        <button
+                          key={quality}
+                          type="button"
+                          className={`pill${materialQuality === quality ? ' active' : ''}`}
+                          onClick={() => setMaterialQuality(quality)}
+                        >
+                          {quality}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : null}
+
+              {showAmendmentMaterialFlow ? (
+                <>
+                  <label className="input-group">
+                    <span className="input-label">Material / Part Needed</span>
+                    <input
+                      className="input"
+                      value={amendmentPartName}
+                      onChange={(event) => {
+                        setAmendmentPartName(event.target.value)
+                        setMaterialType(event.target.value)
+                      }}
+                      placeholder="e.g. Zip, Button, Fabric patch"
+                      list="amendment-part-options"
+                    />
+                    <datalist id="amendment-part-options">
+                      {amendmentPartOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
+                  </label>
+
+                  <div className="wizard-step2-two-col">
+                    <label className="input-group">
+                      <span className="input-label">Color (optional)</span>
+                      <input className="input" value={materialColor} onChange={(event) => setMaterialColor(event.target.value)} placeholder="e.g. Black" />
+                    </label>
+
+                    <label className="input-group">
+                      <span className="input-label">Part Quantity</span>
+                      <input
+                        className="input"
+                        value={amendmentPartQuantity}
+                        onChange={(event) => setAmendmentPartQuantity(event.target.value)}
+                        placeholder="0"
+                        inputMode="numeric"
+                      />
+                    </label>
+                  </div>
+                </>
+              ) : null}
+
+              {(showFullMaterialFlow || showAmendmentMaterialFlow) ? (
+                <div className="input-group">
+                  <span className="input-label">Material Source</span>
+                  <div className="wizard-source-grid">
+                    {materialSources.map((source) => (
+                      <button
+                        key={source}
+                        type="button"
+                        className={`wizard-material-source-btn${materialSource === source ? ' active' : ''}`}
+                        onClick={() => setMaterialSource(source)}
+                      >
+                        {source === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
-              <div className="input-group">
-                <span className="input-label">Material Source</span>
-                <div className="wizard-source-grid">
-                  {materialSources.map((source) => (
-                    <button
-                      key={source}
-                      type="button"
-                      className={`wizard-material-source-btn${materialSource === source ? ' active' : ''}`}
-                      onClick={() => setMaterialSource(source)}
-                    >
-                      {source === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {isAmendmentMode && !amendmentNeedsMaterials ? (
+                <article className="card stack gap-6">
+                  <p className="text-sm text-muted">No extra material selected for this amendment.</p>
+                  <p className="text-sm text-muted">You can continue with pricing and labor costing.</p>
+                </article>
+              ) : null}
 
               <label className="input-group">
                 <span className="input-label">How much are you charging the client?</span>
@@ -1281,13 +1650,50 @@ export default function NewJob() {
                     >
                       <p className="wizard-detail-line"><span className="text-muted">Client name:</span> <strong>{clientName || '-'}</strong></p>
                       <p className="wizard-detail-line"><span className="text-muted">Client phone:</span> <strong>{clientPhone || '-'}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Order mode:</span> <strong>{orderMode}</strong></p>
                       <p className="wizard-detail-line"><span className="text-muted">Job type:</span> <strong>{makeCategory}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Item type:</span> <strong>{(itemType === 'Other' ? customItemType : itemType) || '-'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Order scope:</span> <strong>{jobType}</strong></p>
+                      <p className="wizard-detail-line"><span className="text-muted">Order scope:</span> <strong>{scopeLabel}</strong></p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Item type:</span>{' '}
+                        <strong>
+                          {makeCategory === 'Body Wear'
+                            ? sameItemForAll
+                              ? effectiveItemType || '-'
+                              : persons
+                                  .map((person) => `${person.name || 'Person'}: ${person.itemType || '-'}`)
+                                  .join(', ')
+                            : effectiveItemType || '-'}
+                        </strong>
+                      </p>
                       <p className="wizard-detail-line">
                         <span className="text-muted">Measurement:</span>{' '}
-                        <strong>{makeCategory === 'Body Wear' ? `${persons.length} person profile(s) captured` : `${selectedNonBodyFields.length} item dimension(s) captured`}</strong>
+                        <strong>
+                          {isAmendmentMode
+                            ? 'Amendment details captured'
+                            : makeCategory === 'Body Wear'
+                              ? `${persons.length} person profile(s) captured`
+                              : `${selectedNonBodyFields.length} item dimension(s) captured`}
+                        </strong>
                       </p>
+                      <p className="wizard-detail-line">
+                        <span className="text-muted">Description:</span>{' '}
+                        <strong>
+                          {makeCategory === 'Body Wear'
+                            ? persons
+                                .filter((person) => person.description.trim())
+                                .map((person) => `${person.name || 'Person'}: ${person.description}`)
+                                .join(', ') || '-'
+                            : nonBodyDescription || '-'}
+                        </strong>
+                      </p>
+                      {isAmendmentMode ? (
+                        <>
+                          <p className="wizard-detail-line"><span className="text-muted">Amendment issue:</span> <strong>{amendmentIssueType || '-'}</strong></p>
+                          <p className="wizard-detail-line"><span className="text-muted">Affected area:</span> <strong>{amendmentArea || '-'}</strong></p>
+                          <p className="wizard-detail-line"><span className="text-muted">Target adjustment:</span> <strong>{amendmentTarget || '-'}</strong></p>
+                          <p className="wizard-detail-line"><span className="text-muted">Repair notes:</span> <strong>{amendmentDescription || '-'}</strong></p>
+                        </>
+                      ) : null}
                       <p className="wizard-detail-line"><span className="text-muted">Material type:</span> <strong>{selectedMaterialValue || '-'}</strong></p>
                       <p className="wizard-detail-line"><span className="text-muted">Color:</span> <strong>{materialColor || '-'}</strong></p>
                       <p className="wizard-detail-line"><span className="text-muted">Total yard:</span> <strong>{materialYards || '0'}</strong></p>
