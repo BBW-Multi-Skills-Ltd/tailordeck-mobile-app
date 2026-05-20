@@ -1140,12 +1140,17 @@ p { margin: 0; }
   background: #111;
 }
 
+.job-image-stage {
+  position: relative;
+}
+
 .job-image-close {
   position: absolute;
-  top: calc(14px + var(--safe-top));
-  right: 14px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  top: 8px;
+  right: 8px;
+  color: var(--text-h);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .job-image-nav {

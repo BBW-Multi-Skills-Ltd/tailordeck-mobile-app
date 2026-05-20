@@ -23,7 +23,9 @@
   WalletCards,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
@@ -169,7 +171,6 @@ function statusClass(status: JobStatus): string {
 function formatDateNumeric(date: string): string {
   const parsed = new Date(date)
   if (Number.isNaN(parsed.getTime())) return date
-
   return parsed.toLocaleDateString('en-GB')
 }
 
@@ -221,7 +222,6 @@ function readBrandConfig(): BrandConfig {
   if (typeof window === 'undefined') return defaults
 
   const possibleKeys = ['tailordeck-settings', 'tailordeck-brand']
-
   for (const key of possibleKeys) {
     const raw = window.localStorage.getItem(key)
     if (!raw) continue
@@ -232,7 +232,6 @@ function readBrandConfig(): BrandConfig {
         shop_name?: string
         shopName?: string
       }
-
       const colors = parsed.brand?.colors ?? []
 
       return {
@@ -359,6 +358,7 @@ export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
+  const docPreviewRef = useRef<HTMLDivElement | null>(null)
 
   const job = id ? mockJobs.find((item) => item.id === id) : undefined
   const brand = useMemo(() => readBrandConfig(), [])
@@ -446,6 +446,33 @@ export default function JobDetail() {
   const currentJob = job
   const activePhoto = viewerIndex === null ? null : details.referencePhotos[viewerIndex]
 
+  async function buildPdfBlob(): Promise<Blob | null> {
+    if (!docPreviewRef.current) return null
+
+    const canvas = await html2canvas(docPreviewRef.current, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true,
+    })
+
+    const imageData = canvas.toDataURL('image/png')
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const width = pdf.internal.pageSize.getWidth()
+    const height = (canvas.height * width) / canvas.width
+    pdf.addImage(imageData, 'PNG', 0, 0, width, height)
+    return pdf.output('blob')
+  }
+
+  function triggerPdfDownload(blob: Blob, type: InvoiceType): void {
+    const fileName = `${brand.shopName.replace(/\s+/g, '-').toLowerCase()}-${type}-${currentJob.id}.pdf`
+    const objectUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = objectUrl
+    link.download = fileName
+    link.click()
+    URL.revokeObjectURL(objectUrl)
+  }
+
   async function handleSystemShare(type: InvoiceType): Promise<void> {
     const text = buildDocumentShareText({
       type,
@@ -459,25 +486,34 @@ export default function JobDetail() {
       deadlineDate: currentJob.deadlineDate,
     })
 
-    const shareData: ShareData = {
-      title: `${brand.shopName} ${type === 'invoice' ? 'Invoice' : 'Receipt'}`,
-      text,
-      url: window.location.href,
-    }
+    const blob = await buildPdfBlob()
+    if (!blob) return
+
+    const fileName = `${brand.shopName.replace(/\s+/g, '-').toLowerCase()}-${type}-${currentJob.id}.pdf`
+    const pdfFile = new File([blob], fileName, { type: 'application/pdf' })
 
     if (navigator.share) {
       try {
-        await navigator.share(shareData)
+        if ('canShare' in navigator && typeof navigator.canShare === 'function' && !navigator.canShare({ files: [pdfFile] })) {
+          throw new Error('File share unsupported')
+        }
+
+        await navigator.share({
+          title: `${brand.shopName} ${type === 'invoice' ? 'Invoice' : 'Receipt'}`,
+          text,
+          files: [pdfFile],
+        })
         return
       } catch {
+        triggerPdfDownload(blob, type)
         return
       }
     }
 
-    window.prompt('Copy and share this text manually:', text)
+    triggerPdfDownload(blob, type)
   }
 
-  function handleWhatsAppToClient(type: InvoiceType): void {
+  async function handleWhatsAppToClient(type: InvoiceType): Promise<void> {
     const text = buildDocumentShareText({
       type,
       shopName: brand.shopName,
@@ -489,6 +525,30 @@ export default function JobDetail() {
       balance: balanceToCollect,
       deadlineDate: currentJob.deadlineDate,
     })
+
+    const blob = await buildPdfBlob()
+    if (blob) {
+      if (navigator.share) {
+        try {
+          const fileName = `${brand.shopName.replace(/\s+/g, '-').toLowerCase()}-${type}-${currentJob.id}.pdf`
+          const pdfFile = new File([blob], fileName, { type: 'application/pdf' })
+
+          if ('canShare' in navigator && typeof navigator.canShare === 'function' && navigator.canShare({ files: [pdfFile] })) {
+            await navigator.share({
+              title: `${brand.shopName} ${type === 'invoice' ? 'Invoice' : 'Receipt'}`,
+              text: `For ${currentJob.clientName} (${currentJob.clientPhone})`,
+              files: [pdfFile],
+            })
+          } else {
+            triggerPdfDownload(blob, type)
+          }
+        } catch {
+          triggerPdfDownload(blob, type)
+        }
+      } else {
+        triggerPdfDownload(blob, type)
+      }
+    }
 
     const url = buildWhatsAppURL(currentJob.clientPhone, text)
     window.open(url, '_blank', 'noopener,noreferrer')
@@ -517,7 +577,7 @@ export default function JobDetail() {
                 </p>
               </div>
             </div>
-            <span className={statusClass(job.status)}>{job.status}</span>
+            <span className={statusClass(currentJob.status)}>{currentJob.status}</span>
           </div>
         </article>
 
@@ -616,10 +676,6 @@ export default function JobDetail() {
 
       {activePhoto ? (
         <div className="sheet-overlay job-image-viewer" role="dialog" aria-modal="true" aria-label="Reference image viewer">
-          <button type="button" className="btn btn-ghost btn-icon job-image-close" onClick={() => setViewerIndex(null)} aria-label="Close image viewer">
-            <X size={20} />
-          </button>
-
           <button
             type="button"
             className="btn btn-ghost btn-icon job-image-nav job-image-nav-left"
@@ -629,7 +685,12 @@ export default function JobDetail() {
             <ChevronLeft size={22} />
           </button>
 
-          <img src={activePhoto} alt="Full reference" className="job-image-full" />
+          <div className="job-image-stage">
+            <button type="button" className="btn btn-ghost btn-icon job-image-close" onClick={() => setViewerIndex(null)} aria-label="Close image viewer">
+              <X size={20} />
+            </button>
+            <img src={activePhoto} alt="Full reference" className="job-image-full" />
+          </div>
 
           <button
             type="button"
@@ -649,17 +710,19 @@ export default function JobDetail() {
           <div className="sheet">
             <div className="sheet-handle" />
             <section className="section stack gap-12">
-              <DocumentPreview
-                type={openDrawer}
-                brand={brand}
-                clientName={currentJob.clientName}
-                clientPhone={currentJob.clientPhone}
-                service={details.itemType}
-                charge={currentJob.chargeAmount}
-                deposit={details.depositAmount}
-                balance={balanceToCollect}
-                deadlineDate={currentJob.deadlineDate}
-              />
+              <div ref={docPreviewRef}>
+                <DocumentPreview
+                  type={openDrawer}
+                  brand={brand}
+                  clientName={currentJob.clientName}
+                  clientPhone={currentJob.clientPhone}
+                  service={details.itemType}
+                  charge={currentJob.chargeAmount}
+                  deposit={details.depositAmount}
+                  balance={balanceToCollect}
+                  deadlineDate={currentJob.deadlineDate}
+                />
+              </div>
 
               <div className="stack gap-8">
                 <div className="row gap-8">
@@ -667,12 +730,20 @@ export default function JobDetail() {
                     <Share2 size={16} />
                     Share
                   </button>
-                  <button type="button" className="btn btn-secondary flex-1" onClick={() => handleWhatsAppToClient(openDrawer)}>
+                  <button type="button" className="btn btn-secondary flex-1" onClick={() => void handleWhatsAppToClient(openDrawer)}>
                     <MessageCircle size={16} />
                     Send to Client
                   </button>
                 </div>
-                <button type="button" className="btn btn-secondary btn-full">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-full"
+                  onClick={async () => {
+                    const blob = await buildPdfBlob()
+                    if (!blob) return
+                    triggerPdfDownload(blob, openDrawer)
+                  }}
+                >
                   Download PDF
                 </button>
                 <button type="button" className="btn btn-ghost btn-full" onClick={() => setOpenDrawer(null)}>
