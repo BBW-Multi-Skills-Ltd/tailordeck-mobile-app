@@ -1151,6 +1151,7 @@ p { margin: 0; }
   color: var(--text-h);
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 5;
 }
 
 .job-image-nav {
@@ -1158,7 +1159,9 @@ p { margin: 0; }
   top: 50%;
   transform: translateY(-50%);
   color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 6;
 }
 
 .job-image-nav-left {
@@ -1258,7 +1261,15 @@ p { margin: 0; }
   height: 4px;
   border-radius: var(--radius-full);
   background: var(--border-strong);
-  margin: 12px auto 20px;
+  margin: 0 auto;
+}
+
+.sheet-handle-button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 12px 0 20px;
+  cursor: grab;
 }
 
 /* ============================================

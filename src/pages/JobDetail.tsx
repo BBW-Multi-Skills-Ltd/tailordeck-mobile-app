@@ -25,7 +25,7 @@
 } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
@@ -300,7 +300,7 @@ function DocumentPreview({
 
   return (
     <div className="stack gap-12">
-      <h4>{type === 'invoice' ? 'Invoice Preview' : 'Receipt Preview'}</h4>
+      <h4 className="job-doc-ui-title">{type === 'invoice' ? 'Invoice Preview' : 'Receipt Preview'}</h4>
 
       <div className="card stack gap-10 job-doc-preview-card" style={{ borderColor: `${brand.primaryColor}33` }}>
         <div className="job-doc-preview-bar" style={{ background: brand.primaryColor }} />
@@ -359,6 +359,7 @@ export default function JobDetail() {
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
   const docPreviewRef = useRef<HTMLDivElement | null>(null)
+  const drawerDragStartYRef = useRef<number | null>(null)
 
   const job = id ? mockJobs.find((item) => item.id === id) : undefined
   const brand = useMemo(() => readBrandConfig(), [])
@@ -453,6 +454,9 @@ export default function JobDetail() {
       scale: 2,
       backgroundColor: '#ffffff',
       useCORS: true,
+      onclone: (clonedDoc) => {
+        clonedDoc.querySelectorAll('.job-doc-ui-title').forEach((node) => node.remove())
+      },
     })
 
     const imageData = canvas.toDataURL('image/png')
@@ -552,6 +556,20 @@ export default function JobDetail() {
 
     const url = buildWhatsAppURL(currentJob.clientPhone, text)
     window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  function handleDrawerHandlePointerDown(event: ReactPointerEvent<HTMLButtonElement>): void {
+    drawerDragStartYRef.current = event.clientY
+  }
+
+  function handleDrawerHandlePointerUp(event: ReactPointerEvent<HTMLButtonElement>): void {
+    if (drawerDragStartYRef.current === null) return
+    const deltaY = event.clientY - drawerDragStartYRef.current
+    drawerDragStartYRef.current = null
+
+    if (deltaY > 45) {
+      setOpenDrawer(null)
+    }
   }
 
   return (
@@ -708,7 +726,15 @@ export default function JobDetail() {
       {openDrawer ? (
         <div className="sheet-overlay" role="dialog" aria-modal="true" aria-label={`${openDrawer} preview drawer`}>
           <div className="sheet">
-            <div className="sheet-handle" />
+            <button
+              type="button"
+              className="sheet-handle-button"
+              aria-label="Drag down to close drawer"
+              onPointerDown={handleDrawerHandlePointerDown}
+              onPointerUp={handleDrawerHandlePointerUp}
+            >
+              <span className="sheet-handle" />
+            </button>
             <section className="section stack gap-12">
               <div ref={docPreviewRef}>
                 <DocumentPreview
