@@ -96,6 +96,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
+  const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
 
   function handleSaveSettings() {
     const next = saveTailorSettings(settings)
@@ -113,6 +114,11 @@ export default function SettingsPage() {
 
   function onInput(handler: (value: string) => void) {
     return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handler(event.target.value)
+  }
+
+  function handleProfilePhoneChange(value: string) {
+    const digitsOnly = value.replace(/\D/g, '')
+    setSettings((prev) => ({ ...prev, profile: { ...prev.profile, phone: `+234${digitsOnly}` } }))
   }
 
   function clearJobHistory() {
@@ -148,12 +154,17 @@ export default function SettingsPage() {
               <input className="input settings-profile-input" value={settings.profile.email} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email: value } })))} />
             </div>
             <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Shop Name</label>
-              <input className="input settings-profile-input" value={settings.profile.shopName} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, shopName: value } })))} />
-            </div>
-            <div className="input-group settings-profile-field">
               <label className="settings-profile-label">Phone</label>
-              <input className="input settings-profile-input" value={settings.profile.phone} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, phone: value } })))} />
+              <div className="settings-phone-input-wrap">
+                <span className="settings-phone-prefix">+234</span>
+                <input
+                  className="input settings-profile-input settings-phone-input"
+                  inputMode="numeric"
+                  placeholder="8012345678"
+                  value={profilePhoneLocalPart}
+                  onChange={(event) => handleProfilePhoneChange(event.target.value)}
+                />
+              </div>
             </div>
           </div>
         </SettingAccordion>
@@ -227,6 +238,15 @@ export default function SettingsPage() {
 
         <SettingAccordion icon={<Building2 size={20} />} title="Business Info" panelKey="business" panel={panel} onToggle={handleToggle}>
           <div className="stack gap-12">
+            <div className="input-group">
+              <label className="input-label">Shop Name</label>
+              <input
+                className="input"
+                placeholder="Your shop name"
+                value={settings.businessInfo.shopName}
+                onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopName: value } })))}
+              />
+            </div>
             <div className="input-group">
               <label className="input-label">Shop Address</label>
               <textarea className="input settings-textarea" value={settings.businessInfo.shopAddress} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopAddress: value } })))} />

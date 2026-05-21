@@ -247,7 +247,7 @@ function buildWhatsAppURL(phone: string, message: string): string {
 function readBrandConfig(): BrandConfig {
   const settings = loadTailorSettings()
   return {
-    shopName: settings.brand.name || settings.profile.shopName,
+    shopName: settings.brand.name || settings.businessInfo.shopName,
     primaryColor: settings.brand.colors[0],
     secondaryColor: settings.brand.colors[1],
     accentColor: settings.brand.colors[2],
