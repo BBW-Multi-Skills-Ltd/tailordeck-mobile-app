@@ -7,7 +7,6 @@ export interface TailorSettings {
   profile: {
     fullName: string
     email: string
-    shopName: string
     phone: string
   }
   preferences: {
@@ -21,6 +20,7 @@ export interface TailorSettings {
     dailySummary: boolean
   }
   businessInfo: {
+    shopName: string
     shopAddress: string
     businessPhone: string
     instagramHandle: string
@@ -38,14 +38,46 @@ export interface TailorSettings {
 }
 
 export const TAILOR_SETTINGS_KEY = 'tailordeck-settings'
+export const TAILOR_SIGNUP_PREFILL_KEY = 'tailordeck-signup-profile'
+
+type SignupPrefill = {
+  fullName: string
+  email: string
+  shopName: string
+}
+
+function loadSignupPrefill(): SignupPrefill {
+  const fallback: SignupPrefill = {
+    fullName: 'Favour Tailor',
+    email: 'favour@tailordeck.app',
+    shopName: 'Elon Apparel',
+  }
+
+  if (typeof window === 'undefined') return fallback
+
+  const raw = window.localStorage.getItem(TAILOR_SIGNUP_PREFILL_KEY)
+  if (!raw) return fallback
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<SignupPrefill>
+    return {
+      fullName: parsed.fullName?.trim() || fallback.fullName,
+      email: parsed.email?.trim() || fallback.email,
+      shopName: parsed.shopName?.trim() || fallback.shopName,
+    }
+  } catch {
+    return fallback
+  }
+}
 
 export function getDefaultTailorSettings(): TailorSettings {
+  const signup = loadSignupPrefill()
+
   return {
     profile: {
-      fullName: 'Favour Tailor',
-      email: 'favour@tailordeck.app',
-      shopName: 'Elon Apparel',
-      phone: '+234 801 234 5678',
+      fullName: signup.fullName,
+      email: signup.email,
+      phone: '+234',
     },
     preferences: {
       measurementUnit: 'cm',
@@ -58,6 +90,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       dailySummary: false,
     },
     businessInfo: {
+      shopName: signup.shopName,
       shopAddress: '12 Allen Avenue, Ikeja, Lagos',
       businessPhone: '08012345678',
       instagramHandle: '@elonapparel',
@@ -77,12 +110,22 @@ export function getDefaultTailorSettings(): TailorSettings {
 
 function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
   const defaults = getDefaultTailorSettings()
+  const legacyValue = value as Partial<TailorSettings> & { profile?: { shopName?: string } }
+
+  const normalizedPhoneRaw = value.profile?.phone ?? defaults.profile.phone
+  const normalizedPhoneDigits = normalizedPhoneRaw.replace(/\D/g, '')
+  const normalizedPhone =
+    normalizedPhoneDigits.length === 0
+      ? '+234'
+      : normalizedPhoneDigits.startsWith('234')
+      ? `+${normalizedPhoneDigits}`
+      : `+234${normalizedPhoneDigits}`
+
   return {
     profile: {
       fullName: value.profile?.fullName ?? defaults.profile.fullName,
       email: value.profile?.email ?? defaults.profile.email,
-      shopName: value.profile?.shopName ?? defaults.profile.shopName,
-      phone: value.profile?.phone ?? defaults.profile.phone,
+      phone: normalizedPhone,
     },
     preferences: {
       measurementUnit: value.preferences?.measurementUnit ?? defaults.preferences.measurementUnit,
@@ -95,6 +138,7 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       dailySummary: value.reminders?.dailySummary ?? defaults.reminders.dailySummary,
     },
     businessInfo: {
+      shopName: value.businessInfo?.shopName ?? legacyValue.profile?.shopName ?? defaults.businessInfo.shopName,
       shopAddress: value.businessInfo?.shopAddress ?? defaults.businessInfo.shopAddress,
       businessPhone: value.businessInfo?.businessPhone ?? defaults.businessInfo.businessPhone,
       instagramHandle: value.businessInfo?.instagramHandle ?? defaults.businessInfo.instagramHandle,
