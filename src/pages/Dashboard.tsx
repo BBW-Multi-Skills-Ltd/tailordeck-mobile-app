@@ -6,6 +6,7 @@ import {
   Cell,
   Pie,
   PieChart,
+  Rectangle,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,6 +18,8 @@ import { formatNaira } from '../lib/utils'
 type MonthStat = {
   key: string
   label: string
+  fullLabel: string
+  jobs: number
   revenue: number
   expenses: number
   profit: number
@@ -35,6 +38,12 @@ function monthLabel(key: string): string {
   return date.toLocaleDateString('en-NG', { month: 'short' })
 }
 
+function monthFullLabel(key: string): string {
+  const [year, month] = key.split('-').map(Number)
+  const date = new Date(year, month - 1, 1)
+  return date.toLocaleDateString('en-NG', { month: 'long' })
+}
+
 export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
 
@@ -50,7 +59,7 @@ export default function Dashboard() {
     const monthSet = new Set(monthKeys)
 
     const monthMap = new Map<string, MonthStat>(
-      monthKeys.map((key) => [key, { key, label: monthLabel(key), revenue: 0, expenses: 0, profit: 0 }]),
+      monthKeys.map((key) => [key, { key, label: monthLabel(key), fullLabel: monthFullLabel(key), jobs: 0, revenue: 0, expenses: 0, profit: 0 }]),
     )
 
     for (const job of mockJobs) {
@@ -61,6 +70,7 @@ export default function Dashboard() {
 
       const expenseRatio = job.status === 'Completed' ? 0.36 : job.status === 'In Progress' ? 0.32 : 0.28
       const expenseEstimate = Math.round(job.chargeAmount * expenseRatio)
+      existing.jobs += 1
       existing.revenue += job.chargeAmount
       existing.expenses += expenseEstimate
       existing.profit += job.chargeAmount - expenseEstimate
@@ -92,6 +102,8 @@ export default function Dashboard() {
   const visibleMonthLabel = visibleMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
   const chartMax = Math.max(...metrics.months.map((item) => Math.max(item.revenue, item.expenses)), 1000)
   const yTicks = [0, 85000, 170000, 255000, 340000]
+  const chartTop = Math.max(chartMax, yTicks[yTicks.length - 1])
+  const yTickLabels = [...yTicks].reverse().map((value) => `\u20A6${Math.round(value / 1000)}k`)
   const pieData = [
     { name: 'Completed', value: metrics.statusCounts.completed, color: '#7B1E37' },
     { name: 'In Progress', value: metrics.statusCounts.inProgress, color: '#C9A84C' },
@@ -100,8 +112,10 @@ export default function Dashboard() {
 
   return (
     <section className="section stack gap-14">
-      <header>
-        <h1>Dashboard</h1>
+      <header className="row-between">
+        <span style={{ width: '44px' }} />
+        <h2>Dashboard</h2>
+        <span style={{ width: '44px' }} />
       </header>
 
       <div className="dashboard-month-nav">
@@ -125,24 +139,24 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div className="kpi-grid">
+      <div className="dashboard-kpi-grid">
         <article className="card dashboard-kpi-card">
-          <BriefcaseBusiness size={20} className="text-primary" />
+          <BriefcaseBusiness size={20} className="dashboard-kpi-icon text-primary" />
           <p className="dashboard-kpi-value">{metrics.totalJobs}</p>
           <p className="dashboard-kpi-label">Total Jobs</p>
         </article>
         <article className="card dashboard-kpi-card">
-          <DollarSign size={20} className="text-success" />
+          <DollarSign size={20} className="dashboard-kpi-icon text-success" />
           <p className="dashboard-kpi-value">{formatNaira(metrics.totalRevenue)}</p>
           <p className="dashboard-kpi-label">Revenue</p>
         </article>
         <article className="card dashboard-kpi-card">
-          <ReceiptText size={20} className="text-gold" />
+          <ReceiptText size={20} className="dashboard-kpi-icon text-gold" />
           <p className="dashboard-kpi-value">{formatNaira(metrics.totalExpenses)}</p>
           <p className="dashboard-kpi-label">Expenses</p>
         </article>
         <article className="card dashboard-kpi-card">
-          <TrendingUp size={20} className={metrics.totalProfit >= 0 ? 'text-success' : 'text-danger'} />
+          <TrendingUp size={20} className={`dashboard-kpi-icon ${metrics.totalProfit >= 0 ? 'text-success' : 'text-danger'}`} />
           <p className="dashboard-kpi-value">{formatNaira(metrics.totalProfit)}</p>
           <p className="dashboard-kpi-label">Net Profit</p>
         </article>
@@ -151,34 +165,47 @@ export default function Dashboard() {
       <article className="card stack gap-12">
         <h3 className="dashboard-section-title">Last 6 Months</h3>
         <div className="dashboard-chart-wrap">
-          <ResponsiveContainer width="100%" height={230}>
-            <BarChart data={metrics.months} barGap={4} margin={{ top: 8, right: 8, left: -14, bottom: 4 }}>
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#8A7060', fontSize: 12 }} />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                domain={[0, chartMax]}
-                ticks={yTicks}
-                tick={{ fill: '#8A7060', fontSize: 11 }}
-                tickFormatter={(value) => `₦${Math.round(value / 1000)}k`}
-              />
-              <Tooltip
-                cursor={{ fill: 'rgba(138, 112, 96, 0.08)' }}
-                contentStyle={{ borderRadius: 14, border: '1px solid #E8E0D8', fontSize: 12 }}
-                formatter={(value, name) => [formatNaira(Number(value ?? 0)), String(name) === 'revenue' ? 'Revenue' : 'Expenses']}
-              />
-              <Bar dataKey="revenue" radius={[8, 8, 0, 0]} maxBarSize={22}>
-                {metrics.months.map((month) => (
-                  <Cell key={`${month.key}-rev`} fill="#7B1E37" />
-                ))}
-              </Bar>
-              <Bar dataKey="expenses" radius={[8, 8, 0, 0]} maxBarSize={22}>
-                {metrics.months.map((month) => (
-                  <Cell key={`${month.key}-exp`} fill="#C9A84C" />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="dashboard-chart-layout">
+            <div className="dashboard-y-ticks" aria-hidden="true">
+              {yTickLabels.map((label) => (
+                <span key={label} className="dashboard-y-tick-item">
+                  {label}
+                </span>
+              ))}
+            </div>
+            <div className="dashboard-chart-area">
+              <ResponsiveContainer width="100%" height={230}>
+                <BarChart data={metrics.months} barGap={4} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#8A7060', fontSize: 12 }} />
+                  <YAxis hide domain={[0, chartTop]} />
+                  <Tooltip
+                    cursor={<Rectangle radius={10} fill="rgba(28, 15, 10, 0.18)" />}
+                    contentStyle={{
+                      borderRadius: 14,
+                      border: '1px solid #E8E0D8',
+                      fontSize: 12,
+                      backgroundColor: '#FFFFFF',
+                      boxShadow: '0 8px 22px rgba(28, 15, 10, 0.10)',
+                    }}
+                    wrapperStyle={{ outline: 'none' }}
+                    formatter={(value, name) => [formatNaira(Number(value ?? 0)), String(name) === 'revenue' ? 'Revenue' : 'Expenses']}
+                    labelStyle={{ color: '#4A3728', fontWeight: 600, marginBottom: 4 }}
+                    itemStyle={{ paddingTop: 2, paddingBottom: 2, color: '#8A7060' }}
+                  />
+                  <Bar dataKey="revenue" radius={[8, 8, 0, 0]} maxBarSize={22}>
+                    {metrics.months.map((month) => (
+                      <Cell key={`${month.key}-rev`} fill="#7B1E37" />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="expenses" radius={[8, 8, 0, 0]} maxBarSize={22}>
+                    {metrics.months.map((month) => (
+                      <Cell key={`${month.key}-exp`} fill="#C9A84C" />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
           <div className="dashboard-chart-legend">
             <span className="dashboard-legend-item">
               <span className="dashboard-dot dashboard-dot-revenue" />
@@ -225,7 +252,7 @@ export default function Dashboard() {
           <div className="dashboard-status-legend">
             {pieData.map((item) => (
               <div key={item.name} className="row-between">
-                <p className="text-base text-muted row gap-8">
+                <p className="text-sm text-muted row gap-8">
                   <span className="dashboard-dot" style={{ background: item.color }} />
                   {item.name}
                 </p>
@@ -234,6 +261,32 @@ export default function Dashboard() {
             ))}
             {statusTotal === 0 ? <p className="text-sm text-muted">No jobs yet for this month.</p> : null}
           </div>
+        </div>
+      </article>
+
+      <article className="card stack gap-10">
+        <h3 className="dashboard-section-title">Monthly Performance</h3>
+        <div className="dashboard-performance-table-wrap">
+          <table className="dashboard-performance-table">
+            <thead>
+              <tr>
+                <th>Month</th>
+                <th>Jobs</th>
+                <th>Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...metrics.months]
+                .reverse()
+                .map((month) => (
+                  <tr key={`perf-${month.key}`}>
+                    <td>{month.fullLabel}</td>
+                    <td>{month.jobs}</td>
+                    <td>{formatNaira(month.revenue)}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       </article>
 
