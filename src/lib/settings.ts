@@ -3,8 +3,14 @@ export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 export type ReminderLead = '1 day before' | '3 days before' | '1 week before'
 export type SubscriptionPlan = 'free' | 'starter' | 'pro'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
-export type VibrationOption = 'Short Pulse' | 'Medium Pulse' | 'Long Pulse'
 export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
+export type SocialPlatform = 'Instagram' | 'Facebook' | 'TikTok'
+
+export interface SocialHandle {
+  id: string
+  platform: SocialPlatform
+  handle: string
+}
 
 export interface TailorSettings {
   profile: {
@@ -29,7 +35,9 @@ export interface TailorSettings {
     shopName: string
     shopAddress: string
     businessPhone: string
-    instagramHandle: string
+    businessEmail: string
+    website: string
+    socialHandles: SocialHandle[]
   }
   brand: {
     name: string
@@ -102,7 +110,11 @@ export function getDefaultTailorSettings(): TailorSettings {
       shopName: signup.shopName,
       shopAddress: '12 Allen Avenue, Ikeja, Lagos',
       businessPhone: '08012345678',
-      instagramHandle: '@elonapparel',
+      businessEmail: 'hello@elonapparel.com',
+      website: 'https://elonapparel.com',
+      socialHandles: [
+        { id: 'social-instagram-1', platform: 'Instagram', handle: '@elonapparel' },
+      ],
     },
     brand: {
       name: 'Elon Apparel',
@@ -130,6 +142,20 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       ? `+${normalizedPhoneDigits}`
       : `+234${normalizedPhoneDigits}`
 
+  const legacyBusiness = value.businessInfo as Partial<TailorSettings['businessInfo']> & { instagramHandle?: string } | undefined
+  const normalizedSocialHandles =
+    value.businessInfo?.socialHandles?.length
+      ? value.businessInfo.socialHandles
+          .filter((item) => item?.platform && item?.handle)
+          .map((item, index) => ({
+            id: item.id || `social-${item.platform.toLowerCase()}-${index + 1}`,
+            platform: item.platform,
+            handle: item.handle,
+          }))
+      : legacyBusiness?.instagramHandle
+      ? [{ id: 'social-instagram-legacy', platform: 'Instagram' as const, handle: legacyBusiness.instagramHandle }]
+      : defaults.businessInfo.socialHandles
+
   return {
     profile: {
       fullName: value.profile?.fullName ?? defaults.profile.fullName,
@@ -153,7 +179,9 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       shopName: value.businessInfo?.shopName ?? legacyValue.profile?.shopName ?? defaults.businessInfo.shopName,
       shopAddress: value.businessInfo?.shopAddress ?? defaults.businessInfo.shopAddress,
       businessPhone: value.businessInfo?.businessPhone ?? defaults.businessInfo.businessPhone,
-      instagramHandle: value.businessInfo?.instagramHandle ?? defaults.businessInfo.instagramHandle,
+      businessEmail: value.businessInfo?.businessEmail ?? defaults.businessInfo.businessEmail,
+      website: value.businessInfo?.website ?? defaults.businessInfo.website,
+      socialHandles: normalizedSocialHandles,
     },
     brand: {
       name: value.brand?.name ?? defaults.brand.name,

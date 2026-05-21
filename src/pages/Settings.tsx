@@ -4,14 +4,21 @@ import {
   ChevronRight,
   CircleHelp,
   Database,
+  Globe,
   LogOut,
+  Mail,
   Moon,
   Palette,
+  Phone,
+  Plus,
   Store,
+  Trash2,
+  Upload,
   UserRound,
   WandSparkles,
 } from 'lucide-react'
 import type { IconType } from 'react-icons'
+import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6'
 import { FiBell, FiBellOff, FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi'
 import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -22,6 +29,7 @@ import {
   type NotificationBellOption,
   type ReminderLead,
   type RingtoneOption,
+  type SocialPlatform,
   type TailorSettings,
 } from '../lib/settings'
 
@@ -38,6 +46,18 @@ const notificationBellOptions: Array<{ value: NotificationBellOption; icon: Icon
   { value: 'Soft Bell', icon: FiVolume1 },
   { value: 'Sharp Bell', icon: FiBellOff },
 ]
+
+const socialPlatforms: SocialPlatform[] = ['Instagram', 'Facebook', 'TikTok']
+const socialPlatformIcon: Record<SocialPlatform, IconType> = {
+  Instagram: FaInstagram,
+  Facebook: FaFacebookF,
+  TikTok: FaTiktok,
+}
+const socialPlatformColor: Record<SocialPlatform, string> = {
+  Instagram: '#E1306C',
+  Facebook: '#1877F2',
+  TikTok: '#000000',
+}
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (next: boolean) => void }) {
   return (
@@ -118,6 +138,8 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
+  const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>('Instagram')
+  const [socialHandleInput, setSocialHandleInput] = useState('')
   const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
 
   function handleSaveSettings() {
@@ -153,6 +175,50 @@ export default function SettingsPage() {
 
   function handleToggle(next: Exclude<SettingsPanel, null>) {
     setPanel((prev) => (prev === next ? null : next))
+  }
+
+  function addSocialHandle() {
+    const handle = socialHandleInput.trim()
+    if (!handle) return
+
+    const nextEntry = {
+      id: `social-${socialPlatform.toLowerCase()}-${Date.now()}`,
+      platform: socialPlatform,
+      handle,
+    }
+
+    setSettings((prev) => ({
+      ...prev,
+      businessInfo: {
+        ...prev.businessInfo,
+        socialHandles: [...prev.businessInfo.socialHandles, nextEntry],
+      },
+    }))
+    setSocialHandleInput('')
+  }
+
+  function removeSocialHandle(id: string) {
+    setSettings((prev) => ({
+      ...prev,
+      businessInfo: {
+        ...prev.businessInfo,
+        socialHandles: prev.businessInfo.socialHandles.filter((item) => item.id !== id),
+      },
+    }))
+  }
+
+  function onBrandFileUpload(field: 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : ''
+      if (!result) return
+      setSettings((prev) => ({ ...prev, brand: { ...prev.brand, [field]: result } }))
+    }
+    reader.readAsDataURL(file)
+    event.target.value = ''
   }
 
   return (
@@ -195,30 +261,34 @@ export default function SettingsPage() {
           <div className="stack settings-pref-form">
             <div className="stack settings-pref-group">
               <p className="settings-pref-label">Default Measurement Unit</p>
-              <div className="settings-pref-unit-grid">
+              <p className="settings-help-text">Used for measurement entry across jobs and client profiles.</p>
+              <div className="settings-radio-list">
                 {(['cm', 'inches'] as const).map((unit) => (
                   <button
                     key={unit}
                     type="button"
-                    className={`settings-pref-unit-btn settings-choice-pill${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
+                    className={`settings-radio-option${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, measurementUnit: unit } }))}
                   >
-                    {unit === 'cm' ? 'Centimeters' : 'Inches'}
+                    <span className="settings-radio-indicator" />
+                    <span className="settings-radio-title">{unit === 'cm' ? 'Centimeters' : 'Inches'}</span>
                   </button>
                 ))}
               </div>
             </div>
             <div className="input-group settings-pref-group">
               <p className="settings-pref-label">Default Material Quality</p>
-              <div className="settings-pref-quality-wrap">
+              <p className="settings-help-text">Default quality preselected when creating new jobs.</p>
+              <div className="settings-radio-list">
                 {(['Normal', 'Original', 'Fake', 'High Standard'] as MaterialQuality[]).map((quality) => (
                   <button
                     key={quality}
                     type="button"
-                    className={`settings-pref-quality-btn settings-choice-pill${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
+                    className={`settings-radio-option${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, defaultMaterialQuality: quality } }))}
                   >
-                    {quality}
+                    <span className="settings-radio-indicator" />
+                    <span className="settings-radio-title">{quality}</span>
                   </button>
                 ))}
               </div>
@@ -266,15 +336,17 @@ export default function SettingsPage() {
 
             <div className="stack settings-reminder-group">
               <p className="settings-reminder-label">Default Reminder</p>
-              <div className="settings-reminder-chip-row">
+              <p className="settings-help-text">How early we notify the tailor before delivery deadline.</p>
+              <div className="settings-radio-list">
                 {(['1 day before', '3 days before', '1 week before'] as ReminderLead[]).map((reminder) => (
                   <button
                     key={reminder}
                     type="button"
-                    className={`settings-reminder-chip settings-choice-pill${settings.reminders.defaultReminder === reminder ? ' active' : ''}`}
+                    className={`settings-radio-option${settings.reminders.defaultReminder === reminder ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, defaultReminder: reminder } }))}
                   >
-                    {reminder}
+                    <span className="settings-radio-indicator" />
+                    <span className="settings-radio-title">{reminder}</span>
                   </button>
                 ))}
               </div>
@@ -308,61 +380,154 @@ export default function SettingsPage() {
         </SettingAccordion>
 
         <SettingAccordion icon={<Building2 size={20} />} title="Business Info" panelKey="business" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-12">
-            <div className="input-group">
-              <label className="input-label">Shop Name</label>
+          <div className="stack settings-business-form">
+            <div className="input-group settings-business-group">
+              <label className="settings-business-label row gap-6"><Building2 size={15} />Shop Name</label>
+              <p className="settings-help-text">This is shown on documents and business header.</p>
               <input
-                className="input"
+                className="input settings-business-input"
                 placeholder="Your shop name"
                 value={settings.businessInfo.shopName}
                 onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopName: value } })))}
               />
             </div>
-            <div className="input-group">
-              <label className="input-label">Shop Address</label>
-              <textarea className="input settings-textarea" value={settings.businessInfo.shopAddress} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopAddress: value } })))} />
+
+            <div className="input-group settings-business-group">
+              <label className="settings-business-label row gap-6"><Phone size={15} />Business Phone</label>
+              <p className="settings-help-text">Used for client contact and invoice footer.</p>
+              <input className="input settings-business-input" value={settings.businessInfo.businessPhone} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessPhone: value } })))} />
             </div>
-            <div className="input-group">
-              <label className="input-label">Business Phone</label>
-              <input className="input" value={settings.businessInfo.businessPhone} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessPhone: value } })))} />
+
+            <div className="input-group settings-business-group">
+              <label className="settings-business-label row gap-6"><Mail size={15} />Business Email</label>
+              <p className="settings-help-text">For receipts, invoices, and support contact.</p>
+              <input className="input settings-business-input" value={settings.businessInfo.businessEmail} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessEmail: value } })))} />
             </div>
-            <div className="input-group">
-              <label className="input-label">Instagram Handle</label>
-              <input className="input" value={settings.businessInfo.instagramHandle} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, instagramHandle: value } })))} />
+
+            <div className="input-group settings-business-group">
+              <label className="settings-business-label row gap-6"><Globe size={15} />Business Website</label>
+              <p className="settings-help-text">Optional website link shown on invoices.</p>
+              <input className="input settings-business-input" placeholder="https://yourbusiness.com" value={settings.businessInfo.website} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, website: value } })))} />
+            </div>
+
+            <div className="stack settings-business-group">
+              <p className="settings-business-label row gap-6"><FaInstagram size={15} />Business Handle</p>
+              <p className="settings-help-text">Add social handles used by your business.</p>
+
+              <div className="settings-business-social-builder">
+                <div className="settings-business-platform-row">
+                  {socialPlatforms.map((platform) => {
+                    const Icon = socialPlatformIcon[platform]
+                    return (
+                      <button
+                        key={platform}
+                        type="button"
+                        className={`settings-choice-pill settings-business-platform-btn${socialPlatform === platform ? ' active' : ''}`}
+                        onClick={() => setSocialPlatform(platform)}
+                      >
+                        <span className="settings-business-platform-pill-content">
+                          <Icon size={14} style={{ color: socialPlatformColor[platform] }} />
+                          <span>{platform}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div className="settings-business-handle-row">
+                  <input
+                    className="input settings-business-input flex-1"
+                    placeholder="e.g. @elonapparel"
+                    value={socialHandleInput}
+                    onChange={(event) => setSocialHandleInput(event.target.value)}
+                  />
+                  <button type="button" className="btn btn-primary settings-business-add-btn" onClick={addSocialHandle}>
+                    <Plus size={15} />
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-business-handle-list">
+                {settings.businessInfo.socialHandles.map((item) => {
+                  const Icon = socialPlatformIcon[item.platform]
+                  return (
+                    <div key={item.id} className="settings-business-handle-item">
+                      <div className="row gap-8 min-w-0">
+                        <Icon className="settings-business-handle-icon" size={14} />
+                        <p className="settings-business-handle-text">{item.platform}: {item.handle}</p>
+                      </div>
+                      <button type="button" className="btn btn-ghost btn-icon settings-business-delete" onClick={() => removeSocialHandle(item.id)} aria-label={`Remove ${item.platform} handle`}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="input-group settings-business-group">
+              <label className="settings-business-label row gap-6"><Building2 size={15} />Shop Address</label>
+              <p className="settings-help-text">Your physical shop location for delivery and pickup.</p>
+              <textarea className="input settings-textarea settings-business-input" value={settings.businessInfo.shopAddress} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopAddress: value } })))} />
             </div>
           </div>
         </SettingAccordion>
 
         <SettingAccordion icon={<Palette size={20} />} title="Brand & Invoice Setup" panelKey="brand" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-12">
-            <div className="input-group">
-              <label className="input-label">Business / Brand Name</label>
-              <input className="input" value={settings.brand.name} onChange={onInput((value) => setSettings((prev) => ({ ...prev, brand: { ...prev.brand, name: value } })))} />
+          <div className="stack settings-brand-form">
+            <div className="input-group settings-brand-group">
+              <label className="settings-brand-label">Business / Brand Name</label>
+              <input
+                className="input settings-brand-input"
+                placeholder="e.g. Femi Couture"
+                value={settings.brand.name}
+                onChange={onInput((value) => setSettings((prev) => ({ ...prev, brand: { ...prev.brand, name: value } })))}
+              />
             </div>
-            <div className="stack gap-8">
-              <p className="input-label">Brand Colors (up to 3)</p>
-              <div className="settings-color-grid">
-                <div className="input-group">
-                  <label className="input-label">Primary</label>
-                  <input type="color" className="settings-color-input" value={settings.brand.colors[0]} onChange={onInput((value) => updateColor(0, value))} />
-                </div>
-                <div className="input-group">
-                  <label className="input-label">Secondary</label>
-                  <input type="color" className="settings-color-input" value={settings.brand.colors[1]} onChange={onInput((value) => updateColor(1, value))} />
-                </div>
-                <div className="input-group">
-                  <label className="input-label">Accent</label>
-                  <input type="color" className="settings-color-input" value={settings.brand.colors[2]} onChange={onInput((value) => updateColor(2, value))} />
-                </div>
+
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">Brand Colors (up to 3)</p>
+              <div className="settings-brand-colors-row">
+                {([
+                  { label: 'Primary', index: 0 as const },
+                  { label: 'Secondary', index: 1 as const },
+                  { label: 'Accent', index: 2 as const },
+                ]).map((color) => (
+                  <div key={color.label} className="settings-brand-color-item">
+                    <label className="settings-brand-color-control" aria-label={`${color.label} brand color`}>
+                      <span className="settings-brand-color-swatch" style={{ backgroundColor: settings.brand.colors[color.index] }} />
+                      <input
+                        type="color"
+                        className="settings-brand-color-input"
+                        value={settings.brand.colors[color.index]}
+                        onChange={onInput((value) => updateColor(color.index, value))}
+                      />
+                    </label>
+                    <p className="settings-brand-color-label">{color.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="input-group">
-              <label className="input-label">Business Logo URL</label>
-              <input className="input" value={settings.brand.logoUrl} onChange={onInput((value) => setSettings((prev) => ({ ...prev, brand: { ...prev.brand, logoUrl: value } })))} placeholder="Upload path or URL" />
+
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">Business Logo</p>
+              <label className="settings-brand-upload-box">
+                <Upload size={22} />
+                <span>Upload Logo</span>
+                <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('logoUrl', event)} />
+              </label>
             </div>
-            <div className="input-group">
-              <label className="input-label">Business Signature URL</label>
-              <input className="input" value={settings.brand.signatureUrl} onChange={onInput((value) => setSettings((prev) => ({ ...prev, brand: { ...prev.brand, signatureUrl: value } })))} placeholder="Upload path or URL" />
+
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">
+                Business Signature <span className="settings-brand-signature-note">(image of your signature)</span>
+              </p>
+              <label className="settings-brand-upload-box">
+                <Upload size={22} />
+                <span>Upload Signature</span>
+                <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('signatureUrl', event)} />
+              </label>
             </div>
           </div>
         </SettingAccordion>
