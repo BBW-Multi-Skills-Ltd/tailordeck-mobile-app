@@ -10,6 +10,7 @@ import JobDetail from './pages/JobDetail'
 import JobMeasurements from './pages/JobMeasurements'
 import Dashboard from './pages/Dashboard'
 import SettingsPage from './pages/Settings'
+import SubscriptionPage from './pages/Subscription'
 import Onboarding from './pages/Onboarding'
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/subscription" element={<SubscriptionPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

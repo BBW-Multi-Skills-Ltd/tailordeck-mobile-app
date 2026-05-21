@@ -28,6 +28,7 @@ import jsPDF from 'jspdf'
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { jobMeasurementById } from '../data/mockJobMeasurements'
+import { loadTailorSettings } from '../lib/settings'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
@@ -62,6 +63,10 @@ type BrandConfig = {
   primaryColor: string
   secondaryColor: string
   accentColor: string
+  shopAddress: string
+  businessPhone: string
+  logoUrl: string
+  signatureUrl: string
 }
 
 const detailedMockByJobId: Record<string, DetailedJobData> = {
@@ -240,40 +245,17 @@ function buildWhatsAppURL(phone: string, message: string): string {
 }
 
 function readBrandConfig(): BrandConfig {
-  const defaults: BrandConfig = {
-    shopName: 'Elon Apparel',
-    primaryColor: '#7B1E37',
-    secondaryColor: '#F6ECF0',
-    accentColor: '#C9A84C',
+  const settings = loadTailorSettings()
+  return {
+    shopName: settings.brand.name || settings.profile.shopName,
+    primaryColor: settings.brand.colors[0],
+    secondaryColor: settings.brand.colors[1],
+    accentColor: settings.brand.colors[2],
+    shopAddress: settings.businessInfo.shopAddress,
+    businessPhone: settings.businessInfo.businessPhone,
+    logoUrl: settings.brand.logoUrl,
+    signatureUrl: settings.brand.signatureUrl,
   }
-
-  if (typeof window === 'undefined') return defaults
-
-  const possibleKeys = ['tailordeck-settings', 'tailordeck-brand']
-  for (const key of possibleKeys) {
-    const raw = window.localStorage.getItem(key)
-    if (!raw) continue
-
-    try {
-      const parsed = JSON.parse(raw) as {
-        brand?: { name?: string; colors?: string[] }
-        shop_name?: string
-        shopName?: string
-      }
-      const colors = parsed.brand?.colors ?? []
-
-      return {
-        shopName: parsed.brand?.name ?? parsed.shop_name ?? parsed.shopName ?? defaults.shopName,
-        primaryColor: colors[0] ?? defaults.primaryColor,
-        secondaryColor: colors[1] ?? defaults.secondaryColor,
-        accentColor: colors[2] ?? defaults.accentColor,
-      }
-    } catch {
-      return defaults
-    }
-  }
-
-  return defaults
 }
 
 function buildDocumentShareText(params: {
@@ -335,7 +317,12 @@ function DocumentPreview({
 
         <div className="row-between">
           <div className="stack gap-4">
-            <p className="text-sm" style={{ color: brand.primaryColor, fontWeight: 700 }}>{brand.shopName}</p>
+            <div className="row gap-8">
+              {brand.logoUrl ? <img src={brand.logoUrl} alt={`${brand.shopName} logo`} className="job-doc-brand-logo" /> : null}
+              <p className="text-sm" style={{ color: brand.primaryColor, fontWeight: 700 }}>{brand.shopName}</p>
+            </div>
+            <p className="text-sm text-muted">{brand.shopAddress || '-'}</p>
+            <p className="text-sm text-muted">{brand.businessPhone || '-'}</p>
             <p className="text-sm text-muted" style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>{type}</p>
           </div>
           <div className="stack gap-4" style={{ textAlign: 'right' }}>
@@ -377,6 +364,16 @@ function DocumentPreview({
             <p className="text-sm font-semibold">{formatDateShort(deadlineDate)}</p>
           </div>
         </div>
+
+        {brand.signatureUrl ? (
+          <>
+            <div className="divider" />
+            <div className="stack gap-4">
+              <p className="text-sm text-muted">Authorized Signature</p>
+              <img src={brand.signatureUrl} alt="Business signature" className="job-doc-signature" />
+            </div>
+          </>
+        ) : null}
       </div>
     </div>
   )

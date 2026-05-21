@@ -1078,6 +1078,18 @@ p { margin: 0; }
   min-height: 170px;
 }
 
+.dashboard-status-chart .recharts-wrapper:focus,
+.dashboard-status-chart .recharts-surface:focus {
+  outline: none;
+}
+
+.dashboard-status-chart .recharts-sector:focus,
+.dashboard-status-chart .recharts-sector:focus-visible,
+.dashboard-status-chart .recharts-layer:focus,
+.dashboard-status-chart .recharts-layer:focus-visible {
+  outline: none;
+}
+
 .dashboard-status-legend {
   display: flex;
   flex-direction: column;
@@ -1092,10 +1104,10 @@ p { margin: 0; }
 }
 
 .dashboard-performance-table-wrap {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--bg-card);
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
 }
 
 .dashboard-performance-table {
@@ -1137,6 +1149,10 @@ p { margin: 0; }
   border-top: 1px solid var(--border);
 }
 
+.dashboard-performance-table tbody tr + tr td {
+  border-top: 1px solid var(--border);
+}
+
 .dashboard-best-month-card {
   background: #F7EFF1;
   border-color: #E9DBE0;
@@ -1150,9 +1166,275 @@ p { margin: 0; }
   letter-spacing: -0.2px;
 }
 
+.job-doc-brand-logo {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.job-doc-signature {
+  width: 132px;
+  max-width: 100%;
+  height: 44px;
+  object-fit: contain;
+}
+
+.settings-page-title {
+  color: var(--primary);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.settings-theme-btn {
+  width: 60px;
+  height: 60px;
+  min-height: 60px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  color: var(--primary);
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-accordion-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.settings-row-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-h);
+  min-height: 64px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.settings-row-card:active {
+  transform: scale(0.99);
+}
+
+.settings-row-card[aria-expanded='true'] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.settings-row-chevron {
+  transition: transform var(--transition-fast);
+}
+
+.settings-row-chevron.open {
+  transform: rotate(90deg);
+}
+
+.settings-row-icon {
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-row-title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: -0.1px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.settings-row-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.settings-accordion-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border-top: 0;
+  margin-top: -1px;
+  padding: 16px;
+}
+
+.settings-profile-form {
+  padding-top: 0;
+  gap: 16px !important;
+}
+
+.settings-profile-field {
+  gap: 10px;
+}
+
+.settings-profile-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-h);
+  letter-spacing: -0.1px;
+}
+
+.settings-profile-input {
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 0 13px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-muted);
+  background: #fcfbf9;
+}
+
+.settings-profile-input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.settings-scroll-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 2px;
+}
+
+.settings-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-textarea {
+  min-height: 94px;
+  resize: none;
+}
+
+.settings-color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-color-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  height: 46px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.settings-toggle {
+  width: 48px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-muted);
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.settings-toggle-knob {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: transform var(--transition-fast);
+}
+
+.settings-toggle.active {
+  background: color-mix(in srgb, var(--success) 16%, white 84%);
+  border-color: color-mix(in srgb, var(--success) 50%, white 50%);
+}
+
+.settings-toggle.active .settings-toggle-knob {
+  transform: translateX(19px);
+}
+
+.settings-clear-btn {
+  color: #ef4444;
+  border-color: color-mix(in srgb, #ef4444 28%, white 72%);
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-save-btn {
+  min-height: 60px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.settings-clear-btn-shape {
+  min-height: 58px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.settings-signout-link {
+  margin-top: 2px;
+  border: none;
+  background: transparent;
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.settings-signout-link:active {
+  transform: scale(0.99);
+}
+
+.subscription-card-active {
+  border-color: color-mix(in srgb, var(--success) 40%, white 60%);
+  background: color-mix(in srgb, var(--success) 6%, white 94%);
+}
+
 @media (max-width: 360px) {
   .dashboard-status-layout {
     grid-template-columns: 1fr;
+  }
+
+  .settings-row-title {
+    font-size: 15px;
+  }
+
+  .settings-row-card {
+    min-height: 72px;
+    padding: 12px;
+  }
+
+  .settings-page-title {
+    font-size: 24px;
   }
 }
 
