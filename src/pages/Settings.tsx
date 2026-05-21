@@ -1,10 +1,13 @@
 import {
   BellRing,
   Building2,
+  CheckSquare,
   ChevronRight,
   CircleHelp,
   Database,
+  FileText,
   Globe,
+  Image as ImageIcon,
   LogOut,
   Mail,
   Moon,
@@ -16,6 +19,7 @@ import {
   Upload,
   UserRound,
   WandSparkles,
+  X,
 } from 'lucide-react'
 import type { IconType } from 'react-icons'
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6'
@@ -27,6 +31,8 @@ import {
   saveTailorSettings,
   type MaterialQuality,
   type NotificationBellOption,
+  type InvoiceTemplateOption,
+  type ReceiptTemplateOption,
   type ReminderLead,
   type RingtoneOption,
   type SocialPlatform,
@@ -58,6 +64,24 @@ const socialPlatformColor: Record<SocialPlatform, string> = {
   Facebook: '#1877F2',
   TikTok: '#000000',
 }
+
+const invoiceTemplateOptions: Array<{ value: InvoiceTemplateOption; title: string; subtitle: string }> = [
+  { value: 'classic-curve', title: 'Template 1', subtitle: 'Classic Curve' },
+  { value: 'left-panel', title: 'Template 2', subtitle: 'Left Panel' },
+  { value: 'top-card', title: 'Template 3', subtitle: 'Top Card' },
+]
+
+const receiptTemplateOptions: Array<{ value: ReceiptTemplateOption; title: string; subtitle: string }> = [
+  { value: 'clean-slip', title: 'Template 1', subtitle: 'Clean Slip' },
+  { value: 'compact-block', title: 'Template 2', subtitle: 'Compact Block' },
+  { value: 'minimal-ledger', title: 'Template 3', subtitle: 'Minimal Ledger' },
+]
+
+const brandColorOptions = [
+  '#7B1E37', '#C9A84C', '#1F7A8C', '#2D6A4F',
+  '#A63D40', '#3B82F6', '#9333EA', '#111827',
+  '#F59E0B', '#EF4444', '#10B981', '#6B7280',
+]
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (next: boolean) => void }) {
   return (
@@ -138,6 +162,9 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
+  const [invoicePreviewGenerated, setInvoicePreviewGenerated] = useState(false)
+  const [openColorPicker, setOpenColorPicker] = useState<0 | 1 | 2 | null>(null)
+  const [templatePreview, setTemplatePreview] = useState<{ kind: 'invoice' | 'receipt'; value: string; title: string } | null>(null)
   const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>('Instagram')
   const [socialHandleInput, setSocialHandleInput] = useState('')
   const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
@@ -219,6 +246,29 @@ export default function SettingsPage() {
     }
     reader.readAsDataURL(file)
     event.target.value = ''
+  }
+
+  function toggleBrandDetail(key: keyof TailorSettings['brand']['includeBusinessDetails']) {
+    setSettings((prev) => ({
+      ...prev,
+      brand: {
+        ...prev.brand,
+        includeBusinessDetails: {
+          ...prev.brand.includeBusinessDetails,
+          [key]: !prev.brand.includeBusinessDetails[key],
+        },
+      },
+    }))
+  }
+
+  function applyTemplateSelection() {
+    if (!templatePreview) return
+    if (templatePreview.kind === 'invoice') {
+      setSettings((prev) => ({ ...prev, brand: { ...prev.brand, invoiceTemplate: templatePreview.value as InvoiceTemplateOption } }))
+    } else {
+      setSettings((prev) => ({ ...prev, brand: { ...prev.brand, receiptTemplate: templatePreview.value as ReceiptTemplateOption } }))
+    }
+    setTemplatePreview(null)
   }
 
   return (
@@ -474,37 +524,95 @@ export default function SettingsPage() {
           </div>
         </SettingAccordion>
 
-        <SettingAccordion icon={<Palette size={20} />} title="Brand & Invoice Setup" panelKey="brand" panel={panel} onToggle={handleToggle}>
+        <SettingAccordion icon={<Palette size={20} />} title="Invoice & Receipt Setup" panelKey="brand" panel={panel} onToggle={handleToggle}>
           <div className="stack settings-brand-form">
-            <div className="input-group settings-brand-group">
-              <label className="settings-brand-label">Business / Brand Name</label>
-              <input
-                className="input settings-brand-input"
-                placeholder="e.g. Femi Couture"
-                value={settings.brand.name}
-                onChange={onInput((value) => setSettings((prev) => ({ ...prev, brand: { ...prev.brand, name: value } })))}
-              />
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">Invoice Template</p>
+              <p className="settings-help-text">Pick one invoice style TailorDeck should use.</p>
+              <div className="settings-brand-template-grid">
+                {invoiceTemplateOptions.map((template) => (
+                  <button
+                    key={template.value}
+                    type="button"
+                    className={`settings-brand-template-card${settings.brand.invoiceTemplate === template.value ? ' active' : ''}`}
+                    onClick={() => setTemplatePreview({ kind: 'invoice', value: template.value, title: template.subtitle })}
+                  >
+                    <div className="settings-brand-template-preview">
+                      <div className="settings-brand-template-top" style={{ backgroundColor: settings.brand.colors[0] }} />
+                      <div className="settings-brand-template-line" />
+                      <div className="settings-brand-template-line short" />
+                    </div>
+                    <p className="settings-brand-template-title">{template.title}</p>
+                    <p className="settings-brand-template-sub">{template.subtitle}</p>
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="stack settings-brand-group">
-              <p className="settings-brand-label">Brand Colors (up to 3)</p>
-              <div className="settings-brand-colors-row">
+              <p className="settings-brand-label">Receipt Template</p>
+              <p className="settings-help-text">Pick one receipt style TailorDeck should use.</p>
+              <div className="settings-brand-template-grid">
+                {receiptTemplateOptions.map((template) => (
+                  <button
+                    key={template.value}
+                    type="button"
+                    className={`settings-brand-template-card${settings.brand.receiptTemplate === template.value ? ' active' : ''}`}
+                    onClick={() => setTemplatePreview({ kind: 'receipt', value: template.value, title: template.subtitle })}
+                  >
+                    <div className="settings-brand-template-preview">
+                      <div className="settings-brand-template-top" style={{ backgroundColor: settings.brand.colors[2] }} />
+                      <div className="settings-brand-template-line" />
+                      <div className="settings-brand-template-line short" />
+                    </div>
+                    <p className="settings-brand-template-title">{template.title}</p>
+                    <p className="settings-brand-template-sub">{template.subtitle}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">Select Your Brand Colors</p>
+              <p className="settings-help-text">These colors style invoices and receipts. Maximum: 3 colors.</p>
+              <div className="settings-brand-color-pickers">
                 {([
                   { label: 'Primary', index: 0 as const },
                   { label: 'Secondary', index: 1 as const },
                   { label: 'Accent', index: 2 as const },
                 ]).map((color) => (
-                  <div key={color.label} className="settings-brand-color-item">
-                    <label className="settings-brand-color-control" aria-label={`${color.label} brand color`}>
-                      <span className="settings-brand-color-swatch" style={{ backgroundColor: settings.brand.colors[color.index] }} />
-                      <input
-                        type="color"
-                        className="settings-brand-color-input"
-                        value={settings.brand.colors[color.index]}
-                        onChange={onInput((value) => updateColor(color.index, value))}
-                      />
-                    </label>
-                    <p className="settings-brand-color-label">{color.label}</p>
+                  <div key={color.label} className="settings-brand-color-picker-item">
+                    <div className="row-between">
+                      <p className="settings-brand-color-title">{color.label}</p>
+                      <p className="settings-brand-color-hex">{settings.brand.colors[color.index].toUpperCase()}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="settings-choice-pill settings-brand-color-pick-btn"
+                      onClick={() => setOpenColorPicker((prev) => (prev === color.index ? null : color.index))}
+                    >
+                      Pick {color.label} Color
+                    </button>
+
+                    {openColorPicker === color.index ? (
+                      <div className="settings-brand-color-palette">
+                        {brandColorOptions.map((hex) => (
+                          <button
+                            key={`${color.label}-${hex}`}
+                            type="button"
+                            className={`settings-brand-palette-chip${settings.brand.colors[color.index].toLowerCase() === hex.toLowerCase() ? ' active' : ''}`}
+                            onClick={() => updateColor(color.index, hex)}
+                          >
+                            <span className="settings-brand-palette-dot" style={{ backgroundColor: hex }} />
+                            <span>{hex.toUpperCase()}</span>
+                          </button>
+                        ))}
+                        <label className="settings-brand-custom-color">
+                          <span>Custom Color</span>
+                          <input type="color" value={settings.brand.colors[color.index]} onChange={onInput((value) => updateColor(color.index, value))} />
+                        </label>
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -512,9 +620,14 @@ export default function SettingsPage() {
 
             <div className="stack settings-brand-group">
               <p className="settings-brand-label">Business Logo</p>
+              <p className="settings-help-text">Use PNG/JPG, max 2MB, square or horizontal logo works best.</p>
               <label className="settings-brand-upload-box">
-                <Upload size={22} />
-                <span>Upload Logo</span>
+                <div className="settings-brand-upload-preview">
+                  {settings.brand.logoUrl ? <img src={settings.brand.logoUrl} alt="Logo preview" /> : <ImageIcon size={18} />}
+                </div>
+                <div className="stack gap-4">
+                  <span>Upload Logo</span>
+                </div>
                 <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('logoUrl', event)} />
               </label>
             </div>
@@ -523,11 +636,71 @@ export default function SettingsPage() {
               <p className="settings-brand-label">
                 Business Signature <span className="settings-brand-signature-note">(image of your signature)</span>
               </p>
+              <p className="settings-help-text">Use transparent PNG or clean JPG, max 2MB.</p>
               <label className="settings-brand-upload-box">
-                <Upload size={22} />
-                <span>Upload Signature</span>
+                <div className="settings-brand-upload-preview">
+                  {settings.brand.signatureUrl ? <img src={settings.brand.signatureUrl} alt="Signature preview" /> : <Upload size={18} />}
+                </div>
+                <div className="stack gap-4">
+                  <span>Upload Signature</span>
+                </div>
                 <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('signatureUrl', event)} />
               </label>
+            </div>
+
+            <div className="stack settings-brand-group">
+              <p className="settings-brand-label">Business Details To Show</p>
+              <p className="settings-help-text">Choose which business information appears on invoice and receipt.</p>
+              <div className="settings-radio-list">
+                {([
+                  { key: 'phone', label: 'Business Phone' },
+                  { key: 'email', label: 'Business Email' },
+                  { key: 'website', label: 'Business Website' },
+                  { key: 'social', label: 'Social Handles' },
+                  { key: 'address', label: 'Shop Address' },
+                ] as const).map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    className={`settings-radio-option${settings.brand.includeBusinessDetails[item.key] ? ' active' : ''}`}
+                    onClick={() => toggleBrandDetail(item.key)}
+                  >
+                    <span className="settings-radio-indicator" />
+                    <CheckSquare size={15} className="settings-radio-icon" />
+                    <span className="settings-radio-title">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="stack settings-brand-group">
+              {!invoicePreviewGenerated ? (
+                <button type="button" className="btn btn-primary settings-brand-generate-btn" onClick={() => setInvoicePreviewGenerated(true)}>
+                  <FileText size={16} />
+                  Generate Preview
+                </button>
+              ) : (
+                <div className="settings-brand-final-preview">
+                  <div className="settings-brand-final-header" style={{ background: settings.brand.colors[0] }}>
+                    {settings.brand.logoUrl ? <img src={settings.brand.logoUrl} alt="Brand logo" className="settings-brand-final-logo" /> : null}
+                    <p className="settings-brand-final-title">{settings.businessInfo.shopName}</p>
+                  </div>
+                  <div className="stack gap-6 settings-brand-final-body">
+                    <p className="text-sm font-semibold">Invoice: {invoiceTemplateOptions.find((x) => x.value === settings.brand.invoiceTemplate)?.subtitle}</p>
+                    <p className="text-sm font-semibold">Receipt: {receiptTemplateOptions.find((x) => x.value === settings.brand.receiptTemplate)?.subtitle}</p>
+                    {settings.brand.includeBusinessDetails.phone ? <p className="text-sm text-muted">{settings.businessInfo.businessPhone}</p> : null}
+                    {settings.brand.includeBusinessDetails.email ? <p className="text-sm text-muted">{settings.businessInfo.businessEmail}</p> : null}
+                    {settings.brand.includeBusinessDetails.website ? <p className="text-sm text-muted">{settings.businessInfo.website}</p> : null}
+                    {settings.brand.includeBusinessDetails.social && settings.businessInfo.socialHandles.length ? (
+                      <p className="text-sm text-muted">{settings.businessInfo.socialHandles.map((x) => `${x.platform} ${x.handle}`).join(' • ')}</p>
+                    ) : null}
+                    {settings.brand.includeBusinessDetails.address ? <p className="text-sm text-muted">{settings.businessInfo.shopAddress}</p> : null}
+                  </div>
+                  <button type="button" className="btn btn-secondary settings-brand-edit-btn" onClick={() => setInvoicePreviewGenerated(false)}>
+                    Edit
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </SettingAccordion>
@@ -562,6 +735,40 @@ export default function SettingsPage() {
           Sign Out
         </button>
       </div>
+
+      {templatePreview ? (
+        <div className="sheet-overlay settings-template-preview-overlay" role="dialog" aria-modal="true" aria-label="Template preview">
+          <div className="settings-template-preview-stage">
+            <button type="button" className="btn btn-ghost btn-icon settings-template-preview-close" onClick={() => setTemplatePreview(null)} aria-label="Close preview">
+              <X size={20} />
+            </button>
+
+            <div className="settings-template-preview-paper">
+              <div className="settings-template-preview-head" style={{ background: settings.brand.colors[0] }} />
+              <div className="settings-template-preview-band" style={{ background: settings.brand.colors[2] }} />
+              <div className="settings-template-preview-body">
+                <div className="settings-template-preview-line" />
+                <div className="settings-template-preview-line short" />
+                <div className="settings-template-preview-table">
+                  <div />
+                  <div />
+                  <div />
+                  <div />
+                </div>
+                <div className="settings-template-preview-line" />
+                <div className="settings-template-preview-line short" />
+              </div>
+            </div>
+
+            <div className="settings-template-preview-footer">
+              <p className="settings-template-preview-title">{templatePreview.kind === 'invoice' ? 'Invoice Template' : 'Receipt Template'}: {templatePreview.title}</p>
+              <button type="button" className="btn btn-primary settings-template-preview-use" onClick={applyTemplateSelection}>
+                Use This Template
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -5,6 +5,8 @@ export type SubscriptionPlan = 'free' | 'starter' | 'pro'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
 export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
 export type SocialPlatform = 'Instagram' | 'Facebook' | 'TikTok'
+export type InvoiceTemplateOption = 'classic-curve' | 'left-panel' | 'top-card'
+export type ReceiptTemplateOption = 'clean-slip' | 'compact-block' | 'minimal-ledger'
 
 export interface SocialHandle {
   id: string
@@ -44,6 +46,15 @@ export interface TailorSettings {
     colors: [string, string, string]
     logoUrl: string
     signatureUrl: string
+    invoiceTemplate: InvoiceTemplateOption
+    receiptTemplate: ReceiptTemplateOption
+    includeBusinessDetails: {
+      phone: boolean
+      email: boolean
+      website: boolean
+      social: boolean
+      address: boolean
+    }
   }
   subscription: {
     plan: SubscriptionPlan
@@ -121,6 +132,15 @@ export function getDefaultTailorSettings(): TailorSettings {
       colors: ['#7B1E37', '#F6ECF0', '#C9A84C'],
       logoUrl: '/branding/TailorDeck app logo for in app.png',
       signatureUrl: '',
+      invoiceTemplate: 'classic-curve',
+      receiptTemplate: 'clean-slip',
+      includeBusinessDetails: {
+        phone: true,
+        email: true,
+        website: false,
+        social: true,
+        address: true,
+      },
     },
     subscription: {
       plan: 'free',
@@ -192,6 +212,15 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       ],
       logoUrl: value.brand?.logoUrl ?? defaults.brand.logoUrl,
       signatureUrl: value.brand?.signatureUrl ?? defaults.brand.signatureUrl,
+      invoiceTemplate: value.brand?.invoiceTemplate ?? defaults.brand.invoiceTemplate,
+      receiptTemplate: value.brand?.receiptTemplate ?? defaults.brand.receiptTemplate,
+      includeBusinessDetails: {
+        phone: value.brand?.includeBusinessDetails?.phone ?? defaults.brand.includeBusinessDetails.phone,
+        email: value.brand?.includeBusinessDetails?.email ?? defaults.brand.includeBusinessDetails.email,
+        website: value.brand?.includeBusinessDetails?.website ?? defaults.brand.includeBusinessDetails.website,
+        social: value.brand?.includeBusinessDetails?.social ?? defaults.brand.includeBusinessDetails.social,
+        address: value.brand?.includeBusinessDetails?.address ?? defaults.brand.includeBusinessDetails.address,
+      },
     },
     subscription: {
       plan: value.subscription?.plan ?? defaults.subscription.plan,
