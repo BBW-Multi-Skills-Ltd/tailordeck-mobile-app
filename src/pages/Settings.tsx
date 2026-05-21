@@ -170,15 +170,15 @@ export default function SettingsPage() {
         </SettingAccordion>
 
         <SettingAccordion icon={<Store size={20} />} title="Shop Preferences" panelKey="preferences" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-14">
-            <div className="stack gap-8">
-              <p className="input-label">Default Measurement Unit</p>
-              <div className="row gap-8">
+          <div className="stack settings-pref-form">
+            <div className="stack settings-pref-group">
+              <p className="settings-pref-label">Default Measurement Unit</p>
+              <div className="settings-pref-unit-grid">
                 {(['cm', 'inches'] as const).map((unit) => (
                   <button
                     key={unit}
                     type="button"
-                    className={`pill${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
+                    className={`settings-pref-unit-btn${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, measurementUnit: unit } }))}
                   >
                     {unit === 'cm' ? 'Centimeters' : 'Inches'}
@@ -186,18 +186,14 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-            <div className="input-group">
-              <label className="input-label">Currency Symbol</label>
-              <input className="input" value={settings.preferences.currencySymbol} onChange={onInput((value) => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, currencySymbol: value || '\u20A6' } })))} />
-            </div>
-            <div className="stack gap-8">
-              <p className="input-label">Default Material Quality</p>
-              <div className="settings-scroll-row">
+            <div className="input-group settings-pref-group">
+              <p className="settings-pref-label">Default Material Quality</p>
+              <div className="settings-pref-quality-wrap">
                 {(['Normal', 'Original', 'Fake', 'High Standard'] as MaterialQuality[]).map((quality) => (
                   <button
                     key={quality}
                     type="button"
-                    className={`pill${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
+                    className={`settings-pref-quality-btn${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, defaultMaterialQuality: quality } }))}
                   >
                     {quality}

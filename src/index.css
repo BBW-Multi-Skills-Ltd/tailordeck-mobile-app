@@ -1325,6 +1325,89 @@ p { margin: 0; }
   padding-left: 54px;
 }
 
+.settings-pref-form {
+  gap: 18px;
+}
+
+.settings-pref-group {
+  gap: 10px;
+}
+
+.settings-pref-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-h);
+  letter-spacing: -0.08px;
+}
+
+.settings-pref-unit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.settings-pref-unit-btn {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 26px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.settings-pref-unit-btn.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, white 90%);
+}
+
+.settings-pref-currency-input {
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 0 13px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.settings-pref-quality-wrap {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.settings-pref-quality-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.settings-pref-quality-btn {
+  min-height: 42px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.settings-pref-quality-btn.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
 .settings-scroll-row {
   display: flex;
   align-items: center;
