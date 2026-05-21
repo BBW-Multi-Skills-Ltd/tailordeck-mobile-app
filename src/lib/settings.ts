@@ -2,6 +2,9 @@ export type MeasurementUnit = 'cm' | 'inches'
 export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 export type ReminderLead = '1 day before' | '3 days before' | '1 week before'
 export type SubscriptionPlan = 'free' | 'starter' | 'pro'
+export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
+export type VibrationOption = 'Short Pulse' | 'Medium Pulse' | 'Long Pulse'
+export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
 
 export interface TailorSettings {
   profile: {
@@ -17,7 +20,10 @@ export interface TailorSettings {
   reminders: {
     pushNotifications: boolean
     defaultReminder: ReminderLead
-    dailySummary: boolean
+    ringtoneEnabled: boolean
+    ringtone: RingtoneOption
+    notificationBellEnabled: boolean
+    notificationBell: NotificationBellOption
   }
   businessInfo: {
     shopName: string
@@ -87,7 +93,10 @@ export function getDefaultTailorSettings(): TailorSettings {
     reminders: {
       pushNotifications: true,
       defaultReminder: '1 day before',
-      dailySummary: false,
+      ringtoneEnabled: true,
+      ringtone: 'Classic Ring',
+      notificationBellEnabled: true,
+      notificationBell: 'Standard Bell',
     },
     businessInfo: {
       shopName: signup.shopName,
@@ -135,7 +144,10 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
     reminders: {
       pushNotifications: value.reminders?.pushNotifications ?? defaults.reminders.pushNotifications,
       defaultReminder: value.reminders?.defaultReminder ?? defaults.reminders.defaultReminder,
-      dailySummary: value.reminders?.dailySummary ?? defaults.reminders.dailySummary,
+      ringtoneEnabled: value.reminders?.ringtoneEnabled ?? defaults.reminders.ringtoneEnabled,
+      ringtone: value.reminders?.ringtone ?? defaults.reminders.ringtone,
+      notificationBellEnabled: value.reminders?.notificationBellEnabled ?? defaults.reminders.notificationBellEnabled,
+      notificationBell: value.reminders?.notificationBell ?? defaults.reminders.notificationBell,
     },
     businessInfo: {
       shopName: value.businessInfo?.shopName ?? legacyValue.profile?.shopName ?? defaults.businessInfo.shopName,

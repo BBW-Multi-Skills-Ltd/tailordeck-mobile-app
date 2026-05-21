@@ -11,11 +11,33 @@ import {
   UserRound,
   WandSparkles,
 } from 'lucide-react'
+import type { IconType } from 'react-icons'
+import { FiBell, FiBellOff, FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi'
 import { useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { loadTailorSettings, saveTailorSettings, type MaterialQuality, type ReminderLead, type TailorSettings } from '../lib/settings'
+import {
+  loadTailorSettings,
+  saveTailorSettings,
+  type MaterialQuality,
+  type NotificationBellOption,
+  type ReminderLead,
+  type RingtoneOption,
+  type TailorSettings,
+} from '../lib/settings'
 
 type SettingsPanel = 'profile' | 'preferences' | 'reminders' | 'business' | 'brand' | 'about' | null
+
+const ringtoneOptions: Array<{ value: RingtoneOption; icon: IconType }> = [
+  { value: 'Classic Ring', icon: FiVolume2 },
+  { value: 'Soft Chime', icon: FiVolume1 },
+  { value: 'Pulse Tone', icon: FiVolumeX },
+]
+
+const notificationBellOptions: Array<{ value: NotificationBellOption; icon: IconType }> = [
+  { value: 'Standard Bell', icon: FiBell },
+  { value: 'Soft Bell', icon: FiVolume1 },
+  { value: 'Sharp Bell', icon: FiBellOff },
+]
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (next: boolean) => void }) {
   return (
@@ -178,7 +200,7 @@ export default function SettingsPage() {
                   <button
                     key={unit}
                     type="button"
-                    className={`settings-pref-unit-btn${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
+                    className={`settings-pref-unit-btn settings-choice-pill${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, measurementUnit: unit } }))}
                   >
                     {unit === 'cm' ? 'Centimeters' : 'Inches'}
@@ -193,7 +215,7 @@ export default function SettingsPage() {
                   <button
                     key={quality}
                     type="button"
-                    className={`settings-pref-quality-btn${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
+                    className={`settings-pref-quality-btn settings-choice-pill${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, defaultMaterialQuality: quality } }))}
                   >
                     {quality}
@@ -205,19 +227,51 @@ export default function SettingsPage() {
         </SettingAccordion>
 
         <SettingAccordion icon={<BellRing size={20} />} title="Reminders & Notifications" panelKey="reminders" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-14">
-            <div className="row-between">
-              <p className="input-label">Push Notifications</p>
+          <div className="stack settings-reminder-form">
+            <div className="row-between settings-reminder-row">
+              <div className="stack gap-4">
+                <p className="settings-reminder-label">Push Notifications</p>
+                <p className="settings-reminder-help">Phone pop-up alerts for deadlines and updates.</p>
+              </div>
               <Toggle checked={settings.reminders.pushNotifications} onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, pushNotifications: next } }))} />
             </div>
-            <div className="stack gap-8">
-              <p className="input-label">Default Reminder</p>
-              <div className="settings-scroll-row">
+
+            <div className="stack settings-reminder-group">
+              <div className="row-between settings-reminder-row">
+                <div className="stack gap-4">
+                  <p className="settings-reminder-label">Notification Bell Sound</p>
+                  <p className="settings-reminder-help">Choose the alert bell tone for phone notifications.</p>
+                </div>
+                <Toggle
+                  checked={settings.reminders.notificationBellEnabled}
+                  onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBellEnabled: next } }))}
+                />
+              </div>
+              <div className="settings-radio-list">
+                {notificationBellOptions.map(({ value, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`settings-radio-option${settings.reminders.notificationBell === value ? ' active' : ''}`}
+                    onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBell: value } }))}
+                    disabled={!settings.reminders.pushNotifications || !settings.reminders.notificationBellEnabled}
+                  >
+                    <span className="settings-radio-indicator" />
+                    <Icon size={16} className="settings-radio-icon" />
+                    <span className="settings-radio-title">{value}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="stack settings-reminder-group">
+              <p className="settings-reminder-label">Default Reminder</p>
+              <div className="settings-reminder-chip-row">
                 {(['1 day before', '3 days before', '1 week before'] as ReminderLead[]).map((reminder) => (
                   <button
                     key={reminder}
                     type="button"
-                    className={`pill${settings.reminders.defaultReminder === reminder ? ' active' : ''}`}
+                    className={`settings-reminder-chip settings-choice-pill${settings.reminders.defaultReminder === reminder ? ' active' : ''}`}
                     onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, defaultReminder: reminder } }))}
                   >
                     {reminder}
@@ -225,9 +279,30 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-            <div className="row-between">
-              <p className="input-label">Daily Summary</p>
-              <Toggle checked={settings.reminders.dailySummary} onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, dailySummary: next } }))} />
+
+            <div className="stack settings-reminder-group">
+              <div className="row-between settings-reminder-row">
+                <div className="stack gap-4">
+                  <p className="settings-reminder-label">Ringtone</p>
+                  <p className="settings-reminder-help">Play sound when a reminder alert is delivered.</p>
+                </div>
+                <Toggle checked={settings.reminders.ringtoneEnabled} onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtoneEnabled: next } }))} />
+              </div>
+              <div className="settings-radio-list">
+                {ringtoneOptions.map(({ value, icon: Icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`settings-radio-option${settings.reminders.ringtone === value ? ' active' : ''}`}
+                    onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtone: value } }))}
+                    disabled={!settings.reminders.pushNotifications || !settings.reminders.ringtoneEnabled}
+                  >
+                    <span className="settings-radio-indicator" />
+                    <Icon size={16} className="settings-radio-icon" />
+                    <span className="settings-radio-title">{value}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </SettingAccordion>
