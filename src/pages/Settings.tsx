@@ -66,15 +66,15 @@ const socialPlatformColor: Record<SocialPlatform, string> = {
 }
 
 const invoiceTemplateOptions: Array<{ value: InvoiceTemplateOption; title: string; subtitle: string }> = [
-  { value: 'classic-curve', title: 'Template 1', subtitle: 'Classic Curve' },
-  { value: 'left-panel', title: 'Template 2', subtitle: 'Left Panel' },
-  { value: 'top-card', title: 'Template 3', subtitle: 'Top Card' },
+  { value: 'invoice-classic-wave', title: 'Template 1', subtitle: 'Classic Wave' },
+  { value: 'invoice-left-panel', title: 'Template 2', subtitle: 'Left Panel' },
+  { value: 'invoice-top-card', title: 'Template 3', subtitle: 'Top Card' },
 ]
 
 const receiptTemplateOptions: Array<{ value: ReceiptTemplateOption; title: string; subtitle: string }> = [
-  { value: 'clean-slip', title: 'Template 1', subtitle: 'Clean Slip' },
-  { value: 'compact-block', title: 'Template 2', subtitle: 'Compact Block' },
-  { value: 'minimal-ledger', title: 'Template 3', subtitle: 'Minimal Ledger' },
+  { value: 'receipt-clean-slip', title: 'Template 1', subtitle: 'Clean Slip' },
+  { value: 'receipt-compact-block', title: 'Template 2', subtitle: 'Compact Block' },
+  { value: 'receipt-minimal-ledger', title: 'Template 3', subtitle: 'Minimal Ledger' },
 ]
 
 const brandColorOptions = [

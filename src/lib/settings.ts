@@ -5,8 +5,8 @@ export type SubscriptionPlan = 'free' | 'starter' | 'pro'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
 export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
 export type SocialPlatform = 'Instagram' | 'Facebook' | 'TikTok'
-export type InvoiceTemplateOption = 'classic-curve' | 'left-panel' | 'top-card'
-export type ReceiptTemplateOption = 'clean-slip' | 'compact-block' | 'minimal-ledger'
+export type InvoiceTemplateOption = 'invoice-classic-wave' | 'invoice-left-panel' | 'invoice-top-card'
+export type ReceiptTemplateOption = 'receipt-clean-slip' | 'receipt-compact-block' | 'receipt-minimal-ledger'
 
 export interface SocialHandle {
   id: string
@@ -132,8 +132,8 @@ export function getDefaultTailorSettings(): TailorSettings {
       colors: ['#7B1E37', '#F6ECF0', '#C9A84C'],
       logoUrl: '/branding/TailorDeck app logo for in app.png',
       signatureUrl: '',
-      invoiceTemplate: 'classic-curve',
-      receiptTemplate: 'clean-slip',
+      invoiceTemplate: 'invoice-classic-wave',
+      receiptTemplate: 'receipt-clean-slip',
       includeBusinessDetails: {
         phone: true,
         email: true,

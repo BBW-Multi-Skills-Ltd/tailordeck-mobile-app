@@ -29,8 +29,11 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import { Link, useParams } from 'react-router-dom'
 import { jobMeasurementById } from '../data/mockJobMeasurements'
 import { loadTailorSettings } from '../lib/settings'
+import { renderTemplate } from '../lib/docTemplates'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
+import type { SocialHandle, InvoiceTemplateOption, ReceiptTemplateOption } from '../lib/settings'
+import type { DocumentTemplatePayload } from '../templates/types'
 import type { JobStatus } from '../types/job'
 
 type InvoiceType = 'invoice' | 'receipt'
@@ -65,6 +68,18 @@ type BrandConfig = {
   accentColor: string
   shopAddress: string
   businessPhone: string
+  businessEmail: string
+  website: string
+  socialHandles: SocialHandle[]
+  includeBusinessDetails: {
+    phone: boolean
+    email: boolean
+    website: boolean
+    social: boolean
+    address: boolean
+  }
+  invoiceTemplate: InvoiceTemplateOption
+  receiptTemplate: ReceiptTemplateOption
   logoUrl: string
   signatureUrl: string
 }
@@ -253,6 +268,12 @@ function readBrandConfig(): BrandConfig {
     accentColor: settings.brand.colors[2],
     shopAddress: settings.businessInfo.shopAddress,
     businessPhone: settings.businessInfo.businessPhone,
+    businessEmail: settings.businessInfo.businessEmail,
+    website: settings.businessInfo.website,
+    socialHandles: settings.businessInfo.socialHandles,
+    includeBusinessDetails: settings.brand.includeBusinessDetails,
+    invoiceTemplate: settings.brand.invoiceTemplate,
+    receiptTemplate: settings.brand.receiptTemplate,
     logoUrl: settings.brand.logoUrl,
     signatureUrl: settings.brand.signatureUrl,
   }
@@ -307,74 +328,38 @@ function DocumentPreview({
   deadlineDate: string
 }): ReactElement {
   const documentId = `${type}-${Math.abs((service + deadlineDate).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)).toString(16).slice(0, 6)}`
+  const templatePayload: DocumentTemplatePayload = {
+    kind: type,
+    templateId: type === 'invoice' ? brand.invoiceTemplate : brand.receiptTemplate,
+    documentId,
+    issuedDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    deadlineDate,
+    clientName,
+    clientPhone,
+    service,
+    charge,
+    deposit,
+    balance,
+    brand: {
+      shopName: brand.shopName,
+      logoUrl: brand.logoUrl,
+      signatureUrl: brand.signatureUrl,
+      primaryColor: brand.primaryColor,
+      secondaryColor: brand.secondaryColor,
+      accentColor: brand.accentColor,
+      shopAddress: brand.shopAddress,
+      businessPhone: brand.businessPhone,
+      businessEmail: brand.businessEmail,
+      website: brand.website,
+      socialHandles: brand.socialHandles,
+      includeBusinessDetails: brand.includeBusinessDetails,
+    },
+  }
 
   return (
     <div className="stack gap-12">
       <h4 className="job-doc-ui-title">{type === 'invoice' ? 'Invoice Preview' : 'Receipt Preview'}</h4>
-
-      <div className="card stack gap-10 job-doc-preview-card" style={{ borderColor: `${brand.primaryColor}33` }}>
-        <div className="job-doc-preview-bar" style={{ background: brand.primaryColor }} />
-
-        <div className="row-between">
-          <div className="stack gap-4">
-            <div className="row gap-8">
-              {brand.logoUrl ? <img src={brand.logoUrl} alt={`${brand.shopName} logo`} className="job-doc-brand-logo" /> : null}
-              <p className="text-sm" style={{ color: brand.primaryColor, fontWeight: 700 }}>{brand.shopName}</p>
-            </div>
-            <p className="text-sm text-muted">{brand.shopAddress || '-'}</p>
-            <p className="text-sm text-muted">{brand.businessPhone || '-'}</p>
-            <p className="text-sm text-muted" style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>{type}</p>
-          </div>
-          <div className="stack gap-4" style={{ textAlign: 'right' }}>
-            <p className="text-sm font-semibold">{documentId}</p>
-            <p className="text-sm text-muted">{new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-          </div>
-        </div>
-
-        <div className="stack gap-4">
-          <p className="text-sm" style={{ color: brand.primaryColor, fontWeight: 600 }}>Billed To</p>
-          <p className="text-sm font-semibold">{clientName}</p>
-          <p className="text-sm text-muted">{clientPhone}</p>
-        </div>
-
-        <div className="divider" />
-
-        <div className="stack gap-6">
-          <p className="text-sm" style={{ color: brand.primaryColor, fontWeight: 600 }}>Description</p>
-          <div className="row-between">
-            <p className="text-sm text-muted">Service Details</p>
-            <p className="text-sm font-semibold">{service}</p>
-          </div>
-          <div className="row-between">
-            <p className="text-sm text-muted">Charge Amount</p>
-            <p className="text-sm font-semibold">{formatNaira(charge)}</p>
-          </div>
-          <div className="row-between">
-            <p className="text-sm text-muted">Deposit Paid</p>
-            <p className="text-sm font-semibold">{formatNaira(deposit)}</p>
-          </div>
-          <div className="row-between">
-            <p className="text-sm text-muted">{type === 'invoice' ? 'Balance to Pay' : 'Amount Received'}</p>
-            <p className="text-sm font-semibold" style={{ color: type === 'invoice' ? brand.primaryColor : 'var(--success)' }}>
-              {type === 'invoice' ? formatNaira(balance) : formatNaira(charge)}
-            </p>
-          </div>
-          <div className="row-between">
-            <p className="text-sm text-muted">Delivery Date</p>
-            <p className="text-sm font-semibold">{formatDateShort(deadlineDate)}</p>
-          </div>
-        </div>
-
-        {brand.signatureUrl ? (
-          <>
-            <div className="divider" />
-            <div className="stack gap-4">
-              <p className="text-sm text-muted">Authorized Signature</p>
-              <img src={brand.signatureUrl} alt="Business signature" className="job-doc-signature" />
-            </div>
-          </>
-        ) : null}
-      </div>
+      {renderTemplate(templatePayload)}
     </div>
   )
 }
