@@ -5,8 +5,7 @@ export type SubscriptionPlan = 'free' | 'starter' | 'pro'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
 export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
 export type SocialPlatform = 'Instagram' | 'Facebook' | 'TikTok'
-export type InvoiceTemplateOption = 'invoice-classic-wave' | 'invoice-left-panel' | 'invoice-top-card'
-export type ReceiptTemplateOption = 'receipt-clean-slip' | 'receipt-compact-block' | 'receipt-minimal-ledger'
+export type DocumentTemplateOption = 'classic-wave'
 
 export interface SocialHandle {
   id: string
@@ -19,6 +18,7 @@ export interface TailorSettings {
     fullName: string
     email: string
     phone: string
+    avatarUrl: string
   }
   preferences: {
     measurementUnit: MeasurementUnit
@@ -46,8 +46,7 @@ export interface TailorSettings {
     colors: [string, string, string]
     logoUrl: string
     signatureUrl: string
-    invoiceTemplate: InvoiceTemplateOption
-    receiptTemplate: ReceiptTemplateOption
+    documentTemplate: DocumentTemplateOption
     includeBusinessDetails: {
       phone: boolean
       email: boolean
@@ -64,6 +63,8 @@ export interface TailorSettings {
 
 export const TAILOR_SETTINGS_KEY = 'tailordeck-settings'
 export const TAILOR_SIGNUP_PREFILL_KEY = 'tailordeck-signup-profile'
+export const AVATAR_PLACEHOLDER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23F2EEE9'/%3E%3Ccircle cx='60' cy='44' r='20' fill='%23C9A84C'/%3E%3Cpath d='M24 104C24 82.9 41.2 66 62.3 66h-4.6C36.6 66 19.4 82.9 19.4 104V120H100.6V104C100.6 82.9 83.4 66 62.3 66z' fill='%237B1E37'/%3E%3Ccircle cx='60' cy='60' r='58' fill='none' stroke='%23E8E0D8' stroke-width='4'/%3E%3C/svg%3E"
 
 type SignupPrefill = {
   fullName: string
@@ -103,6 +104,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       fullName: signup.fullName,
       email: signup.email,
       phone: '+234',
+      avatarUrl: AVATAR_PLACEHOLDER,
     },
     preferences: {
       measurementUnit: 'cm',
@@ -120,7 +122,7 @@ export function getDefaultTailorSettings(): TailorSettings {
     businessInfo: {
       shopName: signup.shopName,
       shopAddress: '12 Allen Avenue, Ikeja, Lagos',
-      businessPhone: '08012345678',
+      businessPhone: '+2348012345678',
       businessEmail: 'hello@elonapparel.com',
       website: 'https://elonapparel.com',
       socialHandles: [
@@ -132,8 +134,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       colors: ['#7B1E37', '#F6ECF0', '#C9A84C'],
       logoUrl: '/branding/TailorDeck app logo for in app.png',
       signatureUrl: '',
-      invoiceTemplate: 'invoice-classic-wave',
-      receiptTemplate: 'receipt-clean-slip',
+      documentTemplate: 'classic-wave',
       includeBusinessDetails: {
         phone: true,
         email: true,
@@ -152,15 +153,34 @@ export function getDefaultTailorSettings(): TailorSettings {
 function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
   const defaults = getDefaultTailorSettings()
   const legacyValue = value as Partial<TailorSettings> & { profile?: { shopName?: string } }
+  const legacyBrandValue = value as Partial<TailorSettings> & {
+    brand?: { invoiceTemplate?: string; receiptTemplate?: string; documentTemplate?: string }
+  }
 
   const normalizedPhoneRaw = value.profile?.phone ?? defaults.profile.phone
   const normalizedPhoneDigits = normalizedPhoneRaw.replace(/\D/g, '')
+  const normalizedPhoneLocal =
+    normalizedPhoneDigits.startsWith('234')
+      ? normalizedPhoneDigits.slice(3)
+      : normalizedPhoneDigits.startsWith('0')
+      ? normalizedPhoneDigits.slice(1)
+      : normalizedPhoneDigits
   const normalizedPhone =
     normalizedPhoneDigits.length === 0
       ? '+234'
       : normalizedPhoneDigits.startsWith('234')
       ? `+${normalizedPhoneDigits}`
-      : `+234${normalizedPhoneDigits}`
+      : `+234${normalizedPhoneLocal}`
+
+  const rawBusinessPhone = value.businessInfo?.businessPhone ?? defaults.businessInfo.businessPhone
+  const businessDigits = rawBusinessPhone.replace(/\D/g, '')
+  const businessLocal =
+    businessDigits.startsWith('234')
+      ? businessDigits.slice(3)
+      : businessDigits.startsWith('0')
+      ? businessDigits.slice(1)
+      : businessDigits
+  const normalizedBusinessPhone = businessDigits.length === 0 ? '+234' : `+234${businessLocal}`
 
   const legacyBusiness = value.businessInfo as Partial<TailorSettings['businessInfo']> & { instagramHandle?: string } | undefined
   const normalizedSocialHandles =
@@ -181,6 +201,7 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       fullName: value.profile?.fullName ?? defaults.profile.fullName,
       email: value.profile?.email ?? defaults.profile.email,
       phone: normalizedPhone,
+      avatarUrl: value.profile?.avatarUrl ?? defaults.profile.avatarUrl,
     },
     preferences: {
       measurementUnit: value.preferences?.measurementUnit ?? defaults.preferences.measurementUnit,
@@ -198,7 +219,7 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
     businessInfo: {
       shopName: value.businessInfo?.shopName ?? legacyValue.profile?.shopName ?? defaults.businessInfo.shopName,
       shopAddress: value.businessInfo?.shopAddress ?? defaults.businessInfo.shopAddress,
-      businessPhone: value.businessInfo?.businessPhone ?? defaults.businessInfo.businessPhone,
+      businessPhone: normalizedBusinessPhone,
       businessEmail: value.businessInfo?.businessEmail ?? defaults.businessInfo.businessEmail,
       website: value.businessInfo?.website ?? defaults.businessInfo.website,
       socialHandles: normalizedSocialHandles,
@@ -212,8 +233,11 @@ function normalizeSettings(value: Partial<TailorSettings>): TailorSettings {
       ],
       logoUrl: value.brand?.logoUrl ?? defaults.brand.logoUrl,
       signatureUrl: value.brand?.signatureUrl ?? defaults.brand.signatureUrl,
-      invoiceTemplate: value.brand?.invoiceTemplate ?? defaults.brand.invoiceTemplate,
-      receiptTemplate: value.brand?.receiptTemplate ?? defaults.brand.receiptTemplate,
+      documentTemplate:
+        (legacyBrandValue.brand?.documentTemplate as DocumentTemplateOption | undefined) ??
+        (legacyBrandValue.brand?.invoiceTemplate ? 'classic-wave' : undefined) ??
+        (legacyBrandValue.brand?.receiptTemplate ? 'classic-wave' : undefined) ??
+        defaults.brand.documentTemplate,
       includeBusinessDetails: {
         phone: value.brand?.includeBusinessDetails?.phone ?? defaults.brand.includeBusinessDetails.phone,
         email: value.brand?.includeBusinessDetails?.email ?? defaults.brand.includeBusinessDetails.email,
@@ -246,6 +270,7 @@ export function saveTailorSettings(settings: TailorSettings): TailorSettings {
   const next: TailorSettings = { ...settings, updatedAt: new Date().toISOString() }
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(TAILOR_SETTINGS_KEY, JSON.stringify(next))
+    window.dispatchEvent(new Event('tailordeck-settings-updated'))
   }
   return next
 }

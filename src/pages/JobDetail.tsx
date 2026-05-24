@@ -32,7 +32,7 @@ import { loadTailorSettings } from '../lib/settings'
 import { renderTemplate } from '../lib/docTemplates'
 import { mockJobs } from '../data/mockJobs'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
-import type { SocialHandle, InvoiceTemplateOption, ReceiptTemplateOption } from '../lib/settings'
+import type { SocialHandle, DocumentTemplateOption } from '../lib/settings'
 import type { DocumentTemplatePayload } from '../templates/types'
 import type { JobStatus } from '../types/job'
 
@@ -78,8 +78,7 @@ type BrandConfig = {
     social: boolean
     address: boolean
   }
-  invoiceTemplate: InvoiceTemplateOption
-  receiptTemplate: ReceiptTemplateOption
+  documentTemplate: DocumentTemplateOption
   logoUrl: string
   signatureUrl: string
 }
@@ -272,8 +271,7 @@ function readBrandConfig(): BrandConfig {
     website: settings.businessInfo.website,
     socialHandles: settings.businessInfo.socialHandles,
     includeBusinessDetails: settings.brand.includeBusinessDetails,
-    invoiceTemplate: settings.brand.invoiceTemplate,
-    receiptTemplate: settings.brand.receiptTemplate,
+    documentTemplate: settings.brand.documentTemplate,
     logoUrl: settings.brand.logoUrl,
     signatureUrl: settings.brand.signatureUrl,
   }
@@ -312,6 +310,7 @@ function DocumentPreview({
   clientName,
   clientPhone,
   service,
+  lineItems,
   charge,
   deposit,
   balance,
@@ -322,6 +321,7 @@ function DocumentPreview({
   clientName: string
   clientPhone: string
   service: string
+  lineItems: NonNullable<DocumentTemplatePayload['lineItems']>
   charge: number
   deposit: number
   balance: number
@@ -330,13 +330,14 @@ function DocumentPreview({
   const documentId = `${type}-${Math.abs((service + deadlineDate).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)).toString(16).slice(0, 6)}`
   const templatePayload: DocumentTemplatePayload = {
     kind: type,
-    templateId: type === 'invoice' ? brand.invoiceTemplate : brand.receiptTemplate,
+    templateId: brand.documentTemplate,
     documentId,
     issuedDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
     deadlineDate,
     clientName,
     clientPhone,
     service,
+    lineItems,
     charge,
     deposit,
     balance,
@@ -763,13 +764,29 @@ export default function JobDetail() {
               <span className="sheet-handle" />
             </button>
             <section className="section stack gap-12">
-              <div ref={docPreviewRef}>
+              <div ref={docPreviewRef} className="job-doc-fullbleed">
                 <DocumentPreview
                   type={openDrawer}
                   brand={brand}
                   clientName={currentJob.clientName}
                   clientPhone={currentJob.clientPhone}
                   service={details.itemType}
+                  lineItems={[
+                    {
+                      description: details.itemType,
+                      details: `${details.jobType} • ${details.orderScope}`,
+                      qty: 1,
+                      unitPrice: currentJob.chargeAmount,
+                      total: currentJob.chargeAmount,
+                    },
+                    ...details.expenses.slice(0, 2).map((expense) => ({
+                      description: expense.name,
+                      details: 'Work item',
+                      qty: 1,
+                      unitPrice: expense.cost,
+                      total: expense.cost,
+                    })),
+                  ]}
                   charge={currentJob.chargeAmount}
                   deposit={details.depositAmount}
                   balance={balanceToCollect}

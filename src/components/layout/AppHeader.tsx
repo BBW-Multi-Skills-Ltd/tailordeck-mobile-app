@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { HiChevronDown, HiOutlineBell } from 'react-icons/hi2'
-
-const AVATAR_PLACEHOLDER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23F2EEE9'/%3E%3Ccircle cx='60' cy='44' r='20' fill='%23C9A84C'/%3E%3Cpath d='M24 104C24 82.9 41.2 66 62.3 66h-4.6C36.6 66 19.4 82.9 19.4 104V120H100.6V104C100.6 82.9 83.4 66 62.3 66z' fill='%237B1E37'/%3E%3Ccircle cx='60' cy='60' r='58' fill='none' stroke='%23E8E0D8' stroke-width='4'/%3E%3C/svg%3E"
+import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../../lib/settings'
 
 export default function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [settings, setSettings] = useState(() => loadTailorSettings())
   const menuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -20,6 +19,19 @@ export default function AppHeader() {
 
     window.addEventListener('mousedown', handlePointerDown)
     return () => window.removeEventListener('mousedown', handlePointerDown)
+  }, [])
+
+  useEffect(() => {
+    function syncSettings() {
+      setSettings(loadTailorSettings())
+    }
+
+    window.addEventListener('storage', syncSettings)
+    window.addEventListener('tailordeck-settings-updated', syncSettings)
+    return () => {
+      window.removeEventListener('storage', syncSettings)
+      window.removeEventListener('tailordeck-settings-updated', syncSettings)
+    }
   }, [])
 
   return (
@@ -39,8 +51,8 @@ export default function AppHeader() {
             aria-label="Open profile menu"
             onClick={() => setMenuOpen((prev) => !prev)}
           >
-            <img src={AVATAR_PLACEHOLDER} alt="User avatar placeholder" className="app-profile-image" />
-            <span className="app-business-name">Elon Apparel</span>
+            <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="User avatar placeholder" className="app-profile-image" />
+            <span className="app-business-name">{settings.businessInfo.shopName || 'Elon Apparel'}</span>
             <HiChevronDown size={16} className={`app-menu-chevron${menuOpen ? ' open' : ''}`} />
           </button>
 

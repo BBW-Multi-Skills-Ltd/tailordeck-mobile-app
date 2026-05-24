@@ -1,9 +1,17 @@
-import type { InvoiceTemplateOption, ReceiptTemplateOption, SocialHandle } from '../lib/settings'
+import type { DocumentTemplateOption, SocialHandle } from '../lib/settings'
 import type { ReactElement } from 'react'
 
 export type DocumentTemplateKind = 'invoice' | 'receipt'
 
-export type DocumentTemplateId = InvoiceTemplateOption | ReceiptTemplateOption
+export type DocumentTemplateId = DocumentTemplateOption
+
+export interface DocumentTemplateLineItem {
+  description: string
+  details?: string
+  qty: number
+  unitPrice: number
+  total: number
+}
 
 export interface DocumentTemplateBrand {
   shopName: string
@@ -35,6 +43,7 @@ export interface DocumentTemplatePayload {
   clientName: string
   clientPhone: string
   service: string
+  lineItems?: DocumentTemplateLineItem[]
   charge: number
   deposit: number
   balance: number

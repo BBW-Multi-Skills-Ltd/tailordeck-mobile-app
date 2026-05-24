@@ -3,89 +3,178 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 
-const PLAN_COPY: Record<Exclude<SubscriptionPlan, 'free'>, { price: string; audience: string; features: string[] }> = {
-  starter: {
-    price: '\u20A62,500/month or \u20A624,000/year',
-    audience: 'Solo tailor, basic use',
+type BillingCycle = 'monthly' | 'yearly'
+type PaidPlan = 'starter' | 'pro'
+
+const PLAN_DATA: Array<{
+  id: SubscriptionPlan
+  label: string
+  badge?: string
+  recommended?: boolean
+  price: { monthly: string; yearly: string }
+  suffix: { monthly: string; yearly: string }
+  subtitle: string
+  helper?: string
+  yearlyDiscountNote?: string
+  features: string[]
+}> = [
+  {
+    id: 'free',
+    label: 'Free Trial',
+    badge: 'FREE TRIAL',
+    price: { monthly: '\u20A60', yearly: '\u20A60' },
+    suffix: { monthly: 'for 14 days', yearly: 'for 14 days' },
+    subtitle: 'Everyone starting out',
+    helper: 'All Pro features trial-enabled for 14 days',
+    features: [],
+  },
+  {
+    id: 'starter',
+    label: 'Starter',
+    badge: 'STARTER',
+    price: { monthly: '\u20A62,500', yearly: '\u20A624,000' },
+    suffix: { monthly: '/month', yearly: '/year' },
+    subtitle: 'Core operations',
+    yearlyDiscountNote: 'Save 20%',
     features: [
-      'Up to 20 clients',
-      'Unlimited jobs',
-      'Expense and profit tracking',
-      'Deadline reminders',
-      'Job history',
+      'Clients',
+      'Jobs',
+      'Measurements',
+      'Expenses and profit',
+      'Reminders',
+      'Basic history',
     ],
   },
-  pro: {
-    price: '\u20A64,500/month or \u20A642,000/year',
-    audience: 'Active tailor, full features',
+  {
+    id: 'pro',
+    label: 'Pro',
+    badge: 'PRO',
+    recommended: true,
+    price: { monthly: '\u20A64,500', yearly: '\u20A642,000' },
+    suffix: { monthly: '/month', yearly: '/year' },
+    subtitle: 'Growth and professionalism',
+    yearlyDiscountNote: 'Save 22%',
     features: [
-      'Unlimited clients',
       'Everything in Starter',
-      'Invoice and receipt generation',
-      'WhatsApp invoice sharing',
-      'PDF export',
-      'Business dashboard and analytics',
-      'Brand customization (logo, colors)',
+      'Invoice and receipt PDF',
+      'WhatsApp sharing',
+      'Dashboard analytics',
+      'Brand customization (logo, colors, signature)',
       'Priority support',
     ],
   },
-}
+]
 
 export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
-  const current = settings.subscription.plan
+  const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [selectedPlan, setSelectedPlan] = useState<PaidPlan>('starter')
+  const current: SubscriptionPlan = 'free'
 
-  function choosePlan(plan: SubscriptionPlan) {
-    const next = { ...settings, subscription: { plan } }
+  function choosePlan(plan: PaidPlan) {
+    const next = { ...settings, subscription: { plan: current } }
     setSettings(saveTailorSettings(next))
-    window.alert(`Plan updated to ${plan.toUpperCase()} (UI placeholder).`)
+    window.alert(`${plan.toUpperCase()} upgrade flow will be connected to payments backend.`)
   }
 
+  const activePlan = PLAN_DATA.find((plan) => plan.id === selectedPlan)
+  if (!activePlan) return null
+
   return (
-    <section className="section stack gap-14">
-      <header className="row-between">
-        <Link to="/settings" className="btn btn-ghost btn-icon" aria-label="Back to settings">
+    <section className="section stack gap-10 subscription-page">
+      <header className="subscription-header subscription-header-with-back">
+        <Link to="/settings" className="btn btn-ghost btn-icon subscription-back-btn" aria-label="Back to settings">
           <ArrowLeft size={18} />
         </Link>
-        <h2>Upgrade Plan</h2>
-        <span style={{ width: '44px' }} />
+        <h1 className="subscription-page-title">Subscription</h1>
+        <span className="subscription-header-spacer" aria-hidden />
       </header>
 
-      <article className="card stack gap-8">
-        <p className="text-sm text-muted">Current Plan</p>
-        <p className="text-lg font-semibold">{current === 'free' ? 'Free Trial' : current.toUpperCase()}</p>
+      <article className="subscription-current-card">
+        <div className="row-between">
+          <div className="stack gap-2">
+            <p className="subscription-current-title">Free Trial</p>
+            <p className="subscription-current-subtitle">Still on free trial</p>
+          </div>
+          <span className="subscription-active-chip">Active</span>
+        </div>
+        <button type="button" className="btn btn-secondary btn-full subscription-manage-btn">
+          Manage Plan
+        </button>
       </article>
 
-      {(['starter', 'pro'] as const).map((plan) => {
-        const data = PLAN_COPY[plan]
-        const isActive = current === plan
-        return (
-          <article key={plan} className={`card stack gap-10 ${isActive ? 'subscription-card-active' : ''}`}>
-            <div className="row-between">
-              <h3 style={{ textTransform: 'capitalize' }}>{plan}</h3>
-              {isActive ? <span className="badge badge-done">Active</span> : null}
-            </div>
-            <p className="text-sm font-semibold">{data.price}</p>
-            <p className="text-sm text-muted">{data.audience}</p>
-            <div className="stack gap-6">
-              {data.features.map((feature) => (
-                <p key={feature} className="text-sm row gap-6">
-                  <Check size={14} className="text-success" />
-                  {feature}
-                </p>
-              ))}
-            </div>
+      <h3 className="subscription-section-title">Pricing Plans</h3>
+
+      <div className="subscription-plan-tabs">
+        <button
+          type="button"
+          className={`subscription-plan-tab${selectedPlan === 'starter' ? ' active' : ''}`}
+          onClick={() => setSelectedPlan('starter')}
+        >
+          Starter
+        </button>
+        <button
+          type="button"
+          className={`subscription-plan-tab${selectedPlan === 'pro' ? ' active' : ''}`}
+          onClick={() => setSelectedPlan('pro')}
+        >
+          Pro
+        </button>
+      </div>
+
+      <div className="stack gap-10">
+        <article className={`subscription-plan-card${activePlan.id === 'pro' ? ' pro-card' : ''}`}>
+          <div className="subscription-plan-badges">
+            {activePlan.badge ? <span className={`subscription-plan-badge${activePlan.id === 'pro' ? ' pro' : ''}`}>{activePlan.badge}</span> : null}
+            {activePlan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
+          </div>
+
+          <div className="subscription-inline-cycle">
             <button
               type="button"
-              className={`btn btn-full ${isActive ? 'btn-secondary' : 'btn-primary'}`}
-              onClick={() => choosePlan(plan)}
-              disabled={isActive}
+              className={`subscription-inline-cycle-btn${cycle === 'monthly' ? ' active' : ''}`}
+              onClick={() => setCycle('monthly')}
             >
-              {isActive ? 'Current Plan' : `Choose ${plan[0].toUpperCase()}${plan.slice(1)}`}
+              Monthly
             </button>
-          </article>
-        )
-      })}
+            <button
+              type="button"
+              className={`subscription-inline-cycle-btn${cycle === 'yearly' ? ' active' : ''}`}
+              onClick={() => setCycle('yearly')}
+            >
+              Yearly
+            </button>
+            {cycle === 'yearly' && activePlan.yearlyDiscountNote ? <span className="subscription-discount-note">{activePlan.yearlyDiscountNote}</span> : null}
+          </div>
+
+          <div className="subscription-price-row">
+            <span className="subscription-price">{activePlan.price[cycle]}</span>
+            <span className="subscription-price-suffix">{activePlan.suffix[cycle]}</span>
+          </div>
+
+          <p className="subscription-plan-subtitle">{activePlan.subtitle}</p>
+          {activePlan.helper ? <p className="subscription-plan-helper">{activePlan.helper}</p> : null}
+
+          <div className="stack gap-6 subscription-feature-list">
+            {activePlan.features.map((feature) => (
+              <p key={feature} className="subscription-feature-item">
+                <span className="subscription-feature-icon">
+                  <Check size={10} />
+                </span>
+                <span>{feature}</span>
+              </p>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary btn-full subscription-plan-btn"
+            onClick={() => choosePlan(activePlan.id as PaidPlan)}
+          >
+            {`Upgrade to ${activePlan.label}`}
+          </button>
+        </article>
+      </div>
     </section>
   )
 }
