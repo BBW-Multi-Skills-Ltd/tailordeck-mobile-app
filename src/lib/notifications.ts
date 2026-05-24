@@ -1,0 +1,95 @@
+export type NotificationType = 'deadline' | 'payment' | 'system'
+
+export interface AppNotification {
+  id: string
+  type: NotificationType
+  title: string
+  message: string
+  href: string
+  createdAt: string
+  read: boolean
+}
+
+export const TAILOR_NOTIFICATIONS_KEY = 'tailordeck-notifications'
+
+const DEFAULT_NOTIFICATIONS: AppNotification[] = [
+  {
+    id: 'notif-deadline-1',
+    type: 'deadline',
+    title: 'Deadline tomorrow',
+    message: 'Agbada for Mr. Ade is due tomorrow at 4:00 PM.',
+    href: '/jobs/job-1',
+    createdAt: '2026-05-24T08:10:00.000Z',
+    read: false,
+  },
+  {
+    id: 'notif-payment-1',
+    type: 'payment',
+    title: 'Balance pending',
+    message: 'Wedding Lace order still has balance to collect.',
+    href: '/jobs/job-2',
+    createdAt: '2026-05-23T13:25:00.000Z',
+    read: false,
+  },
+  {
+    id: 'notif-system-1',
+    type: 'system',
+    title: 'Complete your invoice setup',
+    message: 'Upload your signature to make receipts look professional.',
+    href: '/settings',
+    createdAt: '2026-05-22T09:00:00.000Z',
+    read: true,
+  },
+]
+
+function dispatchNotificationsUpdated() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new Event('tailordeck-notifications-updated'))
+}
+
+export function getDefaultNotifications(): AppNotification[] {
+  return DEFAULT_NOTIFICATIONS
+}
+
+export function loadNotifications(): AppNotification[] {
+  if (typeof window === 'undefined') return getDefaultNotifications()
+  const raw = window.localStorage.getItem(TAILOR_NOTIFICATIONS_KEY)
+  if (!raw) return getDefaultNotifications()
+  try {
+    const parsed = JSON.parse(raw) as AppNotification[]
+    if (!Array.isArray(parsed)) return getDefaultNotifications()
+    return parsed
+  } catch {
+    return getDefaultNotifications()
+  }
+}
+
+export function saveNotifications(list: AppNotification[]): AppNotification[] {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(TAILOR_NOTIFICATIONS_KEY, JSON.stringify(list))
+    dispatchNotificationsUpdated()
+  }
+  return list
+}
+
+export function markNotificationRead(id: string): AppNotification[] {
+  const current = loadNotifications()
+  const next = current.map((item) => (item.id === id ? { ...item, read: true } : item))
+  return saveNotifications(next)
+}
+
+export function markAllNotificationsRead(): AppNotification[] {
+  const current = loadNotifications()
+  const next = current.map((item) => ({ ...item, read: true }))
+  return saveNotifications(next)
+}
+
+export function deleteNotification(id: string): AppNotification[] {
+  const current = loadNotifications()
+  const next = current.filter((item) => item.id !== id)
+  return saveNotifications(next)
+}
+
+export function clearNotifications(): AppNotification[] {
+  return saveNotifications([])
+}
