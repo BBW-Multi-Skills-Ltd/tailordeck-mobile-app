@@ -74,9 +74,9 @@ type SignupPrefill = {
 
 function loadSignupPrefill(): SignupPrefill {
   const fallback: SignupPrefill = {
-    fullName: 'Favour Tailor',
-    email: 'favour@tailordeck.app',
-    shopName: 'Elon Apparel',
+    fullName: '',
+    email: '',
+    shopName: '',
   }
 
   if (typeof window === 'undefined') return fallback
@@ -101,8 +101,8 @@ export function getDefaultTailorSettings(): TailorSettings {
 
   return {
     profile: {
-      fullName: signup.fullName,
-      email: signup.email,
+      fullName: signup.fullName || 'Your Name',
+      email: signup.email || 'your@email.com',
       phone: '+234',
       avatarUrl: AVATAR_PLACEHOLDER,
     },
@@ -120,17 +120,15 @@ export function getDefaultTailorSettings(): TailorSettings {
       notificationBell: 'Standard Bell',
     },
     businessInfo: {
-      shopName: signup.shopName,
-      shopAddress: '12 Allen Avenue, Ikeja, Lagos',
-      businessPhone: '+2348012345678',
-      businessEmail: 'hello@elonapparel.com',
-      website: 'https://elonapparel.com',
-      socialHandles: [
-        { id: 'social-instagram-1', platform: 'Instagram', handle: '@elonapparel' },
-      ],
+      shopName: signup.shopName || '',
+      shopAddress: '',
+      businessPhone: '+234',
+      businessEmail: '',
+      website: 'https://',
+      socialHandles: [],
     },
     brand: {
-      name: 'Elon Apparel',
+      name: signup.shopName || 'Your Business',
       colors: ['#7B1E37', '#F6ECF0', '#C9A84C'],
       logoUrl: '/branding/TailorDeck app logo for in app.png',
       signatureUrl: '',

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
+import { getOnboardingStage, signInWithLocalAccount } from '../lib/auth'
 
 export default function SignIn() {
   const navigate = useNavigate()
@@ -12,25 +13,43 @@ export default function SignIn() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    window.localStorage.setItem('tailordeck-auth-preview', 'signed-in')
+    const success = signInWithLocalAccount(email, password)
+    if (!success) {
+      window.alert('Account not found. Please sign up first or check your email/password.')
+      return
+    }
+
+    const stage = getOnboardingStage()
+    if (stage === 'setup') {
+      navigate('/onboarding/setup')
+      return
+    }
+    if (stage === 'plan') {
+      navigate('/onboarding/plan')
+      return
+    }
     navigate('/dashboard')
   }
 
   return (
-    <AuthShell title="TailorDeck" subtitle="Your shop, in your pocket">
-      <form className="auth-form" onSubmit={handleSubmit}>
+    <AuthShell
+      title="TailorDeck"
+      subtitle="Your shop, in your pocket"
+      pageClassName="auth-page-signin"
+      wrapClassName="auth-wrap-signin"
+    >
+      <form className="auth-form auth-form-signin" onSubmit={handleSubmit}>
         <div className="input-group">
           <label htmlFor="signin-email" className="auth-label">
             Email
           </label>
           <input
             id="signin-email"
-            type="email"
+            type="text"
             className="auth-input"
             placeholder="Enter your email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            required
           />
         </div>
 
@@ -46,7 +65,6 @@ export default function SignIn() {
               placeholder="Enter your password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              required
             />
             <button
               type="button"
@@ -68,9 +86,9 @@ export default function SignIn() {
           Sign in with Google
         </button>
 
-        <button type="button" className="auth-link-btn">
+        <Link to="/auth/forgot" className="auth-link-btn">
           Forgot password?
-        </button>
+        </Link>
       </form>
 
       <p className="auth-switch-line">

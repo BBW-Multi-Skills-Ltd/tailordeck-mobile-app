@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
+import { TAILOR_SIGNUP_PREFILL_KEY } from '../lib/settings'
+import { markOnboardingStage, registerLocalAccount, setPreviewAuthenticated } from '../lib/auth'
 
 export default function SignUp() {
   const navigate = useNavigate()
@@ -28,13 +30,24 @@ export default function SignUp() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!agree) return
-    if (password !== confirmPassword) {
-      window.alert('Passwords do not match.')
-      return
-    }
-    window.localStorage.setItem('tailordeck-auth-preview', 'signed-up')
-    navigate('/onboarding')
+    const normalizedEmail = email.trim().toLowerCase()
+    registerLocalAccount({
+      fullName: fullName.trim(),
+      email: normalizedEmail,
+      phone: `+234${phone.replace(/\D/g, '')}`,
+      password,
+    })
+    window.localStorage.setItem(
+      TAILOR_SIGNUP_PREFILL_KEY,
+      JSON.stringify({
+        fullName: fullName.trim(),
+        email: normalizedEmail,
+        shopName: '',
+      }),
+    )
+    setPreviewAuthenticated('signed-up')
+    markOnboardingStage('setup')
+    navigate('/onboarding/setup')
   }
 
   return (
@@ -51,7 +64,6 @@ export default function SignUp() {
             placeholder="Enter your full name"
             value={fullName}
             onChange={(event) => setFullName(event.target.value)}
-            required
           />
         </div>
 
@@ -61,12 +73,11 @@ export default function SignUp() {
           </label>
           <input
             id="signup-email"
-            type="email"
+            type="text"
             className="auth-input"
             placeholder="Enter your email address"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            required
           />
         </div>
 
@@ -84,7 +95,6 @@ export default function SignUp() {
               placeholder="80 1234 5678"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              required
             />
           </div>
         </div>
@@ -101,7 +111,6 @@ export default function SignUp() {
               placeholder="Create a strong password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              required
             />
             <button
               type="button"
@@ -132,7 +141,6 @@ export default function SignUp() {
             placeholder="Confirm your password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            required
           />
         </div>
 

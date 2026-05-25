@@ -5,12 +5,14 @@ interface AuthShellProps {
   subtitle: string
   children: ReactNode
   footer?: ReactNode
+  pageClassName?: string
+  wrapClassName?: string
 }
 
-export default function AuthShell({ title, subtitle, children, footer }: AuthShellProps) {
+export default function AuthShell({ title, subtitle, children, footer, pageClassName, wrapClassName }: AuthShellProps) {
   return (
-    <main className="page-full auth-page">
-      <div className="auth-wrap">
+    <main className={`page-full auth-page${pageClassName ? ` ${pageClassName}` : ''}`}>
+      <div className={`auth-wrap${wrapClassName ? ` ${wrapClassName}` : ''}`}>
         <div className="auth-brand">
           <div className="auth-brand-icon" aria-hidden>
             <img

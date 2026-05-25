@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } f
 import { Link, useNavigate } from 'react-router-dom'
 import { HiChevronDown, HiOutlineBell } from 'react-icons/hi2'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../../lib/settings'
+import { clearPreviewSession } from '../../lib/auth'
 import {
   clearNotifications,
   deleteNotification,
@@ -102,6 +103,12 @@ export default function AppHeader() {
 
   function handleDelete(id: string) {
     setNotifications(deleteNotification(id))
+  }
+
+  function handleSignOut() {
+    clearPreviewSession()
+    setMenuOpen(false)
+    navigate('/auth/signin')
   }
 
   useEffect(() => {
@@ -212,7 +219,7 @@ export default function AppHeader() {
               onClick={() => setMenuOpen((prev) => !prev)}
             >
               <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="User avatar placeholder" className="app-profile-image" />
-              <span className="app-business-name">{settings.businessInfo.shopName || 'Elon Apparel'}</span>
+              <span className="app-business-name">{settings.businessInfo.shopName || 'Your Shop'}</span>
               <HiChevronDown size={16} className={`app-menu-chevron${menuOpen ? ' open' : ''}`} />
             </button>
 
@@ -228,7 +235,7 @@ export default function AppHeader() {
                   type="button"
                   className="app-profile-menu-item danger"
                   role="menuitem"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={handleSignOut}
                 >
                   Sign out
                 </button>

@@ -28,7 +28,8 @@ import type { IconType } from 'react-icons'
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6'
 import { FiBell, FiBellOff, FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi'
 import { useState, type ChangeEvent, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { clearPreviewSession } from '../lib/auth'
 import { renderTemplate } from '../lib/docTemplates'
 import {
   AVATAR_PLACEHOLDER,
@@ -161,6 +162,7 @@ function SettingLinkRow({
 }
 
 export default function SettingsPage() {
+  const navigate = useNavigate()
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
@@ -222,6 +224,11 @@ export default function SettingsPage() {
     window.localStorage.removeItem('tailordeck-job-history')
     window.localStorage.removeItem('tailordeck-jobs')
     window.alert('Job history cleared locally.')
+  }
+
+  function handleSignOut() {
+    clearPreviewSession()
+    navigate('/auth/signin')
   }
 
   function handleToggle(next: Exclude<SettingsPanel, null>) {
@@ -912,7 +919,7 @@ export default function SettingsPage() {
           <Database size={18} />
           Clear Job History
         </button>
-        <button type="button" className="settings-signout-link">
+        <button type="button" className="settings-signout-link" onClick={handleSignOut}>
           <LogOut size={18} />
           Sign Out
         </button>
