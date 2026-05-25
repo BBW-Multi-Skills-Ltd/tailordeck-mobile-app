@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { HiChevronDown, HiOutlineBell } from 'react-icons/hi2'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../../lib/settings'
@@ -17,10 +17,14 @@ export default function AppHeader() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerDragOffset, setDrawerDragOffset] = useState(0)
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [notifications, setNotifications] = useState<AppNotification[]>(() => loadNotifications())
   const [filter, setFilter] = useState<'all' | 'unread' | NotificationType>('all')
   const menuRef = useRef<HTMLDivElement | null>(null)
+  const drawerDragStartYRef = useRef<number | null>(null)
+  const drawerDragPointerIdRef = useRef<number | null>(null)
+  const isDrawerDraggingRef = useRef(false)
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -63,11 +67,16 @@ export default function AppHeader() {
 
   function closeNotificationDrawer() {
     setDrawerOpen(false)
+    setDrawerDragOffset(0)
+    drawerDragStartYRef.current = null
+    drawerDragPointerIdRef.current = null
+    isDrawerDraggingRef.current = false
     setFilter('all')
   }
 
   function onBellClick() {
     setMenuOpen(false)
+    setDrawerDragOffset(0)
     setDrawerOpen(true)
   }
 
@@ -93,6 +102,68 @@ export default function AppHeader() {
 
   function handleDelete(id: string) {
     setNotifications(deleteNotification(id))
+  }
+
+  useEffect(() => {
+    function handleWindowPointerMove(event: PointerEvent): void {
+      if (!isDrawerDraggingRef.current) return
+      if (drawerDragPointerIdRef.current !== null && event.pointerId !== drawerDragPointerIdRef.current) return
+      if (drawerDragStartYRef.current === null) return
+      const deltaY = event.clientY - drawerDragStartYRef.current
+      setDrawerDragOffset(Math.max(0, Math.min(260, deltaY)))
+    }
+
+    function handleWindowPointerUp(event: PointerEvent): void {
+      if (!isDrawerDraggingRef.current) return
+      if (drawerDragPointerIdRef.current !== null && event.pointerId !== drawerDragPointerIdRef.current) return
+      if (drawerDragStartYRef.current === null) return
+      const deltaY = event.clientY - drawerDragStartYRef.current
+      drawerDragStartYRef.current = null
+      drawerDragPointerIdRef.current = null
+      isDrawerDraggingRef.current = false
+
+      if (deltaY > 70) {
+        closeNotificationDrawer()
+        return
+      }
+
+      setDrawerDragOffset(0)
+    }
+
+    function handleWindowPointerCancel(): void {
+      if (!isDrawerDraggingRef.current) return
+      drawerDragStartYRef.current = null
+      drawerDragPointerIdRef.current = null
+      isDrawerDraggingRef.current = false
+      setDrawerDragOffset(0)
+    }
+
+    window.addEventListener('pointermove', handleWindowPointerMove)
+    window.addEventListener('pointerup', handleWindowPointerUp)
+    window.addEventListener('pointercancel', handleWindowPointerCancel)
+
+    return () => {
+      window.removeEventListener('pointermove', handleWindowPointerMove)
+      window.removeEventListener('pointerup', handleWindowPointerUp)
+      window.removeEventListener('pointercancel', handleWindowPointerCancel)
+    }
+  }, [])
+
+  function handleDrawerHandlePointerDown(event: ReactPointerEvent<HTMLButtonElement>): void {
+    event.preventDefault()
+    if (typeof event.currentTarget.setPointerCapture === 'function') {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
+    drawerDragStartYRef.current = event.clientY
+    drawerDragPointerIdRef.current = event.pointerId
+    isDrawerDraggingRef.current = true
+  }
+
+  function handleDrawerHandlePointerCancel(): void {
+    drawerDragStartYRef.current = null
+    drawerDragPointerIdRef.current = null
+    isDrawerDraggingRef.current = false
+    setDrawerDragOffset(0)
   }
 
   function getRelativeTime(iso: string): string {
@@ -178,8 +249,21 @@ export default function AppHeader() {
 
       {drawerOpen ? (
         <div className="sheet-overlay" role="dialog" aria-modal="true" aria-label="Notifications drawer" onClick={(event) => event.target === event.currentTarget && closeNotificationDrawer()}>
-          <div className="sheet notification-sheet">
-            <button type="button" className="sheet-handle-button" aria-label="Close notifications" onClick={closeNotificationDrawer}>
+          <div
+            className="sheet notification-sheet"
+            style={{
+              transform: `translateY(${drawerDragOffset}px)`,
+              transition: drawerDragStartYRef.current === null ? 'transform 180ms ease' : 'none',
+            }}
+          >
+            <button
+              type="button"
+              className="sheet-handle-button"
+              aria-label="Drag down to close notifications drawer"
+              onClick={() => setDrawerDragOffset(0)}
+              onPointerDown={handleDrawerHandlePointerDown}
+              onPointerCancel={handleDrawerHandlePointerCancel}
+            >
               <span className="sheet-handle" />
             </button>
 
