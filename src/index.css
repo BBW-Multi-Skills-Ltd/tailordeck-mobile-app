@@ -228,10 +228,14 @@ body {
 }
 
 .auth-title {
-  font-size: 31px;
+  font-size: 27px;
   font-weight: 700;
   letter-spacing: -0.18px;
-  color: var(--gold);
+  color: var(--primary);
+  background: linear-gradient(110deg, var(--primary) 0%, var(--primary-light) 42%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .auth-subtitle {
