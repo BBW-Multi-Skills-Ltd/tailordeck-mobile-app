@@ -12,12 +12,22 @@ import Dashboard from './pages/Dashboard'
 import SettingsPage from './pages/Settings'
 import SubscriptionPage from './pages/Subscription'
 import Onboarding from './pages/Onboarding'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
+
+function hasAuthPreviewSession() {
+  return window.localStorage.getItem('tailordeck-auth-preview') !== null
+}
 
 export default function App() {
+  const isAuthed = hasAuthPreviewSession()
+
   return (
     <Routes>
+      <Route path="/auth/signin" element={isAuthed ? <Navigate to="/" replace /> : <SignIn />} />
+      <Route path="/auth/signup" element={isAuthed ? <Navigate to="/" replace /> : <SignUp />} />
       <Route path="/onboarding" element={<Onboarding />} />
-      <Route element={<AppLayout />}>
+      <Route element={isAuthed ? <AppLayout /> : <Navigate to="/auth/signin" replace />}>
         <Route path="/" element={<Home />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/new" element={<NewClient />} />
@@ -30,7 +40,7 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/subscription" element={<SubscriptionPage />} />
       </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to={isAuthed ? '/' : '/auth/signin'} replace />} />
     </Routes>
   )
 }
