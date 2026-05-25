@@ -30,6 +30,10 @@ export default function SignUp() {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!email.trim() || !password.trim()) {
+      window.alert('Enter at least email and password to create account.')
+      return
+    }
     const normalizedEmail = email.trim().toLowerCase()
     registerLocalAccount({
       fullName: fullName.trim(),
@@ -47,6 +51,7 @@ export default function SignUp() {
     )
     setPreviewAuthenticated('signed-up')
     markOnboardingStage('setup')
+    window.alert('Account created. Continue with setup.')
     navigate('/onboarding/setup')
   }
 

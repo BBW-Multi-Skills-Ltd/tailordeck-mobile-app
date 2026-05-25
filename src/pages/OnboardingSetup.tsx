@@ -41,6 +41,7 @@ export default function OnboardingSetup() {
 
     void shopDescription
     markOnboardingStage('plan')
+    window.alert('Setup saved. Choose your plan to continue.')
     navigate('/onboarding/plan')
   }
 

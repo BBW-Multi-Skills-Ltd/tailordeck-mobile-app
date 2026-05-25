@@ -23,16 +23,17 @@ export default function App() {
   const isAuthed = isPreviewAuthenticated()
   const isOnboarded = isOnboardingCompleted()
   const onboardingStage = getOnboardingStage()
+  const onboardingTarget = onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'
 
   return (
     <Routes>
-      <Route path="/onboarding" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'} replace /> : <OnboardingWelcome />} />
-      <Route path="/auth/signin" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'} replace /> : <SignIn />} />
-      <Route path="/auth/signup" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'} replace /> : <SignUp />} />
-      <Route path="/auth/forgot" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'} replace /> : <ForgotPassword />} />
+      <Route path="/onboarding" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <OnboardingWelcome />} />
+      <Route path="/auth/signin" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <SignIn />} />
+      <Route path="/auth/signup" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <SignUp />} />
+      <Route path="/auth/forgot" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <ForgotPassword />} />
       <Route path="/onboarding/setup" element={isAuthed ? (isOnboarded ? <Navigate to="/" replace /> : <OnboardingSetup />) : <Navigate to="/auth/signup" replace />} />
-      <Route path="/onboarding/plan" element={isAuthed ? (isOnboarded ? <Navigate to="/" replace /> : <OnboardingPlan />) : <Navigate to="/auth/signup" replace />} />
-      <Route element={isAuthed ? (isOnboarded ? <AppLayout /> : <Navigate to={onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'} replace />) : <Navigate to="/onboarding" replace />}>
+      <Route path="/onboarding/plan" element={isAuthed ? (isOnboarded ? <Navigate to="/" replace /> : onboardingStage === 'plan' ? <OnboardingPlan /> : <Navigate to="/onboarding/setup" replace />) : <Navigate to="/auth/signup" replace />} />
+      <Route element={isAuthed ? (isOnboarded ? <AppLayout /> : <Navigate to={onboardingTarget} replace />) : <Navigate to="/onboarding" replace />}>
         <Route path="/" element={<Home />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/clients/new" element={<NewClient />} />
@@ -45,7 +46,7 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/subscription" element={<SubscriptionPage />} />
       </Route>
-      <Route path="*" element={<Navigate to={isAuthed ? (isOnboarded ? '/' : onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup') : '/onboarding'} replace />} />
+      <Route path="*" element={<Navigate to={isAuthed ? (isOnboarded ? '/' : onboardingTarget) : '/onboarding'} replace />} />
     </Routes>
   )
 }

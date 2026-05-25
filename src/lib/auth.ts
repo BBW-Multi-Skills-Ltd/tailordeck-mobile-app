@@ -21,7 +21,7 @@ export function isPreviewAuthenticated(): boolean {
 
 export function isOnboardingCompleted(): boolean {
   if (typeof window === 'undefined') return false
-  return getOnboardingStage() === 'done' || window.localStorage.getItem(ONBOARDING_DONE_KEY) === 'true'
+  return getOnboardingStage() === 'done'
 }
 
 export function setPreviewAuthenticated(mode: 'signed-in' | 'signed-up'): void {
@@ -53,8 +53,13 @@ export function markOnboardingStage(stage: OnboardingStage): void {
 
 export function getOnboardingStage(): OnboardingStage {
   if (typeof window === 'undefined') return 'welcome'
+  const doneLegacy = window.localStorage.getItem(ONBOARDING_DONE_KEY) === 'true'
   const raw = window.localStorage.getItem(ONBOARDING_STAGE_KEY)
   if (raw === 'setup' || raw === 'plan' || raw === 'done' || raw === 'welcome') return raw
+  if (doneLegacy) {
+    window.localStorage.setItem(ONBOARDING_STAGE_KEY, 'done')
+    return 'done'
+  }
   return 'welcome'
 }
 

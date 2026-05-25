@@ -71,11 +71,11 @@ export default function OnboardingPlan() {
     })
     setSettings(next)
     markOnboardingCompleted()
+    window.alert('Plan selected. Welcome to TailorDeck.')
     navigate('/')
   }
 
   const activePlan = PLAN_DATA.find((plan) => plan.id === selectedPlan)
-  const showPaidCycle = selectedPlan !== 'free'
 
   return (
     <main className="page-full onboarding-page onboarding-page-step">
@@ -123,25 +123,23 @@ export default function OnboardingPlan() {
               {activePlan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
             </div>
 
-            {showPaidCycle ? (
-              <div className="subscription-inline-cycle">
-                <button
-                  type="button"
-                  className={`subscription-inline-cycle-btn${cycle === 'monthly' ? ' active' : ''}`}
-                  onClick={() => setCycle('monthly')}
-                >
-                  Monthly
-                </button>
-                <button
-                  type="button"
-                  className={`subscription-inline-cycle-btn${cycle === 'yearly' ? ' active' : ''}`}
-                  onClick={() => setCycle('yearly')}
-                >
-                  Yearly
-                </button>
-                {cycle === 'yearly' && activePlan.yearlyDiscountNote ? <span className="subscription-discount-note">{activePlan.yearlyDiscountNote}</span> : null}
-              </div>
-            ) : null}
+            <div className="subscription-inline-cycle">
+              <button
+                type="button"
+                className={`subscription-inline-cycle-btn${cycle === 'monthly' ? ' active' : ''}`}
+                onClick={() => setCycle('monthly')}
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                className={`subscription-inline-cycle-btn${cycle === 'yearly' ? ' active' : ''}`}
+                onClick={() => setCycle('yearly')}
+              >
+                Yearly
+              </button>
+              {cycle === 'yearly' && activePlan.yearlyDiscountNote ? <span className="subscription-discount-note">{activePlan.yearlyDiscountNote}</span> : null}
+            </div>
 
             <div className="subscription-price-row">
               <span className="subscription-price">{activePlan.price[cycle]}</span>
