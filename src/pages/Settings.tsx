@@ -13,6 +13,7 @@
   LogOut,
   Mail,
   Moon,
+  Sun,
   Palette,
   Phone,
   Plus,
@@ -23,14 +24,16 @@
   Upload,
   UserRound,
   WandSparkles,
+  X,
 } from 'lucide-react'
 import type { IconType } from 'react-icons'
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6'
 import { FiBell, FiBellOff, FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi'
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearPreviewSession } from '../lib/auth'
 import { renderTemplate } from '../lib/docTemplates'
+import { getSavedTheme, toggleTheme, type AppTheme } from '../lib/theme'
 import {
   AVATAR_PLACEHOLDER,
   loadTailorSettings,
@@ -164,12 +167,14 @@ function SettingLinkRow({
 export default function SettingsPage() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
+  const [theme, setTheme] = useState<AppTheme>(() => getSavedTheme())
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
   const [savedSection, setSavedSection] = useState('')
   const [securityFeedback, setSecurityFeedback] = useState('')
   const [invoicePreviewGenerated, setInvoicePreviewGenerated] = useState(false)
   const [generatedPreviewKind, setGeneratedPreviewKind] = useState<'invoice' | 'receipt'>('invoice')
+  const [openBrandPreviewSheet, setOpenBrandPreviewSheet] = useState(false)
   const [openColorPicker, setOpenColorPicker] = useState<0 | 1 | null>(null)
   const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>('Instagram')
   const [socialHandleInput, setSocialHandleInput] = useState('')
@@ -177,11 +182,28 @@ export default function SettingsPage() {
   const businessPhoneLocalPart = settings.businessInfo.businessPhone.replace(/^\+234/, '').replace(/\D/g, '')
   const websiteLocalPart = settings.businessInfo.website.replace(/^https?:\/\//, '')
 
+  useEffect(() => {
+    function syncTheme() {
+      setTheme(getSavedTheme())
+    }
+
+    window.addEventListener('storage', syncTheme)
+    window.addEventListener('tailordeck-theme-updated', syncTheme)
+    return () => {
+      window.removeEventListener('storage', syncTheme)
+      window.removeEventListener('tailordeck-theme-updated', syncTheme)
+    }
+  }, [])
+
   function handleSaveSettings(sectionLabel?: string) {
     const next = saveTailorSettings(settings)
     setSettings(next)
     setSavedTick(Date.now())
     if (sectionLabel) setSavedSection(sectionLabel)
+  }
+
+  function handleThemeToggle() {
+    setTheme(toggleTheme())
   }
 
   function updateColor(index: 0 | 1, value: string) {
@@ -382,8 +404,13 @@ export default function SettingsPage() {
     <section className="section stack gap-16">
       <header className="row-between">
         <h1 className="settings-page-title">Settings</h1>
-        <button type="button" className="btn btn-ghost btn-icon settings-theme-btn" aria-label="Theme mode (coming soon)">
-          <Moon size={20} />
+        <button
+          type="button"
+          className="btn btn-ghost btn-icon settings-theme-btn"
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          onClick={handleThemeToggle}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </header>
 
@@ -846,47 +873,18 @@ export default function SettingsPage() {
 
             <div className="stack settings-brand-group">
               <div className="settings-brand-final-preview">
-                {!invoicePreviewGenerated ? (
-                  <button
-                    type="button"
-                    className="btn btn-primary settings-brand-generate-btn settings-brand-generate-btn-in-wrap"
-                    onClick={() => {
-                      setGeneratedPreviewKind('invoice')
-                      setInvoicePreviewGenerated(true)
-                    }}
-                  >
-                    <FileText size={16} />
-                    Generate Preview
-                  </button>
-                ) : (
-                  <>
-                    <div className="settings-brand-generated-paper">
-                      {renderTemplate(buildTemplatePreviewPayload(generatedPreviewKind))}
-                    </div>
-                    <div className="row gap-8 settings-brand-mode-switch">
-                      <button
-                        type="button"
-                        className={`btn btn-secondary flex-1${generatedPreviewKind === 'invoice' ? ' active' : ''}`}
-                        onClick={() => setGeneratedPreviewKind('invoice')}
-                      >
-                        View as Invoice
-                      </button>
-                      <button
-                        type="button"
-                        className={`btn btn-secondary flex-1${generatedPreviewKind === 'receipt' ? ' active' : ''}`}
-                        onClick={() => setGeneratedPreviewKind('receipt')}
-                      >
-                        View as Receipt
-                      </button>
-                    </div>
-                    <button type="button" className="btn btn-secondary settings-brand-edit-btn" onClick={() => setInvoicePreviewGenerated(false)}>
-                      Edit
-                    </button>
-                    <button type="button" className="btn btn-primary settings-brand-template-save-btn" onClick={() => handleSaveSettings('Invoice & Receipt Setup')}>
-                      Save Template Design
-                    </button>
-                  </>
-                )}
+                <button
+                  type="button"
+                  className="btn btn-primary settings-brand-generate-btn settings-brand-generate-btn-in-wrap"
+                  onClick={() => {
+                    setGeneratedPreviewKind('invoice')
+                    setInvoicePreviewGenerated(true)
+                    setOpenBrandPreviewSheet(true)
+                  }}
+                >
+                  <FileText size={16} />
+                  {invoicePreviewGenerated ? 'Open Preview' : 'Generate Preview'}
+                </button>
               </div>
               {savedSection === 'Invoice & Receipt Setup' && savedTick ? <p className="text-sm text-success">Invoice & Receipt Setup saved.</p> : null}
             </div>
@@ -924,6 +922,67 @@ export default function SettingsPage() {
           Sign Out
         </button>
       </div>
+
+      {openBrandPreviewSheet ? (
+        <div
+          className="side-sheet-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Invoice and receipt template preview"
+          onClick={() => setOpenBrandPreviewSheet(false)}
+        >
+          <aside className="side-sheet" onClick={(event) => event.stopPropagation()}>
+            <header className="side-sheet-header">
+              <h3 className="side-sheet-title">Template Preview</h3>
+              <button type="button" className="btn btn-ghost btn-icon side-sheet-close" onClick={() => setOpenBrandPreviewSheet(false)} aria-label="Close preview">
+                <X size={18} />
+              </button>
+            </header>
+
+            <div className="side-sheet-body">
+              <div className="settings-brand-generated-paper">
+                {renderTemplate(buildTemplatePreviewPayload(generatedPreviewKind))}
+              </div>
+              <div className="row gap-8 settings-brand-mode-switch">
+                <button
+                  type="button"
+                  className={`btn btn-secondary flex-1${generatedPreviewKind === 'invoice' ? ' active' : ''}`}
+                  onClick={() => setGeneratedPreviewKind('invoice')}
+                >
+                  View as Invoice
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-secondary flex-1${generatedPreviewKind === 'receipt' ? ' active' : ''}`}
+                  onClick={() => setGeneratedPreviewKind('receipt')}
+                >
+                  View as Receipt
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary settings-brand-edit-btn"
+                onClick={() => {
+                  setInvoicePreviewGenerated(false)
+                  setOpenBrandPreviewSheet(false)
+                }}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary settings-brand-template-save-btn"
+                onClick={() => {
+                  handleSaveSettings('Invoice & Receipt Setup')
+                  setOpenBrandPreviewSheet(false)
+                }}
+              >
+                Save Template Design
+              </button>
+            </div>
+          </aside>
+        </div>
+      ) : null}
 
     </section>
   )

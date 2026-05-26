@@ -204,7 +204,9 @@ export default function AppHeader() {
     <>
       <header className="app-shell-header">
         <div className="app-shell-left">
-          <img src="/branding/TailorDeck%20app%20logo%20for%20in%20app.png" alt="TailorDeck logo" className="app-shell-logo" />
+          <span className="app-shell-logo-wrap">
+            <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck logo" className="app-shell-logo" />
+          </span>
           <p className="app-shell-logo-text">TailorDeck</p>
         </div>
 
@@ -275,27 +277,24 @@ export default function AppHeader() {
             </button>
 
             <div className="notification-sheet-content">
-              <div className="row-between">
-                <h3 className="notification-sheet-title">Notifications</h3>
-                <div className="row gap-8">
-                  <button type="button" className="btn btn-ghost notification-sheet-top-btn" onClick={handleMarkAllRead}>
-                    Mark all as read
-                  </button>
-                  <button type="button" className="btn btn-ghost notification-sheet-top-btn danger" onClick={handleClearAll}>
-                    Clear all
-                  </button>
-                </div>
+              <div className="row gap-8" style={{ justifyContent: 'flex-end' }}>
+                <button type="button" className="btn btn-ghost notification-sheet-top-btn" onClick={handleMarkAllRead}>
+                  Mark all as read
+                </button>
+                <button type="button" className="btn btn-ghost notification-sheet-top-btn danger" onClick={handleClearAll}>
+                  Clear all
+                </button>
               </div>
 
               <div className="notification-filter-row">
-                {(['all', 'unread', 'deadline', 'payment', 'system'] as const).map((item) => (
+                {(['all', 'unread', 'deadline'] as const).map((item) => (
                   <button
                     key={item}
                     type="button"
                     className={`notification-filter-pill${filter === item ? ' active' : ''}`}
                     onClick={() => setFilter(item)}
                   >
-                    {item === 'all' ? 'All' : item === 'unread' ? 'Unread' : item === 'deadline' ? 'Deadlines' : item === 'payment' ? 'Payments' : 'System'}
+                    {item === 'all' ? 'All' : item === 'unread' ? 'Unread' : 'Deadlines'}
                   </button>
                 ))}
               </div>

@@ -3,7 +3,7 @@ import { RiScissorsLine } from 'react-icons/ri'
 import { TbMoneybag } from 'react-icons/tb'
 import { HiOutlineArrowTrendingUp } from 'react-icons/hi2'
 import { FiPlus } from 'react-icons/fi'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { mockJobs } from '../data/mockJobs'
 import { formatDueDate, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
@@ -39,10 +39,12 @@ function statusClass(status: JobStatus): string {
 }
 
 export default function Home() {
+  const navigate = useNavigate()
+
   return (
     <section className="section stack gap-16 page-fab-clearance">
       <div className="stack gap-4">
-        <h1>Good morning, Favour</h1>
+        <h1 className="home-greeting-title">Good morning, Favour</h1>
         <p className="text-base text-muted">Your workshop is busy today.</p>
       </div>
 
@@ -73,17 +75,26 @@ export default function Home() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate('/dashboard')}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            navigate('/dashboard')
+          }
+        }}
       >
         <p className="home-profit-label">Total Profit</p>
         <div className="home-profit-row">
           <p className="home-profit-value">{'\u20A6850,000'}</p>
-          <HiOutlineArrowTrendingUp size={38} className="home-profit-trend" />
+          <HiOutlineArrowTrendingUp size={28} className="home-profit-trend" />
         </div>
       </motion.article>
 
       <div className="stack gap-12">
         <div className="row-between">
-          <h2>Recent Jobs</h2>
+          <h2 className="home-section-title">Recent Jobs</h2>
           <Link to="/jobs" className="home-link">
             View All
           </Link>
@@ -96,7 +107,7 @@ export default function Home() {
                 <span className="recent-job-initial">{getInitial(job.clientName)}</span>
               </div>
               <div className="stack min-w-0 flex-1 recent-job-main">
-                <p className="font-semibold truncate">{job.title}</p>
+                <p className="recent-job-title truncate">{job.title}</p>
                 <div className="recent-job-meta-row">
                   <p className="recent-job-meta-text">{formatDueDate(job.deadlineDate)}</p>
                 </div>

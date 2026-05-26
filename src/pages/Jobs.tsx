@@ -43,7 +43,7 @@ export default function Jobs() {
   return (
     <section className="section stack gap-16">
       <header className="row-between">
-        <h1>Jobs</h1>
+        <h1 className="app-page-heading">Jobs</h1>
         <Link to="/jobs/new" className="btn btn-primary btn-sm">
           <Plus size={16} />
           New Job

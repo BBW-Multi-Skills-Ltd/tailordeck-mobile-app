@@ -18,7 +18,7 @@ export default function Clients() {
   return (
     <section className="section stack gap-16">
       <header className="row-between">
-        <h1>Clients</h1>
+        <h1 className="app-page-heading">Clients</h1>
       </header>
 
       <label className="search-bar" aria-label="Search clients by name">

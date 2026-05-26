@@ -1,6 +1,34 @@
 ﻿import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, ChevronUp, Plus, Trash2, Upload, UserRound, X } from 'lucide-react'
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Banknote,
+  CalendarClock,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  ClipboardList,
+  Coins,
+  FileText,
+  Images,
+  Layers,
+  Package,
+  Palette,
+  Phone,
+  Plus,
+  Ruler,
+  Scissors,
+  Shirt,
+  Trash2,
+  TrendingUp,
+  Truck,
+  Upload,
+  UserRound,
+  Wrench,
+  X,
+} from 'lucide-react'
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatNaira } from '../lib/utils'
 
@@ -204,6 +232,24 @@ function newPerson(overrides?: Partial<PersonForm>): PersonForm {
     measurements: {},
     ...overrides,
   }
+}
+
+type ReviewRowProps = {
+  icon: ReactNode
+  label: string
+  value: string
+  valueClassName?: string
+}
+
+function ReviewRow({ icon, label, value, valueClassName }: ReviewRowProps) {
+  return (
+    <div className="wizard-detail-row">
+      <span className="wizard-detail-icon">{icon}</span>
+      <p className="wizard-detail-line">
+        <span className="text-muted">{label}:</span> <strong className={valueClassName}>{value || '-'}</strong>
+      </p>
+    </div>
+  )
 }
 
 function ensurePersonsForJobType(jobType: JobType, prevPersons: PersonForm[], clientName: string): PersonForm[] {
@@ -576,7 +622,7 @@ export default function NewJob() {
         <button type="button" className="btn btn-ghost btn-icon" onClick={goBack} aria-label="Back">
           <ArrowLeft size={18} />
         </button>
-        <h2>New Job</h2>
+        <h2 className="app-page-heading">New Job</h2>
         <span style={{ width: '44px' }} />
       </div>
 
@@ -1256,6 +1302,7 @@ export default function NewJob() {
                 <>
                   <div className="stack gap-8">
                     <span className="input-label">Material Type</span>
+                    <p className="text-sm text-muted wizard-helper-inline">Pick a fabric category, then select the exact material used for this job.</p>
                     {materialCategories.map((category) => {
                       const isOpen = openMaterialCategory === category.id
 
@@ -1409,6 +1456,7 @@ export default function NewJob() {
 
               <label className="input-group">
                 <span className="input-label">How much are you charging the client?</span>
+                <p className="text-sm text-muted">Enter the total agreed price. TailorDeck auto-formats in Naira.</p>
                 <input
                   className="input"
                   value={formatNairaInput(chargeAmount)}
@@ -1420,6 +1468,7 @@ export default function NewJob() {
 
               <label className="input-group">
                 <span className="input-label">How many percent deposit are you collecting first?</span>
+                <p className="text-sm text-muted">Set upfront percentage. Deposit and balance are calculated automatically.</p>
                 <input
                   className="input"
                   value={formatPercentInput(depositPercent)}
@@ -1648,83 +1697,76 @@ export default function NewJob() {
                       }}
                       style={{ pointerEvents: stepFourDetailsOpen ? 'auto' : 'none' }}
                     >
-                      <p className="wizard-detail-line"><span className="text-muted">Client name:</span> <strong>{clientName || '-'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Client phone:</span> <strong>{clientPhone || '-'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Order mode:</span> <strong>{orderMode}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Job type:</span> <strong>{makeCategory}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Order scope:</span> <strong>{scopeLabel}</strong></p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Item type:</span>{' '}
-                        <strong>
-                          {makeCategory === 'Body Wear'
+                      <ReviewRow icon={<UserRound size={15} className="text-primary" />} label="Client name" value={clientName || '-'} />
+                      <ReviewRow icon={<Phone size={15} className="text-success" />} label="Client phone" value={clientPhone || '-'} />
+                      <ReviewRow icon={<Wrench size={15} className="text-gold" />} label="Order mode" value={orderMode} />
+                      <ReviewRow icon={<Shirt size={15} className="text-primary" />} label="Job type" value={makeCategory} />
+                      <ReviewRow icon={<Layers size={15} className="text-success" />} label="Order scope" value={scopeLabel} />
+                      <ReviewRow
+                        icon={<Scissors size={15} className="text-primary" />}
+                        label="Item type"
+                        value={
+                          makeCategory === 'Body Wear'
                             ? sameItemForAll
                               ? effectiveItemType || '-'
                               : persons
                                   .map((person) => `${person.name || 'Person'}: ${person.itemType || '-'}`)
                                   .join(', ')
-                            : effectiveItemType || '-'}
-                        </strong>
-                      </p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Measurement:</span>{' '}
-                        <strong>
-                          {isAmendmentMode
+                            : effectiveItemType || '-'
+                        }
+                      />
+                      <ReviewRow
+                        icon={<Ruler size={15} className="text-gold" />}
+                        label="Measurement"
+                        value={
+                          isAmendmentMode
                             ? 'Amendment details captured'
                             : makeCategory === 'Body Wear'
                               ? `${persons.length} person profile(s) captured`
-                              : `${selectedNonBodyFields.length} item dimension(s) captured`}
-                        </strong>
-                      </p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Description:</span>{' '}
-                        <strong>
-                          {makeCategory === 'Body Wear'
+                              : `${selectedNonBodyFields.length} item dimension(s) captured`
+                        }
+                      />
+                      <ReviewRow
+                        icon={<FileText size={15} className="text-success" />}
+                        label="Description"
+                        value={
+                          makeCategory === 'Body Wear'
                             ? persons
                                 .filter((person) => person.description.trim())
                                 .map((person) => `${person.name || 'Person'}: ${person.description}`)
                                 .join(', ') || '-'
-                            : nonBodyDescription || '-'}
-                        </strong>
-                      </p>
+                            : nonBodyDescription || '-'
+                        }
+                      />
                       {isAmendmentMode ? (
                         <>
-                          <p className="wizard-detail-line"><span className="text-muted">Amendment issue:</span> <strong>{amendmentIssueType || '-'}</strong></p>
-                          <p className="wizard-detail-line"><span className="text-muted">Affected area:</span> <strong>{amendmentArea || '-'}</strong></p>
-                          <p className="wizard-detail-line"><span className="text-muted">Target adjustment:</span> <strong>{amendmentTarget || '-'}</strong></p>
-                          <p className="wizard-detail-line"><span className="text-muted">Repair notes:</span> <strong>{amendmentDescription || '-'}</strong></p>
+                          <ReviewRow icon={<Wrench size={15} className="text-danger" />} label="Amendment issue" value={amendmentIssueType || '-'} />
+                          <ReviewRow icon={<ClipboardList size={15} className="text-gold" />} label="Affected area" value={amendmentArea || '-'} />
+                          <ReviewRow icon={<Scissors size={15} className="text-primary" />} label="Target adjustment" value={amendmentTarget || '-'} />
+                          <ReviewRow icon={<FileText size={15} className="text-success" />} label="Repair notes" value={amendmentDescription || '-'} />
                         </>
                       ) : null}
-                      <p className="wizard-detail-line"><span className="text-muted">Material type:</span> <strong>{selectedMaterialValue || '-'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Color:</span> <strong>{materialColor || '-'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Total yard:</span> <strong>{materialYards || '0'}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Material quality:</span> <strong>{materialQuality}</strong></p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Material source:</span>{' '}
-                        <strong>{materialSource === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'}</strong>
-                      </p>
-                      <p className="wizard-detail-line"><span className="text-muted">Charged amount:</span> <strong>{formatNaira(charge)}</strong></p>
-                      <p className="wizard-detail-line"><span className="text-muted">Deposited collected:</span> <strong>{formatNaira(deposit)}</strong></p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Reference photo:</span>{' '}
-                        <strong>{referencePhotoNames.length ? referencePhotoNames.join(', ') : '-'}</strong>
-                      </p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Expenses list:</span>{' '}
-                        <strong>
-                          {expenses.length
-                            ? expenses.map((expense) => `${expense.name} (${formatNaira(numericValue(expense.cost))})`).join(', ')
-                            : '-'}
-                        </strong>
-                      </p>
-                      <p className="wizard-detail-line"><span className="text-muted">Expenses cost:</span> <strong>{formatNaira(totalExpenses)}</strong></p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Estimated profit:</span>{' '}
-                        <strong className={projectedProfit >= 0 ? 'text-success' : 'text-danger'}>{formatNaira(projectedProfit)}</strong>
-                      </p>
-                      <p className="wizard-detail-line">
-                        <span className="text-muted">Delivery date and time:</span>{' '}
-                        <strong>{deadlineDate || '-'} {deadlineTime ? `at ${deadlineTime}` : ''}</strong>
-                      </p>
+                      <ReviewRow icon={<Package size={15} className="text-primary" />} label="Material type" value={selectedMaterialValue || '-'} />
+                      <ReviewRow icon={<Palette size={15} className="text-gold" />} label="Color" value={materialColor || '-'} />
+                      <ReviewRow icon={<Ruler size={15} className="text-success" />} label="Total yard" value={materialYards || '0'} />
+                      <ReviewRow icon={<ClipboardList size={15} className="text-primary" />} label="Material quality" value={materialQuality} />
+                      <ReviewRow icon={<Truck size={15} className="text-gold" />} label="Material source" value={materialSource === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'} />
+                      <ReviewRow icon={<Banknote size={15} className="text-primary" />} label="Charged amount" value={formatNaira(charge)} />
+                      <ReviewRow icon={<Coins size={15} className="text-gold" />} label="Deposited collected" value={formatNaira(deposit)} />
+                      <ReviewRow icon={<Images size={15} className="text-success" />} label="Reference photo" value={referencePhotoNames.length ? referencePhotoNames.join(', ') : '-'} />
+                      <ReviewRow
+                        icon={<ClipboardList size={15} className="text-primary" />}
+                        label="Expenses list"
+                        value={expenses.length ? expenses.map((expense) => `${expense.name} (${formatNaira(numericValue(expense.cost))})`).join(', ') : '-'}
+                      />
+                      <ReviewRow icon={<Banknote size={15} className="text-danger" />} label="Expenses cost" value={formatNaira(totalExpenses)} />
+                      <ReviewRow
+                        icon={<TrendingUp size={15} className={projectedProfit >= 0 ? 'text-success' : 'text-danger'} />}
+                        label="Estimated profit"
+                        value={formatNaira(projectedProfit)}
+                        valueClassName={projectedProfit >= 0 ? 'text-success' : 'text-danger'}
+                      />
+                      <ReviewRow icon={<CalendarClock size={15} className="text-primary" />} label="Delivery date and time" value={`${deadlineDate || '-'} ${deadlineTime ? `at ${deadlineTime}` : ''}`} />
                     </motion.div>
                   </div>
 

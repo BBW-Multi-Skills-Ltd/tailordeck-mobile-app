@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, ChevronLeft, ChevronRight, DollarSign, ReceiptText, TrendingUp } from 'lucide-react'
+import { BriefcaseBusiness, ChevronLeft, ChevronRight, ReceiptText, TrendingUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import {
   Bar,
@@ -146,7 +146,9 @@ export default function Dashboard() {
           <p className="dashboard-kpi-label">Total Jobs</p>
         </article>
         <article className="card dashboard-kpi-card">
-          <DollarSign size={20} className="dashboard-kpi-icon text-success" />
+          <span className="dashboard-kpi-icon dashboard-kpi-currency text-success" aria-hidden>
+            ₦
+          </span>
           <p className="dashboard-kpi-value">{formatNaira(metrics.totalRevenue)}</p>
           <p className="dashboard-kpi-label">Revenue</p>
         </article>
@@ -179,18 +181,18 @@ export default function Dashboard() {
                   <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#8A7060', fontSize: 12 }} />
                   <YAxis hide domain={[0, chartTop]} />
                   <Tooltip
-                    cursor={<Rectangle radius={10} fill="rgba(28, 15, 10, 0.18)" />}
+                    cursor={<Rectangle radius={10} fill="color-mix(in srgb, var(--primary) 20%, transparent)" />}
                     contentStyle={{
                       borderRadius: 14,
-                      border: '1px solid #E8E0D8',
+                      border: '1px solid var(--border)',
                       fontSize: 12,
-                      backgroundColor: '#FFFFFF',
-                      boxShadow: '0 8px 22px rgba(28, 15, 10, 0.10)',
+                      backgroundColor: 'var(--bg-card)',
+                      boxShadow: 'var(--shadow-md)',
                     }}
                     wrapperStyle={{ outline: 'none' }}
                     formatter={(value, name) => [formatNaira(Number(value ?? 0)), String(name) === 'revenue' ? 'Revenue' : 'Expenses']}
-                    labelStyle={{ color: '#4A3728', fontWeight: 600, marginBottom: 4 }}
-                    itemStyle={{ paddingTop: 2, paddingBottom: 2, color: '#8A7060' }}
+                    labelStyle={{ color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}
+                    itemStyle={{ paddingTop: 2, paddingBottom: 2, color: 'var(--text-muted)' }}
                   />
                   <Bar dataKey="revenue" radius={[8, 8, 0, 0]} maxBarSize={22}>
                     {metrics.months.map((month) => (
@@ -243,7 +245,16 @@ export default function Dashboard() {
                 </Pie>
                 <Tooltip
                   formatter={(value, name) => [`${Number(value ?? 0)}`, String(name)]}
-                  contentStyle={{ borderRadius: 14, border: '1px solid #E8E0D8', fontSize: 12 }}
+                  cursor={false}
+                  contentStyle={{
+                    borderRadius: 14,
+                    border: '1px solid var(--border)',
+                    fontSize: 12,
+                    backgroundColor: 'var(--bg-card)',
+                    boxShadow: 'var(--shadow-md)',
+                  }}
+                  labelStyle={{ color: 'var(--text)', fontWeight: 600 }}
+                  itemStyle={{ color: 'var(--text-muted)' }}
                 />
               </PieChart>
             </ResponsiveContainer>

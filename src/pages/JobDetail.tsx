@@ -8,7 +8,6 @@
   HandCoins,
   Layers2,
   List,
-  MessageCircle,
   Palette,
   Package,
   Phone,
@@ -23,9 +22,10 @@
   WalletCards,
   X,
 } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { jobMeasurementById } from '../data/mockJobMeasurements'
 import { loadTailorSettings } from '../lib/settings'
@@ -359,7 +359,6 @@ function DocumentPreview({
 
   return (
     <div className="stack gap-12">
-      <h4 className="job-doc-ui-title">{type === 'invoice' ? 'Invoice Preview' : 'Receipt Preview'}</h4>
       {renderTemplate(templatePayload)}
     </div>
   )
@@ -370,7 +369,6 @@ export default function JobDetail() {
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
   const docPreviewRef = useRef<HTMLDivElement | null>(null)
-  const drawerDragStartYRef = useRef<number | null>(null)
 
   const job = id ? mockJobs.find((item) => item.id === id) : undefined
   const brand = useMemo(() => readBrandConfig(), [])
@@ -576,20 +574,6 @@ export default function JobDetail() {
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  function handleDrawerHandlePointerDown(event: ReactPointerEvent<HTMLButtonElement>): void {
-    drawerDragStartYRef.current = event.clientY
-  }
-
-  function handleDrawerHandlePointerUp(event: ReactPointerEvent<HTMLButtonElement>): void {
-    if (drawerDragStartYRef.current === null) return
-    const deltaY = event.clientY - drawerDragStartYRef.current
-    drawerDragStartYRef.current = null
-
-    if (deltaY > 45) {
-      setOpenDrawer(null)
-    }
-  }
-
   return (
     <>
       <section className="section stack gap-16">
@@ -752,19 +736,23 @@ export default function JobDetail() {
       ) : null}
 
       {openDrawer ? (
-        <div className="sheet-overlay" role="dialog" aria-modal="true" aria-label={`${openDrawer} preview drawer`}>
-          <div className="sheet">
-            <button
-              type="button"
-              className="sheet-handle-button"
-              aria-label="Drag down to close drawer"
-              onPointerDown={handleDrawerHandlePointerDown}
-              onPointerUp={handleDrawerHandlePointerUp}
-            >
-              <span className="sheet-handle" />
-            </button>
-            <section className="section stack gap-12">
-              <div ref={docPreviewRef} className="job-doc-fullbleed">
+        <div
+          className="side-sheet-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${openDrawer} preview`}
+          onClick={() => setOpenDrawer(null)}
+        >
+          <aside className="side-sheet" onClick={(event) => event.stopPropagation()}>
+            <header className="side-sheet-header">
+              <h4 className="side-sheet-title">{openDrawer === 'invoice' ? 'Invoice Preview' : 'Receipt Preview'}</h4>
+              <button type="button" className="btn btn-ghost btn-icon side-sheet-close" onClick={() => setOpenDrawer(null)} aria-label="Close preview">
+                <X size={18} />
+              </button>
+            </header>
+
+            <div className="side-sheet-body">
+              <div ref={docPreviewRef} className="job-doc-fullbleed side-sheet-doc-preview">
                 <DocumentPreview
                   type={openDrawer}
                   brand={brand}
@@ -794,17 +782,15 @@ export default function JobDetail() {
                 />
               </div>
 
-              <div className="stack gap-8">
-                <div className="row gap-8">
-                  <button type="button" className="btn btn-primary flex-1" onClick={() => void handleSystemShare(openDrawer)}>
-                    <Share2 size={16} />
-                    Share
-                  </button>
-                  <button type="button" className="btn btn-secondary flex-1" onClick={() => void handleWhatsAppToClient(openDrawer)}>
-                    <MessageCircle size={16} />
-                    Send to Client
-                  </button>
-                </div>
+              <div className="stack gap-8 side-sheet-actions">
+                <button type="button" className="btn btn-primary btn-full" onClick={() => void handleSystemShare(openDrawer)}>
+                  <Share2 size={16} />
+                  Share
+                </button>
+                <button type="button" className="btn btn-full whatsapp-send-btn" onClick={() => void handleWhatsAppToClient(openDrawer)}>
+                  <FaWhatsapp size={18} />
+                  Send to Client (WhatsApp)
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary btn-full"
@@ -816,12 +802,9 @@ export default function JobDetail() {
                 >
                   Download PDF
                 </button>
-                <button type="button" className="btn btn-ghost btn-full" onClick={() => setOpenDrawer(null)}>
-                  Close
-                </button>
               </div>
-            </section>
-          </div>
+            </div>
+          </aside>
         </div>
       ) : null}
     </>

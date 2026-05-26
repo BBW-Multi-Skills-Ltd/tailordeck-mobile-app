@@ -86,7 +86,7 @@ export default function SubscriptionPage() {
         <Link to="/settings" className="btn btn-ghost btn-icon subscription-back-btn" aria-label="Back to settings">
           <ArrowLeft size={18} />
         </Link>
-        <h1 className="subscription-page-title">Subscription</h1>
+        <h1 className="subscription-page-title app-page-heading">Subscription</h1>
         <span className="subscription-header-spacer" aria-hidden />
       </header>
 
