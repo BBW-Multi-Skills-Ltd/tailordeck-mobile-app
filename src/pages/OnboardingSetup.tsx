@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Ruler } from 'lucide-react'
+import { Ruler } from 'lucide-react'
 import { markOnboardingStage } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type MeasurementUnit } from '../lib/settings'
 
@@ -9,10 +9,6 @@ export default function OnboardingSetup() {
   const currentSettings = loadTailorSettings()
   const [shopName, setShopName] = useState(currentSettings.businessInfo.shopName)
   const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(currentSettings.preferences.measurementUnit)
-
-  function goBack() {
-    navigate('/auth/signup')
-  }
 
   function completeSetup() {
     const current = loadTailorSettings()
@@ -41,13 +37,6 @@ export default function OnboardingSetup() {
   return (
     <main className="page-full onboarding-page onboarding-page-step">
       <div className="onboarding-shell onboarding-shell-step">
-        <header className="onboarding-topbar">
-          <button type="button" className="onboarding-back-btn" onClick={goBack} aria-label="Back">
-            <ArrowLeft size={16} />
-          </button>
-          <p className="onboarding-step-text">Setup</p>
-        </header>
-
         <div className="onboarding-brand compact">
           <div className="onboarding-brand-icon" aria-hidden>
             <img src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png" alt="" className="onboarding-brand-logo" />
