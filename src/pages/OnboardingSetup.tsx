@@ -7,17 +7,11 @@ import { loadTailorSettings, saveTailorSettings, type MeasurementUnit } from '..
 export default function OnboardingSetup() {
   const navigate = useNavigate()
   const currentSettings = loadTailorSettings()
-  const [step, setStep] = useState<1 | 2>(1)
   const [shopName, setShopName] = useState(currentSettings.businessInfo.shopName)
-  const [shopDescription, setShopDescription] = useState('')
   const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(currentSettings.preferences.measurementUnit)
 
   function goBack() {
-    if (step === 1) {
-      navigate('/auth/signup')
-      return
-    }
-    setStep(1)
+    navigate('/auth/signup')
   }
 
   function completeSetup() {
@@ -39,7 +33,6 @@ export default function OnboardingSetup() {
       updatedAt: new Date().toISOString(),
     })
 
-    void shopDescription
     markOnboardingStage('plan')
     window.alert('Setup saved. Choose your plan to continue.')
     navigate('/onboarding/plan')
@@ -52,68 +45,34 @@ export default function OnboardingSetup() {
           <button type="button" className="onboarding-back-btn" onClick={goBack} aria-label="Back">
             <ArrowLeft size={16} />
           </button>
-          <p className="onboarding-step-text">{step} of 2</p>
+          <p className="onboarding-step-text">Setup</p>
         </header>
 
-        <div className="onboarding-progress">
-          <span className="onboarding-progress-fill" style={{ width: step === 1 ? '50%' : '100%' }} />
+        <div className="onboarding-brand compact">
+          <div className="onboarding-brand-icon" aria-hidden>
+            <img src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png" alt="" className="onboarding-brand-logo" />
+          </div>
+          <h2 className="onboarding-section-title">Set Up Your Shop</h2>
         </div>
 
-        {step === 1 ? (
-          <>
-            <div className="onboarding-brand compact">
-              <div className="onboarding-brand-icon" aria-hidden>
-                <img src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png" alt="" className="onboarding-brand-logo" />
-              </div>
-              <h2 className="onboarding-section-title">Set Up Your Shop</h2>
-            </div>
+        <section className="onboarding-card onboarding-card-plain onboarding-card-step">
+          <div className="input-group">
+            <label htmlFor="onboard-shop-name" className="auth-label">
+              Shop Name
+            </label>
+            <input
+              id="onboard-shop-name"
+              type="text"
+              className="auth-input"
+              placeholder="Enter your shop name"
+              value={shopName}
+              onChange={(event) => setShopName(event.target.value)}
+            />
+          </div>
 
-            <section className="onboarding-card onboarding-card-plain onboarding-card-step">
-              <div className="input-group">
-                <label htmlFor="onboard-shop-name" className="auth-label">
-                  Shop Name
-                </label>
-                <input
-                  id="onboard-shop-name"
-                  type="text"
-                  className="auth-input"
-                  placeholder="Enter your shop name"
-                  value={shopName}
-                  onChange={(event) => setShopName(event.target.value)}
-                />
-              </div>
-
-              <div className="input-group">
-                <label htmlFor="onboard-shop-desc" className="auth-label">
-                  Shop Description (Optional)
-                </label>
-                <textarea
-                  id="onboard-shop-desc"
-                  className="auth-input onboarding-textarea"
-                  placeholder="Tell customers about your shop"
-                  value={shopDescription}
-                  onChange={(event) => setShopDescription(event.target.value)}
-                />
-              </div>
-
-              <div className="onboarding-step-actions">
-                <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => setStep(2)}>
-                  Continue
-                </button>
-                <button type="button" className="onboarding-skip-btn" onClick={() => setStep(2)}>
-                  Skip for now
-                </button>
-              </div>
-            </section>
-          </>
-        ) : (
-          <>
-            <section className="onboarding-preference-head">
-              <h2 className="onboarding-section-title">Measurement Preferences</h2>
-              <p className="onboarding-caption">Choose your preferred unit for taking measurements</p>
-            </section>
-
-            <section className="onboarding-card onboarding-card-step">
+          <div className="input-group">
+            <span className="auth-label">Measurement Preference</span>
+            <div className="stack gap-8">
               <button
                 type="button"
                 className={`onboarding-unit-card${measurementUnit === 'cm' ? ' active' : ''}`}
@@ -139,19 +98,26 @@ export default function OnboardingSetup() {
                 </span>
                 <span className="onboarding-unit-copy">
                   <span className="onboarding-unit-title">Inches (in)</span>
-                  <span className="onboarding-unit-text">Imperial system, traditional tailoring measurements</span>
+                  <span className="onboarding-unit-text">Traditional tailoring measurements</span>
                 </span>
                 <span className={`onboarding-radio${measurementUnit === 'inches' ? ' checked' : ''}`} aria-hidden />
               </button>
-            </section>
+            </div>
+          </div>
 
-            <p className="onboarding-note">You can change this preference anytime in your profile settings.</p>
+          <p className="onboarding-note">
+            You can complete business info and invoice template setup later in Settings for better invoices and receipts.
+          </p>
 
-            <button type="button" className="btn btn-primary btn-full onboarding-primary-btn onboarding-complete-btn" onClick={completeSetup}>
+          <div className="onboarding-step-actions">
+            <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={completeSetup}>
               Continue
             </button>
-          </>
-        )}
+            <button type="button" className="onboarding-skip-btn" onClick={completeSetup}>
+              Skip for now
+            </button>
+          </div>
+        </section>
       </div>
     </main>
   )

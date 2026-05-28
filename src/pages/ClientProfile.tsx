@@ -281,7 +281,7 @@ export default function ClientProfile() {
         )}
       </section>
 
-      <button type="button" className="btn btn-primary btn-full" onClick={() => navigate('/jobs/new')}>
+      <button type="button" className="btn btn-primary btn-full" onClick={() => navigate(`/jobs/new?clientId=${activeClient.id}`)}>
         Start Another Job for This Client
       </button>
 

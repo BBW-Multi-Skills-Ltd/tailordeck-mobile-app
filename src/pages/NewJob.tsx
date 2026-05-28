@@ -29,8 +29,12 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { jobMeasurementById, type JobMeasurementSnapshot } from '../data/mockJobMeasurements'
+import { mockJobs } from '../data/mockJobs'
+import { useClients } from '../hooks/useClients'
 import { formatNaira } from '../lib/utils'
+import type { Client } from '../types/client'
 
 type JobType = 'Single' | 'Couple' | 'Family'
 type PersonSex = 'Male' | 'Female' | 'Boy' | 'Girl'
@@ -234,6 +238,36 @@ function newPerson(overrides?: Partial<PersonForm>): PersonForm {
   }
 }
 
+function measurementNumbersToStrings(measurements: Record<string, number>): Record<string, string> {
+  return Object.fromEntries(Object.entries(measurements).map(([field, value]) => [field, String(value)]))
+}
+
+function latestMeasurementForClient(clientId: string): JobMeasurementSnapshot | undefined {
+  const clientJobs = mockJobs
+    .filter((job) => job.clientId === clientId && jobMeasurementById[job.id])
+    .sort((a, b) => {
+      if (a.status === 'Completed' && b.status !== 'Completed') return -1
+      if (a.status !== 'Completed' && b.status === 'Completed') return 1
+      return a.createdDate < b.createdDate ? 1 : -1
+    })
+
+  return clientJobs[0] ? jobMeasurementById[clientJobs[0].id] : undefined
+}
+
+function snapshotPersonsToForm(snapshot: Extract<JobMeasurementSnapshot, { kind: 'body' }>, client: Client): PersonForm[] {
+  return snapshot.persons.map((person, index) =>
+    newPerson({
+      id: person.id,
+      name: index === 0 ? client.name : person.name,
+      sex: person.sex,
+      role: person.role,
+      itemType: person.itemType || snapshot.itemType,
+      description: person.description || '',
+      measurements: measurementNumbersToStrings(person.measurements),
+    }),
+  )
+}
+
 type ReviewRowProps = {
   icon: ReactNode
   label: string
@@ -293,7 +327,12 @@ function ensurePersonsForJobType(jobType: JobType, prevPersons: PersonForm[], cl
 
 export default function NewJob() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { getClientById } = useClients()
   const sectionRef = useRef<HTMLElement | null>(null)
+  const prefilledClientRef = useRef(false)
+  const repeatClientId = searchParams.get('clientId')
+  const repeatClient = repeatClientId ? getClientById(repeatClientId) : undefined
 
   const [step, setStep] = useState(0)
   const [clientName, setClientName] = useState('')
@@ -341,6 +380,46 @@ export default function NewJob() {
   const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
   const [stepOneMeasurementsOpen, setStepOneMeasurementsOpen] = useState<Record<string, boolean>>({})
   const [stepFourDetailsOpen, setStepFourDetailsOpen] = useState(true)
+
+  useEffect(() => {
+    if (!repeatClient || prefilledClientRef.current) return
+
+    const latestSnapshot = latestMeasurementForClient(repeatClient.id)
+
+    setClientName(repeatClient.name)
+    setClientPhone(repeatClient.phone)
+    setOrderMode('New Stitch')
+
+    if (latestSnapshot?.kind === 'body') {
+      const nextPersons = snapshotPersonsToForm(latestSnapshot, repeatClient)
+      const nextScope = latestSnapshot.orderScope
+      const firstItem = nextPersons[0]?.itemType || latestSnapshot.itemType
+      const everyPersonSameItem = nextPersons.every((person) => person.itemType === firstItem)
+
+      setMakeCategory('Body Wear')
+      setJobType(nextScope)
+      setItemType(everyPersonSameItem ? firstItem : latestSnapshot.itemType)
+      setSameItemForAll(everyPersonSameItem)
+      setPersons(nextPersons.length ? nextPersons : [newPerson({ name: repeatClient.name, sex: repeatClient.sex, role: 'adult' })])
+      setStepOneMeasurementsOpen(Object.fromEntries(nextPersons.map((person) => [person.id, true])))
+      setSingleMeasurementsOpen(true)
+    } else if (latestSnapshot?.kind === 'non-body') {
+      setMakeCategory('Non-Body Item')
+      setJobType('Single')
+      setItemType(latestSnapshot.itemType)
+      setNonBodyQuantity(String(latestSnapshot.quantity))
+      setNonBodyDescription(latestSnapshot.description || '')
+      setNonBodyMeasurements(measurementNumbersToStrings(latestSnapshot.measurements))
+      setPersons([newPerson({ name: repeatClient.name, sex: repeatClient.sex, role: 'adult' })])
+    } else {
+      setMakeCategory('Body Wear')
+      setJobType('Single')
+      setPersons([newPerson({ name: repeatClient.name, sex: repeatClient.sex, role: 'adult', measurements: measurementNumbersToStrings({ ...repeatClient.measurements }) })])
+      setSingleMeasurementsOpen(true)
+    }
+
+    prefilledClientRef.current = true
+  }, [repeatClient])
 
   useEffect(() => {
     const pageElement = document.querySelector('main.page')
@@ -659,6 +738,7 @@ export default function NewJob() {
                   onChange={(event) => handleClientNameChange(event.target.value)}
                   placeholder="e.g. Amina Bello"
                   autoFocus
+                  readOnly={Boolean(repeatClient)}
                 />
               </label>
 
@@ -670,8 +750,18 @@ export default function NewJob() {
                   onChange={(event) => setClientPhone(event.target.value)}
                   placeholder="e.g. 08012345678"
                   inputMode="tel"
+                  readOnly={Boolean(repeatClient)}
                 />
               </label>
+
+              {repeatClient ? (
+                <article className="card stack gap-6 wizard-repeat-client-note">
+                  <p className="text-sm font-semibold">Existing client selected</p>
+                  <p className="text-sm text-muted">
+                    Client details and latest measurements are prefilled. Edit measurements here only if this new job needs updated values.
+                  </p>
+                </article>
+              ) : null}
 
               <div className="input-group">
                 <span className="input-label">What type of order is this?</span>
