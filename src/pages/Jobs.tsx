@@ -97,7 +97,7 @@ export default function Jobs() {
                 <div className="client-main">
                   <p className="client-name truncate">{job.clientName}</p>
                   <p className="text-sm text-muted truncate">
-                    {job.title} • {job.jobType}
+                    {job.title} - {job.jobType}
                   </p>
                   <div className="recent-job-meta-row">
                     <p className="recent-job-meta-text">Due: {formatDateShort(job.deadlineDate)}</p>
@@ -114,3 +114,4 @@ export default function Jobs() {
     </section>
   )
 }
+

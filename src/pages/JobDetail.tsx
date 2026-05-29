@@ -446,7 +446,7 @@ export default function JobDetail() {
   if (!job) {
     return (
       <section className="section stack gap-16">
-        <h2>Job Not Found</h2>
+        <h2 className="app-page-heading">Job Not Found</h2>
         <p className="text-muted">This job may have been removed.</p>
         <Link to="/jobs" className="btn btn-secondary">
           Back to Jobs
@@ -581,7 +581,7 @@ export default function JobDetail() {
           <Link to="/jobs" className="btn btn-ghost btn-icon" aria-label="Back to jobs">
             <ArrowLeft size={18} />
           </Link>
-          <h2>Job Details</h2>
+          <h2 className="app-page-heading">Job Details</h2>
           <span style={{ width: '44px' }} />
         </header>
 

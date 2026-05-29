@@ -114,7 +114,7 @@ export default function Dashboard() {
     <section className="section stack gap-14">
       <header className="row-between">
         <span style={{ width: '44px' }} />
-        <h2>Dashboard</h2>
+        <h2 className="app-page-heading">Dashboard</h2>
         <span style={{ width: '44px' }} />
       </header>
 
@@ -147,7 +147,7 @@ export default function Dashboard() {
         </article>
         <article className="card dashboard-kpi-card">
           <span className="dashboard-kpi-icon dashboard-kpi-currency text-success" aria-hidden>
-            ₦
+            {'\u20A6'}
           </span>
           <p className="dashboard-kpi-value">{formatNaira(metrics.totalRevenue)}</p>
           <p className="dashboard-kpi-label">Revenue</p>
@@ -237,7 +237,7 @@ export default function Dashboard() {
                   endAngle={-260}
                   paddingAngle={3}
                   strokeWidth={2}
-                  stroke="#FFFFFF"
+                  stroke="var(--bg-card)"
                 >
                   {pieData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
@@ -310,3 +310,4 @@ export default function Dashboard() {
     </section>
   )
 }
+

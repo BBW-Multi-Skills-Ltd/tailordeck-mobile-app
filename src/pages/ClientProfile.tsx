@@ -50,7 +50,7 @@ export default function ClientProfile() {
   if (!client) {
     return (
       <section className="section stack gap-16">
-        <h2>Client Not Found</h2>
+        <h2 className="app-page-heading">Client Not Found</h2>
         <p className="text-muted">This client may have been deleted.</p>
         <Link to="/clients" className="btn btn-secondary">
           Back to Clients
@@ -133,7 +133,7 @@ export default function ClientProfile() {
         <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
           <ArrowLeft size={18} />
         </Link>
-        <h2>Client Profile</h2>
+        <h2 className="app-page-heading">Client Profile</h2>
         <span style={{ width: '44px' }} />
       </div>
 

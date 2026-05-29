@@ -16,7 +16,7 @@ export default function JobMeasurements() {
   if (!job || !snapshot) {
     return (
       <section className="section stack gap-16">
-        <h2>Measurement Not Found</h2>
+        <h2 className="app-page-heading">Measurement Not Found</h2>
         <p className="text-muted">This job measurement is not available.</p>
         <Link to="/jobs" className="btn btn-secondary">
           Back to Jobs
@@ -31,7 +31,7 @@ export default function JobMeasurements() {
         <Link to={`/jobs/${job.id}`} className="btn btn-ghost btn-icon" aria-label="Back to job details">
           <ArrowLeft size={18} />
         </Link>
-        <h2>Measurements</h2>
+        <h2 className="app-page-heading">Measurements</h2>
         <span style={{ width: '44px' }} />
       </header>
 

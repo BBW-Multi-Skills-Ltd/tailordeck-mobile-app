@@ -92,7 +92,7 @@ export default function NewClient() {
         <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
           <ArrowLeft size={18} />
         </Link>
-        <h2>New Client</h2>
+        <h2 className="app-page-heading">New Client</h2>
         <span style={{ width: '44px' }} />
       </div>
 
