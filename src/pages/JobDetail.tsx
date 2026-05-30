@@ -25,189 +25,19 @@
 import { FaWhatsapp } from 'react-icons/fa6'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { jobMeasurementById } from '../data/mockJobMeasurements'
-import { loadTailorSettings } from '../lib/settings'
-import { renderTemplate } from '../lib/docTemplates'
-import { mockJobs } from '../data/mockJobs'
-import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
-import type { SocialHandle, DocumentTemplateOption } from '../lib/settings'
-import type { DocumentTemplatePayload } from '../templates/types'
+import { appJobMeasurementById, appJobs } from '../data/appData'
+import { detailedMockByJobId, type DetailedJobData } from '../data/mockJobDetails'
+import { formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
-
-type InvoiceType = 'invoice' | 'receipt'
-
-type DetailedExpense = {
-  name: string
-  cost: number
-}
-
-type DetailedJobData = {
-  orderMode: 'New Stitch' | 'Amendment / Repair'
-  jobType: 'Body Wear' | 'Non-Body Item'
-  itemType: string
-  orderScope: string
-  measurement: string
-  materialType: string
-  color: string
-  totalYard: string
-  materialQuality: string
-  materialSource: string
-  deliveryTime: string
-  reminder: string
-  referencePhotos: string[]
-  expenses: DetailedExpense[]
-  depositAmount: number
-}
-
-type BrandConfig = {
-  shopName: string
-  primaryColor: string
-  secondaryColor: string
-  accentColor: string
-  shopAddress: string
-  businessPhone: string
-  businessEmail: string
-  website: string
-  socialHandles: SocialHandle[]
-  includeBusinessDetails: {
-    phone: boolean
-    email: boolean
-    website: boolean
-    social: boolean
-    address: boolean
-  }
-  documentTemplate: DocumentTemplateOption
-  logoUrl: string
-  signatureUrl: string
-}
-
-const detailedMockByJobId: Record<string, DetailedJobData> = {
-  'j-001': {
-    orderMode: 'New Stitch',
-    jobType: 'Body Wear',
-    itemType: 'Wedding Lace Gown',
-    orderScope: 'Single',
-    measurement: 'Body wear measurement captured (Female)',
-    materialType: 'Lace',
-    color: 'Wine / Gold',
-    totalYard: '8',
-    materialQuality: 'High Standard',
-    materialSource: 'Client Provided',
-    deliveryTime: '14:30',
-    reminder: '3 days before',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Transport', cost: 5500 },
-      { name: 'Lining + Thread', cost: 17000 },
-      { name: 'Stone Work', cost: 14500 },
-    ],
-    depositAmount: 120000,
-  },
-  'j-002': {
-    orderMode: 'Amendment / Repair',
-    jobType: 'Body Wear',
-    itemType: 'Church Native Set',
-    orderScope: 'Single',
-    measurement: 'Amendment details captured',
-    materialType: 'Zip',
-    color: 'Navy',
-    totalYard: '1',
-    materialQuality: 'Normal',
-    materialSource: 'I Am Getting It',
-    deliveryTime: '12:00',
-    reminder: '1 day before',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Fabric Purchase', cost: 35000 },
-      { name: 'Accessories', cost: 8500 },
-    ],
-    depositAmount: 70000,
-  },
-  'j-003': {
-    orderMode: 'New Stitch',
-    jobType: 'Body Wear',
-    itemType: 'Senator Couple Set',
-    orderScope: 'Couple',
-    measurement: '2 body profiles captured',
-    materialType: 'Guinea Brocade',
-    color: 'Navy',
-    totalYard: '5',
-    materialQuality: 'Normal',
-    materialSource: 'Client Provided',
-    deliveryTime: '16:00',
-    reminder: 'none',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Embroidery', cost: 22000 },
-      { name: 'Buttons + Lining', cost: 7000 },
-    ],
-    depositAmount: 250000,
-  },
-  'j-004': {
-    orderMode: 'New Stitch',
-    jobType: 'Body Wear',
-    itemType: 'Agbada Set',
-    orderScope: 'Couple',
-    measurement: '2 body profiles captured',
-    materialType: 'Aso Oke',
-    color: 'Cream',
-    totalYard: '10',
-    materialQuality: 'High Standard',
-    materialSource: 'Client Provided',
-    deliveryTime: '15:15',
-    reminder: '1 week before',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Machine Maintenance', cost: 9000 },
-      { name: 'Extra Tailor Support', cost: 30000 },
-    ],
-    depositAmount: 170000,
-  },
-  'j-005': {
-    orderMode: 'New Stitch',
-    jobType: 'Body Wear',
-    itemType: 'Aso-Ebi Family Pack',
-    orderScope: 'Family',
-    measurement: '3 person profiles captured',
-    materialType: 'Ankara',
-    color: 'Emerald Green',
-    totalYard: '18',
-    materialQuality: 'Original',
-    materialSource: 'I Am Getting It',
-    deliveryTime: '11:00',
-    reminder: '3 days before',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Fabric Purchase', cost: 140000 },
-      { name: 'Labor', cost: 60000 },
-      { name: 'Finishing', cost: 17000 },
-    ],
-    depositAmount: 300000,
-  },
-  'j-006': {
-    orderMode: 'New Stitch',
-    jobType: 'Body Wear',
-    itemType: 'Family Native Set',
-    orderScope: 'Family',
-    measurement: '3 person profiles captured',
-    materialType: 'Ankara',
-    color: 'Deep Green',
-    totalYard: '14',
-    materialQuality: 'Original',
-    materialSource: 'Client Provided',
-    deliveryTime: '13:00',
-    reminder: '3 days before',
-    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
-    expenses: [
-      { name: 'Fabric Purchase', cost: 120000 },
-      { name: 'Labor', cost: 50000 },
-      { name: 'Finishing', cost: 14000 },
-    ],
-    depositAmount: 220000,
-  },
-}
+import {
+  DocumentPreview,
+  buildDocumentShareText,
+  buildWhatsAppURL,
+  readBrandConfig,
+  type InvoiceType,
+} from '../components/invoice/DocumentPreview'
 
 function statusClass(status: JobStatus): string {
   if (status === 'Completed') return 'badge badge-done'
@@ -245,132 +75,13 @@ function formatTimeWords(value: string): string {
   return date.toLocaleTimeString('en-NG', { hour: 'numeric', minute: '2-digit' })
 }
 
-function normalizeNigerianPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.startsWith('234')) return digits
-  if (digits.startsWith('0')) return `234${digits.slice(1)}`
-  return `234${digits}`
-}
-
-function buildWhatsAppURL(phone: string, message: string): string {
-  const normalized = normalizeNigerianPhone(phone)
-  return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`
-}
-
-function readBrandConfig(): BrandConfig {
-  const settings = loadTailorSettings()
-  return {
-    shopName: settings.businessInfo.shopName || settings.brand.name,
-    primaryColor: settings.brand.colors[0],
-    secondaryColor: settings.brand.colors[1],
-    accentColor: settings.brand.colors[2],
-    shopAddress: settings.businessInfo.shopAddress,
-    businessPhone: settings.businessInfo.businessPhone,
-    businessEmail: settings.businessInfo.businessEmail,
-    website: settings.businessInfo.website,
-    socialHandles: settings.businessInfo.socialHandles,
-    includeBusinessDetails: settings.brand.includeBusinessDetails,
-    documentTemplate: settings.brand.documentTemplate,
-    logoUrl: settings.brand.logoUrl,
-    signatureUrl: settings.brand.signatureUrl,
-  }
-}
-
-function buildDocumentShareText(params: {
-  type: InvoiceType
-  shopName: string
-  clientName: string
-  clientPhone: string
-  service: string
-  charge: number
-  deposit: number
-  balance: number
-  deadlineDate: string
-}): string {
-  const { type, shopName, clientName, clientPhone, service, charge, deposit, balance, deadlineDate } = params
-  const heading = type === 'invoice' ? 'INVOICE' : 'RECEIPT'
-
-  return [
-    `${shopName} ${heading}`,
-    '',
-    `Client: ${clientName}`,
-    `Phone: ${clientPhone}`,
-    `Service: ${service}`,
-    `Charge: ${formatNaira(charge)}`,
-    `Deposit: ${formatNaira(deposit)}`,
-    type === 'invoice' ? `Balance to Pay: ${formatNaira(balance)}` : `Amount Received: ${formatNaira(charge)}`,
-    `Delivery Date: ${formatDateShort(deadlineDate)}`,
-  ].join('\n')
-}
-
-function DocumentPreview({
-  type,
-  brand,
-  clientName,
-  clientPhone,
-  service,
-  lineItems,
-  charge,
-  deposit,
-  balance,
-  deadlineDate,
-}: {
-  type: InvoiceType
-  brand: BrandConfig
-  clientName: string
-  clientPhone: string
-  service: string
-  lineItems: NonNullable<DocumentTemplatePayload['lineItems']>
-  charge: number
-  deposit: number
-  balance: number
-  deadlineDate: string
-}): ReactElement {
-  const documentId = `${type}-${Math.abs((service + deadlineDate).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)).toString(16).slice(0, 6)}`
-  const templatePayload: DocumentTemplatePayload = {
-    kind: type,
-    templateId: brand.documentTemplate,
-    documentId,
-    issuedDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-    deadlineDate,
-    clientName,
-    clientPhone,
-    service,
-    lineItems,
-    charge,
-    deposit,
-    balance,
-    brand: {
-      shopName: brand.shopName,
-      logoUrl: brand.logoUrl,
-      signatureUrl: brand.signatureUrl,
-      primaryColor: brand.primaryColor,
-      secondaryColor: brand.secondaryColor,
-      accentColor: brand.accentColor,
-      shopAddress: brand.shopAddress,
-      businessPhone: brand.businessPhone,
-      businessEmail: brand.businessEmail,
-      website: brand.website,
-      socialHandles: brand.socialHandles,
-      includeBusinessDetails: brand.includeBusinessDetails,
-    },
-  }
-
-  return (
-    <div className="stack gap-12">
-      {renderTemplate(templatePayload)}
-    </div>
-  )
-}
-
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
   const docPreviewRef = useRef<HTMLDivElement | null>(null)
 
-  const job = id ? mockJobs.find((item) => item.id === id) : undefined
+  const job = id ? appJobs.find((item) => item.id === id) : undefined
   const brand = useMemo(() => readBrandConfig(), [])
 
   const details = useMemo<DetailedJobData>(() => {
@@ -456,7 +167,7 @@ export default function JobDetail() {
   }
 
   const currentJob = job
-  const measurementSnapshot = jobMeasurementById[currentJob.id]
+  const measurementSnapshot = appJobMeasurementById[currentJob.id]
   const measurementScopeText =
     details.jobType === 'Non-Body Item'
       ? 'Non-body item captured'
@@ -810,3 +521,5 @@ export default function JobDetail() {
     </>
   )
 }
+
+

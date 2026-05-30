@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { ChevronRight, Phone, Search, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
+import EmptyState from '../components/shared/EmptyState'
 import { useClients } from '../hooks/useClients'
 import { formatDateShort, getInitial } from '../lib/utils'
 
@@ -32,16 +33,17 @@ export default function Clients() {
       </label>
 
       {filteredClients.length === 0 ? (
-        <div className="empty-state card">
-          <div className="empty-state-icon">
-            <Users size={28} />
-          </div>
-          <p className="empty-state-title">No clients found</p>
-          <p className="empty-state-desc">Try another name or add a new client.</p>
-          <Link to="/clients/new" className="btn btn-primary btn-sm">
-            Add New Client
-          </Link>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={clients.length === 0 ? 'No clients yet' : 'No clients found'}
+          description={
+            clients.length === 0
+              ? 'Clients will appear here after you create jobs. Start from New Job to store client details and measurements.'
+              : 'No client matches that search. Try another name.'
+          }
+          actionLabel={clients.length === 0 ? 'Create Job' : undefined}
+          actionTo={clients.length === 0 ? '/jobs/new' : undefined}
+        />
       ) : (
         <motion.div
           className="stack gap-8"

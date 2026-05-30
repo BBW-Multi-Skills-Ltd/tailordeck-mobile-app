@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { Plus, Search } from 'lucide-react'
+import { Plus, Search, Scissors } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { mockJobs } from '../data/mockJobs'
+import EmptyState from '../components/shared/EmptyState'
+import { appJobs } from '../data/appData'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
@@ -21,7 +22,7 @@ export default function Jobs() {
   const [search, setSearch] = useState('')
 
   const filteredJobs = useMemo(() => {
-    const byStatus = activeFilter === 'All' ? mockJobs : mockJobs.filter((job) => job.status === activeFilter)
+    const byStatus = activeFilter === 'All' ? appJobs : appJobs.filter((job) => job.status === activeFilter)
     const term = search.trim().toLowerCase()
     if (!term) return byStatus
     return byStatus.filter((job) => job.clientName.toLowerCase().includes(term))
@@ -36,7 +37,8 @@ export default function Jobs() {
   )
 
   function emptyMessage(filter: JobFilter): string {
-    if (filter === 'All') return 'No jobs yet. Start by creating a new job.'
+    if (appJobs.length === 0) return 'Create your first job to store client details, measurements, pricing, and deadline.'
+    if (filter === 'All') return 'No jobs match that search.'
     return `No ${filter.toLowerCase()} jobs yet.`
   }
 
@@ -74,10 +76,13 @@ export default function Jobs() {
       </label>
 
       {sortedJobs.length === 0 ? (
-        <div className="empty-state card">
-          <p className="empty-state-title">Nothing Here Yet</p>
-          <p className="empty-state-desc">{emptyMessage(activeFilter)}</p>
-        </div>
+        <EmptyState
+          icon={Scissors}
+          title={appJobs.length === 0 ? 'No jobs yet' : 'Nothing here yet'}
+          description={emptyMessage(activeFilter)}
+          actionLabel={appJobs.length === 0 ? 'Create Job' : undefined}
+          actionTo={appJobs.length === 0 ? '/jobs/new' : undefined}
+        />
       ) : (
         <motion.div
           className="stack gap-8"

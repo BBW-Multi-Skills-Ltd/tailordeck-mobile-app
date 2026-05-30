@@ -1,8 +1,8 @@
 import { ArrowLeft, CalendarDays, PencilLine, Phone, Ruler, Save, Trash2, UserRound } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { jobMeasurementById, labelFromField, type JobMeasurementSnapshot } from '../data/mockJobMeasurements'
-import { mockJobs } from '../data/mockJobs'
+import { labelFromField, type JobMeasurementSnapshot } from '../data/mockJobMeasurements'
+import { appJobMeasurementById, appJobs } from '../data/appData'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import { useClients } from '../hooks/useClients'
 
@@ -19,7 +19,7 @@ export default function ClientProfile() {
 
   const completedJobs = useMemo(
     () =>
-      mockJobs
+      appJobs
         .filter((job) => job.clientId === client?.id && job.status === 'Completed')
         .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
     [client?.id],
@@ -27,17 +27,17 @@ export default function ClientProfile() {
 
   const measurementJobs = useMemo(
     () =>
-      mockJobs
+      appJobs
         .filter((job) => job.clientId === client?.id)
         .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
     [client?.id],
   )
 
   const [measurementDrafts, setMeasurementDrafts] = useState<Record<string, JobMeasurementSnapshot>>(() => {
-    const entries = mockJobs
+    const entries = appJobs
       .filter((job) => job.clientId === client?.id)
       .map((job) => {
-        const snapshot = jobMeasurementById[job.id]
+        const snapshot = appJobMeasurementById[job.id]
         if (!snapshot) return [job.id, undefined] as const
         return [job.id, JSON.parse(JSON.stringify(snapshot)) as JobMeasurementSnapshot] as const
       })

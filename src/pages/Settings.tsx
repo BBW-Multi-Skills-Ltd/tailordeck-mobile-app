@@ -26,11 +26,18 @@
   WandSparkles,
   X,
 } from 'lucide-react'
-import type { IconType } from 'react-icons'
-import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa6'
-import { FiBell, FiBellOff, FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi'
-import { useEffect, useState, type ChangeEvent, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { SettingAccordion, SettingLinkRow, Toggle, type SettingsPanel } from '../components/settings/SettingsRows'
+import {
+  brandColorOptions,
+  documentTemplate,
+  notificationBellOptions,
+  ringtoneOptions,
+  socialPlatformColor,
+  socialPlatformIcon,
+  socialPlatforms,
+} from '../components/settings/settingsOptions'
 import { clearPreviewSession } from '../lib/auth'
 import { renderTemplate } from '../lib/docTemplates'
 import { getSavedTheme, toggleTheme, type AppTheme } from '../lib/theme'
@@ -39,130 +46,11 @@ import {
   loadTailorSettings,
   saveTailorSettings,
   type MaterialQuality,
-  type NotificationBellOption,
   type ReminderLead,
-  type RingtoneOption,
   type SocialPlatform,
   type TailorSettings,
 } from '../lib/settings'
 import type { DocumentTemplatePayload } from '../templates/types'
-
-type SettingsPanel = 'profile' | 'security' | 'preferences' | 'reminders' | 'business' | 'brand' | 'about' | null
-
-const ringtoneOptions: Array<{ value: RingtoneOption; icon: IconType }> = [
-  { value: 'Classic Ring', icon: FiVolume2 },
-  { value: 'Soft Chime', icon: FiVolume1 },
-  { value: 'Pulse Tone', icon: FiVolumeX },
-]
-
-const notificationBellOptions: Array<{ value: NotificationBellOption; icon: IconType }> = [
-  { value: 'Standard Bell', icon: FiBell },
-  { value: 'Soft Bell', icon: FiVolume1 },
-  { value: 'Sharp Bell', icon: FiBellOff },
-]
-
-const socialPlatforms: SocialPlatform[] = ['Instagram', 'Facebook', 'TikTok']
-const socialPlatformIcon: Record<SocialPlatform, IconType> = {
-  Instagram: FaInstagram,
-  Facebook: FaFacebookF,
-  TikTok: FaTiktok,
-}
-const socialPlatformColor: Record<SocialPlatform, string> = {
-  Instagram: '#E1306C',
-  Facebook: '#1877F2',
-  TikTok: '#000000',
-}
-
-const documentTemplate = { title: 'Classic Wave', subtitle: 'Single template for invoice and receipt' }
-
-const brandColorOptions = [
-  '#7B1E37', '#C9A84C', '#1F7A8C', '#2D6A4F',
-  '#A63D40', '#3B82F6', '#9333EA', '#111827',
-  '#F59E0B', '#EF4444', '#10B981', '#6B7280',
-]
-
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (next: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      className={`settings-toggle${checked ? ' active' : ''}`}
-      aria-pressed={checked}
-      onClick={() => onChange(!checked)}
-    >
-      <span className="settings-toggle-knob" />
-    </button>
-  )
-}
-
-function SettingAccordion({
-  icon,
-  title,
-  subtitle,
-  tone = 'default',
-  order,
-  panelKey,
-  panel,
-  onToggle,
-  children,
-}: {
-  icon: ReactNode
-  title: string
-  subtitle?: string
-  tone?: 'default' | 'danger'
-  order?: number
-  panelKey: Exclude<SettingsPanel, null>
-  panel: SettingsPanel
-  onToggle: (key: Exclude<SettingsPanel, null>) => void
-  children: ReactNode
-}) {
-  const isOpen = panel === panelKey
-
-  return (
-    <div className={`settings-accordion-item${tone === 'danger' ? ' danger' : ''}`} style={order ? { order } : undefined}>
-      <button type="button" className="settings-row-card" onClick={() => onToggle(panelKey)} aria-expanded={isOpen}>
-        <div className="row gap-4">
-          <span className="settings-row-icon">{icon}</span>
-          <div className="stack gap-4">
-            <p className="settings-row-title">{title}</p>
-            {subtitle ? <p className="settings-row-subtitle">{subtitle}</p> : null}
-          </div>
-        </div>
-        <ChevronRight size={17} className={`text-muted settings-row-chevron${isOpen ? ' open' : ''}`} />
-      </button>
-
-      {isOpen ? <div className="settings-accordion-panel">{children}</div> : null}
-    </div>
-  )
-}
-
-function SettingLinkRow({
-  icon,
-  title,
-  subtitle,
-  href,
-  tone = 'default',
-  order,
-}: {
-  icon: ReactNode
-  title: string
-  subtitle?: string
-  href: string
-  tone?: 'default' | 'accent' | 'danger'
-  order?: number
-}) {
-  return (
-    <Link to={href} className={`settings-row-card settings-link-row${tone !== 'default' ? ` ${tone}` : ''}`} style={order ? { order } : undefined}>
-      <div className="row gap-4">
-        <span className="settings-row-icon">{icon}</span>
-        <div className="stack gap-4">
-          <p className="settings-row-title">{title}</p>
-          {subtitle ? <p className="settings-row-subtitle">{subtitle}</p> : null}
-        </div>
-      </div>
-      <ChevronRight size={17} className="text-muted" />
-    </Link>
-  )
-}
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -181,6 +69,7 @@ export default function SettingsPage() {
   const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
   const businessPhoneLocalPart = settings.businessInfo.businessPhone.replace(/^\+234/, '').replace(/\D/g, '')
   const websiteLocalPart = settings.businessInfo.website.replace(/^https?:\/\//, '')
+  const BusinessHandleIcon = socialPlatformIcon.Instagram
 
   useEffect(() => {
     function syncTheme() {
@@ -265,27 +154,27 @@ export default function SettingsPage() {
     }
 
     if (kind === 'email') {
-      setSecurityFeedback(`Login email placeholder set to: ${settings.profile.email}`)
-      window.alert(`Email update placeholder saved.\nTarget email: ${settings.profile.email}`)
+      setSecurityFeedback(`Login email update queued for: ${settings.profile.email}`)
+      window.alert(`Login email update will be connected with Supabase Auth.\nTarget email: ${settings.profile.email}`)
       return
     }
 
-    setSecurityFeedback(`Login phone placeholder set to: ${settings.profile.phone}`)
-    window.alert(`Phone update placeholder saved.\nTarget phone: ${settings.profile.phone}`)
+    setSecurityFeedback(`Login phone update queued for: ${settings.profile.phone}`)
+    window.alert(`Login phone update will be connected with Supabase Auth.\nTarget phone: ${settings.profile.phone}`)
   }
 
   function handleSecurityDanger(kind: 'deactivate' | 'delete') {
     if (kind === 'deactivate') {
       const ok = window.confirm('Deactivate account?\nYou can reactivate later once backend auth is connected.')
       if (!ok) return
-      setSecurityFeedback('Account deactivation placeholder triggered.')
+      setSecurityFeedback('Account deactivation queued.')
       window.alert('Account deactivation queued as placeholder. Supabase auth wiring will handle this fully.')
       return
     }
 
     const ok = window.confirm('Delete account permanently?\nThis is irreversible once backend auth is connected.')
     if (!ok) return
-    setSecurityFeedback('Permanent delete placeholder triggered.')
+    setSecurityFeedback('Permanent account delete queued.')
     window.alert('Permanent account delete queued as placeholder. Supabase auth wiring will handle this fully.')
   }
 
@@ -372,13 +261,13 @@ export default function SettingsPage() {
       documentId: `TD-${kind.toUpperCase()}-012345`,
       issuedDate: '24 May 2026',
       deadlineDate: '2026-05-28',
-      clientName: 'John Smith',
+      clientName: 'Client Name',
       clientPhone: '08012345678',
       service: 'Custom Sewing Service',
       lineItems: [
-        { description: 'Design Service', details: 'Sample row for preview', qty: 2, unitPrice: 75000, total: 150000 },
-        { description: 'Fabric + Work', details: 'Sample row for preview', qty: 1, unitPrice: 130000, total: 130000 },
-        { description: 'Finishing', details: 'Sample row for preview', qty: 1, unitPrice: 90000, total: 90000 },
+        { description: 'Tailoring Service', details: 'Preview line item', qty: 2, unitPrice: 75000, total: 150000 },
+        { description: 'Fabric + Work', details: 'Preview line item', qty: 1, unitPrice: 130000, total: 130000 },
+        { description: 'Finishing', details: 'Preview line item', qty: 1, unitPrice: 90000, total: 90000 },
       ],
       charge,
       deposit,
@@ -458,7 +347,7 @@ export default function SettingsPage() {
         <SettingAccordion icon={<ShieldCheck size={20} />} title="Account & Security" tone="danger" order={6} panelKey="security" panel={panel} onToggle={handleToggle}>
           <div className="stack settings-security-form">
             <p className="settings-help-text">
-              These controls are frontend placeholders for now. Supabase Auth wiring will handle real account updates.
+              Supabase Auth wiring will handle real password, email, phone, and account status updates.
             </p>
 
             <button type="button" className="settings-security-action" onClick={() => handleSecurityAction('password')}>
@@ -679,7 +568,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="stack settings-business-group">
-              <p className="settings-business-label row gap-6"><FaInstagram size={15} />Business Handle</p>
+              <p className="settings-business-label row gap-6"><BusinessHandleIcon size={15} />Business Handle</p>
               <p className="settings-help-text">Add social handles used by your business.</p>
 
               <div className="settings-business-social-builder">
@@ -709,7 +598,7 @@ export default function SettingsPage() {
                     </span>
                     <input
                       className="input settings-business-input settings-phone-input"
-                      placeholder="elonapparel"
+                      placeholder="yourhandle"
                       value={socialHandleInput}
                       onChange={(event) => setSocialHandleInput(event.target.value.replace(/^@+/, ''))}
                     />

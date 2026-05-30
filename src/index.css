@@ -1732,18 +1732,18 @@ p { margin: 0; }
 }
 
 .notification-icon.deadline {
-  color: #0f766e;
-  background: #d1fae5;
+  color: var(--success);
+  background: var(--success-bg);
 }
 
 .notification-icon.payment {
-  color: #92400e;
-  background: #fef3c7;
+  color: var(--warning);
+  background: var(--warning-bg);
 }
 
 .notification-icon.system {
-  color: #1d4ed8;
-  background: #dbeafe;
+  color: var(--info);
+  background: var(--info-bg);
 }
 
 .notification-text {
@@ -2155,10 +2155,6 @@ p { margin: 0; }
 .dashboard-performance-table th:nth-child(3) {
   text-align: right;
   width: 34%;
-}
-
-.dashboard-performance-table tbody tr + tr td {
-  border-top: 1px solid var(--border);
 }
 
 .dashboard-performance-table tbody tr + tr td {
@@ -3812,9 +3808,9 @@ p { margin: 0; }
   font-size: 10px;
   line-height: 1.4;
   font-weight: 600;
-  color: #0f766e;
-  background: #d1fae5;
-  border: 1px solid #a7f3d0;
+  color: var(--success);
+  background: var(--success-bg);
+  border: 1px solid color-mix(in srgb, var(--success) 36%, var(--bg-card) 64%);
 }
 
 .subscription-manage-btn {
@@ -3974,8 +3970,8 @@ p { margin: 0; }
 
 .subscription-plan-top h2 {
   margin: 0;
-  color: var(--text-h);
-  font-size: 24px;
+  color: var(--text);
+  font-size: 22px;
   line-height: 1.1;
   font-weight: 500;
 }
@@ -4202,8 +4198,8 @@ p { margin: 0; }
 }
 
 .recent-job-initial {
-  font-size: 17px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .recent-job-meta-row {
@@ -4223,10 +4219,10 @@ p { margin: 0; }
 
 .recent-job-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.2;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--text);
 }
 
 .recent-job-meta-text {
@@ -4311,8 +4307,8 @@ p { margin: 0; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -4325,10 +4321,10 @@ p { margin: 0; }
 }
 
 .client-name {
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.2;
   font-weight: 600;
-  color: var(--text-h);
+  color: var(--text);
 }
 
 .client-phone-row {

@@ -1,0 +1,148 @@
+export type DetailedExpense = {
+  name: string
+  cost: number
+}
+
+export type DetailedJobData = {
+  orderMode: 'New Stitch' | 'Amendment / Repair'
+  jobType: 'Body Wear' | 'Non-Body Item'
+  itemType: string
+  orderScope: string
+  measurement: string
+  materialType: string
+  color: string
+  totalYard: string
+  materialQuality: string
+  materialSource: string
+  deliveryTime: string
+  reminder: string
+  referencePhotos: string[]
+  expenses: DetailedExpense[]
+  depositAmount: number
+}
+
+export const detailedMockByJobId: Record<string, DetailedJobData> = {
+  'j-001': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Wedding Lace Gown',
+    orderScope: 'Single',
+    measurement: 'Body wear measurement captured (Female)',
+    materialType: 'Lace',
+    color: 'Wine / Gold',
+    totalYard: '8',
+    materialQuality: 'High Standard',
+    materialSource: 'Client Provided',
+    deliveryTime: '14:30',
+    reminder: '3 days before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Transport', cost: 5500 },
+      { name: 'Lining + Thread', cost: 17000 },
+      { name: 'Stone Work', cost: 14500 },
+    ],
+    depositAmount: 120000,
+  },
+  'j-002': {
+    orderMode: 'Amendment / Repair',
+    jobType: 'Body Wear',
+    itemType: 'Church Native Set',
+    orderScope: 'Single',
+    measurement: 'Amendment details captured',
+    materialType: 'Zip',
+    color: 'Navy',
+    totalYard: '1',
+    materialQuality: 'Normal',
+    materialSource: 'I Am Getting It',
+    deliveryTime: '12:00',
+    reminder: '1 day before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Fabric Purchase', cost: 35000 },
+      { name: 'Accessories', cost: 8500 },
+    ],
+    depositAmount: 70000,
+  },
+  'j-003': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Senator Couple Set',
+    orderScope: 'Couple',
+    measurement: '2 body profiles captured',
+    materialType: 'Guinea Brocade',
+    color: 'Navy',
+    totalYard: '5',
+    materialQuality: 'Normal',
+    materialSource: 'Client Provided',
+    deliveryTime: '16:00',
+    reminder: 'none',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Embroidery', cost: 22000 },
+      { name: 'Buttons + Lining', cost: 7000 },
+    ],
+    depositAmount: 250000,
+  },
+  'j-004': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Agbada Set',
+    orderScope: 'Couple',
+    measurement: '2 body profiles captured',
+    materialType: 'Aso Oke',
+    color: 'Cream',
+    totalYard: '10',
+    materialQuality: 'High Standard',
+    materialSource: 'Client Provided',
+    deliveryTime: '15:15',
+    reminder: '1 week before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Machine Maintenance', cost: 9000 },
+      { name: 'Extra Tailor Support', cost: 30000 },
+    ],
+    depositAmount: 170000,
+  },
+  'j-005': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Aso-Ebi Family Pack',
+    orderScope: 'Family',
+    measurement: '3 person profiles captured',
+    materialType: 'Ankara',
+    color: 'Emerald Green',
+    totalYard: '18',
+    materialQuality: 'Original',
+    materialSource: 'I Am Getting It',
+    deliveryTime: '11:00',
+    reminder: '3 days before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Fabric Purchase', cost: 140000 },
+      { name: 'Labor', cost: 60000 },
+      { name: 'Finishing', cost: 17000 },
+    ],
+    depositAmount: 300000,
+  },
+  'j-006': {
+    orderMode: 'New Stitch',
+    jobType: 'Body Wear',
+    itemType: 'Family Native Set',
+    orderScope: 'Family',
+    measurement: '3 person profiles captured',
+    materialType: 'Ankara',
+    color: 'Deep Green',
+    totalYard: '14',
+    materialQuality: 'Original',
+    materialSource: 'Client Provided',
+    deliveryTime: '13:00',
+    reminder: '3 days before',
+    referencePhotos: ['/avatar-placeholder.svg', '/avatar-placeholder.svg', '/avatar-placeholder.svg'],
+    expenses: [
+      { name: 'Fabric Purchase', cost: 120000 },
+      { name: 'Labor', cost: 50000 },
+      { name: 'Finishing', cost: 14000 },
+    ],
+    depositAmount: 220000,
+  },
+}

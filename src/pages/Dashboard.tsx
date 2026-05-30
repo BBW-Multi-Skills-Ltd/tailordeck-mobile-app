@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, ChevronLeft, ChevronRight, ReceiptText, TrendingUp } from 'lucide-react'
+import { BarChart3, BriefcaseBusiness, ChevronLeft, ChevronRight, ReceiptText, TrendingUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import {
   Bar,
@@ -12,7 +12,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { mockJobs } from '../data/mockJobs'
+import EmptyState from '../components/shared/EmptyState'
+import { appJobs } from '../data/appData'
 import { formatNaira } from '../lib/utils'
 
 type MonthStat = {
@@ -48,7 +49,7 @@ export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
 
   const metrics = useMemo(() => {
-    const sortedJobs = [...mockJobs].sort((a, b) => (a.createdDate > b.createdDate ? 1 : -1))
+    const sortedJobs = [...appJobs].sort((a, b) => (a.createdDate > b.createdDate ? 1 : -1))
     const latestDate = sortedJobs.length ? new Date(sortedJobs[sortedJobs.length - 1].createdDate) : new Date()
 
     const monthWindow: Date[] = []
@@ -62,7 +63,7 @@ export default function Dashboard() {
       monthKeys.map((key) => [key, { key, label: monthLabel(key), fullLabel: monthFullLabel(key), jobs: 0, revenue: 0, expenses: 0, profit: 0 }]),
     )
 
-    for (const job of mockJobs) {
+    for (const job of appJobs) {
       const key = monthKey(job.createdDate)
       if (!monthSet.has(key)) continue
       const existing = monthMap.get(key)
@@ -87,7 +88,7 @@ export default function Dashboard() {
     }, null)
 
     const currentMonthKey = monthKeys[monthKeys.length - 1]
-    const currentMonthJobs = mockJobs.filter((job) => monthKey(job.createdDate) === currentMonthKey)
+    const currentMonthJobs = appJobs.filter((job) => monthKey(job.createdDate) === currentMonthKey)
     const statusCounts = {
       completed: currentMonthJobs.filter((job) => job.status === 'Completed').length,
       inProgress: currentMonthJobs.filter((job) => job.status === 'In Progress').length,
@@ -118,6 +119,18 @@ export default function Dashboard() {
         <span style={{ width: '44px' }} />
       </header>
 
+      {appJobs.length === 0 ? (
+        <EmptyState
+          icon={BarChart3}
+          title="No analytics yet"
+          description="Your dashboard will show revenue, expenses, profit, and job status once you create your first job."
+          actionLabel="Create Job"
+          actionTo="/jobs/new"
+        />
+      ) : null}
+
+      {appJobs.length > 0 ? (
+        <>
       <div className="dashboard-month-nav">
         <button
           type="button"
@@ -307,6 +320,8 @@ export default function Dashboard() {
           {metrics.bestMonth?.label ?? '-'} - {formatNaira(metrics.bestMonth?.profit ?? 0)} profit
         </p>
       </article>
+        </>
+      ) : null}
     </section>
   )
 }

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { mockClients } from '../data/mockClients'
+import { appClients } from '../data/appData'
 import type { Client, CreateClientInput } from '../types/client'
 
 const STORAGE_KEY = 'tailordeck.clients.v1'
@@ -23,20 +23,20 @@ function generateClientId(): string {
 }
 
 function loadInitialClients(): Client[] {
-  if (typeof window === 'undefined') return mockClients
+  if (typeof window === 'undefined') return appClients
 
   const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (!stored) return mockClients
+  if (!stored) return appClients
 
   try {
     const parsed = JSON.parse(stored) as Client[]
-    if (!Array.isArray(parsed)) return mockClients
+    if (!Array.isArray(parsed)) return appClients
 
     const parsedIds = new Set(parsed.map((client) => client.id))
-    const missingSeedClients = mockClients.filter((client) => !parsedIds.has(client.id))
+    const missingSeedClients = appClients.filter((client) => !parsedIds.has(client.id))
     return [...parsed, ...missingSeedClients]
   } catch {
-    return mockClients
+    return appClients
   }
 }
 
@@ -54,7 +54,7 @@ export function ClientsProvider({ children }: { children: ReactNode }) {
         id: generateClientId(),
         created_date: timestamp,
         updated_date: timestamp,
-        created_by: 'demo@tailordeck.app',
+        created_by: 'local-user',
         name: input.name.trim(),
         phone: input.phone.trim(),
         sex: input.sex,

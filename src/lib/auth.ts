@@ -98,7 +98,17 @@ export function registerLocalAccount(input: Omit<LocalAuthAccount, 'createdAt'>)
     accounts.push(next)
   }
   saveAccounts(accounts)
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(AUTH_ACTIVE_EMAIL_KEY, next.email)
+  }
   return next
+}
+
+export function getActiveLocalAccount(): LocalAuthAccount | null {
+  if (typeof window === 'undefined') return null
+  const activeEmail = window.localStorage.getItem(AUTH_ACTIVE_EMAIL_KEY)
+  if (!activeEmail) return null
+  return loadAccounts().find((item) => item.email === activeEmail) ?? null
 }
 
 export function signInWithLocalAccount(emailInput: string, passwordInput: string): boolean {

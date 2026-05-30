@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
-import { TAILOR_SIGNUP_PREFILL_KEY } from '../lib/settings'
+import { loadTailorSettings, saveTailorSettings, TAILOR_SIGNUP_PREFILL_KEY } from '../lib/settings'
 import { markOnboardingStage, registerLocalAccount, setPreviewAuthenticated } from '../lib/auth'
 
 export default function SignUp() {
@@ -49,6 +49,16 @@ export default function SignUp() {
         shopName: '',
       }),
     )
+    const currentSettings = loadTailorSettings()
+    saveTailorSettings({
+      ...currentSettings,
+      profile: {
+        ...currentSettings.profile,
+        fullName: fullName.trim() || currentSettings.profile.fullName,
+        email: normalizedEmail,
+        phone: `+234${phone.replace(/\D/g, '')}`,
+      },
+    })
     setPreviewAuthenticated('signed-up')
     markOnboardingStage('setup')
     window.alert('Account created. Continue with setup.')

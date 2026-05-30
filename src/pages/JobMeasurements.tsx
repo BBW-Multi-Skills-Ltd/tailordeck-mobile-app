@@ -1,7 +1,7 @@
 import { ArrowLeft, Phone, Ruler } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
-import { jobMeasurementById, labelFromField } from '../data/mockJobMeasurements'
-import { mockJobs } from '../data/mockJobs'
+import { appJobMeasurementById, appJobs } from '../data/appData'
+import { labelFromField } from '../data/mockJobMeasurements'
 import { getInitial } from '../lib/utils'
 
 function toTitleCase(value: string): string {
@@ -10,8 +10,8 @@ function toTitleCase(value: string): string {
 
 export default function JobMeasurements() {
   const { id } = useParams<{ id: string }>()
-  const job = id ? mockJobs.find((item) => item.id === id) : undefined
-  const snapshot = id ? jobMeasurementById[id] : undefined
+  const job = id ? appJobs.find((item) => item.id === id) : undefined
+  const snapshot = id ? appJobMeasurementById[id] : undefined
 
   if (!job || !snapshot) {
     return (
