@@ -257,7 +257,13 @@ export default function AppHeader() {
       </header>
 
       {drawerOpen ? (
-        <div className="sheet-overlay" role="dialog" aria-modal="true" aria-label="Notifications drawer" onClick={(event) => event.target === event.currentTarget && closeNotificationDrawer()}>
+        <div
+          className="sheet-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Notifications drawer"
+          onClick={(event) => event.target === event.currentTarget && closeNotificationDrawer()}
+        >
           <div
             className="sheet notification-sheet"
             style={{
