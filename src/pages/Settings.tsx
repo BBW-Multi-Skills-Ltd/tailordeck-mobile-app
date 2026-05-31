@@ -2,8 +2,8 @@
   AtSign,
   BellRing,
   Building2,
+  Camera,
   CheckSquare,
-  ChevronRight,
   CircleHelp,
   Database,
   FileText,
@@ -66,6 +66,8 @@ export default function SettingsPage() {
   const [openColorPicker, setOpenColorPicker] = useState<0 | 1 | null>(null)
   const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>('Instagram')
   const [socialHandleInput, setSocialHandleInput] = useState('')
+  const [passwordDraft, setPasswordDraft] = useState('')
+  const [confirmPasswordDraft, setConfirmPasswordDraft] = useState('')
   const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
   const businessPhoneLocalPart = settings.businessInfo.businessPhone.replace(/^\+234/, '').replace(/\D/g, '')
   const websiteLocalPart = settings.businessInfo.website.replace(/^https?:\/\//, '')
@@ -146,21 +148,19 @@ export default function SettingsPage() {
     setPanel((prev) => (prev === next ? null : next))
   }
 
-  function handleSecurityAction(kind: 'password' | 'email' | 'phone') {
-    if (kind === 'password') {
-      setSecurityFeedback('Change password flow will be connected to Supabase Auth.')
-      window.alert('Password update is a frontend placeholder for now. It will be wired to Supabase Auth.')
-      return
-    }
+  function openAccountSecurity() {
+    setPanel('security')
+    window.setTimeout(() => {
+      document.querySelector('[data-settings-panel="security"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
 
-    if (kind === 'email') {
-      setSecurityFeedback(`Login email update queued for: ${settings.profile.email}`)
-      window.alert(`Login email update will be connected with Supabase Auth.\nTarget email: ${settings.profile.email}`)
-      return
-    }
-
-    setSecurityFeedback(`Login phone update queued for: ${settings.profile.phone}`)
-    window.alert(`Login phone update will be connected with Supabase Auth.\nTarget phone: ${settings.profile.phone}`)
+  function handleSaveAccountSecurity() {
+    const next = saveTailorSettings(settings)
+    setSettings(next)
+    setSavedTick(Date.now())
+    setSavedSection('Account & Security')
+    setSecurityFeedback('Account details saved locally. Supabase Auth will handle secure login updates later.')
   }
 
   function handleSecurityDanger(kind: 'deactivate' | 'delete') {
@@ -305,27 +305,52 @@ export default function SettingsPage() {
 
       <div className="settings-list">
         <SettingAccordion icon={<UserRound size={20} />} title="My Profile" order={1} panelKey="profile" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-14 settings-profile-form">
-            <div className="stack settings-profile-field">
-              <label className="settings-profile-label">Profile Avatar</label>
-              <label className="settings-profile-avatar-upload">
-                <div className="settings-profile-avatar-preview">
-                  <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="Profile avatar preview" />
+          <div className="stack gap-14 settings-profile-summary-panel">
+            <div className="settings-profile-summary">
+              <div className="settings-profile-avatar-large">
+                <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="Profile avatar" />
+                <label className="settings-profile-avatar-camera" aria-label="Upload profile avatar">
+                  <Camera size={14} />
+                  <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={onProfileAvatarUpload} />
+                </label>
+              </div>
+
+              <div className="settings-profile-summary-copy">
+                <h3>{settings.profile.fullName || 'Your Name'}</h3>
+                <p>{settings.profile.email || 'your@email.com'}</p>
+                <p>{settings.businessInfo.shopName || settings.brand.name || 'Your shop name'}</p>
+                <div className="settings-profile-summary-actions">
+                  <button type="button" className="settings-profile-edit-btn save-photo" onClick={() => handleSaveSettings('Profile Avatar')}>
+                    Save Photo
+                  </button>
+                  <button type="button" className="settings-profile-edit-btn" onClick={openAccountSecurity}>
+                    Edit Profile
+                  </button>
                 </div>
-                <span>Upload Profile Avatar</span>
-                <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={onProfileAvatarUpload} />
-              </label>
+              </div>
             </div>
+            {savedSection === 'Profile Avatar' && savedTick ? <p className="text-sm text-success">Profile avatar saved.</p> : null}
+          </div>
+        </SettingAccordion>
+
+        <SettingAccordion icon={<ShieldCheck size={20} />} title="Account & Security" tone="danger" order={6} panelKey="security" panel={panel} onToggle={handleToggle}>
+          <div className="stack settings-security-form">
+            <p className="settings-help-text">
+              Update your account identity here. Password and login security will be connected to Supabase Auth during backend wiring.
+            </p>
+
             <div className="input-group settings-profile-field">
               <label className="settings-profile-label">Full Name</label>
               <input className="input settings-profile-input" value={settings.profile.fullName} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, fullName: value } })))} />
             </div>
+
             <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Email</label>
-              <input className="input settings-profile-input" value={settings.profile.email} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email: value } })))} />
+              <label className="settings-profile-label">Login Email</label>
+              <input className="input settings-profile-input" type="email" value={settings.profile.email} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email: value } })))} />
             </div>
+
             <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Phone</label>
+              <label className="settings-profile-label">Login Phone</label>
               <div className="settings-phone-input-wrap">
                 <span className="settings-phone-prefix">+234</span>
                 <input
@@ -337,42 +362,36 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={() => handleSaveSettings('My Profile')}>
-              Save Profile
-            </button>
-            {savedSection === 'My Profile' && savedTick ? <p className="text-sm text-success">My Profile saved.</p> : null}
-          </div>
-        </SettingAccordion>
 
-        <SettingAccordion icon={<ShieldCheck size={20} />} title="Account & Security" tone="danger" order={6} panelKey="security" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-security-form">
-            <p className="settings-help-text">
-              Supabase Auth wiring will handle real password, email, phone, and account status updates.
-            </p>
-
-            <button type="button" className="settings-security-action" onClick={() => handleSecurityAction('password')}>
-              <div className="row gap-8">
+            <div className="input-group settings-profile-field">
+              <label className="settings-profile-label row gap-8">
                 <KeyRound size={15} className="settings-security-icon" />
-                <span>Change Password</span>
-              </div>
-              <ChevronRight size={16} className="text-muted" />
-            </button>
+                New Password
+              </label>
+              <input
+                className="input settings-profile-input"
+                type="password"
+                placeholder="Create a new password"
+                value={passwordDraft}
+                onChange={(event) => setPasswordDraft(event.target.value)}
+              />
+            </div>
 
-            <button type="button" className="settings-security-action" onClick={() => handleSecurityAction('email')}>
-              <div className="row gap-8">
-                <Mail size={15} className="settings-security-icon" />
-                <span>Update Login Email</span>
-              </div>
-              <ChevronRight size={16} className="text-muted" />
-            </button>
+            <div className="input-group settings-profile-field">
+              <label className="settings-profile-label">Confirm Password</label>
+              <input
+                className="input settings-profile-input"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPasswordDraft}
+                onChange={(event) => setConfirmPasswordDraft(event.target.value)}
+              />
+            </div>
 
-            <button type="button" className="settings-security-action" onClick={() => handleSecurityAction('phone')}>
-              <div className="row gap-8">
-                <Phone size={15} className="settings-security-icon" />
-                <span>Update Login Phone</span>
-              </div>
-              <ChevronRight size={16} className="text-muted" />
+            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={handleSaveAccountSecurity}>
+              Save Account Changes
             </button>
+            {savedSection === 'Account & Security' && savedTick ? <p className="text-sm text-success">Account changes saved locally.</p> : null}
 
             <div className="stack settings-security-danger-wrap">
               <button type="button" className="settings-security-danger-btn" onClick={() => handleSecurityDanger('deactivate')}>

@@ -43,7 +43,11 @@ export function SettingAccordion({
   const isOpen = panel === panelKey
 
   return (
-    <div className={`settings-accordion-item${tone === 'danger' ? ' danger' : ''}`} style={order ? { order } : undefined}>
+    <div
+      className={`settings-accordion-item${tone === 'danger' ? ' danger' : ''}`}
+      data-settings-panel={panelKey}
+      style={order ? { order } : undefined}
+    >
       <button type="button" className="settings-row-card" onClick={() => onToggle(panelKey)} aria-expanded={isOpen}>
         <div className="row gap-4">
           <span className="settings-row-icon">{icon}</span>

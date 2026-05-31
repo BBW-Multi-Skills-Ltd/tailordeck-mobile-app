@@ -2741,6 +2741,108 @@ p { margin: 0; }
   gap: 16px !important;
 }
 
+.settings-profile-summary-panel {
+  padding-top: 0;
+  gap: 10px !important;
+}
+
+.settings-profile-summary {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.settings-profile-avatar-large {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-profile-avatar-large img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  display: block;
+}
+
+.settings-profile-avatar-camera {
+  position: absolute;
+  right: -2px;
+  bottom: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--secondary);
+  color: var(--primary);
+  border: 2px solid var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.settings-profile-summary-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.settings-profile-summary-copy h3 {
+  margin: 0;
+  color: var(--foreground);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.35px;
+  line-height: 1.1;
+}
+
+.settings-profile-summary-copy p {
+  width: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-profile-summary-actions {
+  margin-top: 7px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-profile-edit-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.settings-profile-edit-btn.save-photo {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
 .settings-profile-field {
   gap: 10px;
 }
