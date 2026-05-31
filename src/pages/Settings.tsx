@@ -1,56 +1,27 @@
-﻿import {
-  AtSign,
-  BellRing,
-  Building2,
-  Camera,
-  CheckSquare,
-  CircleHelp,
-  Database,
-  FileText,
-  Globe,
-  Image as ImageIcon,
-  KeyRound,
-  LogOut,
-  Mail,
-  Moon,
-  Sun,
-  Palette,
-  Phone,
-  Plus,
-  ShieldAlert,
-  ShieldCheck,
-  Store,
-  Trash2,
-  Upload,
-  UserRound,
-  WandSparkles,
-  X,
-} from 'lucide-react'
+﻿import { BellRing, Building2, CircleHelp, Database, LogOut, Moon, Palette, ShieldCheck, Store, Sun, UserRound, WandSparkles } from 'lucide-react'
 import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { SettingAccordion, SettingLinkRow, Toggle, type SettingsPanel } from '../components/settings/SettingsRows'
-import {
-  brandColorOptions,
-  documentTemplate,
-  notificationBellOptions,
-  ringtoneOptions,
-  socialPlatformColor,
-  socialPlatformIcon,
-  socialPlatforms,
-} from '../components/settings/settingsOptions'
+import AboutTailorDeckPanel from '../components/settings/AboutTailorDeckPanel'
+import AccountSecurityPanel from '../components/settings/AccountSecurityPanel'
+import BusinessInfoPanel from '../components/settings/BusinessInfoPanel'
+import DocumentPreviewSheet from '../components/settings/DocumentPreviewSheet'
+import InvoiceReceiptPanel from '../components/settings/InvoiceReceiptPanel'
+import ProfileSettingsPanel from '../components/settings/ProfileSettingsPanel'
+import RemindersPanel from '../components/settings/RemindersPanel'
+import { SettingAccordion, SettingLinkRow, type SettingsPanel } from '../components/settings/SettingsRows'
+import ShopPreferencesPanel from '../components/settings/ShopPreferencesPanel'
 import { clearPreviewSession } from '../lib/auth'
-import { renderTemplate } from '../lib/docTemplates'
 import { getSavedTheme, toggleTheme, type AppTheme } from '../lib/theme'
 import {
-  AVATAR_PLACEHOLDER,
   loadTailorSettings,
   saveTailorSettings,
   type MaterialQuality,
+  type NotificationBellOption,
   type ReminderLead,
+  type RingtoneOption,
   type SocialPlatform,
   type TailorSettings,
 } from '../lib/settings'
-import type { DocumentTemplatePayload } from '../templates/types'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -68,10 +39,10 @@ export default function SettingsPage() {
   const [socialHandleInput, setSocialHandleInput] = useState('')
   const [passwordDraft, setPasswordDraft] = useState('')
   const [confirmPasswordDraft, setConfirmPasswordDraft] = useState('')
+
   const profilePhoneLocalPart = settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, '')
   const businessPhoneLocalPart = settings.businessInfo.businessPhone.replace(/^\+234/, '').replace(/\D/g, '')
   const websiteLocalPart = settings.businessInfo.website.replace(/^https?:\/\//, '')
-  const BusinessHandleIcon = socialPlatformIcon.Instagram
 
   useEffect(() => {
     function syncTheme() {
@@ -86,18 +57,29 @@ export default function SettingsPage() {
     }
   }, [])
 
-  function handleSaveSettings(sectionLabel?: string) {
-    const next = saveTailorSettings(settings)
+  function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): void {
+    const next = saveTailorSettings(nextSettings)
     setSettings(next)
     setSavedTick(Date.now())
-    if (sectionLabel) setSavedSection(sectionLabel)
+    setSavedSection(sectionLabel)
   }
 
-  function handleThemeToggle() {
+  function handleThemeToggle(): void {
     setTheme(toggleTheme())
   }
 
-  function updateColor(index: 0 | 1, value: string) {
+  function handleToggle(next: Exclude<SettingsPanel, null>): void {
+    setPanel((prev) => (prev === next ? null : next))
+  }
+
+  function openAccountSecurity(): void {
+    setPanel('security')
+    window.setTimeout(() => {
+      document.querySelector('[data-settings-panel="security"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
+
+  function updateColor(index: 0 | 1, value: string): void {
     setSettings((prev) => {
       const colors: [string, string, string] = [...prev.brand.colors] as [string, string, string]
       colors[index] = value
@@ -105,33 +87,23 @@ export default function SettingsPage() {
     })
   }
 
-  function onInput(handler: (value: string) => void) {
-    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handler(event.target.value)
-  }
-
-  function handleProfilePhoneChange(value: string) {
+  function handleProfilePhoneChange(value: string): void {
     const digitsOnly = value.replace(/\D/g, '')
     setSettings((prev) => ({ ...prev, profile: { ...prev.profile, phone: `+234${digitsOnly}` } }))
   }
 
-  function handleBusinessPhoneChange(value: string) {
+  function handleBusinessPhoneChange(value: string): void {
     const digitsOnly = value.replace(/\D/g, '')
     const normalizedLocal = digitsOnly.startsWith('0') ? digitsOnly.slice(1) : digitsOnly
-    setSettings((prev) => ({
-      ...prev,
-      businessInfo: { ...prev.businessInfo, businessPhone: `+234${normalizedLocal}` },
-    }))
+    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessPhone: `+234${normalizedLocal}` } }))
   }
 
-  function handleWebsiteChange(value: string) {
+  function handleWebsiteChange(value: string): void {
     const normalized = value.trim().replace(/^https?:\/\//, '')
-    setSettings((prev) => ({
-      ...prev,
-      businessInfo: { ...prev.businessInfo, website: `https://${normalized}` },
-    }))
+    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, website: `https://${normalized}` } }))
   }
 
-  function clearJobHistory() {
+  function clearJobHistory(): void {
     const confirmed = window.confirm('Clear all job history data? This action cannot be undone once backend is connected.')
     if (!confirmed) return
     window.localStorage.removeItem('tailordeck-job-history')
@@ -139,31 +111,17 @@ export default function SettingsPage() {
     window.alert('Job history cleared locally.')
   }
 
-  function handleSignOut() {
+  function handleSignOut(): void {
     clearPreviewSession()
     navigate('/auth/signin')
   }
 
-  function handleToggle(next: Exclude<SettingsPanel, null>) {
-    setPanel((prev) => (prev === next ? null : next))
-  }
-
-  function openAccountSecurity() {
-    setPanel('security')
-    window.setTimeout(() => {
-      document.querySelector('[data-settings-panel="security"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 80)
-  }
-
-  function handleSaveAccountSecurity() {
-    const next = saveTailorSettings(settings)
-    setSettings(next)
-    setSavedTick(Date.now())
-    setSavedSection('Account & Security')
+  function handleSaveAccountSecurity(): void {
+    markSaved('Account & Security')
     setSecurityFeedback('Account details saved locally. Supabase Auth will handle secure login updates later.')
   }
 
-  function handleSecurityDanger(kind: 'deactivate' | 'delete') {
+  function handleSecurityDanger(kind: 'deactivate' | 'delete'): void {
     if (kind === 'deactivate') {
       const ok = window.confirm('Deactivate account?\nYou can reactivate later once backend auth is connected.')
       if (!ok) return
@@ -178,28 +136,29 @@ export default function SettingsPage() {
     window.alert('Permanent account delete queued as placeholder. Supabase auth wiring will handle this fully.')
   }
 
-  function addSocialHandle() {
+  function addSocialHandle(): void {
     const handle = socialHandleInput.trim()
     if (!handle) return
     const normalizedHandle = handle.startsWith('@') ? handle : `@${handle}`
-
-    const nextEntry = {
-      id: `social-${socialPlatform.toLowerCase()}-${Date.now()}`,
-      platform: socialPlatform,
-      handle: normalizedHandle,
-    }
 
     setSettings((prev) => ({
       ...prev,
       businessInfo: {
         ...prev.businessInfo,
-        socialHandles: [...prev.businessInfo.socialHandles, nextEntry],
+        socialHandles: [
+          ...prev.businessInfo.socialHandles,
+          {
+            id: `social-${socialPlatform.toLowerCase()}-${Date.now()}`,
+            platform: socialPlatform,
+            handle: normalizedHandle,
+          },
+        ],
       },
     }))
     setSocialHandleInput('')
   }
 
-  function removeSocialHandle(id: string) {
+  function removeSocialHandle(id: string): void {
     setSettings((prev) => ({
       ...prev,
       businessInfo: {
@@ -209,7 +168,7 @@ export default function SettingsPage() {
     }))
   }
 
-  function onBrandFileUpload(field: 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>) {
+  function onBrandFileUpload(field: 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>): void {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -223,7 +182,7 @@ export default function SettingsPage() {
     event.target.value = ''
   }
 
-  function onProfileAvatarUpload(event: ChangeEvent<HTMLInputElement>) {
+  function onProfileAvatarUpload(event: ChangeEvent<HTMLInputElement>): void {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -237,7 +196,7 @@ export default function SettingsPage() {
     event.target.value = ''
   }
 
-  function toggleBrandDetail(key: keyof TailorSettings['brand']['includeBusinessDetails']) {
+  function toggleBrandDetail(key: keyof TailorSettings['brand']['includeBusinessDetails']): void {
     setSettings((prev) => ({
       ...prev,
       brand: {
@@ -250,574 +209,113 @@ export default function SettingsPage() {
     }))
   }
 
-  function buildTemplatePreviewPayload(kind: 'invoice' | 'receipt'): DocumentTemplatePayload {
-    const charge = 370000
-    const deposit = kind === 'receipt' ? charge : 120000
-    const balance = kind === 'receipt' ? 0 : charge - deposit
-
-    return {
-      kind,
-      templateId: settings.brand.documentTemplate,
-      documentId: `TD-${kind.toUpperCase()}-012345`,
-      issuedDate: '24 May 2026',
-      deadlineDate: '2026-05-28',
-      clientName: 'Client Name',
-      clientPhone: '08012345678',
-      service: 'Custom Sewing Service',
-      lineItems: [
-        { description: 'Tailoring Service', details: 'Preview line item', qty: 2, unitPrice: 75000, total: 150000 },
-        { description: 'Fabric + Work', details: 'Preview line item', qty: 1, unitPrice: 130000, total: 130000 },
-        { description: 'Finishing', details: 'Preview line item', qty: 1, unitPrice: 90000, total: 90000 },
-      ],
-      charge,
-      deposit,
-      balance,
-      brand: {
-        shopName: settings.businessInfo.shopName || settings.brand.name || 'TailorDeck',
-        logoUrl: settings.brand.logoUrl,
-        signatureUrl: settings.brand.signatureUrl,
-        primaryColor: settings.brand.colors[0],
-        secondaryColor: settings.brand.colors[1],
-        accentColor: settings.brand.colors[0],
-        shopAddress: settings.businessInfo.shopAddress,
-        businessPhone: settings.businessInfo.businessPhone,
-        businessEmail: settings.businessInfo.businessEmail,
-        website: settings.businessInfo.website,
-        socialHandles: settings.businessInfo.socialHandles,
-        includeBusinessDetails: settings.brand.includeBusinessDetails,
-      },
-    }
-  }
-
   return (
     <section className="section stack gap-16">
       <header className="row-between">
         <h1 className="settings-page-title">Settings</h1>
-        <button
-          type="button"
-          className="btn btn-ghost btn-icon settings-theme-btn"
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          onClick={handleThemeToggle}
-        >
+        <button type="button" className="btn btn-ghost btn-icon settings-theme-btn" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={handleThemeToggle}>
           {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </header>
 
       <div className="settings-list">
         <SettingAccordion icon={<UserRound size={20} />} title="My Profile" order={1} panelKey="profile" panel={panel} onToggle={handleToggle}>
-          <div className="stack gap-14 settings-profile-summary-panel">
-            <div className="settings-profile-summary">
-              <div className="settings-profile-avatar-large">
-                <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="Profile avatar" />
-                <label className="settings-profile-avatar-camera" aria-label="Upload profile avatar">
-                  <Camera size={14} />
-                  <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={onProfileAvatarUpload} />
-                </label>
-              </div>
-
-              <div className="settings-profile-summary-copy">
-                <h3>{settings.profile.fullName || 'Your Name'}</h3>
-                <p>{settings.profile.email || 'your@email.com'}</p>
-                <p>{settings.businessInfo.shopName || settings.brand.name || 'Your shop name'}</p>
-                <div className="settings-profile-summary-actions">
-                  <button type="button" className="settings-profile-edit-btn save-photo" onClick={() => handleSaveSettings('Profile Avatar')}>
-                    Save Photo
-                  </button>
-                  <button type="button" className="settings-profile-edit-btn" onClick={openAccountSecurity}>
-                    Edit Profile
-                  </button>
-                </div>
-              </div>
-            </div>
-            {savedSection === 'Profile Avatar' && savedTick ? <p className="text-sm text-success">Profile avatar saved.</p> : null}
-          </div>
-        </SettingAccordion>
-
-        <SettingAccordion icon={<ShieldCheck size={20} />} title="Account & Security" tone="danger" order={6} panelKey="security" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-security-form">
-            <p className="settings-help-text">
-              Update your account identity here. Password and login security will be connected to Supabase Auth during backend wiring.
-            </p>
-
-            <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Full Name</label>
-              <input className="input settings-profile-input" value={settings.profile.fullName} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, fullName: value } })))} />
-            </div>
-
-            <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Login Email</label>
-              <input className="input settings-profile-input" type="email" value={settings.profile.email} onChange={onInput((value) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email: value } })))} />
-            </div>
-
-            <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Login Phone</label>
-              <div className="settings-phone-input-wrap">
-                <span className="settings-phone-prefix">+234</span>
-                <input
-                  className="input settings-profile-input settings-phone-input"
-                  inputMode="numeric"
-                  placeholder="8012345678"
-                  value={profilePhoneLocalPart}
-                  onChange={(event) => handleProfilePhoneChange(event.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="input-group settings-profile-field">
-              <label className="settings-profile-label row gap-8">
-                <KeyRound size={15} className="settings-security-icon" />
-                New Password
-              </label>
-              <input
-                className="input settings-profile-input"
-                type="password"
-                placeholder="Create a new password"
-                value={passwordDraft}
-                onChange={(event) => setPasswordDraft(event.target.value)}
-              />
-            </div>
-
-            <div className="input-group settings-profile-field">
-              <label className="settings-profile-label">Confirm Password</label>
-              <input
-                className="input settings-profile-input"
-                type="password"
-                placeholder="Confirm new password"
-                value={confirmPasswordDraft}
-                onChange={(event) => setConfirmPasswordDraft(event.target.value)}
-              />
-            </div>
-
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={handleSaveAccountSecurity}>
-              Save Account Changes
-            </button>
-            {savedSection === 'Account & Security' && savedTick ? <p className="text-sm text-success">Account changes saved locally.</p> : null}
-
-            <div className="stack settings-security-danger-wrap">
-              <button type="button" className="settings-security-danger-btn" onClick={() => handleSecurityDanger('deactivate')}>
-                <ShieldAlert size={15} />
-                Deactivate Account
-              </button>
-              <button type="button" className="settings-security-danger-btn permanent" onClick={() => handleSecurityDanger('delete')}>
-                <Trash2 size={15} />
-                Delete Account Permanently
-              </button>
-            </div>
-
-            {securityFeedback ? <p className="text-sm text-success">{securityFeedback}</p> : null}
-          </div>
-        </SettingAccordion>
-
-        <SettingAccordion icon={<Store size={20} />} title="Shop Preferences" order={3} panelKey="preferences" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-pref-form">
-            <div className="stack settings-pref-group">
-              <p className="settings-pref-label">Default Measurement Unit</p>
-              <p className="settings-help-text">Used for measurement entry across jobs and client profiles.</p>
-              <div className="settings-radio-list">
-                {(['cm', 'inches'] as const).map((unit) => (
-                  <button
-                    key={unit}
-                    type="button"
-                    className={`settings-radio-option${settings.preferences.measurementUnit === unit ? ' active' : ''}`}
-                    onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, measurementUnit: unit } }))}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <span className="settings-radio-title">{unit === 'cm' ? 'Centimeters' : 'Inches'}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="input-group settings-pref-group">
-              <p className="settings-pref-label">Default Material Quality</p>
-              <p className="settings-help-text">Default quality preselected when creating new jobs.</p>
-              <div className="settings-radio-list">
-                {(['Normal', 'Original', 'Fake', 'High Standard'] as MaterialQuality[]).map((quality) => (
-                  <button
-                    key={quality}
-                    type="button"
-                    className={`settings-radio-option${settings.preferences.defaultMaterialQuality === quality ? ' active' : ''}`}
-                    onClick={() => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, defaultMaterialQuality: quality } }))}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <span className="settings-radio-title">{quality}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={() => handleSaveSettings('Shop Preferences')}>
-              Save Shop Preferences
-            </button>
-            {savedSection === 'Shop Preferences' && savedTick ? <p className="text-sm text-success">Shop Preferences saved.</p> : null}
-          </div>
-        </SettingAccordion>
-
-        <SettingAccordion icon={<BellRing size={20} />} title="Reminders & Notifications" order={5} panelKey="reminders" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-reminder-form">
-            <div className="row-between settings-reminder-row">
-              <div className="stack gap-4">
-                <p className="settings-reminder-label">Push Notifications</p>
-                <p className="settings-reminder-help">Phone pop-up alerts for deadlines and updates.</p>
-              </div>
-              <Toggle checked={settings.reminders.pushNotifications} onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, pushNotifications: next } }))} />
-            </div>
-
-            <div className="stack settings-reminder-group">
-              <div className="row-between settings-reminder-row">
-                <div className="stack gap-4">
-                  <p className="settings-reminder-label">Notification Bell Sound</p>
-                  <p className="settings-reminder-help">Choose the alert bell tone for phone notifications.</p>
-                </div>
-                <Toggle
-                  checked={settings.reminders.notificationBellEnabled}
-                  onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBellEnabled: next } }))}
-                />
-              </div>
-              <div className="settings-radio-list">
-                {notificationBellOptions.map(({ value, icon: Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`settings-radio-option${settings.reminders.notificationBell === value ? ' active' : ''}`}
-                    onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBell: value } }))}
-                    disabled={!settings.reminders.pushNotifications || !settings.reminders.notificationBellEnabled}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <Icon size={16} className="settings-radio-icon" />
-                    <span className="settings-radio-title">{value}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="stack settings-reminder-group">
-              <p className="settings-reminder-label">Default Reminder</p>
-              <p className="settings-help-text">How early we notify the tailor before delivery deadline.</p>
-              <div className="settings-radio-list">
-                {(['1 day before', '3 days before', '1 week before'] as ReminderLead[]).map((reminder) => (
-                  <button
-                    key={reminder}
-                    type="button"
-                    className={`settings-radio-option${settings.reminders.defaultReminder === reminder ? ' active' : ''}`}
-                    onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, defaultReminder: reminder } }))}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <span className="settings-radio-title">{reminder}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="stack settings-reminder-group">
-              <div className="row-between settings-reminder-row">
-                <div className="stack gap-4">
-                  <p className="settings-reminder-label">Ringtone</p>
-                  <p className="settings-reminder-help">Play sound when a reminder alert is delivered.</p>
-                </div>
-                <Toggle checked={settings.reminders.ringtoneEnabled} onChange={(next) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtoneEnabled: next } }))} />
-              </div>
-              <div className="settings-radio-list">
-                {ringtoneOptions.map(({ value, icon: Icon }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={`settings-radio-option${settings.reminders.ringtone === value ? ' active' : ''}`}
-                    onClick={() => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtone: value } }))}
-                    disabled={!settings.reminders.pushNotifications || !settings.reminders.ringtoneEnabled}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <Icon size={16} className="settings-radio-icon" />
-                    <span className="settings-radio-title">{value}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={() => handleSaveSettings('Reminders')}>
-              Save Reminders & Notifications
-            </button>
-            {savedSection === 'Reminders' && savedTick ? <p className="text-sm text-success">Reminders & Notifications saved.</p> : null}
-          </div>
+          <ProfileSettingsPanel
+            settings={settings}
+            saved={savedSection === 'Profile Avatar' && Boolean(savedTick)}
+            onAvatarUpload={onProfileAvatarUpload}
+            onSavePhoto={() => markSaved('Profile Avatar')}
+            onEditProfile={openAccountSecurity}
+          />
         </SettingAccordion>
 
         <SettingAccordion icon={<Building2 size={20} />} title="Business Info" order={2} panelKey="business" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-business-form">
-            <div className="input-group settings-business-group">
-              <label className="settings-business-label row gap-6"><Building2 size={15} />Shop Name</label>
-              <p className="settings-help-text">This is shown on documents and business header.</p>
-              <input
-                className="input settings-business-input"
-                placeholder="Your shop name"
-                value={settings.businessInfo.shopName}
-                onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopName: value } })))}
-              />
-            </div>
+          <BusinessInfoPanel
+            settings={settings}
+            businessPhoneLocalPart={businessPhoneLocalPart}
+            websiteLocalPart={websiteLocalPart}
+            socialPlatform={socialPlatform}
+            socialHandleInput={socialHandleInput}
+            saved={savedSection === 'Business Info' && Boolean(savedTick)}
+            onShopNameChange={(value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopName: value } }))}
+            onBusinessPhoneChange={handleBusinessPhoneChange}
+            onBusinessEmailChange={(value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessEmail: value } }))}
+            onWebsiteChange={handleWebsiteChange}
+            onSocialPlatformChange={setSocialPlatform}
+            onSocialHandleInputChange={setSocialHandleInput}
+            onAddSocialHandle={addSocialHandle}
+            onRemoveSocialHandle={removeSocialHandle}
+            onShopAddressChange={(value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopAddress: value } }))}
+            onSave={() => markSaved('Business Info')}
+          />
+        </SettingAccordion>
 
-            <div className="input-group settings-business-group">
-              <label className="settings-business-label row gap-6"><Phone size={15} />Business Phone</label>
-              <p className="settings-help-text">Used for client contact and invoice footer.</p>
-              <div className="settings-phone-input-wrap">
-                <span className="settings-phone-prefix">+234</span>
-                <input
-                  className="input settings-business-input settings-phone-input"
-                  inputMode="numeric"
-                  placeholder="8012345678"
-                  value={businessPhoneLocalPart}
-                  onChange={(event) => handleBusinessPhoneChange(event.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="input-group settings-business-group">
-              <label className="settings-business-label row gap-6"><Mail size={15} />Business Email</label>
-              <p className="settings-help-text">For receipts, invoices, and support contact.</p>
-              <input className="input settings-business-input" value={settings.businessInfo.businessEmail} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessEmail: value } })))} />
-            </div>
-
-            <div className="input-group settings-business-group">
-              <label className="settings-business-label row gap-6"><Globe size={15} />Business Website</label>
-              <p className="settings-help-text">Optional website link shown on invoices.</p>
-              <div className="settings-phone-input-wrap">
-                <span className="settings-phone-prefix">https://</span>
-                <input
-                  className="input settings-business-input settings-phone-input settings-website-input"
-                  placeholder="yourbusiness.com"
-                  value={websiteLocalPart}
-                  onChange={(event) => handleWebsiteChange(event.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="stack settings-business-group">
-              <p className="settings-business-label row gap-6"><BusinessHandleIcon size={15} />Business Handle</p>
-              <p className="settings-help-text">Add social handles used by your business.</p>
-
-              <div className="settings-business-social-builder">
-                <div className="settings-business-platform-row">
-                  {socialPlatforms.map((platform) => {
-                    const Icon = socialPlatformIcon[platform]
-                    return (
-                      <button
-                        key={platform}
-                        type="button"
-                        className={`settings-choice-pill settings-business-platform-btn${socialPlatform === platform ? ' active' : ''}`}
-                        onClick={() => setSocialPlatform(platform)}
-                      >
-                        <span className="settings-business-platform-pill-content">
-                          <Icon size={14} style={{ color: socialPlatformColor[platform] }} />
-                          <span>{platform}</span>
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-
-                <div className="settings-business-handle-row">
-                  <div className="settings-phone-input-wrap flex-1">
-                    <span className="settings-phone-prefix">
-                      <AtSign size={14} />
-                    </span>
-                    <input
-                      className="input settings-business-input settings-phone-input"
-                      placeholder="yourhandle"
-                      value={socialHandleInput}
-                      onChange={(event) => setSocialHandleInput(event.target.value.replace(/^@+/, ''))}
-                    />
-                  </div>
-                  <button type="button" className="btn btn-primary settings-business-add-btn" onClick={addSocialHandle}>
-                    <Plus size={15} />
-                    Add
-                  </button>
-                </div>
-              </div>
-
-              <div className="settings-business-handle-list">
-                {settings.businessInfo.socialHandles.map((item) => {
-                  const Icon = socialPlatformIcon[item.platform]
-                  return (
-                    <div key={item.id} className="settings-business-handle-item">
-                      <div className="row gap-8 min-w-0">
-                        <Icon className="settings-business-handle-icon" size={14} />
-                        <p className="settings-business-handle-text">{item.platform}: {item.handle}</p>
-                      </div>
-                      <button type="button" className="btn btn-ghost btn-icon settings-business-delete" onClick={() => removeSocialHandle(item.id)} aria-label={`Remove ${item.platform} handle`}>
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="input-group settings-business-group">
-              <label className="settings-business-label row gap-6"><Building2 size={15} />Shop Address</label>
-              <p className="settings-help-text">Your physical shop location for delivery and pickup.</p>
-              <textarea className="input settings-textarea settings-business-input" value={settings.businessInfo.shopAddress} onChange={onInput((value) => setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, shopAddress: value } })))} />
-            </div>
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={() => handleSaveSettings('Business Info')}>
-              Save Business Info
-            </button>
-            {savedSection === 'Business Info' && savedTick ? <p className="text-sm text-success">Business Info saved.</p> : null}
-          </div>
+        <SettingAccordion icon={<Store size={20} />} title="Shop Preferences" order={3} panelKey="preferences" panel={panel} onToggle={handleToggle}>
+          <ShopPreferencesPanel
+            settings={settings}
+            saved={savedSection === 'Shop Preferences' && Boolean(savedTick)}
+            onMeasurementUnitChange={(measurementUnit) => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, measurementUnit } }))}
+            onMaterialQualityChange={(defaultMaterialQuality: MaterialQuality) => setSettings((prev) => ({ ...prev, preferences: { ...prev.preferences, defaultMaterialQuality } }))}
+            onSave={() => markSaved('Shop Preferences')}
+          />
         </SettingAccordion>
 
         <SettingAccordion icon={<Palette size={20} />} title="Invoice & Receipt Setup" order={4} panelKey="brand" panel={panel} onToggle={handleToggle}>
-          <div className="stack settings-brand-form">
-            <div className="stack settings-brand-group">
-              <p className="settings-brand-label">Document Template</p>
-              <p className="settings-help-text">
-                One shared template is used for both invoice and receipt. Choose your header/body colors, upload logo and signature, then generate preview to review before saving.
-              </p>
-              <div className="settings-brand-template-grid">
-                <div className="settings-brand-template-card active">
-                  <div className="settings-brand-template-preview">
-                    <div className="settings-brand-template-top" style={{ backgroundColor: settings.brand.colors[0] }} />
-                    <div className="settings-brand-template-line" />
-                    <div className="settings-brand-template-line short" />
-                  </div>
-                  <p className="settings-brand-template-title">{documentTemplate.title}</p>
-                  <p className="settings-brand-template-sub">{documentTemplate.subtitle}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="stack settings-brand-group">
-              <p className="settings-brand-label">Select Your Brand Colors</p>
-              <p className="settings-help-text">Choose a Header Color and Body Color. TailorDeck auto-mixes both for clean document sections.</p>
-              <div className="settings-brand-color-pickers">
-                {([
-                  { label: 'Header', index: 0 as const },
-                  { label: 'Body', index: 1 as const },
-                ]).map((color) => (
-                  <div key={color.label} className="settings-brand-color-picker-item">
-                    <div className="row-between">
-                      <p className="settings-brand-color-title">{color.label}</p>
-                      <p className="settings-brand-color-hex">{settings.brand.colors[color.index].toUpperCase()}</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="settings-choice-pill settings-brand-color-pick-btn"
-                      onClick={() => setOpenColorPicker((prev) => (prev === color.index ? null : color.index))}
-                    >
-                      Pick {color.label} Color
-                    </button>
-
-                    {openColorPicker === color.index ? (
-                      <div className="settings-brand-color-palette">
-                        {brandColorOptions.map((hex) => (
-                          <button
-                            key={`${color.label}-${hex}`}
-                            type="button"
-                            className={`settings-brand-palette-chip${settings.brand.colors[color.index].toLowerCase() === hex.toLowerCase() ? ' active' : ''}`}
-                            onClick={() => updateColor(color.index, hex)}
-                          >
-                            <span className="settings-brand-palette-dot" style={{ backgroundColor: hex }} />
-                            <span>{hex.toUpperCase()}</span>
-                          </button>
-                        ))}
-                        <label className="settings-brand-custom-color">
-                          <span>Custom Color</span>
-                          <input type="color" value={settings.brand.colors[color.index]} onChange={onInput((value) => updateColor(color.index, value))} />
-                        </label>
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="stack settings-brand-group">
-              <p className="settings-brand-label">Business Logo</p>
-              <p className="settings-help-text">Use PNG/JPG, max 2MB, square or horizontal logo works best.</p>
-              <label className="settings-brand-upload-box">
-                <div className="settings-brand-upload-preview">
-                  {settings.brand.logoUrl ? <img src={settings.brand.logoUrl} alt="Logo preview" /> : <ImageIcon size={18} />}
-                </div>
-                <div className="stack gap-4">
-                  <span>Upload Logo</span>
-                </div>
-                <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('logoUrl', event)} />
-              </label>
-            </div>
-
-            <div className="stack settings-brand-group">
-              <p className="settings-brand-label">
-                Business Signature <span className="settings-brand-signature-note">(image of your signature)</span>
-              </p>
-              <p className="settings-help-text">Use transparent PNG or clean JPG, max 2MB.</p>
-              <label className="settings-brand-upload-box">
-                <div className="settings-brand-upload-preview">
-                  {settings.brand.signatureUrl ? <img src={settings.brand.signatureUrl} alt="Signature preview" /> : <Upload size={18} />}
-                </div>
-                <div className="stack gap-4">
-                  <span>Upload Signature</span>
-                </div>
-                <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={(event) => onBrandFileUpload('signatureUrl', event)} />
-              </label>
-            </div>
-
-            <div className="stack settings-brand-group">
-              <p className="settings-brand-label">Business Details To Show</p>
-              <p className="settings-help-text">Choose which business information appears on invoice and receipt.</p>
-              <div className="settings-radio-list">
-                {([
-                  { key: 'phone', label: 'Business Phone' },
-                  { key: 'email', label: 'Business Email' },
-                  { key: 'website', label: 'Business Website' },
-                  { key: 'social', label: 'Social Handles' },
-                  { key: 'address', label: 'Shop Address' },
-                ] as const).map((item) => (
-                  <button
-                    key={item.key}
-                    type="button"
-                    className={`settings-radio-option${settings.brand.includeBusinessDetails[item.key] ? ' active' : ''}`}
-                    onClick={() => toggleBrandDetail(item.key)}
-                  >
-                    <span className="settings-radio-indicator" />
-                    <CheckSquare size={15} className="settings-radio-icon" />
-                    <span className="settings-radio-title">{item.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="stack settings-brand-group">
-              <div className="settings-brand-final-preview">
-                <button
-                  type="button"
-                  className="btn btn-primary settings-brand-generate-btn settings-brand-generate-btn-in-wrap"
-                  onClick={() => {
-                    setGeneratedPreviewKind('invoice')
-                    setInvoicePreviewGenerated(true)
-                    setOpenBrandPreviewSheet(true)
-                  }}
-                >
-                  <FileText size={16} />
-                  {invoicePreviewGenerated ? 'Open Preview' : 'Generate Preview'}
-                </button>
-              </div>
-              {savedSection === 'Invoice & Receipt Setup' && savedTick ? <p className="text-sm text-success">Invoice & Receipt Setup saved.</p> : null}
-            </div>
-            <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={() => handleSaveSettings('Invoice & Receipt Setup')}>
-              Save Invoice & Receipt Setup
-            </button>
-          </div>
+          <InvoiceReceiptPanel
+            settings={settings}
+            openColorPicker={openColorPicker}
+            invoicePreviewGenerated={invoicePreviewGenerated}
+            saved={savedSection === 'Invoice & Receipt Setup' && Boolean(savedTick)}
+            onColorPickerToggle={(index) => setOpenColorPicker((prev) => (prev === index ? null : index))}
+            onColorChange={updateColor}
+            onFileUpload={onBrandFileUpload}
+            onToggleBrandDetail={toggleBrandDetail}
+            onGeneratePreview={() => {
+              setGeneratedPreviewKind('invoice')
+              setInvoicePreviewGenerated(true)
+              setOpenBrandPreviewSheet(true)
+            }}
+            onSave={() => markSaved('Invoice & Receipt Setup')}
+          />
         </SettingAccordion>
+
+        <SettingAccordion icon={<BellRing size={20} />} title="Reminders & Notifications" order={5} panelKey="reminders" panel={panel} onToggle={handleToggle}>
+          <RemindersPanel
+            settings={settings}
+            saved={savedSection === 'Reminders' && Boolean(savedTick)}
+            onPushNotificationsChange={(pushNotifications) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, pushNotifications } }))}
+            onNotificationBellEnabledChange={(notificationBellEnabled) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBellEnabled } }))}
+            onNotificationBellChange={(notificationBell: NotificationBellOption) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, notificationBell } }))}
+            onDefaultReminderChange={(defaultReminder: ReminderLead) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, defaultReminder } }))}
+            onRingtoneEnabledChange={(ringtoneEnabled) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtoneEnabled } }))}
+            onRingtoneChange={(ringtone: RingtoneOption) => setSettings((prev) => ({ ...prev, reminders: { ...prev.reminders, ringtone } }))}
+            onSave={() => markSaved('Reminders')}
+          />
+        </SettingAccordion>
+
+        <SettingAccordion icon={<ShieldCheck size={20} />} title="Account & Security" tone="danger" order={6} panelKey="security" panel={panel} onToggle={handleToggle}>
+          <AccountSecurityPanel
+            settings={settings}
+            profilePhoneLocalPart={profilePhoneLocalPart}
+            passwordDraft={passwordDraft}
+            confirmPasswordDraft={confirmPasswordDraft}
+            securityFeedback={securityFeedback}
+            saved={savedSection === 'Account & Security' && Boolean(savedTick)}
+            onFullNameChange={(fullName) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, fullName } }))}
+            onEmailChange={(email) => setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email } }))}
+            onPhoneChange={handleProfilePhoneChange}
+            onPasswordChange={setPasswordDraft}
+            onConfirmPasswordChange={setConfirmPasswordDraft}
+            onSave={handleSaveAccountSecurity}
+            onDanger={handleSecurityDanger}
+          />
+        </SettingAccordion>
+
+        <SettingLinkRow icon={<WandSparkles size={20} />} title="Upgrade" subtitle={`Currently on ${settings.subscription.plan === 'free' ? 'Free' : settings.subscription.plan}`} href="/settings/subscription" tone="accent" order={7} />
 
         <SettingAccordion icon={<CircleHelp size={20} />} title="About TailorDeck" order={8} panelKey="about" panel={panel} onToggle={handleToggle}>
-          <div className="settings-about-content">
-            <p className="text-base font-semibold">Version 1.0.0</p>
-            <p className="text-sm text-muted">Your shop, in your pocket.</p>
-            <p className="text-sm text-muted">Built with ❤️ for tailors and fashion designers.</p>
-          </div>
+          <AboutTailorDeckPanel />
         </SettingAccordion>
-
-        <SettingLinkRow
-          icon={<WandSparkles size={20} />}
-          title="Upgrade"
-          subtitle={`Currently on ${settings.subscription.plan === 'free' ? 'Free' : settings.subscription.plan}`}
-          href="/settings/subscription"
-          tone="accent"
-          order={7}
-        />
       </div>
 
       <div className="settings-actions">
@@ -832,69 +330,21 @@ export default function SettingsPage() {
       </div>
 
       {openBrandPreviewSheet ? (
-        <div
-          className="side-sheet-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Invoice and receipt template preview"
-          onClick={() => setOpenBrandPreviewSheet(false)}
-        >
-          <aside className="side-sheet" onClick={(event) => event.stopPropagation()}>
-            <header className="side-sheet-header">
-              <h3 className="side-sheet-title">Template Preview</h3>
-              <button type="button" className="btn btn-ghost btn-icon side-sheet-close" onClick={() => setOpenBrandPreviewSheet(false)} aria-label="Close preview">
-                <X size={18} />
-              </button>
-            </header>
-
-            <div className="side-sheet-body">
-              <div className="settings-brand-generated-paper">
-                {renderTemplate(buildTemplatePreviewPayload(generatedPreviewKind))}
-              </div>
-              <div className="row gap-8 settings-brand-mode-switch">
-                <button
-                  type="button"
-                  className={`btn btn-secondary flex-1${generatedPreviewKind === 'invoice' ? ' active' : ''}`}
-                  onClick={() => setGeneratedPreviewKind('invoice')}
-                >
-                  View as Invoice
-                </button>
-                <button
-                  type="button"
-                  className={`btn btn-secondary flex-1${generatedPreviewKind === 'receipt' ? ' active' : ''}`}
-                  onClick={() => setGeneratedPreviewKind('receipt')}
-                >
-                  View as Receipt
-                </button>
-              </div>
-              <button
-                type="button"
-                className="btn btn-secondary settings-brand-edit-btn"
-                onClick={() => {
-                  setInvoicePreviewGenerated(false)
-                  setOpenBrandPreviewSheet(false)
-                }}
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary settings-brand-template-save-btn"
-                onClick={() => {
-                  handleSaveSettings('Invoice & Receipt Setup')
-                  setOpenBrandPreviewSheet(false)
-                }}
-              >
-                Save Template Design
-              </button>
-            </div>
-          </aside>
-        </div>
+        <DocumentPreviewSheet
+          settings={settings}
+          previewKind={generatedPreviewKind}
+          onPreviewKindChange={setGeneratedPreviewKind}
+          onClose={() => setOpenBrandPreviewSheet(false)}
+          onEdit={() => {
+            setInvoicePreviewGenerated(false)
+            setOpenBrandPreviewSheet(false)
+          }}
+          onSave={() => {
+            markSaved('Invoice & Receipt Setup')
+            setOpenBrandPreviewSheet(false)
+          }}
+        />
       ) : null}
-
     </section>
   )
 }
-
-
-
