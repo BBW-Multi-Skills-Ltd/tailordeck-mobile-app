@@ -1,20 +1,17 @@
-import { Plus } from 'lucide-react'
 import {
-  CHILD_FIELDS,
   bodyWearItems,
   makeCategories,
   nonBodyItems,
   orderModes,
   scopeForBodyWear,
   scopeForNonBody,
-  step1FieldsBySex,
   type JobType,
   type MakeCategory,
   type OrderMode,
   type PersonForm,
 } from './newJobConfig'
 import AmendmentDetailsForm from './AmendmentDetailsForm'
-import BodyPersonMeasurementsCard from './BodyPersonMeasurementsCard'
+import BodyMeasurementsSection from './BodyMeasurementsSection'
 import NonBodyMeasurementsForm from './NonBodyMeasurementsForm'
 
 type StepClientMeasurementsProps = {
@@ -202,103 +199,25 @@ export default function StepClientMeasurements({
         </div>
       ) : null}
 
-      {showBodyMeasurementFlow && jobType === 'Single' && persons[0] ? (
-        <div className="stack gap-8 wizard-step1-measurements">
-          <p className="input-label">Measurements</p>
-          <BodyPersonMeasurementsCard
-            person={persons[0]}
-            title={persons[0].name || clientName || 'Client'}
-            subtitle={`${persons[0].sex} - adult`}
-            isOpen={singleMeasurementsOpen}
-            sexOptions={['Male', 'Female']}
-            measurementFields={step1FieldsBySex(persons[0].sex)}
-            measurementTitle="Body Measurements (cm)"
-            itemValue={persons[0].itemType || itemType}
-            itemPlaceholder="e.g. Shirt, Gown, Agbada"
-            onToggle={() => onSingleMeasurementsOpenChange((prev) => !prev)}
-            onUpdatePerson={(updater) => onUpdatePerson(persons[0].id, updater)}
-            onUpdateMeasurement={(field, value) => onUpdatePersonMeasurement(persons[0].id, field, value)}
-            onUpdateDescription={(value) => onUpdatePersonDescription(persons[0].id, value)}
-            onSharedItemTypeChange={onSharedItemTypeChange}
-          />
-        </div>
-      ) : null}
-
-      {showBodyMeasurementFlow && jobType === 'Couple' ? (
-        <div className="stack gap-8 wizard-step1-measurements">
-          <p className="input-label">Measurements</p>
-          {persons.slice(0, 2).map((person, index) => (
-            <BodyPersonMeasurementsCard
-              key={person.id}
-              person={person}
-              title={index === 0 ? person.name || clientName || 'Client' : `Person ${index + 1}`}
-              subtitle={`${person.sex} - adult`}
-              isOpen={stepOneMeasurementsOpen[person.id] ?? true}
-              sexOptions={['Male', 'Female']}
-              measurementFields={step1FieldsBySex(person.sex)}
-              measurementTitle="Body Measurements (cm)"
-              itemValue={sameItemForAll ? itemType : person.itemType}
-              itemPlaceholder="e.g. Suit, Gown, Kaftan"
-              showNameInput
-              namePlaceholder={`Person ${index + 1} name`}
-              disableName={index === 0}
-              onToggle={() => onTogglePersonMeasurements(person.id)}
-              onUpdatePerson={(updater) => onUpdatePerson(person.id, updater)}
-              onUpdateMeasurement={(field, value) => onUpdatePersonMeasurement(person.id, field, value)}
-              onUpdateDescription={(value) => onUpdatePersonDescription(person.id, value)}
-              onSharedItemTypeChange={sameItemForAll ? onSharedItemTypeChange : (value) => onUpdatePerson(person.id, (p) => ({ ...p, itemType: value }))}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      {showBodyMeasurementFlow && jobType === 'Family' ? (
-        <div className="stack gap-8 wizard-step1-measurements">
-          <p className="input-label">Measurements</p>
-          {persons.map((person, index) => {
-            const adultIndex = persons.filter((p, i) => p.role === 'adult' && i <= index).length
-            const isPrimaryAdult = person.role === 'adult' && adultIndex === 1
-            const personLabel = isPrimaryAdult ? person.name || clientName || 'Client' : person.role === 'adult' ? `Adult ${adultIndex}` : person.name || 'Child'
-            const measurementFields = person.role === 'child' ? CHILD_FIELDS : step1FieldsBySex(person.sex)
-            const sexOptions = person.role === 'child' ? (['Boy', 'Girl'] as const) : (['Male', 'Female'] as const)
-
-            return (
-              <BodyPersonMeasurementsCard
-                key={person.id}
-                person={person}
-                title={personLabel}
-                subtitle={`${person.sex} - ${person.role}`}
-                isOpen={stepOneMeasurementsOpen[person.id] ?? true}
-                sexOptions={sexOptions}
-                measurementFields={measurementFields}
-                measurementTitle={person.role === 'child' ? 'Child Measurements (cm)' : 'Body Measurements (cm)'}
-                itemValue={sameItemForAll ? itemType : person.itemType}
-                itemPlaceholder="e.g. Agbada, Gown, Shirt"
-                showNameInput
-                namePlaceholder={person.role === 'child' ? 'Child name' : 'Adult name'}
-                disableName={isPrimaryAdult}
-                showAge={person.role === 'child'}
-                allowRemove={person.role === 'child'}
-                onRemove={() => onRemovePerson(person.id)}
-                onToggle={() => onTogglePersonMeasurements(person.id)}
-                onUpdatePerson={(updater) => onUpdatePerson(person.id, updater)}
-                onUpdateMeasurement={(field, value) => onUpdatePersonMeasurement(person.id, field, value)}
-                onUpdateDescription={(value) => onUpdatePersonDescription(person.id, value)}
-                onSharedItemTypeChange={sameItemForAll ? onSharedItemTypeChange : (value) => onUpdatePerson(person.id, (p) => ({ ...p, itemType: value }))}
-              />
-            )
-          })}
-
-          <button type="button" className="wizard-add-person-btn" onClick={onAddAdult}>
-            <Plus size={22} />
-            <span>Add Adult</span>
-          </button>
-
-          <button type="button" className="wizard-add-person-btn" onClick={onAddChild}>
-            <Plus size={22} />
-            <span>Add Child</span>
-          </button>
-        </div>
+      {showBodyMeasurementFlow ? (
+        <BodyMeasurementsSection
+          clientName={clientName}
+          itemType={itemType}
+          jobType={jobType}
+          persons={persons}
+          sameItemForAll={sameItemForAll}
+          singleMeasurementsOpen={singleMeasurementsOpen}
+          stepOneMeasurementsOpen={stepOneMeasurementsOpen}
+          onAddAdult={onAddAdult}
+          onAddChild={onAddChild}
+          onRemovePerson={onRemovePerson}
+          onSharedItemTypeChange={onSharedItemTypeChange}
+          onSingleMeasurementsOpenChange={onSingleMeasurementsOpenChange}
+          onTogglePersonMeasurements={onTogglePersonMeasurements}
+          onUpdatePerson={onUpdatePerson}
+          onUpdatePersonDescription={onUpdatePersonDescription}
+          onUpdatePersonMeasurement={onUpdatePersonMeasurement}
+        />
       ) : null}
 
       {showNonBodyMeasurementFlow ? (
