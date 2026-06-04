@@ -1,4 +1,4 @@
-import type { BrandConfig, InvoiceType } from '../invoice/DocumentPreview'
+import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 
 export function documentFileName(brand: BrandConfig, type: InvoiceType, jobId: string): string {
   return `${brand.shopName.replace(/\s+/g, '-').toLowerCase()}-${type}-${jobId}.pdf`

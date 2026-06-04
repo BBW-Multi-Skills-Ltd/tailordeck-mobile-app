@@ -1,13 +1,10 @@
 import { useCallback, useRef } from 'react'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
 import type { DetailedJobData } from '../../data/mockJobDetails'
 import {
   buildDocumentShareText,
   buildWhatsAppURL,
-  type BrandConfig,
-  type InvoiceType,
-} from '../invoice/DocumentPreview'
+} from '../invoice/documentHelpers'
+import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import type { MockJob } from '../../types/job'
 import { canSharePdfFile, createPdfFile, documentFileName } from './jobDocumentHelpers'
 
@@ -26,6 +23,10 @@ export function useJobDocumentActions({
 
   const buildPdfBlob = useCallback(async (): Promise<Blob | null> => {
     if (!docPreviewRef.current) return null
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ])
 
     const canvas = await html2canvas(docPreviewRef.current, {
       scale: 2,

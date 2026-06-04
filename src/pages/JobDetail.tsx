@@ -1,9 +1,8 @@
 import { ArrowLeft } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
 import { JobDeadlineSection } from '../components/jobdetail/JobDeadlineSection'
-import { JobDocumentDrawer } from '../components/jobdetail/JobDocumentDrawer'
 import { JobImageViewer } from '../components/jobdetail/JobImageViewer'
 import { JobInfoSection } from '../components/jobdetail/JobInfoSection'
 import { JobPricingSection } from '../components/jobdetail/JobPricingSection'
@@ -14,10 +13,15 @@ import {
 } from '../components/jobdetail/jobDetailUtils'
 import { useJobDocumentActions } from '../components/jobdetail/useJobDocumentActions'
 import { useJobImageViewer } from '../components/jobdetail/useJobImageViewer'
-import { readBrandConfig, type BrandConfig, type InvoiceType } from '../components/invoice/DocumentPreview'
+import { readBrandConfig } from '../components/invoice/documentHelpers'
+import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
 import { appJobMeasurementById, appJobs } from '../data/appData'
 import { detailedMockByJobId, type DetailedJobData } from '../data/mockJobDetails'
 import type { MockJob } from '../types/job'
+
+const JobDocumentDrawer = lazy(() =>
+  import('../components/jobdetail/JobDocumentDrawer').then((module) => ({ default: module.JobDocumentDrawer })),
+)
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
@@ -139,18 +143,20 @@ function JobDetailContent({
       ) : null}
 
       {openDrawer ? (
-        <JobDocumentDrawer
-          type={openDrawer}
-          brand={brand}
-          job={job}
-          details={details}
-          balanceToCollect={balanceToCollect}
-          docPreviewRef={docPreviewRef}
-          onClose={() => setOpenDrawer(null)}
-          onShare={(type) => void handleSystemShare(type)}
-          onWhatsApp={(type) => void handleWhatsAppToClient(type)}
-          onDownload={(type) => void handleDownload(type)}
-        />
+        <Suspense fallback={null}>
+          <JobDocumentDrawer
+            type={openDrawer}
+            brand={brand}
+            job={job}
+            details={details}
+            balanceToCollect={balanceToCollect}
+            docPreviewRef={docPreviewRef}
+            onClose={() => setOpenDrawer(null)}
+            onShare={(type) => void handleSystemShare(type)}
+            onWhatsApp={(type) => void handleWhatsAppToClient(type)}
+            onDownload={(type) => void handleDownload(type)}
+          />
+        </Suspense>
       ) : null}
     </>
   )

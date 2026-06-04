@@ -3,11 +3,8 @@ import { FaWhatsapp } from 'react-icons/fa6'
 import type { RefObject } from 'react'
 import type { DetailedJobData } from '../../data/mockJobDetails'
 import type { MockJob } from '../../types/job'
-import {
-  DocumentPreview,
-  type BrandConfig,
-  type InvoiceType,
-} from '../invoice/DocumentPreview'
+import { DocumentPreview } from '../invoice/DocumentPreview'
+import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 
 export function JobDocumentDrawer({
   type,
