@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import {
@@ -7,13 +7,14 @@ import {
   type SocialPlatform,
   type TailorSettings,
 } from '../../lib/settings'
-import { getSavedTheme, toggleTheme } from '../../lib/theme'
 import type { SettingsPanel } from './SettingsRows'
+import { getSettingsLocalParts, normalizeNigeriaPhoneInput, normalizeWebsiteInput } from './settingsFormUtils'
+import { useSettingsTheme } from './useSettingsTheme'
 
 export function useSettingsPage() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
-  const [theme, setTheme] = useState(() => getSavedTheme())
+  const { setTheme, theme } = useSettingsTheme()
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
   const [savedSection, setSavedSection] = useState('')
@@ -26,19 +27,6 @@ export function useSettingsPage() {
   const [socialHandleInput, setSocialHandleInput] = useState('')
   const [passwordDraft, setPasswordDraft] = useState('')
   const [confirmPasswordDraft, setConfirmPasswordDraft] = useState('')
-
-  useEffect(() => {
-    function syncTheme() {
-      setTheme(getSavedTheme())
-    }
-
-    window.addEventListener('storage', syncTheme)
-    window.addEventListener('tailordeck-theme-updated', syncTheme)
-    return () => {
-      window.removeEventListener('storage', syncTheme)
-      window.removeEventListener('tailordeck-theme-updated', syncTheme)
-    }
-  }, [])
 
   function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): void {
     const next = saveTailorSettings(nextSettings)
@@ -67,18 +55,15 @@ export function useSettingsPage() {
   }
 
   function handleProfilePhoneChange(value: string): void {
-    setSettings((prev) => ({ ...prev, profile: { ...prev.profile, phone: `+234${value.replace(/\D/g, '')}` } }))
+    setSettings((prev) => ({ ...prev, profile: { ...prev.profile, phone: normalizeNigeriaPhoneInput(value) } }))
   }
 
   function handleBusinessPhoneChange(value: string): void {
-    const digitsOnly = value.replace(/\D/g, '')
-    const normalizedLocal = digitsOnly.startsWith('0') ? digitsOnly.slice(1) : digitsOnly
-    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessPhone: `+234${normalizedLocal}` } }))
+    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, businessPhone: normalizeNigeriaPhoneInput(value) } }))
   }
 
   function handleWebsiteChange(value: string): void {
-    const normalized = value.trim().replace(/^https?:\/\//, '')
-    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, website: `https://${normalized}` } }))
+    setSettings((prev) => ({ ...prev, businessInfo: { ...prev.businessInfo, website: normalizeWebsiteInput(value) } }))
   }
 
   function clearJobHistory(): void {
@@ -188,16 +173,14 @@ export function useSettingsPage() {
       setSettings,
       setSocialHandleInput,
       setSocialPlatform,
-      setTheme: () => setTheme(toggleTheme()),
+      setTheme,
       toggleBrandDetail,
       updateColor,
       uploadSettingsImage,
       handleProfilePhoneChange,
     },
     derived: {
-      businessPhoneLocalPart: settings.businessInfo.businessPhone.replace(/^\+234/, '').replace(/\D/g, ''),
-      profilePhoneLocalPart: settings.profile.phone.replace(/^\+234/, '').replace(/\D/g, ''),
-      websiteLocalPart: settings.businessInfo.website.replace(/^https?:\/\//, ''),
+      ...getSettingsLocalParts(settings),
     },
     state: {
       confirmPasswordDraft,
