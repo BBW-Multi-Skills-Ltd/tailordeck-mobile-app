@@ -9,7 +9,12 @@ import {
 } from '../../lib/settings'
 import type { SettingsPanel } from './SettingsRows'
 import { getSettingsLocalParts, normalizeNigeriaPhoneInput, normalizeWebsiteInput } from './settingsFormUtils'
+import { uploadSettingsImage as uploadSettingsImageFile } from './settingsImageUpload'
+import { getSecurityDangerAlert, getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
+import { addSocialHandle as addSocialHandleToSettings, removeSocialHandle as removeSocialHandleFromSettings } from './settingsSocialActions'
 import { useSettingsTheme } from './useSettingsTheme'
+
+type SettingsImageField = 'avatarUrl' | 'logoUrl' | 'signatureUrl'
 
 export function useSettingsPage() {
   const navigate = useNavigate()
@@ -84,57 +89,18 @@ export function useSettingsPage() {
   }
 
   function handleSecurityDanger(kind: 'deactivate' | 'delete'): void {
-    const message = kind === 'deactivate' ? 'Deactivate account?\nYou can reactivate later once backend auth is connected.' : 'Delete account permanently?\nThis is irreversible once backend auth is connected.'
-    if (!window.confirm(message)) return
+    if (!window.confirm(getSecurityDangerMessage(kind))) return
 
-    setSecurityFeedback(kind === 'deactivate' ? 'Account deactivation queued.' : 'Permanent account delete queued.')
-    window.alert(`${kind === 'deactivate' ? 'Account deactivation' : 'Permanent account delete'} queued as placeholder. Supabase auth wiring will handle this fully.`)
+    setSecurityFeedback(getSecurityDangerFeedback(kind))
+    window.alert(getSecurityDangerAlert(kind))
   }
 
   function addSocialHandle(): void {
-    const handle = socialHandleInput.trim()
-    if (!handle) return
-    const normalizedHandle = handle.startsWith('@') ? handle : `@${handle}`
-
-    setSettings((prev) => ({
-      ...prev,
-      businessInfo: {
-        ...prev.businessInfo,
-        socialHandles: [
-          ...prev.businessInfo.socialHandles,
-          { id: `social-${socialPlatform.toLowerCase()}-${Date.now()}`, platform: socialPlatform, handle: normalizedHandle },
-        ],
-      },
-    }))
-    setSocialHandleInput('')
+    addSocialHandleToSettings({ setSettings, setSocialHandleInput, socialHandleInput, socialPlatform })
   }
 
   function removeSocialHandle(id: string): void {
-    setSettings((prev) => ({
-      ...prev,
-      businessInfo: {
-        ...prev.businessInfo,
-        socialHandles: prev.businessInfo.socialHandles.filter((item) => item.id !== id),
-      },
-    }))
-  }
-
-  function uploadSettingsImage(field: 'avatarUrl' | 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>): void {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : ''
-      if (!result) return
-      setSettings((prev) =>
-        field === 'avatarUrl'
-          ? { ...prev, profile: { ...prev.profile, avatarUrl: result } }
-          : { ...prev, brand: { ...prev.brand, [field]: result } },
-      )
-    }
-    reader.readAsDataURL(file)
-    event.target.value = ''
+    removeSocialHandleFromSettings(id, setSettings)
   }
 
   function toggleBrandDetail(key: keyof TailorSettings['brand']['includeBusinessDetails']): void {
@@ -176,7 +142,7 @@ export function useSettingsPage() {
       setTheme,
       toggleBrandDetail,
       updateColor,
-      uploadSettingsImage,
+      uploadSettingsImage: (field: SettingsImageField, event: ChangeEvent<HTMLInputElement>) => uploadSettingsImageFile(field, event, setSettings),
       handleProfilePhoneChange,
     },
     derived: {

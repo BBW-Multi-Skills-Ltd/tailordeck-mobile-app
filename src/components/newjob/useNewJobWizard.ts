@@ -9,7 +9,8 @@ import { createNavigationActions } from './newJobNavigationActions'
 import { createStepOneActions } from './newJobStepOneActions'
 import { usePageNoScroll, useSharedItemTypeSync } from './useNewJobEffects'
 import { useRepeatClientPrefill } from './useRepeatClientPrefill'
-import { getNewJobWizardStateSnapshot, useNewJobWizardState } from './useNewJobWizardState'
+import { getNewJobWizardStateSnapshot } from './newJobWizardStateSnapshot'
+import { useNewJobWizardState } from './useNewJobWizardState'
 
 export function useNewJobWizard() {
   const navigate = useNavigate()
@@ -182,3 +183,4 @@ export function useNewJobWizard() {
 }
 
 export type NewJobWizardModel = ReturnType<typeof useNewJobWizard>
+
