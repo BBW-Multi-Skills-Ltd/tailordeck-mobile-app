@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { markOnboardingStage, registerLocalAccount, setPreviewAuthenticated } from '../../lib/auth'
 import { loadTailorSettings, saveTailorSettings, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
+import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
 
 export function useSignUpForm() {
   const navigate = useNavigate()
@@ -12,11 +12,12 @@ export function useSignUpForm() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [agree, setAgree] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const strength = useMemo(() => calculatePasswordStrength(password), [password])
   const passwordLabel = strength <= 1 ? 'Weak password' : strength <= 3 ? 'Medium password' : 'Strong password'
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!email.trim() || !password.trim()) {
       window.alert('Enter at least email and password to create account.')
@@ -25,22 +26,31 @@ export function useSignUpForm() {
 
     const normalizedEmail = email.trim().toLowerCase()
     const normalizedPhone = `+234${phone.replace(/\D/g, '')}`
-    registerLocalAccount({ fullName: fullName.trim(), email: normalizedEmail, phone: normalizedPhone, password })
-    window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({ fullName: fullName.trim(), email: normalizedEmail, shopName: '' }))
-    const currentSettings = loadTailorSettings()
-    saveTailorSettings({
-      ...currentSettings,
-      profile: {
-        ...currentSettings.profile,
-        fullName: fullName.trim() || currentSettings.profile.fullName,
-        email: normalizedEmail,
-        phone: normalizedPhone,
-      },
-    })
-    setPreviewAuthenticated('signed-up')
-    markOnboardingStage('setup')
-    window.alert('Account created. Continue with setup.')
-    navigate('/onboarding/setup')
+    setLoading(true)
+    try {
+      await signUpWithEmail({ fullName, email: normalizedEmail, password, phone: normalizedPhone })
+      window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({ fullName: fullName.trim(), email: normalizedEmail, shopName: '' }))
+      const currentSettings = loadTailorSettings()
+      saveTailorSettings({
+        ...currentSettings,
+        profile: {
+          ...currentSettings.profile,
+          fullName: fullName.trim() || currentSettings.profile.fullName,
+          email: normalizedEmail,
+          phone: normalizedPhone,
+        },
+      })
+      window.alert('Account created. Continue with setup.')
+      navigate('/onboarding/setup')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to create account.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function handleGoogleSignUp() {
+    void signInWithGoogle()
   }
 
   return {
@@ -48,7 +58,9 @@ export function useSignUpForm() {
     confirmPassword,
     email,
     fullName,
+    handleGoogleSignUp,
     handleSubmit,
+    loading,
     password,
     passwordLabel,
     phone,

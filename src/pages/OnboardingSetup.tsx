@@ -1,17 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Ruler } from 'lucide-react'
-import { markOnboardingStage } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type MeasurementUnit } from '../lib/settings'
+import { updateBrandSettings } from '../services/brandService'
+import { updateBusinessProfile } from '../services/businessService'
+import { updatePreferences } from '../services/preferencesService'
 
 export default function OnboardingSetup() {
   const navigate = useNavigate()
   const currentSettings = loadTailorSettings()
   const [shopName, setShopName] = useState(currentSettings.businessInfo.shopName)
   const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>(currentSettings.preferences.measurementUnit)
+  const [saving, setSaving] = useState(false)
 
-  function completeSetup() {
+  async function completeSetup() {
     const current = loadTailorSettings()
+    const normalizedShopName = shopName.trim() || current.businessInfo.shopName
     saveTailorSettings({
       ...current,
       preferences: {
@@ -20,18 +24,29 @@ export default function OnboardingSetup() {
       },
       businessInfo: {
         ...current.businessInfo,
-        shopName: shopName.trim() || current.businessInfo.shopName,
+        shopName: normalizedShopName,
       },
       brand: {
         ...current.brand,
-        name: shopName.trim() || current.brand.name,
+        name: normalizedShopName || current.brand.name,
       },
       updatedAt: new Date().toISOString(),
     })
 
-    markOnboardingStage('plan')
-    window.alert('Setup saved. Choose your plan to continue.')
-    navigate('/onboarding/plan')
+    setSaving(true)
+    try {
+      await Promise.all([
+        updateBusinessProfile({ shop_name: normalizedShopName }),
+        updatePreferences({ measurement_unit: measurementUnit }),
+        updateBrandSettings({ brand_name: normalizedShopName || current.brand.name }),
+      ])
+      window.alert('Setup saved. Choose your plan to continue.')
+      navigate('/onboarding/plan')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to save setup.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -99,10 +114,10 @@ export default function OnboardingSetup() {
           </p>
 
           <div className="onboarding-step-actions">
-            <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={completeSetup}>
-              Continue
+            <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => void completeSetup()} disabled={saving}>
+              {saving ? 'Saving...' : 'Continue'}
             </button>
-            <button type="button" className="onboarding-skip-btn" onClick={completeSetup}>
+            <button type="button" className="onboarding-skip-btn" onClick={() => void completeSetup()} disabled={saving}>
               Skip for now
             </button>
           </div>

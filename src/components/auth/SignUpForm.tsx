@@ -38,9 +38,11 @@ export function SignUpForm(props: SignUpFormProps) {
         </span>
       </label>
 
-      <button type="submit" className="btn btn-primary btn-full auth-submit">Create Account</button>
+      <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={props.loading}>
+        {props.loading ? 'Creating account...' : 'Create Account'}
+      </button>
       <div className="auth-divider"><span>or</span></div>
-      <button type="button" className="btn btn-secondary btn-full auth-google-btn"><FcGoogle size={16} />Sign up with Google</button>
+      <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={props.handleGoogleSignUp}><FcGoogle size={16} />Sign up with Google</button>
     </form>
   )
 }

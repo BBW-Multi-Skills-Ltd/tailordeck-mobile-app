@@ -3,32 +3,26 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
-import { getOnboardingStage, signInWithLocalAccount } from '../lib/auth'
+import { signInWithEmail, signInWithGoogle } from '../services/authService'
 
 export default function SignIn() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const success = signInWithLocalAccount(email, password)
-    if (!success) {
-      window.alert('Account not found. Please sign up first or check your email/password.')
-      return
+    setLoading(true)
+    try {
+      await signInWithEmail({ email, password })
+      navigate('/')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to sign in.')
+    } finally {
+      setLoading(false)
     }
-
-    const stage = getOnboardingStage()
-    if (stage === 'setup') {
-      navigate('/onboarding/setup')
-      return
-    }
-    if (stage === 'plan') {
-      navigate('/onboarding/plan')
-      return
-    }
-    navigate('/dashboard')
   }
 
   return (
@@ -77,11 +71,11 @@ export default function SignIn() {
           </div>
         </div>
 
-        <button type="submit" className="btn btn-primary btn-full auth-submit">
-          Sign In
+        <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign In'}
         </button>
 
-        <button type="button" className="btn btn-secondary btn-full auth-google-btn">
+        <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={() => void signInWithGoogle()}>
           <FcGoogle size={16} />
           Sign in with Google
         </button>

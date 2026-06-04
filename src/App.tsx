@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
-import { getOnboardingStage, isOnboardingCompleted, isPreviewAuthenticated } from './lib/auth'
+import { RouteGuard } from './components/layout/RouteGuard'
 
 const Home = lazy(() => import('./pages/Home'))
 const Clients = lazy(() => import('./pages/Clients'))
@@ -36,34 +36,33 @@ function RouteLoadingFallback() {
 }
 
 export default function App() {
-  const isAuthed = isPreviewAuthenticated()
-  const isOnboarded = isOnboardingCompleted()
-  const onboardingStage = getOnboardingStage()
-  const onboardingTarget = onboardingStage === 'plan' ? '/onboarding/plan' : '/onboarding/setup'
-
   return (
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
-        <Route path="/onboarding" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <OnboardingWelcome />} />
-        <Route path="/auth/signin" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <SignIn />} />
-        <Route path="/auth/signup" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <SignUp />} />
-        <Route path="/auth/forgot" element={isAuthed ? <Navigate to={isOnboarded ? '/' : onboardingTarget} replace /> : <ForgotPassword />} />
-        <Route path="/onboarding/setup" element={isAuthed ? (isOnboarded ? <Navigate to="/" replace /> : <OnboardingSetup />) : <Navigate to="/auth/signup" replace />} />
-        <Route path="/onboarding/plan" element={isAuthed ? (isOnboarded ? <Navigate to="/" replace /> : onboardingStage === 'plan' ? <OnboardingPlan /> : <Navigate to="/onboarding/setup" replace />) : <Navigate to="/auth/signup" replace />} />
-        <Route element={isAuthed ? (isOnboarded ? <AppLayout /> : <Navigate to={onboardingTarget} replace />) : <Navigate to="/onboarding" replace />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/clients/new" element={<NewClient />} />
-          <Route path="/clients/:id" element={<ClientProfile />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/jobs/new" element={<NewJob />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/settings/subscription" element={<SubscriptionPage />} />
+        <Route path="/onboarding" element={<OnboardingWelcome />} />
+        <Route path="/auth/signin" element={<SignIn />} />
+        <Route path="/auth/signup" element={<SignUp />} />
+        <Route path="/auth/forgot" element={<ForgotPassword />} />
+
+        <Route element={<RouteGuard />}>
+          <Route path="/onboarding/setup" element={<OnboardingSetup />} />
+          <Route path="/onboarding/plan" element={<OnboardingPlan />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/new" element={<NewClient />} />
+            <Route path="/clients/:id" element={<ClientProfile />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/new" element={<NewJob />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/subscription" element={<SubscriptionPage />} />
+          </Route>
         </Route>
-        <Route path="*" element={<Navigate to={isAuthed ? (isOnboarded ? '/' : onboardingTarget) : '/onboarding'} replace />} />
+
+        <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     </Suspense>
   )

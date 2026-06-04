@@ -1,0 +1,17 @@
+﻿export const queryKeys = {
+  profile: ['profile'] as const,
+  settings: ['settings'] as const,
+  clients: ['clients'] as const,
+  client: (id: string) => ['client', id] as const,
+  jobs: (status?: string) => ['jobs', status ?? 'all'] as const,
+  job: (id: string) => ['job', id] as const,
+  jobExpenses: (jobId: string) => ['job-expenses', jobId] as const,
+  jobPersons: (jobId: string) => ['job-persons', jobId] as const,
+  dashboardMonthly: ['dashboard', 'monthly'] as const,
+  dashboardStatus: ['dashboard', 'status'] as const,
+  recentJobs: ['dashboard', 'recent-jobs'] as const,
+  notifications: ['notifications'] as const,
+  subscription: ['subscription'] as const,
+  feature: (featureKey: string) => ['feature-access', featureKey] as const,
+  documents: (jobId: string) => ['documents', jobId] as const,
+}

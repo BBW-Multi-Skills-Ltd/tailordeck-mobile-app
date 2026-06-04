@@ -1,10 +1,23 @@
 import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
+import { sendPasswordReset } from '../services/authService'
 
 export default function ForgotPassword() {
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    window.alert('Reset link placeholder sent. Supabase auth email flow will be wired next.')
+    setLoading(true)
+    try {
+      await sendPasswordReset(email)
+      window.alert('Password reset link sent. Check your email.')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to send reset link.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -19,12 +32,14 @@ export default function ForgotPassword() {
             type="email"
             className="auth-input"
             placeholder="Enter your email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             required
           />
         </div>
 
-        <button type="submit" className="btn btn-primary btn-full auth-submit">
-          Send Reset Link
+        <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
+          {loading ? 'Sending...' : 'Send Reset Link'}
         </button>
       </form>
 

@@ -1,8 +1,9 @@
 import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
+import { updateProfile } from '../services/profileService'
+import { selectSubscriptionPlan } from '../services/subscriptionService'
 
 type BillingCycle = 'monthly' | 'yearly'
 
@@ -72,17 +73,28 @@ export default function OnboardingPlan() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
 
-  function activatePlan(plan: SubscriptionPlan) {
+  async function activatePlan(plan: SubscriptionPlan) {
     const next = saveTailorSettings({
       ...settings,
       subscription: { plan },
       updatedAt: new Date().toISOString(),
     })
     setSettings(next)
-    markOnboardingCompleted()
-    window.alert('Plan selected. Welcome to TailorDeck.')
-    navigate('/')
+    setSavingPlan(plan)
+    try {
+      await Promise.all([
+        selectSubscriptionPlan(plan),
+        updateProfile({ onboarding_complete: true }),
+      ])
+      window.alert('Plan selected. Welcome to TailorDeck.')
+      navigate('/')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to activate plan.')
+    } finally {
+      setSavingPlan(null)
+    }
   }
 
   return (
@@ -137,9 +149,10 @@ export default function OnboardingPlan() {
               <button
                 type="button"
                 className={`btn btn-full subscription-plan-btn${plan.id === 'pro' ? ' btn-primary' : ' btn-secondary'}`}
-                onClick={() => activatePlan(plan.id)}
+                onClick={() => void activatePlan(plan.id)}
+                disabled={savingPlan !== null}
               >
-                {plan.cta}
+                {savingPlan === plan.id ? 'Saving...' : plan.cta}
               </button>
 
               <div className="subscription-plan-divider" />
