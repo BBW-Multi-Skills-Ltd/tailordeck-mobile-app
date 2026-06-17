@@ -58,15 +58,14 @@ export async function saveReminderSettings(settings: TailorSettings) {
 
 export async function saveBrandSettings(settings: TailorSettings) {
   return updateBrandSettings({
-    brand_name: settings.brand.name,
     logo_url: settings.brand.logoUrl,
     signature_url: settings.brand.signatureUrl,
     document_template: settings.brand.documentTemplate,
     header_color: settings.brand.colors[0],
     body_color: settings.brand.colors[1],
     accent_color: settings.brand.colors[2],
-    show_phone: settings.brand.includeBusinessDetails.phone,
-    show_email: settings.brand.includeBusinessDetails.email,
+    show_business_phone: settings.brand.includeBusinessDetails.phone,
+    show_business_email: settings.brand.includeBusinessDetails.email,
     show_website: settings.brand.includeBusinessDetails.website,
     show_social: settings.brand.includeBusinessDetails.social,
     show_address: settings.brand.includeBusinessDetails.address,

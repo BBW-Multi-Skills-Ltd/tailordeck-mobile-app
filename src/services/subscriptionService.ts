@@ -12,14 +12,32 @@ export async function getSubscription(): Promise<SubscriptionRow | null> {
 
 export async function selectSubscriptionPlan(planName: SubscriptionPlan): Promise<SubscriptionRow> {
   const userId = await requireUserId()
-  const { data, error } = await supabase
+  const now = new Date()
+  const trialEndsAt = planName === 'free' ? new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString() : null
+  const payload = {
+    user_id: userId,
+    plan_name: planName,
+    status: 'active',
+    trial_ends_at: trialEndsAt,
+    updated_at: now.toISOString(),
+  }
+
+  const { data: updated, error: updateError } = await supabase
     .from('subscriptions')
-    .update({ plan_name: planName, status: 'active', updated_at: new Date().toISOString() })
+    .update(payload)
     .eq('user_id', userId)
     .select('*')
+    .maybeSingle<SubscriptionRow>()
+  if (updateError) throw updateError
+  if (updated) return updated
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('subscriptions')
+    .insert(payload)
+    .select('*')
     .single<SubscriptionRow>()
-  if (error) throw error
-  return data
+  if (insertError) throw insertError
+  return inserted
 }
 
 export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
@@ -32,6 +50,6 @@ export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
     .eq('feature_key', featureKey)
     .maybeSingle<PlanFeatureRow>()
   if (error) throw error
-  return Boolean(data?.enabled)
+  return Boolean(data?.is_enabled)
 }
 

@@ -51,14 +51,14 @@ export function mergeSettingsRows(rows: {
       })),
     },
     brand: {
-      name: rows.brand?.brand_name || rows.business?.shop_name || fallback.brand.name,
+      name: rows.business?.shop_name || fallback.brand.name,
       colors,
       logoUrl: rows.brand?.logo_url || fallback.brand.logoUrl,
       signatureUrl: rows.brand?.signature_url || fallback.brand.signatureUrl,
       documentTemplate: rows.brand?.document_template || fallback.brand.documentTemplate,
       includeBusinessDetails: {
-        phone: rows.brand?.show_phone ?? fallback.brand.includeBusinessDetails.phone,
-        email: rows.brand?.show_email ?? fallback.brand.includeBusinessDetails.email,
+        phone: rows.brand?.show_business_phone ?? fallback.brand.includeBusinessDetails.phone,
+        email: rows.brand?.show_business_email ?? fallback.brand.includeBusinessDetails.email,
         website: rows.brand?.show_website ?? fallback.brand.includeBusinessDetails.website,
         social: rows.brand?.show_social ?? fallback.brand.includeBusinessDetails.social,
         address: rows.brand?.show_address ?? fallback.brand.includeBusinessDetails.address,

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Ruler } from 'lucide-react'
 import { loadTailorSettings, saveTailorSettings, type MeasurementUnit } from '../lib/settings'
-import { updateBrandSettings } from '../services/brandService'
 import { updateBusinessProfile } from '../services/businessService'
 import { updatePreferences } from '../services/preferencesService'
 
@@ -38,7 +37,6 @@ export default function OnboardingSetup() {
       await Promise.all([
         updateBusinessProfile({ shop_name: normalizedShopName }),
         updatePreferences({ measurement_unit: measurementUnit }),
-        updateBrandSettings({ brand_name: normalizedShopName || current.brand.name }),
       ])
       window.alert('Setup saved. Choose your plan to continue.')
       navigate('/onboarding/plan')

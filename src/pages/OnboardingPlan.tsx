@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { updateProfile } from '../services/profileService'
+import { getServiceErrorMessage } from '../services/serviceHelpers'
 import { selectSubscriptionPlan } from '../services/subscriptionService'
 
 type BillingCycle = 'monthly' | 'yearly'
@@ -84,14 +85,13 @@ export default function OnboardingPlan() {
     setSettings(next)
     setSavingPlan(plan)
     try {
-      await Promise.all([
-        selectSubscriptionPlan(plan),
-        updateProfile({ onboarding_complete: true }),
-      ])
+      await selectSubscriptionPlan(plan)
+      await updateProfile({ onboarding_complete: true })
       window.alert('Plan selected. Welcome to TailorDeck.')
       navigate('/')
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to activate plan.')
+      console.error('Unable to activate onboarding plan:', error)
+      window.alert(getServiceErrorMessage(error, 'Unable to activate plan.'))
     } finally {
       setSavingPlan(null)
     }

@@ -61,7 +61,6 @@ export interface UserPreferencesRow {
 export interface BrandSettingsRow {
   id: string
   user_id: string
-  brand_name: string | null
   logo_url: string | null
   logo_storage_path: string | null
   signature_url: string | null
@@ -70,8 +69,8 @@ export interface BrandSettingsRow {
   header_color: string | null
   body_color: string | null
   accent_color: string | null
-  show_phone: boolean
-  show_email: boolean
+  show_business_phone: boolean
+  show_business_email: boolean
   show_website: boolean
   show_social: boolean
   show_address: boolean
@@ -98,8 +97,7 @@ export interface PlanFeatureRow {
   id: string
   plan_name: SubscriptionPlan
   feature_key: string
-  enabled: boolean
-  limit_value: number | null
+  is_enabled: boolean
 }
 
 export interface ClientRow {
