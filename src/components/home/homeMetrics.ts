@@ -1,6 +1,7 @@
 import { RiScissorsLine } from 'react-icons/ri'
 import { TbMoneybag } from 'react-icons/tb'
-import { appJobs } from '../../data/appData'
+import { formatNaira } from '../../lib/money'
+import type { MonthlyStat } from '../../services/dashboardService'
 import type { JobStatus } from '../../types/job'
 
 export type RecentJob = {
@@ -18,33 +19,20 @@ export function getGreeting(): string {
   return 'Good evening'
 }
 
-export function getRecentJobs(): RecentJob[] {
-  return [...appJobs]
-    .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1))
-    .slice(0, 3)
-    .map((job) => ({
-      id: job.id,
-      clientName: job.clientName,
-      title: job.title,
-      deadlineDate: job.deadlineDate,
-      status: job.status,
-    }))
+export function getCurrentMonthStats(monthlyStats: MonthlyStat[] = []): MonthlyStat | undefined {
+  const currentMonth = new Date().toISOString().slice(0, 7)
+  return monthlyStats.find((stat) => stat.month === currentMonth)
 }
 
-export function getHomeKpiCards() {
-  const currentMonth = new Date().toISOString().slice(0, 7)
-  const monthJobs = appJobs.filter((job) => job.createdDate.slice(0, 7) === currentMonth)
-  const totalExpenses = monthJobs.reduce((sum, job) => sum + calculateExpenseEstimate(job.chargeAmount, job.status), 0)
-
+export function getHomeKpiCards(currentMonth?: MonthlyStat) {
   return [
-    { label: 'Jobs This Month', value: String(monthJobs.length), icon: RiScissorsLine },
-    { label: 'Total Expenses', value: `₦${Math.round(totalExpenses / 1000)}k`, icon: TbMoneybag },
+    { label: 'Jobs This Month', value: String(currentMonth?.jobs ?? 0), icon: RiScissorsLine },
+    { label: 'Total Expenses', value: formatCompactNaira(currentMonth?.expensesKobo ?? 0), icon: TbMoneybag },
   ]
 }
 
-export function formatHomeProfit(): string {
-  const profit = appJobs.reduce((sum, job) => sum + (job.chargeAmount - calculateExpenseEstimate(job.chargeAmount, job.status)), 0)
-  return `₦${profit.toLocaleString('en-NG')}`
+export function formatHomeProfit(currentMonth?: MonthlyStat): string {
+  return formatNaira(currentMonth?.profitKobo ?? 0)
 }
 
 export function statusClass(status: JobStatus): string {
@@ -53,7 +41,9 @@ export function statusClass(status: JobStatus): string {
   return 'badge badge-pending'
 }
 
-function calculateExpenseEstimate(chargeAmount: number, status: JobStatus): number {
-  const ratio = status === 'Completed' ? 0.36 : status === 'In Progress' ? 0.32 : 0.28
-  return Math.round(chargeAmount * ratio)
+function formatCompactNaira(kobo: number): string {
+  const naira = Math.round(kobo / 100)
+  if (naira >= 1000000) return `₦${Math.round(naira / 100000) / 10}m`
+  if (naira >= 100000) return `₦${Math.round(naira / 1000)}k`
+  return formatNaira(kobo)
 }

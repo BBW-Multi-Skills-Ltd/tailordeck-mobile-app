@@ -1,6 +1,8 @@
 import { Check } from 'lucide-react'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
+import { queryKeys } from '../hooks/queryKeys'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { updateProfile } from '../services/profileService'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
@@ -72,6 +74,7 @@ const PLAN_DATA: Array<{
 
 export default function OnboardingPlan() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
@@ -87,6 +90,10 @@ export default function OnboardingPlan() {
     try {
       await selectSubscriptionPlan(plan)
       await updateProfile({ onboarding_complete: true })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),
+      ])
       window.alert('Plan selected. Welcome to TailorDeck.')
       navigate('/')
     } catch (error) {

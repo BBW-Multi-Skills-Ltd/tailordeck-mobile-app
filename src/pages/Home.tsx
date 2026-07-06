@@ -4,18 +4,22 @@ import { useEffect, useMemo, useState } from 'react'
 import { HomeKpiGrid } from '../components/home/HomeKpiGrid'
 import { HomeProfitCard } from '../components/home/HomeProfitCard'
 import { HomeRecentJobs } from '../components/home/HomeRecentJobs'
-import { formatHomeProfit, getGreeting, getHomeKpiCards, getRecentJobs } from '../components/home/homeMetrics'
-import { appJobs } from '../data/appData'
+import { formatHomeProfit, getCurrentMonthStats, getGreeting, getHomeKpiCards } from '../components/home/homeMetrics'
+import { useMonthlyStatsQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
 import { loadTailorSettings } from '../lib/settings'
 
 export default function Home() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState(() => loadTailorSettings())
-  const hasJobs = appJobs.length > 0
+  const monthlyStatsQuery = useMonthlyStatsQuery()
+  const recentJobsQuery = useRecentJobsQuery(3)
+  const monthlyStats = monthlyStatsQuery.data ?? []
+  const recentJobs = recentJobsQuery.data ?? []
+  const currentMonth = useMemo(() => getCurrentMonthStats(monthlyStats), [monthlyStats])
+  const hasJobs = recentJobs.length > 0 || monthlyStats.some((month) => month.jobs > 0)
   const firstName = settings.profile.fullName.trim().split(/\s+/)[0] || 'Tailor'
   const greeting = getGreeting()
-  const kpiCards = useMemo(() => getHomeKpiCards(), [])
-  const recentJobs = useMemo(() => getRecentJobs(), [])
+  const kpiCards = useMemo(() => getHomeKpiCards(currentMonth), [currentMonth])
 
   useEffect(() => {
     function syncSettings() {
@@ -38,7 +42,7 @@ export default function Home() {
       </div>
 
       {hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
-      {hasJobs ? <HomeProfitCard profit={formatHomeProfit()} onOpenDashboard={() => navigate('/dashboard')} /> : null}
+      {hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       <HomeRecentJobs jobs={recentJobs} />
 
       <Link to="/jobs/new" className="fab" aria-label="Create new job">

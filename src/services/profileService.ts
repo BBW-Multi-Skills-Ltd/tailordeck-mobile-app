@@ -1,7 +1,7 @@
 ﻿import { normalizeNigerianPhone } from '../lib/phone'
 import { supabase } from '../lib/supabase'
 import type { ProfileRow } from './types'
-import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
+import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
 
 export async function getProfile(): Promise<ProfileRow | null> {
   const userId = await requireUserId()
@@ -17,8 +17,9 @@ export async function updateProfile(updates: Partial<Pick<ProfileRow, 'full_name
     phone_normalized: updates.phone ? normalizeNigerianPhone(updates.phone) : undefined,
     updated_at: new Date().toISOString(),
   }
-  const { data, error } = await supabase.from('profiles').update(next).eq('id', userId).select('*').single<ProfileRow>()
+  const { data, error } = await supabase.from('profiles').update(next).eq('user_id', userId).select('*').maybeSingle<ProfileRow>()
   if (error) throw error
+  if (!data) throw new ServiceError('Profile update was blocked or no profile row exists for this user.')
   return data
 }
 

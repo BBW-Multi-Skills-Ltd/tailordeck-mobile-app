@@ -3,11 +3,12 @@ import { ChevronRight, Phone, Search, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import EmptyState from '../components/shared/EmptyState'
-import { useClients } from '../hooks/useClients'
+import { useClientsQuery } from '../hooks/useClientQueries'
 import { formatDateShort, getInitial } from '../lib/utils'
 
 export default function Clients() {
-  const { clients } = useClients()
+  const clientsQuery = useClientsQuery()
+  const clients = clientsQuery.data ?? []
   const [search, setSearch] = useState('')
 
   const filteredClients = useMemo(() => {
@@ -32,7 +33,19 @@ export default function Clients() {
         />
       </label>
 
-      {filteredClients.length === 0 ? (
+      {clientsQuery.isLoading ? (
+        <div className="stack gap-8">
+          <div className="skeleton" style={{ height: 86 }} />
+          <div className="skeleton" style={{ height: 86 }} />
+          <div className="skeleton" style={{ height: 86 }} />
+        </div>
+      ) : clientsQuery.isError ? (
+        <EmptyState
+          icon={Users}
+          title="Unable to load clients"
+          description="Check your connection and Supabase access policies, then refresh the page."
+        />
+      ) : filteredClients.length === 0 ? (
         <EmptyState
           icon={Users}
           title={clients.length === 0 ? 'No clients yet' : 'No clients found'}

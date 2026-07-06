@@ -9,7 +9,7 @@
   jobPersons: (jobId: string) => ['job-persons', jobId] as const,
   dashboardMonthly: ['dashboard', 'monthly'] as const,
   dashboardStatus: ['dashboard', 'status'] as const,
-  recentJobs: ['dashboard', 'recent-jobs'] as const,
+  recentJobs: (limit = 5) => ['dashboard', 'recent-jobs', limit] as const,
   notifications: ['notifications'] as const,
   subscription: ['subscription'] as const,
   feature: (featureKey: string) => ['feature-access', featureKey] as const,

@@ -11,5 +11,5 @@ export function useJobStatusBreakdownQuery() {
 }
 
 export function useRecentJobsQuery(limit = 5) {
-  return useQuery({ queryKey: queryKeys.recentJobs, queryFn: () => getRecentJobs(limit) })
+  return useQuery({ queryKey: queryKeys.recentJobs(limit), queryFn: () => getRecentJobs(limit) })
 }
