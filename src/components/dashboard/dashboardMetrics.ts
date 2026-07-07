@@ -1,4 +1,5 @@
-import type { MockJob } from '../../types/job'
+import { toNaira } from '../../lib/money'
+import type { JobStatusBreakdown, MonthlyStat as ServiceMonthlyStat } from '../../services/dashboardService'
 
 export type MonthStat = {
   key: string
@@ -25,74 +26,51 @@ export type DashboardMetrics = {
   totalRevenue: number
 }
 
-export function monthKey(date: string): string {
-  const parsed = new Date(date)
-  const year = parsed.getFullYear()
-  const month = parsed.getMonth() + 1
-  return `${year}-${String(month).padStart(2, '0')}`
-}
-
 export function monthLabel(key: string, format: 'short' | 'long' = 'short'): string {
   const [year, month] = key.split('-').map(Number)
   const date = new Date(year, month - 1, 1)
   return date.toLocaleDateString('en-NG', { month: format })
 }
 
-export function estimateJobExpense(job: MockJob): number {
-  const expenseRatio = job.status === 'Completed' ? 0.36 : job.status === 'In Progress' ? 0.32 : 0.28
-  return Math.round(job.chargeAmount * expenseRatio)
-}
-
-export function buildDashboardMetrics(jobs: MockJob[]): DashboardMetrics {
-  const sortedJobs = [...jobs].sort((a, b) => (a.createdDate > b.createdDate ? 1 : -1))
-  const latestDate = sortedJobs.length ? new Date(sortedJobs[sortedJobs.length - 1].createdDate) : new Date()
+export function buildDashboardMetricsFromStats(
+  stats: ServiceMonthlyStat[] = [],
+  statusCounts: JobStatusBreakdown = { completed: 0, inProgress: 0, pending: 0 },
+): DashboardMetrics {
+  const latestDate = getLatestDate(stats)
   const monthKeys = getRecentMonthKeys(latestDate, 6)
-  const monthSet = new Set(monthKeys)
-  const monthMap = new Map<string, MonthStat>(monthKeys.map((key) => [key, createMonthStat(key)]))
-
-  for (const job of jobs) {
-    const key = monthKey(job.createdDate)
-    const existing = monthSet.has(key) ? monthMap.get(key) : undefined
-    if (!existing) continue
-
-    const expenseEstimate = estimateJobExpense(job)
-    existing.jobs += 1
-    existing.revenue += job.chargeAmount
-    existing.expenses += expenseEstimate
-    existing.profit += job.chargeAmount - expenseEstimate
-  }
-
-  const months = monthKeys.map((key) => monthMap.get(key)!)
-  const totalRevenue = months.reduce((sum, month) => sum + month.revenue, 0)
-  const totalExpenses = months.reduce((sum, month) => sum + month.expenses, 0)
-  const currentMonthJobs = jobs.filter((job) => monthKey(job.createdDate) === monthKeys[monthKeys.length - 1])
+  const statsByMonth = new Map(stats.map((stat) => [stat.month, stat]))
+  const months = monthKeys.map((key) => mapMonthStat(key, statsByMonth.get(key)))
+  const currentMonth = months[months.length - 1]
 
   return {
     bestMonth: months.reduce<MonthStat | null>((best, month) => (!best || month.profit > best.profit ? month : best), null),
     latestDate,
     months,
-    statusCounts: {
-      completed: currentMonthJobs.filter((job) => job.status === 'Completed').length,
-      inProgress: currentMonthJobs.filter((job) => job.status === 'In Progress').length,
-      pending: currentMonthJobs.filter((job) => job.status === 'Pending').length,
-    },
-    totalExpenses,
-    totalJobs: currentMonthJobs.length,
-    totalProfit: totalRevenue - totalExpenses,
-    totalRevenue,
+    statusCounts,
+    totalExpenses: currentMonth.expenses,
+    totalJobs: currentMonth.jobs,
+    totalProfit: currentMonth.profit,
+    totalRevenue: currentMonth.revenue,
   }
 }
 
-function createMonthStat(key: string): MonthStat {
+function mapMonthStat(key: string, stat?: ServiceMonthlyStat): MonthStat {
   return {
     key,
     label: monthLabel(key),
     fullLabel: monthLabel(key, 'long'),
-    jobs: 0,
-    revenue: 0,
-    expenses: 0,
-    profit: 0,
+    jobs: stat?.jobs ?? 0,
+    revenue: toNaira(stat?.revenueKobo ?? 0),
+    expenses: toNaira(stat?.expensesKobo ?? 0),
+    profit: toNaira(stat?.profitKobo ?? 0),
   }
+}
+
+function getLatestDate(stats: ServiceMonthlyStat[]): Date {
+  const latestMonth = [...stats].sort((a, b) => a.month.localeCompare(b.month)).at(-1)?.month
+  if (!latestMonth) return new Date()
+  const [year, month] = latestMonth.split('-').map(Number)
+  return new Date(year, month - 1, 1)
 }
 
 function getRecentMonthKeys(latestDate: Date, count: number): string[] {

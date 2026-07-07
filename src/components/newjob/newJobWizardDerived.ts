@@ -20,3 +20,5 @@ export function getNewJobWizardDerived(state: NewJobWizardStateModel) {
     ...pricing,
   }
 }
+
+export type NewJobWizardDerivedModel = ReturnType<typeof getNewJobWizardDerived>

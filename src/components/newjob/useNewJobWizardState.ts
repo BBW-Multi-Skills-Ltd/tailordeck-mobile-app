@@ -40,6 +40,7 @@ export function useNewJobWizardState() {
   const [materialSource, setMaterialSource] = useState<MaterialSource>('Client is Providing Material')
   const [chargeAmount, setChargeAmount] = useState('')
   const [depositPercent, setDepositPercent] = useState('')
+  const [referencePhotoFiles, setReferencePhotoFiles] = useState<File[]>([])
   const [referencePhotoNames, setReferencePhotoNames] = useState<string[]>([])
   const [expenses, setExpenses] = useState<ExpenseForm[]>([])
   const [expenseDraftName, setExpenseDraftName] = useState('')
@@ -90,6 +91,7 @@ export function useNewJobWizardState() {
     openMaterialCategory,
     orderMode,
     persons,
+    referencePhotoFiles,
     referencePhotoNames,
     reminder,
     sameItemForAll,
@@ -127,6 +129,7 @@ export function useNewJobWizardState() {
     setOrderMode,
     setPersons,
     setReferencePhotoNames,
+    setReferencePhotoFiles,
     setReminder,
     setSameItemForAll,
     setSingleMeasurementsOpen,

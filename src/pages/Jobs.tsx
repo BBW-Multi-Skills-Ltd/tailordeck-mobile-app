@@ -3,7 +3,7 @@ import { Plus, Search, Scissors } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/shared/EmptyState'
-import { appJobs } from '../data/appData'
+import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
@@ -20,13 +20,14 @@ function statusClass(status: JobStatus): string {
 export default function Jobs() {
   const [activeFilter, setActiveFilter] = useState<JobFilter>('All')
   const [search, setSearch] = useState('')
+  const jobsQuery = useJobsQuery(activeFilter === 'All' ? undefined : activeFilter)
+  const jobs = jobsQuery.data ?? []
 
   const filteredJobs = useMemo(() => {
-    const byStatus = activeFilter === 'All' ? appJobs : appJobs.filter((job) => job.status === activeFilter)
     const term = search.trim().toLowerCase()
-    if (!term) return byStatus
-    return byStatus.filter((job) => job.clientName.toLowerCase().includes(term))
-  }, [activeFilter, search])
+    if (!term) return jobs
+    return jobs.filter((job) => job.clientName.toLowerCase().includes(term))
+  }, [jobs, search])
 
   const sortedJobs = useMemo(
     () =>
@@ -37,7 +38,7 @@ export default function Jobs() {
   )
 
   function emptyMessage(filter: JobFilter): string {
-    if (appJobs.length === 0) return 'Create your first job to store client details, measurements, pricing, and deadline.'
+    if (jobs.length === 0 && !search.trim()) return 'Create your first job to store client details, measurements, pricing, and deadline.'
     if (filter === 'All') return 'No jobs match that search.'
     return `No ${filter.toLowerCase()} jobs yet.`
   }
@@ -75,13 +76,25 @@ export default function Jobs() {
         />
       </label>
 
-      {sortedJobs.length === 0 ? (
+      {jobsQuery.isLoading ? (
+        <div className="stack gap-8">
+          <div className="skeleton" style={{ height: 86 }} />
+          <div className="skeleton" style={{ height: 86 }} />
+          <div className="skeleton" style={{ height: 86 }} />
+        </div>
+      ) : jobsQuery.isError ? (
         <EmptyState
           icon={Scissors}
-          title={appJobs.length === 0 ? 'No jobs yet' : 'Nothing here yet'}
+          title="Unable to load jobs"
+          description="Check your connection and Supabase policies for jobs, then refresh the page."
+        />
+      ) : sortedJobs.length === 0 ? (
+        <EmptyState
+          icon={Scissors}
+          title={jobs.length === 0 && !search.trim() ? 'No jobs yet' : 'Nothing here yet'}
           description={emptyMessage(activeFilter)}
-          actionLabel={appJobs.length === 0 ? 'Create Job' : undefined}
-          actionTo={appJobs.length === 0 ? '/jobs/new' : undefined}
+          actionLabel={jobs.length === 0 && !search.trim() ? 'Create Job' : undefined}
+          actionTo={jobs.length === 0 && !search.trim() ? '/jobs/new' : undefined}
         />
       ) : (
         <motion.div

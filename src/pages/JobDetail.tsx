@@ -9,14 +9,16 @@ import { JobPricingSection } from '../components/jobdetail/JobPricingSection'
 import { JobReferencePhotos } from '../components/jobdetail/JobReferencePhotos'
 import {
   getDefaultJobDetails,
+  getJobDetailsFromRow,
+  getMockJobFromRow,
   getMeasurementScopeText,
 } from '../components/jobdetail/jobDetailUtils'
 import { useJobDocumentActions } from '../components/jobdetail/useJobDocumentActions'
 import { useJobImageViewer } from '../components/jobdetail/useJobImageViewer'
 import { readBrandConfig } from '../components/invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
-import { appJobMeasurementById, appJobs } from '../data/appData'
-import { detailedMockByJobId, type DetailedJobData } from '../data/mockJobDetails'
+import type { DetailedJobData } from '../data/mockJobDetails'
+import { useJobQuery } from '../hooks/useJobQueries'
 import type { MockJob } from '../types/job'
 
 const JobDocumentDrawer = lazy(() =>
@@ -25,19 +27,31 @@ const JobDocumentDrawer = lazy(() =>
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>()
-  const job = id ? appJobs.find((item) => item.id === id) : undefined
+  const jobQuery = useJobQuery(id)
+  const jobRow = jobQuery.data
   const brand = useMemo(() => readBrandConfig(), [])
+  const job = useMemo(() => (jobRow ? getMockJobFromRow(jobRow) : undefined), [jobRow])
 
   const details = useMemo<DetailedJobData>(() => {
-    if (!job) return getDefaultJobDetails()
-    return detailedMockByJobId[job.id] ?? getDefaultJobDetails(job)
-  }, [job])
+    if (jobRow) return getJobDetailsFromRow(jobRow)
+    return getDefaultJobDetails(job)
+  }, [job, jobRow])
+
+  if (jobQuery.isLoading) {
+    return (
+      <section className="section stack gap-16">
+        <div className="skeleton" style={{ height: 42 }} />
+        <div className="skeleton" style={{ height: 96 }} />
+        <div className="skeleton" style={{ height: 220 }} />
+      </section>
+    )
+  }
 
   if (!job) {
     return (
       <section className="section stack gap-16">
         <h2 className="app-page-heading">Job Not Found</h2>
-        <p className="text-muted">This job may have been removed.</p>
+        <p className="text-muted">This job may have been removed or is unavailable.</p>
         <Link to="/jobs" className="btn btn-secondary">
           Back to Jobs
         </Link>
@@ -45,17 +59,19 @@ export default function JobDetail() {
     )
   }
 
-  return <JobDetailContent job={job} brand={brand} details={details} />
+  return <JobDetailContent job={job} brand={brand} details={details} measurementOrderScope={jobRow?.order_scope} />
 }
 
 function JobDetailContent({
   job,
   brand,
   details,
+  measurementOrderScope,
 }: {
   job: MockJob
   brand: BrandConfig
   details: DetailedJobData
+  measurementOrderScope?: string
 }) {
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
@@ -69,10 +85,9 @@ function JobDetailContent({
   const totalExpenses = details.expenses.reduce((sum, expense) => sum + expense.cost, 0)
   const balanceToCollect = Math.max(job.chargeAmount - details.depositAmount, 0)
   const estimatedProfit = job.chargeAmount - totalExpenses
-  const measurementSnapshot = appJobMeasurementById[job.id]
   const measurementScopeText = getMeasurementScopeText({
     details,
-    measurementOrderScope: measurementSnapshot?.orderScope,
+    measurementOrderScope,
     fallbackScope: job.jobType,
   })
   const activePhoto = viewerIndex === null ? null : details.referencePhotos[viewerIndex]

@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import {
@@ -7,9 +7,21 @@ import {
   type SocialPlatform,
   type TailorSettings,
 } from '../../lib/settings'
+import { useAuth } from '../../context/AuthContext'
+import { useUploadAvatarMutation } from '../../hooks/useProfileQueries'
+import {
+  useSaveBrandSettingsMutation,
+  useSaveBusinessSettingsMutation,
+  useSavePreferenceSettingsMutation,
+  useSaveProfileSettingsMutation,
+  useSaveReminderSettingsMutation,
+  useSettingsQuery,
+  useUploadLogoMutation,
+  useUploadSignatureMutation,
+} from '../../hooks/useSettingsQueries'
+import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import type { SettingsPanel } from './SettingsRows'
 import { getSettingsLocalParts, normalizeNigeriaPhoneInput, normalizeWebsiteInput } from './settingsFormUtils'
-import { uploadSettingsImage as uploadSettingsImageFile } from './settingsImageUpload'
 import { getSecurityDangerAlert, getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
 import { addSocialHandle as addSocialHandleToSettings, removeSocialHandle as removeSocialHandleFromSettings } from './settingsSocialActions'
 import { useSettingsTheme } from './useSettingsTheme'
@@ -18,6 +30,16 @@ type SettingsImageField = 'avatarUrl' | 'logoUrl' | 'signatureUrl'
 
 export function useSettingsPage() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
+  const settingsQuery = useSettingsQuery()
+  const saveProfileMutation = useSaveProfileSettingsMutation()
+  const saveBusinessMutation = useSaveBusinessSettingsMutation()
+  const savePreferenceMutation = useSavePreferenceSettingsMutation()
+  const saveReminderMutation = useSaveReminderSettingsMutation()
+  const saveBrandMutation = useSaveBrandSettingsMutation()
+  const uploadAvatarMutation = useUploadAvatarMutation()
+  const uploadLogoMutation = useUploadLogoMutation()
+  const uploadSignatureMutation = useUploadSignatureMutation()
   const [settings, setSettings] = useState<TailorSettings>(() => loadTailorSettings())
   const { setTheme, theme } = useSettingsTheme()
   const [panel, setPanel] = useState<SettingsPanel>(null)
@@ -33,11 +55,36 @@ export function useSettingsPage() {
   const [passwordDraft, setPasswordDraft] = useState('')
   const [confirmPasswordDraft, setConfirmPasswordDraft] = useState('')
 
-  function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): void {
-    const next = saveTailorSettings(nextSettings)
+  useEffect(() => {
+    if (!settingsQuery.data) return
+    const next = saveTailorSettings(settingsQuery.data)
     setSettings(next)
-    setSavedTick(Date.now())
-    setSavedSection(sectionLabel)
+  }, [settingsQuery.data])
+
+  async function persistSection(sectionLabel: string, nextSettings: TailorSettings): Promise<void> {
+    if (sectionLabel === 'Profile Avatar' || sectionLabel === 'Account & Security') {
+      await saveProfileMutation.mutateAsync(nextSettings)
+    } else if (sectionLabel === 'Business Info') {
+      await saveBusinessMutation.mutateAsync(nextSettings)
+    } else if (sectionLabel === 'Shop Preferences') {
+      await savePreferenceMutation.mutateAsync(nextSettings)
+    } else if (sectionLabel === 'Reminders') {
+      await saveReminderMutation.mutateAsync(nextSettings)
+    } else if (sectionLabel === 'Invoice & Receipt Setup') {
+      await saveBrandMutation.mutateAsync(nextSettings)
+    }
+  }
+
+  async function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): Promise<void> {
+    try {
+      await persistSection(sectionLabel, nextSettings)
+      const next = saveTailorSettings(nextSettings)
+      setSettings(next)
+      setSavedTick(Date.now())
+      setSavedSection(sectionLabel)
+    } catch (error) {
+      window.alert(getServiceErrorMessage(error, `Unable to save ${sectionLabel}.`))
+    }
   }
 
   function handleToggle(next: Exclude<SettingsPanel, null>): void {
@@ -78,14 +125,15 @@ export function useSettingsPage() {
     window.alert('Job history cleared locally.')
   }
 
-  function handleSignOut(): void {
+  async function handleSignOut(): Promise<void> {
     clearPreviewSession()
+    await signOut()
     navigate('/auth/signin')
   }
 
-  function handleSaveAccountSecurity(): void {
-    markSaved('Account & Security')
-    setSecurityFeedback('Account details saved locally. Supabase Auth will handle secure login updates later.')
+  async function handleSaveAccountSecurity(): Promise<void> {
+    await markSaved('Account & Security')
+    setSecurityFeedback('Account details saved. Login email/password changes will be handled through Supabase Auth flows.')
   }
 
   function handleSecurityDanger(kind: 'deactivate' | 'delete'): void {
@@ -116,6 +164,53 @@ export function useSettingsPage() {
     }))
   }
 
+  function setLocalImagePreview(field: SettingsImageField, value: string): void {
+    setSettings((prev) =>
+      field === 'avatarUrl'
+        ? { ...prev, profile: { ...prev.profile, avatarUrl: value } }
+        : { ...prev, brand: { ...prev.brand, [field]: value } },
+    )
+  }
+
+  function readImagePreview(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '')
+      reader.onerror = () => reject(new Error('Unable to read selected image.'))
+      reader.readAsDataURL(file)
+    })
+  }
+
+  async function uploadSettingsImage(field: SettingsImageField, event: ChangeEvent<HTMLInputElement>): Promise<void> {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const preview = await readImagePreview(file)
+      if (preview) setLocalImagePreview(field, preview)
+
+      if (field === 'avatarUrl') {
+        const { signedUrl } = await uploadAvatarMutation.mutateAsync(file)
+        setSettings((prev) => {
+          const next = { ...prev, profile: { ...prev.profile, avatarUrl: signedUrl } }
+          saveTailorSettings(next)
+          return next
+        })
+        return
+      }
+
+      const { signedUrl } = field === 'logoUrl' ? await uploadLogoMutation.mutateAsync(file) : await uploadSignatureMutation.mutateAsync(file)
+      setSettings((prev) => {
+        const next = { ...prev, brand: { ...prev.brand, [field]: signedUrl } }
+        saveTailorSettings(next)
+        return next
+      })
+    } catch (error) {
+      window.alert(getServiceErrorMessage(error, 'Unable to upload image.'))
+    }
+  }
+
   return {
     actions: {
       addSocialHandle,
@@ -142,7 +237,7 @@ export function useSettingsPage() {
       setTheme,
       toggleBrandDetail,
       updateColor,
-      uploadSettingsImage: (field: SettingsImageField, event: ChangeEvent<HTMLInputElement>) => uploadSettingsImageFile(field, event, setSettings),
+      uploadSettingsImage,
       handleProfilePhoneChange,
     },
     derived: {

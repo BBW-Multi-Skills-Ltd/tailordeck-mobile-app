@@ -5,36 +5,42 @@ import ClientJobHistory from '../components/clientprofile/ClientJobHistory'
 import ClientMeasurementsSection from '../components/clientprofile/ClientMeasurementsSection'
 import ClientProfileCard from '../components/clientprofile/ClientProfileCard'
 import { useClientMeasurements } from '../components/clientprofile/useClientMeasurements'
-import { appJobs } from '../data/appData'
-import { useClients } from '../hooks/useClients'
+import EmptyState from '../components/shared/EmptyState'
+import { useClientQuery, useSoftDeleteClientMutation } from '../hooks/useClientQueries'
+import { useClientJobsQuery } from '../hooks/useJobQueries'
+import { mapJobRow } from '../services/mappers/jobMapper'
 
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { deleteClient, getClientById } = useClients()
-  const client = id ? getClientById(id) : undefined
-  const measurements = useClientMeasurements(client?.id)
+  const clientQuery = useClientQuery(id)
+  const client = clientQuery.data
+  const clientJobsQuery = useClientJobsQuery(client?.id)
+  const clientJobs = clientJobsQuery.data ?? []
+  const deleteClientMutation = useSoftDeleteClientMutation()
+  const measurements = useClientMeasurements(clientJobs)
 
   const completedJobs = useMemo(
-    () =>
-      appJobs
-        .filter((job) => job.clientId === client?.id && job.status === 'Completed')
-        .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
-    [client?.id],
+    () => clientJobs.filter((job) => job.status === 'completed').map(mapJobRow),
+    [clientJobs],
   )
-  const measurementJobs = useMemo(
-    () =>
-      appJobs
-        .filter((job) => job.clientId === client?.id)
-        .sort((a, b) => (a.createdDate < b.createdDate ? 1 : -1)),
-    [client?.id],
-  )
+  const measurementJobs = useMemo(() => clientJobs.map(mapJobRow), [clientJobs])
+
+  if (clientQuery.isLoading || clientJobsQuery.isLoading) {
+    return (
+      <section className="section stack gap-16">
+        <div className="skeleton" style={{ height: 42 }} />
+        <div className="skeleton" style={{ height: 96 }} />
+        <div className="skeleton" style={{ height: 180 }} />
+      </section>
+    )
+  }
 
   if (!client) {
     return (
       <section className="section stack gap-16">
         <h2 className="app-page-heading">Client Not Found</h2>
-        <p className="text-muted">This client may have been deleted.</p>
+        <p className="text-muted">This client may have been deleted or is unavailable.</p>
         <Link to="/clients" className="btn btn-secondary">
           Back to Clients
         </Link>
@@ -42,13 +48,17 @@ export default function ClientProfile() {
     )
   }
 
-  function handleDeleteClient(): void {
+  async function handleDeleteClient(): Promise<void> {
     if (!client) return
     const confirmed = window.confirm(`Delete ${client.name}? This will remove this client profile. This action cannot be undone.`)
     if (!confirmed) return
 
-    deleteClient(client.id)
-    navigate('/clients')
+    try {
+      await deleteClientMutation.mutateAsync(client.id)
+      navigate('/clients')
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to delete client.')
+    }
   }
 
   return (
@@ -62,6 +72,10 @@ export default function ClientProfile() {
       </div>
 
       <ClientProfileCard client={client} />
+
+      {clientJobsQuery.isError ? (
+        <EmptyState title="Unable to load client jobs" description="Check Supabase policies for jobs and job persons, then refresh." />
+      ) : null}
 
       <ClientMeasurementsSection
         isEditing={measurements.isEditing}
@@ -78,9 +92,9 @@ export default function ClientProfile() {
         Start Another Job for This Client
       </button>
 
-      <button type="button" className="btn btn-danger btn-full" onClick={handleDeleteClient}>
+      <button type="button" className="btn btn-danger btn-full" onClick={() => void handleDeleteClient()} disabled={deleteClientMutation.isPending}>
         <Trash2 size={16} />
-        Delete Client
+        {deleteClientMutation.isPending ? 'Deleting...' : 'Delete Client'}
       </button>
     </section>
   )

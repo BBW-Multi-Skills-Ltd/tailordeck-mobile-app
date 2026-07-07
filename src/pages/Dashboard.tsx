@@ -4,15 +4,20 @@ import BestMonthCard from '../components/dashboard/BestMonthCard'
 import DashboardKpiGrid from '../components/dashboard/DashboardKpiGrid'
 import DashboardMonthNav from '../components/dashboard/DashboardMonthNav'
 import DashboardRevenueChart from '../components/dashboard/DashboardRevenueChart'
-import { buildDashboardMetrics } from '../components/dashboard/dashboardMetrics'
+import { buildDashboardMetricsFromStats } from '../components/dashboard/dashboardMetrics'
 import JobStatusBreakdown from '../components/dashboard/JobStatusBreakdown'
 import MonthlyPerformanceTable from '../components/dashboard/MonthlyPerformanceTable'
 import EmptyState from '../components/shared/EmptyState'
-import { appJobs } from '../data/appData'
+import { useJobStatusBreakdownQuery, useMonthlyStatsQuery } from '../hooks/useDashboardQueries'
 
 export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
-  const metrics = useMemo(() => buildDashboardMetrics(appJobs), [])
+  const monthlyStatsQuery = useMonthlyStatsQuery()
+  const statusQuery = useJobStatusBreakdownQuery()
+  const monthlyStats = monthlyStatsQuery.data ?? []
+  const statusCounts = statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 }
+  const metrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts), [monthlyStats, statusCounts])
+  const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)
   const visibleMonth = new Date(metrics.latestDate.getFullYear(), metrics.latestDate.getMonth() + monthOffset, 1)
   const visibleMonthLabel = visibleMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
 
@@ -24,7 +29,23 @@ export default function Dashboard() {
         <span style={{ width: '44px' }} />
       </header>
 
-      {appJobs.length === 0 ? (
+      {monthlyStatsQuery.isLoading || statusQuery.isLoading ? (
+        <div className="stack gap-12">
+          <div className="dashboard-kpi-grid">
+            <div className="skeleton" style={{ height: 112 }} />
+            <div className="skeleton" style={{ height: 112 }} />
+            <div className="skeleton" style={{ height: 112 }} />
+            <div className="skeleton" style={{ height: 112 }} />
+          </div>
+          <div className="skeleton" style={{ height: 260 }} />
+        </div>
+      ) : monthlyStatsQuery.isError || statusQuery.isError ? (
+        <EmptyState
+          icon={BarChart3}
+          title="Unable to load analytics"
+          description="Check your connection and Supabase policies for jobs, then refresh the page."
+        />
+      ) : !hasAnalytics ? (
         <EmptyState
           icon={BarChart3}
           title="No analytics yet"
@@ -34,7 +55,7 @@ export default function Dashboard() {
         />
       ) : null}
 
-      {appJobs.length > 0 ? (
+      {hasAnalytics ? (
         <>
           <DashboardMonthNav
             label={visibleMonthLabel}

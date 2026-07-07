@@ -10,6 +10,7 @@ type MaterialActionParams = {
   setMaterialColor: (value: string) => void
   setMaterialType: (value: string) => void
   setMaterialYards: (value: string) => void
+  setReferencePhotoFiles: (value: File[]) => void
   setReferencePhotoNames: (value: string[]) => void
 }
 
@@ -23,6 +24,7 @@ export function createMaterialActions({
   setMaterialColor,
   setMaterialType,
   setMaterialYards,
+  setReferencePhotoFiles,
   setReferencePhotoNames,
 }: MaterialActionParams) {
   function handleAmendmentMaterialsToggle(needsMaterials: boolean): void {
@@ -38,7 +40,9 @@ export function createMaterialActions({
   }
 
   function handleReferencePhotoUpload(files: FileList | null): void {
-    setReferencePhotoNames(files ? Array.from(files).map((file) => file.name) : [])
+    const nextFiles = files ? Array.from(files).slice(0, 3) : []
+    setReferencePhotoFiles(nextFiles)
+    setReferencePhotoNames(nextFiles.map((file) => file.name))
   }
 
   function handleDepositPercentKeyDown(event: KeyboardEvent<HTMLInputElement>): void {

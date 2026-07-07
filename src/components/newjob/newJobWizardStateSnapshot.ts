@@ -35,6 +35,7 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     openMaterialCategory: state.openMaterialCategory,
     orderMode: state.orderMode,
     persons: state.persons,
+    referencePhotoFiles: state.referencePhotoFiles,
     referencePhotoNames: state.referencePhotoNames,
     reminder: state.reminder,
     sameItemForAll: state.sameItemForAll,

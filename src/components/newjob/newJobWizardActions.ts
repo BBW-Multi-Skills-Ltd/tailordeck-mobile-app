@@ -44,6 +44,7 @@ export function createNewJobWizardActions({ navigate, state }: NewJobWizardActio
     setMaterialColor: state.setMaterialColor,
     setMaterialType: state.setMaterialType,
     setMaterialYards: state.setMaterialYards,
+    setReferencePhotoFiles: state.setReferencePhotoFiles,
     setReferencePhotoNames: state.setReferencePhotoNames,
   })
   const costingActions = createCostingActions({

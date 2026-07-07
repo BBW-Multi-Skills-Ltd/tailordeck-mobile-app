@@ -4,6 +4,7 @@
   clients: ['clients'] as const,
   client: (id: string) => ['client', id] as const,
   jobs: (status?: string) => ['jobs', status ?? 'all'] as const,
+  clientJobs: (clientId: string) => ['client-jobs', clientId] as const,
   job: (id: string) => ['job', id] as const,
   jobExpenses: (jobId: string) => ['job-expenses', jobId] as const,
   jobPersons: (jobId: string) => ['job-persons', jobId] as const,
