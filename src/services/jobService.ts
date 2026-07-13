@@ -103,9 +103,7 @@ function buildFullJobRow(input: CreateFullJobInput, userId: string, clientId: st
     material_yards: input.materialYards ?? null,
     material_quality: input.materialQuality ?? null,
     material_source: input.materialSource ?? null,
-    balance_amount_kobo: toKobo(Math.max(input.chargeAmount - (input.chargeAmount * input.depositPercent) / 100, 0)),
     total_expenses_kobo: toKobo(input.totalExpenses),
-    profit_kobo: toKobo(input.projectedProfit),
     is_worth_it: input.isWorthIt,
   }
 }
