@@ -172,6 +172,7 @@ export async function createFullJob(input: CreateFullJobInput): Promise<MockJob>
     job_id: job.id,
     client_id: clientId,
     name: person.name.trim() || input.clientName.trim(),
+    person_name: person.name.trim() || input.clientName.trim(),
     sex: person.sex,
     role: person.role,
     age: person.age?.trim() || null,
