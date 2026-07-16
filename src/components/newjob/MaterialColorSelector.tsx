@@ -1,4 +1,4 @@
-import { CheckCircle2, Plus, Search } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { commonMaterialColors, materialColorCategories } from './materialColorOptions'
 
@@ -8,29 +8,18 @@ type MaterialColorSelectorProps = {
 }
 
 export function MaterialColorSelector({ selectedColor, onSelectColor }: MaterialColorSelectorProps) {
-  const [searchValue, setSearchValue] = useState('')
   const [openCategoryId, setOpenCategoryId] = useState('neutral')
   const [showBrowse, setShowBrowse] = useState(false)
   const [showCustom, setShowCustom] = useState(false)
   const activeCategory = materialColorCategories.find((category) => category.id === openCategoryId) ?? materialColorCategories[0]
   const allColors = useMemo(() => materialColorCategories.flatMap((category) => category.options), [])
   const selectedOption = allColors.find((option) => option.name === selectedColor)
-  const visibleOptions = useMemo(() => {
-    const query = searchValue.trim().toLowerCase()
-    const source = query ? allColors : activeCategory.options
-    if (!query) return source
-    return source.filter((option) => `${option.name} ${option.hex}`.toLowerCase().includes(query))
-  }, [activeCategory.options, allColors, searchValue])
+  const visibleOptions = activeCategory.options
 
   return (
     <div className="stack gap-8">
       <span className="input-label">Color</span>
       <p className="text-sm text-muted wizard-helper-inline">What color is the material?</p>
-
-      <label className="wizard-material-search">
-        <Search size={15} />
-        <input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder="Search colors" />
-      </label>
 
       <div className="wizard-material-quick-row" aria-label="Common colors">
         {commonMaterialColors.map((option) => (
@@ -54,27 +43,25 @@ export function MaterialColorSelector({ selectedColor, onSelectColor }: Material
         <span>{materialColorCategories.length} groups</span>
       </button>
 
-      {showBrowse || searchValue.trim() ? (
+      {showBrowse ? (
         <div className="stack gap-8">
-          {!searchValue.trim() ? (
-            <div className="wizard-material-category-row" aria-label="Color categories">
-              {materialColorCategories.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  className={`wizard-material-category-chip${activeCategory.id === category.id ? ' active' : ''}`}
-                  onClick={() => setOpenCategoryId(category.id)}
-                >
-                  {category.title.replace(' Colors', '')}
-                </button>
-              ))}
-            </div>
-          ) : null}
+          <div className="wizard-material-category-row" aria-label="Color categories">
+            {materialColorCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                className={`wizard-material-category-chip${activeCategory.id === category.id ? ' active' : ''}`}
+                onClick={() => setOpenCategoryId(category.id)}
+              >
+                {category.title.replace(' Colors', '')}
+              </button>
+            ))}
+          </div>
 
           <article className="wizard-material-options-panel">
             <div className="row-between">
-              <h5>{searchValue.trim() ? 'Search results' : activeCategory.title}</h5>
-              <span>{visibleOptions.length}</span>
+              <h5>{activeCategory.title}</h5>
+              <span className="wizard-swipe-hint">Swipe for more <ArrowRight size={12} /></span>
             </div>
             <div className="wizard-color-option-grid wizard-swipe-option-grid">
               <button

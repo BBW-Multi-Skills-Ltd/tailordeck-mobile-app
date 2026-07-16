@@ -1,8 +1,9 @@
 import { Check, Plus, Trash2, X } from 'lucide-react'
 import { digitsOnly, formatNairaInput, numericValue, type ExpenseForm } from './newJobConfig'
 import { formatNaira } from '../../lib/utils'
+import { PricingDepositFields, type PricingDepositFieldsProps } from './PricingDepositFields'
 
-type StepCostingProps = {
+type StepCostingProps = PricingDepositFieldsProps & {
   expenseDraftName: string
   expenseDraftCost: string
   expenses: ExpenseForm[]
@@ -18,13 +19,21 @@ type StepCostingProps = {
 }
 
 export default function StepCosting({
+  balance,
+  chargeAmount,
   expenseDraftName,
   expenseDraftCost,
   expenses,
   charge,
+  deposit,
+  depositPercent,
+  depositPercentValue,
   totalExpenses,
   projectedProfit,
   worthIt,
+  onChargeAmountChange,
+  onDepositPercentChange,
+  onDepositPercentKeyDown,
   onExpenseDraftNameChange,
   onExpenseDraftCostChange,
   onAddExpense,
@@ -33,6 +42,28 @@ export default function StepCosting({
 }: StepCostingProps) {
   return (
     <div className="stack gap-12">
+      <section className="stack gap-10">
+        <div className="wizard-step-section-heading">
+          <span>
+            <Check size={15} />
+          </span>
+          <div>
+            <strong>Pricing</strong>
+            <p>Set charge and deposit before adding expenses.</p>
+          </div>
+        </div>
+        <PricingDepositFields
+          balance={balance}
+          chargeAmount={chargeAmount}
+          deposit={deposit}
+          depositPercent={depositPercent}
+          depositPercentValue={depositPercentValue}
+          onChargeAmountChange={onChargeAmountChange}
+          onDepositPercentChange={onDepositPercentChange}
+          onDepositPercentKeyDown={onDepositPercentKeyDown}
+        />
+      </section>
+
       <div className="stack gap-8">
         <p className="wizard-section-label">Expenses</p>
         <div className="wizard-expense-entry-row">

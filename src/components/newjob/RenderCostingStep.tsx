@@ -17,6 +17,11 @@ export function RenderCostingStep({ wizard }: StepRendererProps) {
 
   return (
     <StepCosting
+      balance={derived.balance}
+      chargeAmount={state.chargeAmount}
+      deposit={derived.deposit}
+      depositPercent={state.depositPercent}
+      depositPercentValue={derived.depositPercentValue}
       expenseDraftName={state.expenseDraftName}
       expenseDraftCost={state.expenseDraftCost}
       expenses={state.expenses}
@@ -24,6 +29,9 @@ export function RenderCostingStep({ wizard }: StepRendererProps) {
       totalExpenses={derived.totalExpenses}
       projectedProfit={derived.projectedProfit}
       worthIt={state.worthIt}
+      onChargeAmountChange={actions.setChargeAmount}
+      onDepositPercentChange={actions.setDepositPercent}
+      onDepositPercentKeyDown={actions.handleDepositPercentKeyDown}
       onExpenseDraftNameChange={actions.setExpenseDraftName}
       onExpenseDraftCostChange={actions.setExpenseDraftCost}
       onAddExpense={actions.addExpense}

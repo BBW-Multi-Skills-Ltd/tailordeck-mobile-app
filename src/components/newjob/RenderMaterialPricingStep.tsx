@@ -23,11 +23,6 @@ export function RenderMaterialPricingStep({ wizard }: StepRendererProps) {
       materialSource={state.materialSource}
       amendmentPartName={state.amendmentPartName}
       amendmentPartQuantity={state.amendmentPartQuantity}
-      chargeAmount={state.chargeAmount}
-      depositPercent={state.depositPercent}
-      depositPercentValue={derived.depositPercentValue}
-      deposit={derived.deposit}
-      balance={derived.balance}
       referencePhotoNames={state.referencePhotoNames}
       onAmendmentMaterialsToggle={actions.handleAmendmentMaterialsToggle}
       onOpenMaterialCategoryChange={actions.setOpenMaterialCategory}
@@ -39,11 +34,7 @@ export function RenderMaterialPricingStep({ wizard }: StepRendererProps) {
       onMaterialSourceChange={actions.setMaterialSource}
       onAmendmentPartNameChange={actions.setAmendmentPartName}
       onAmendmentPartQuantityChange={actions.setAmendmentPartQuantity}
-      onChargeAmountChange={actions.setChargeAmount}
-      onDepositPercentChange={actions.setDepositPercent}
-      onDepositPercentKeyDown={actions.handleDepositPercentKeyDown}
       onReferencePhotoUpload={actions.handleReferencePhotoUpload}
     />
   )
 }
-

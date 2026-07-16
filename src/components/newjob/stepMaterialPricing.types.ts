@@ -1,4 +1,3 @@
-import type { KeyboardEvent } from 'react'
 import type { MaterialQuality, MaterialSource } from './newJobConfig'
 
 export type StepMaterialPricingProps = {
@@ -15,11 +14,6 @@ export type StepMaterialPricingProps = {
   materialSource: MaterialSource
   amendmentPartName: string
   amendmentPartQuantity: string
-  chargeAmount: string
-  depositPercent: string
-  depositPercentValue: number
-  deposit: number
-  balance: number
   referencePhotoNames: string[]
   onAmendmentMaterialsToggle: (needsMaterials: boolean) => void
   onOpenMaterialCategoryChange: (categoryId: string) => void
@@ -31,8 +25,5 @@ export type StepMaterialPricingProps = {
   onMaterialSourceChange: (source: MaterialSource) => void
   onAmendmentPartNameChange: (value: string) => void
   onAmendmentPartQuantityChange: (value: string) => void
-  onChargeAmountChange: (value: string) => void
-  onDepositPercentChange: (value: string) => void
-  onDepositPercentKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
   onReferencePhotoUpload: (files: FileList | null) => void
 }

@@ -1,18 +1,17 @@
 import { formatNaira } from '../../lib/utils'
 import { digitsOnly, formatNairaInput, formatPercentInput } from './newJobConfig'
-import type { StepMaterialPricingProps } from './stepMaterialPricing.types'
+import type { KeyboardEvent } from 'react'
 
-type PricingDepositFieldsProps = Pick<
-  StepMaterialPricingProps,
-  | 'balance'
-  | 'chargeAmount'
-  | 'deposit'
-  | 'depositPercent'
-  | 'depositPercentValue'
-  | 'onChargeAmountChange'
-  | 'onDepositPercentChange'
-  | 'onDepositPercentKeyDown'
->
+export type PricingDepositFieldsProps = {
+  balance: number
+  chargeAmount: string
+  deposit: number
+  depositPercent: string
+  depositPercentValue: number
+  onChargeAmountChange: (value: string) => void
+  onDepositPercentChange: (value: string) => void
+  onDepositPercentKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
+}
 
 export function PricingDepositFields(props: PricingDepositFieldsProps) {
   function handleDepositPercentChange(value: string): void {

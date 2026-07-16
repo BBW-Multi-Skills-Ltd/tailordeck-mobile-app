@@ -4,7 +4,7 @@ export type MaterialYardCategory = {
   options: string[]
 }
 
-export const commonMaterialYards = ['2', '3', '4', '5', '6', '8']
+export const commonMaterialYards = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 export const materialYardCategories: MaterialYardCategory[] = [
   {

@@ -2,8 +2,8 @@ import type { JobType, MakeCategory, MaterialQuality, MaterialSource, OrderMode,
 
 export const stepLabels = [
   'Client Info & Measurements',
-  'Materials / Parts & Pricing',
-  'Costing / Expenses',
+  'Materials / Parts',
+  'Pricing / Costing & Expenses',
   'Deadline',
 ] as const
 
@@ -44,4 +44,3 @@ export const bodyWearItems = [
 ] as const
 
 export const nonBodyItems = ['Bedcover', 'Blanket', 'Duvet', 'Pillow Case', 'Face Cap'] as const
-

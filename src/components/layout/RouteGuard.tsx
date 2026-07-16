@@ -1,7 +1,10 @@
-﻿import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useProfileQuery } from '../../hooks/useProfileQueries'
 import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
+
+const ROUTE_GUARD_DATA_TIMEOUT_MS = 6000
 
 function RouteGuardFallback() {
   return (
@@ -18,18 +21,31 @@ export function RouteGuard() {
   const hasSession = Boolean(auth.session)
   const profile = useProfileQuery(hasSession)
   const subscription = useSubscriptionQuery(hasSession)
+  const [dataWaitTimedOut, setDataWaitTimedOut] = useState(false)
+
+  useEffect(() => {
+    setDataWaitTimedOut(false)
+    if (!hasSession) return undefined
+    if (!profile.isLoading && !subscription.isLoading) return undefined
+
+    const timeoutId = window.setTimeout(() => {
+      setDataWaitTimedOut(true)
+    }, ROUTE_GUARD_DATA_TIMEOUT_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [hasSession, location.pathname, profile.isLoading, subscription.isLoading])
 
   if (auth.loading) return <RouteGuardFallback />
   if (!auth.session) return <Navigate to="/auth/signin" replace state={{ from: location.pathname }} />
-  if (profile.isLoading || subscription.isLoading) return <RouteGuardFallback />
+  if ((profile.isLoading || subscription.isLoading) && !dataWaitTimedOut) return <RouteGuardFallback />
 
   const onboardingComplete = profile.data?.onboarding_complete === true
-  if (!onboardingComplete && !location.pathname.startsWith('/onboarding')) {
+  if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding')) {
     return <Navigate to="/onboarding/setup" replace />
   }
 
   const isExpired = subscription.data?.status === 'expired' || subscription.data?.status === 'past_due'
-  if (isExpired && location.pathname !== '/settings/subscription') {
+  if (!subscription.isError && isExpired && location.pathname !== '/settings/subscription') {
     return <Navigate to="/settings/subscription" replace />
   }
 

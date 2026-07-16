@@ -1,8 +1,7 @@
-import { CheckCircle2, Sparkles, Wrench } from 'lucide-react'
+import { CheckCircle2, Wrench } from 'lucide-react'
 import { AmendmentMaterialFields } from './AmendmentMaterialFields'
 import { MaterialFlowFields } from './MaterialFlowFields'
 import { MaterialSourceSelector } from './MaterialSourceSelector'
-import { PricingDepositFields } from './PricingDepositFields'
 import { ReferencePhotoUpload } from './ReferencePhotoUpload'
 import type { StepMaterialPricingProps } from './stepMaterialPricing.types'
 
@@ -49,29 +48,7 @@ export default function StepMaterialPricing(props: StepMaterialPricingProps) {
         </article>
       ) : null}
 
-      <section className="stack gap-10">
-        <div className="wizard-step-section-heading">
-          <span>
-            <CheckCircle2 size={15} />
-          </span>
-          <div>
-            <strong>Pricing</strong>
-            <p>Set the agreed charge and deposit. Balance is calculated for you.</p>
-          </div>
-        </div>
-        <PricingDepositFields {...props} />
-      </section>
-
       <section className="stack gap-8">
-        <div className="wizard-step-section-heading">
-          <span>
-            <Sparkles size={15} />
-          </span>
-          <div>
-            <strong>Reference photo</strong>
-            <p>Optional, but useful when the client wants a specific style.</p>
-          </div>
-        </div>
         <ReferencePhotoUpload referencePhotoNames={props.referencePhotoNames} onReferencePhotoUpload={props.onReferencePhotoUpload} />
       </section>
     </div>

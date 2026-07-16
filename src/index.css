@@ -6498,6 +6498,16 @@ p { margin: 0; }
   font-weight: 700;
 }
 
+.wizard-material-options-panel .wizard-swipe-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 650;
+}
+
 .wizard-material-empty {
   border: 1px dashed var(--border-strong);
   border-radius: 15px;
@@ -6521,23 +6531,67 @@ p { margin: 0; }
   line-height: 1.35;
 }
 
+.wizard-material-option-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.wizard-material-paged-grid {
+  grid-auto-flow: column;
+  grid-template-columns: minmax(100%, 100%);
+  grid-template-rows: repeat(3, auto);
+  grid-auto-columns: minmax(100%, 100%);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1px 2px 4px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.wizard-material-paged-grid::-webkit-scrollbar {
+  display: none;
+}
+
 .wizard-material-option {
   width: 100%;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--bg-input);
+  min-height: 74px;
   padding: 10px 12px;
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
+  scroll-snap-align: start;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
 .wizard-material-option.active {
   border-color: var(--primary-border);
   background: var(--primary-bg);
+}
+
+.wizard-material-custom-option {
+  border-style: dashed;
+  color: var(--primary);
+}
+
+.wizard-material-custom-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1px;
+}
+
+.wizard-custom-material-field {
+  margin-top: 0;
 }
 
 .wizard-material-title {
@@ -6654,8 +6708,7 @@ p { margin: 0; }
   white-space: nowrap;
 }
 
-.wizard-color-chip,
-.wizard-yard-chip {
+.wizard-color-chip {
   min-height: 34px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -6672,8 +6725,61 @@ p { margin: 0; }
   cursor: pointer;
 }
 
+.wizard-yard-chip {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wizard-quality-chip {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wizard-source-chip {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .wizard-color-chip.active,
-.wizard-yard-chip.active {
+.wizard-yard-chip.active,
+.wizard-quality-chip.active,
+.wizard-source-chip.active {
   border-color: var(--primary-border);
   background: var(--primary-bg);
   color: var(--primary);
