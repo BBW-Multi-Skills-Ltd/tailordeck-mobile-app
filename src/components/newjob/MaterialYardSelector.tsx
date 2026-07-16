@@ -1,4 +1,4 @@
-import { CheckCircle2, Search } from 'lucide-react'
+import { CheckCircle2, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { commonMaterialYards, materialYardCategories } from './materialYardOptions'
 
@@ -74,7 +74,20 @@ export function MaterialYardSelector({ selectedYards, onSelectYards }: MaterialY
               <h5>{searchValue.trim() ? 'Search results' : activeCategory.title}</h5>
               <span>{visibleOptions.length}</span>
             </div>
-            <div className="wizard-yard-option-grid">
+            <div className="wizard-yard-option-grid wizard-swipe-option-grid">
+              <button
+                type="button"
+                className={`wizard-yard-option wizard-custom-option${showCustom ? ' active' : ''}`}
+                onClick={() => setShowCustom((current) => !current)}
+              >
+                <span className="wizard-custom-option-icon">
+                  <Plus size={14} />
+                </span>
+                <span>
+                  <strong>Add Custom</strong>
+                  <small>Type yards</small>
+                </span>
+              </button>
               {visibleOptions.map((yards) => (
                 <button
                   key={`${activeCategory.id}-${yards}`}
@@ -93,10 +106,6 @@ export function MaterialYardSelector({ selectedYards, onSelectYards }: MaterialY
           </article>
         </div>
       ) : null}
-
-      <button type="button" className="wizard-add-measurement-chip" onClick={() => setShowCustom((current) => !current)}>
-        Use custom yards
-      </button>
 
       {showCustom ? (
         <input className="input" value={selectedYards} onChange={(event) => onSelectYards(event.target.value)} placeholder="Type yard amount" inputMode="decimal" />

@@ -1,4 +1,4 @@
-import { CheckCircle2, Search } from 'lucide-react'
+import { CheckCircle2, Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { commonMaterialColors, materialColorCategories } from './materialColorOptions'
 
@@ -76,7 +76,20 @@ export function MaterialColorSelector({ selectedColor, onSelectColor }: Material
               <h5>{searchValue.trim() ? 'Search results' : activeCategory.title}</h5>
               <span>{visibleOptions.length}</span>
             </div>
-            <div className="wizard-color-option-grid">
+            <div className="wizard-color-option-grid wizard-swipe-option-grid">
+              <button
+                type="button"
+                className={`wizard-color-option wizard-custom-option${showCustom ? ' active' : ''}`}
+                onClick={() => setShowCustom((current) => !current)}
+              >
+                <span className="wizard-custom-option-icon">
+                  <Plus size={14} />
+                </span>
+                <span>
+                  <strong>Add Custom</strong>
+                  <small>Type name or hex</small>
+                </span>
+              </button>
               {visibleOptions.map((option) => (
                 <button
                   key={`${activeCategory.id}-${option.name}`}
@@ -98,10 +111,6 @@ export function MaterialColorSelector({ selectedColor, onSelectColor }: Material
           </article>
         </div>
       ) : null}
-
-      <button type="button" className="wizard-add-measurement-chip" onClick={() => setShowCustom((current) => !current)}>
-        Use custom color
-      </button>
 
       {showCustom ? (
         <input className="input" value={selectedColor} onChange={(event) => onSelectColor(event.target.value)} placeholder="Type color name or hex code" />
