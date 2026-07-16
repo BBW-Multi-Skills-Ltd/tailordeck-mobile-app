@@ -1,4 +1,5 @@
 import { ArrowLeft } from 'lucide-react'
+import PageHeader from '../shared/PageHeader'
 
 type NewJobHeaderProps = {
   onBack: () => void
@@ -6,13 +7,14 @@ type NewJobHeaderProps = {
 
 export function NewJobHeader({ onBack }: NewJobHeaderProps) {
   return (
-    <div className="row-between">
-      <button type="button" className="btn btn-ghost btn-icon" onClick={onBack} aria-label="Back">
-        <ArrowLeft size={18} />
-      </button>
-      <h2 className="app-page-heading">New Job</h2>
-      <span style={{ width: '44px' }} />
-    </div>
+    <PageHeader
+      title="New Job"
+      centered
+      leading={(
+        <button type="button" className="btn btn-ghost btn-icon" onClick={onBack} aria-label="Back">
+          <ArrowLeft size={18} />
+        </button>
+      )}
+    />
   )
 }
-

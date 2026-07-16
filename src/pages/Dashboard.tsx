@@ -1,6 +1,8 @@
 import { BarChart3 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import BestMonthCard from '../components/dashboard/BestMonthCard'
+import DashboardEmptyGuide from '../components/dashboard/DashboardEmptyGuide'
+import DashboardInsightCard from '../components/dashboard/DashboardInsightCard'
 import DashboardKpiGrid from '../components/dashboard/DashboardKpiGrid'
 import DashboardMonthNav from '../components/dashboard/DashboardMonthNav'
 import DashboardRevenueChart from '../components/dashboard/DashboardRevenueChart'
@@ -43,13 +45,7 @@ export default function Dashboard() {
           description="Check your connection and Supabase policies for jobs, then refresh the page."
         />
       ) : !hasAnalytics ? (
-        <EmptyState
-          icon={BarChart3}
-          title="No analytics yet"
-          description="Your dashboard will show revenue, expenses, profit, and job status once you create your first job."
-          actionLabel="Create Job"
-          actionTo="/jobs/new"
-        />
+        <DashboardEmptyGuide />
       ) : null}
 
       {hasAnalytics ? (
@@ -61,6 +57,7 @@ export default function Dashboard() {
             onNext={() => setMonthOffset((prev) => Math.min(prev + 1, 0))}
           />
           <DashboardKpiGrid metrics={metrics} />
+          <DashboardInsightCard metrics={metrics} />
           <DashboardRevenueChart months={metrics.months} />
           <JobStatusBreakdown statusCounts={metrics.statusCounts} />
           <MonthlyPerformanceTable months={metrics.months} />

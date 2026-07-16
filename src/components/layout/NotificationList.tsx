@@ -11,12 +11,14 @@ type NotificationListProps = {
 }
 
 export function NotificationList({ filter, notifications, onDelete, onItemOpen, onMarkRead }: NotificationListProps) {
+  const emptyCopy = getEmptyCopy(filter)
+
   return (
     <div className="notification-sheet-body">
       {notifications.length === 0 ? (
         <div className="notification-empty">
-          <p className="notification-empty-title">{filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}</p>
-          <p className="notification-empty-sub">New alerts will show here when jobs need attention.</p>
+          <p className="notification-empty-title">{emptyCopy.title}</p>
+          <p className="notification-empty-sub">{emptyCopy.description}</p>
         </div>
       ) : (
         <div className="notification-list">
@@ -27,4 +29,25 @@ export function NotificationList({ filter, notifications, onDelete, onItemOpen, 
       )}
     </div>
   )
+}
+
+function getEmptyCopy(filter: NotificationFilter): { title: string; description: string } {
+  if (filter === 'unread') {
+    return {
+      title: 'Nothing unread',
+      description: 'When you mark alerts as read, they stay out of the way so you can focus.',
+    }
+  }
+
+  if (filter === 'deadline') {
+    return {
+      title: 'No deadline alerts',
+      description: 'Delivery reminders will appear here before jobs are due.',
+    }
+  }
+
+  return {
+    title: 'No notifications yet',
+    description: 'Deadline reminders and important shop alerts will show here.',
+  }
 }

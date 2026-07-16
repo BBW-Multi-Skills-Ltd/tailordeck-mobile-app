@@ -1,5 +1,6 @@
 import { ArrowLeft, Phone, Ruler } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import PageHeader from '../components/shared/PageHeader'
 import { appJobMeasurementById, appJobs } from '../data/appData'
 import { labelFromField } from '../data/mockJobMeasurements'
 import { getInitial } from '../lib/utils'
@@ -27,13 +28,15 @@ export default function JobMeasurements() {
 
   return (
     <section className="section stack gap-16">
-      <header className="row-between">
-        <Link to={`/jobs/${job.id}`} className="btn btn-ghost btn-icon" aria-label="Back to job details">
-          <ArrowLeft size={18} />
-        </Link>
-        <h2 className="app-page-heading">Measurements</h2>
-        <span style={{ width: '44px' }} />
-      </header>
+      <PageHeader
+        title="Measurements"
+        centered
+        leading={(
+          <Link to={`/jobs/${job.id}`} className="btn btn-ghost btn-icon" aria-label="Back to job details">
+            <ArrowLeft size={18} />
+          </Link>
+        )}
+      />
 
       <article className="card stack gap-12">
         <div className="row gap-12">

@@ -1,4 +1,4 @@
-import { ArrowLeft, Check } from 'lucide-react'
+import { AlertCircle, ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/shared/PageHeader'
@@ -84,13 +84,23 @@ export default function SubscriptionPage() {
         <div className="row-between">
           <div className="stack gap-2">
             <p className="subscription-current-title">Free Trial</p>
-            <p className="subscription-current-subtitle">Still on free trial</p>
+            <p className="subscription-current-subtitle">Still on free trial. Pro tools are available while trial is active.</p>
           </div>
           <span className="subscription-active-chip">Active</span>
         </div>
         <button type="button" className="btn btn-secondary btn-full subscription-manage-btn">
           Manage Plan
         </button>
+      </article>
+
+      <article className="subscription-trial-note">
+        <span className="subscription-trial-note-icon">
+          <AlertCircle size={16} />
+        </span>
+        <div className="stack gap-2">
+          <strong>Keep your professional tools active</strong>
+          <p>When trial ends, branded PDFs, WhatsApp sharing, and business analytics pause until you choose a plan.</p>
+        </div>
       </article>
 
       <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />

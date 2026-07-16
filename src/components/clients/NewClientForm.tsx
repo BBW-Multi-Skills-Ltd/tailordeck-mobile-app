@@ -1,3 +1,4 @@
+import SegmentedControl from '../shared/SegmentedControl'
 import { newClientFieldLabels, newClientMeasurementFields } from './newClientFormConfig'
 import type { NewClientFormModel } from './useNewClientForm'
 
@@ -49,13 +50,7 @@ function PillChoice<T extends string>({ label, onSelect, selected, values }: { l
   return (
     <div className="input-group">
       <span className="input-label">{label}</span>
-      <div className="pill-group">
-        {values.map((value) => (
-          <button key={value} type="button" className={`pill${selected === value ? ' active' : ''}`} onClick={() => onSelect(value)}>
-            {value}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl label={label} options={values} value={selected} onChange={onSelect} />
     </div>
   )
 }

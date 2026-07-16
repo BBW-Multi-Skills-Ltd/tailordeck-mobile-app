@@ -1,3 +1,4 @@
+import { Ruler } from 'lucide-react'
 import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
 import type { MockJob } from '../../types/job'
 import { BodyMeasurementCard } from './BodyMeasurementCard'
@@ -22,7 +23,17 @@ export default function ClientMeasurementsSection({
   onUpdateNonBodyMeasurement,
 }: ClientMeasurementsSectionProps) {
   if (measurementJobs.length === 0) {
-    return <p className="text-sm text-muted">The profile is not recorded for this client. Create a job for this client first.</p>
+    return (
+      <article className="client-empty-panel">
+        <span>
+          <Ruler size={18} />
+        </span>
+        <div>
+          <strong>No measurements yet</strong>
+          <p>Create this client's first job and TailorDeck will save measurements here automatically.</p>
+        </div>
+      </article>
+    )
   }
 
   return (

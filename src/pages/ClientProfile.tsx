@@ -1,4 +1,4 @@
-import { ArrowLeft, Trash2 } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ClientJobHistory from '../components/clientprofile/ClientJobHistory'
@@ -6,6 +6,7 @@ import ClientMeasurementsSection from '../components/clientprofile/ClientMeasure
 import ClientProfileCard from '../components/clientprofile/ClientProfileCard'
 import { useClientMeasurements } from '../components/clientprofile/useClientMeasurements'
 import EmptyState from '../components/shared/EmptyState'
+import PageHeader from '../components/shared/PageHeader'
 import { useClientQuery, useSoftDeleteClientMutation } from '../hooks/useClientQueries'
 import { useClientJobsQuery } from '../hooks/useJobQueries'
 import { mapJobRow } from '../services/mappers/jobMapper'
@@ -63,13 +64,15 @@ export default function ClientProfile() {
 
   return (
     <section className="section stack gap-16 page-fab-clearance">
-      <div className="row-between">
-        <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
-          <ArrowLeft size={18} />
-        </Link>
-        <h2 className="app-page-heading">Client Profile</h2>
-        <span style={{ width: '44px' }} />
-      </div>
+      <PageHeader
+        title="Client Profile"
+        centered
+        leading={(
+          <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
+            <ArrowLeft size={18} />
+          </Link>
+        )}
+      />
 
       <ClientProfileCard client={client} />
 
@@ -88,9 +91,18 @@ export default function ClientProfile() {
 
       <ClientJobHistory jobs={completedJobs} />
 
-      <button type="button" className="btn btn-primary btn-full" onClick={() => navigate(`/jobs/new?clientId=${client.id}`)}>
-        Start Another Job for This Client
-      </button>
+      <article className="client-repeat-card card">
+        <div className="client-repeat-icon">
+          <RotateCcw size={18} />
+        </div>
+        <div className="stack gap-4 min-w-0">
+          <h4>Create another job</h4>
+          <p>Use {client.name}'s saved details and adjust measurements only if this job needs changes.</p>
+        </div>
+        <button type="button" className="btn btn-primary btn-sm client-repeat-btn" onClick={() => navigate(`/jobs/new?clientId=${client.id}`)}>
+          Start
+        </button>
+      </article>
 
       <button type="button" className="btn btn-danger btn-full" onClick={() => void handleDeleteClient()} disabled={deleteClientMutation.isPending}>
         <Trash2 size={16} />

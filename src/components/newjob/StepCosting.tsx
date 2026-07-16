@@ -114,6 +114,9 @@ export default function StepCosting({
             Not worth it
           </button>
         </div>
+        {worthIt === 'Yes' ? (
+          <p className="text-sm text-muted">Tap Yes to continue straight to deadline setup.</p>
+        ) : null}
         {worthIt === 'No' ? (
           <p className="text-sm text-danger">Consider revising price or reducing costs before finalizing.</p>
         ) : null}

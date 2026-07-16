@@ -25,7 +25,7 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
       <label className="input-group">
         <span className="input-label">How much are you charging the client?</span>
         <p className="text-sm text-muted">Enter the total agreed price. TailorDeck auto-formats in Naira.</p>
-        <input className="input" value={formatNairaInput(props.chargeAmount)} onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))} placeholder="₦0" inputMode="numeric" />
+        <input className="input" value={formatNairaInput(props.chargeAmount)} onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))} placeholder={formatNairaInput('0')} inputMode="numeric" />
       </label>
 
       <label className="input-group">

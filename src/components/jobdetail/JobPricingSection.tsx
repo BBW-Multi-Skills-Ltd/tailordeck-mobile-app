@@ -43,7 +43,7 @@ export function JobPricingSection({
   return (
     <article className="card stack gap-10">
       <h4 className="row gap-8">
-        <span className="text-primary">₦</span>
+        <span className="text-primary">{'\u20A6'}</span>
         <span>Pricing</span>
       </h4>
       <div className="stack gap-8">
@@ -87,3 +87,4 @@ export function JobPricingSection({
     </article>
   )
 }
+

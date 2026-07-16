@@ -3,6 +3,7 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
 import { JobDeadlineSection } from '../components/jobdetail/JobDeadlineSection'
+import { JobDocumentActions } from '../components/jobdetail/JobDocumentActions'
 import { JobImageViewer } from '../components/jobdetail/JobImageViewer'
 import { JobInfoSection } from '../components/jobdetail/JobInfoSection'
 import { JobPricingSection } from '../components/jobdetail/JobPricingSection'
@@ -17,6 +18,7 @@ import { useJobDocumentActions } from '../components/jobdetail/useJobDocumentAct
 import { useJobImageViewer } from '../components/jobdetail/useJobImageViewer'
 import { readBrandConfig } from '../components/invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
+import PageHeader from '../components/shared/PageHeader'
 import type { DetailedJobData } from '../data/mockJobDetails'
 import { useJobQuery } from '../hooks/useJobQueries'
 import type { MockJob } from '../types/job'
@@ -115,13 +117,15 @@ function JobDetailContent({
   return (
     <>
       <section className="section stack gap-16">
-        <header className="row-between">
-          <Link to="/jobs" className="btn btn-ghost btn-icon" aria-label="Back to jobs">
-            <ArrowLeft size={18} />
-          </Link>
-          <h2 className="app-page-heading">Job Details</h2>
-          <span style={{ width: '44px' }} />
-        </header>
+        <PageHeader
+          title="Job Details"
+          centered
+          leading={(
+            <Link to="/jobs" className="btn btn-ghost btn-icon" aria-label="Back to jobs">
+              <ArrowLeft size={18} />
+            </Link>
+          )}
+        />
 
         <JobClientCard job={job} />
         <JobInfoSection job={job} details={details} measurementScopeText={measurementScopeText} />
@@ -136,14 +140,7 @@ function JobDetailContent({
         <JobReferencePhotos photos={details.referencePhotos} onOpen={setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
 
-        <div className="row gap-8">
-          <button type="button" className="btn btn-primary flex-1" onClick={() => setOpenDrawer('invoice')}>
-            Send Invoice
-          </button>
-          <button type="button" className="btn btn-secondary flex-1" onClick={() => setOpenDrawer('receipt')}>
-            Send Receipt
-          </button>
-        </div>
+        <JobDocumentActions onInvoice={() => setOpenDrawer('invoice')} onReceipt={() => setOpenDrawer('receipt')} />
       </section>
 
       {activePhoto ? (

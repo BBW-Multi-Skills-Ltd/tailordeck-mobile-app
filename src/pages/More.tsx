@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { BarChart3, ChevronRight, CircleHelp, FileText, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import PageHeader from '../components/shared/PageHeader'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
 
 type MoreHubItem = {
@@ -60,10 +61,7 @@ export default function More() {
 
   return (
     <section className="section stack gap-16 more-page">
-      <header className="stack gap-4">
-        <h2 className="app-page-heading">More</h2>
-        <p className="text-sm text-muted">Everything else, neatly tucked away.</p>
-      </header>
+      <PageHeader title="More" subtitle="Everything else, neatly tucked away." />
 
       <article className="clay-card more-profile-card">
         <div className="more-avatar clay-inset" aria-hidden>

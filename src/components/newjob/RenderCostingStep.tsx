@@ -8,6 +8,13 @@ type StepRendererProps = {
 export function RenderCostingStep({ wizard }: StepRendererProps) {
   const { actions, derived, state } = wizard
 
+  function handleWorthItChange(value: 'Yes' | 'No'): void {
+    actions.setWorthIt(value)
+    if (value === 'Yes') {
+      actions.goNext()
+    }
+  }
+
   return (
     <StepCosting
       expenseDraftName={state.expenseDraftName}
@@ -21,8 +28,7 @@ export function RenderCostingStep({ wizard }: StepRendererProps) {
       onExpenseDraftCostChange={actions.setExpenseDraftCost}
       onAddExpense={actions.addExpense}
       onRemoveExpense={actions.removeExpense}
-      onWorthItChange={actions.setWorthIt}
+      onWorthItChange={handleWorthItChange}
     />
   )
 }
-

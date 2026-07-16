@@ -1,4 +1,4 @@
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays, ClipboardList } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatDateShort, formatNaira } from '../../lib/utils'
 import type { MockJob } from '../../types/job'
@@ -16,7 +16,15 @@ export default function ClientJobHistory({ jobs }: ClientJobHistoryProps) {
       </div>
 
       {jobs.length === 0 ? (
-        <p className="text-sm text-muted">No job history yet for this client. Create a job for this client.</p>
+        <article className="client-empty-panel">
+          <span>
+            <ClipboardList size={18} />
+          </span>
+          <div>
+            <strong>No completed jobs yet</strong>
+            <p>Finished jobs for this client will appear here, so repeat orders are easier to track.</p>
+          </div>
+        </article>
       ) : (
         <div className="stack gap-8">
           {jobs.map((job) => (

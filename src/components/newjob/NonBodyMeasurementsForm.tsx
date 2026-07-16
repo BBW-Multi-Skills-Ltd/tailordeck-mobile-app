@@ -21,7 +21,10 @@ export default function NonBodyMeasurementsForm({
 }: NonBodyMeasurementsFormProps) {
   return (
     <div className="stack gap-8 wizard-step1-measurements">
-      <p className="input-label">Item Measurements</p>
+      <div className="wizard-measurement-intro">
+        <p className="input-label">Item Measurements</p>
+        <p>Use these fields for items like duvet, curtains, cap, blanket, or covers.</p>
+      </div>
       <article className="card stack gap-12">
         <label className="input-group">
           <span className="input-label">Quantity</span>
@@ -31,7 +34,7 @@ export default function NonBodyMeasurementsForm({
         <div className="wizard-measurements-grid">
           {fields.map((field) => (
             <label key={field} className="input-group">
-              <span className="input-label">{labelFromField(field)} (cm)</span>
+              <span className="input-label">{labelFromField(field)} (in)</span>
               <input
                 className="input"
                 value={measurements[field] ?? ''}

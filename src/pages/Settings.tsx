@@ -7,8 +7,10 @@ import InvoiceReceiptPanel from '../components/settings/InvoiceReceiptPanel'
 import ProfileSettingsPanel from '../components/settings/ProfileSettingsPanel'
 import RemindersPanel from '../components/settings/RemindersPanel'
 import { SettingAccordion, SettingLinkRow } from '../components/settings/SettingsRows'
+import { SettingsSetupProgress } from '../components/settings/SettingsSetupProgress'
 import ShopPreferencesPanel from '../components/settings/ShopPreferencesPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
+import PageHeader from '../components/shared/PageHeader'
 import type { MaterialQuality, NotificationBellOption, ReminderLead, RingtoneOption } from '../lib/settings'
 
 export default function SettingsPage() {
@@ -17,12 +19,16 @@ export default function SettingsPage() {
 
   return (
     <section className="section stack gap-16">
-      <header className="row-between">
-        <h1 className="settings-page-title">Settings</h1>
-        <button type="button" className="btn btn-ghost btn-icon settings-theme-btn" aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={actions.setTheme}>
-          {state.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </header>
+      <PageHeader
+        title="Settings"
+        trailing={(
+          <button type="button" className="btn btn-ghost btn-icon settings-theme-btn" aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={actions.setTheme}>
+            {state.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+        )}
+      />
+
+      <SettingsSetupProgress settings={settings} />
 
       <div className="settings-list">
         <SettingAccordion icon={<UserRound size={20} />} title="My Profile" order={1} panelKey="profile" panel={state.panel} onToggle={actions.handleToggle}>

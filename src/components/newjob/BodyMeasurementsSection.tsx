@@ -42,7 +42,7 @@ export default function BodyMeasurementsSection({
   if (jobType === 'Single' && persons[0]) {
     return (
       <div className="stack gap-8 wizard-step1-measurements">
-        <p className="input-label">Measurements</p>
+        <MeasurementSectionIntro />
         <BodyPersonMeasurementsCard
           person={persons[0]}
           title={persons[0].name || clientName || 'Client'}
@@ -50,7 +50,7 @@ export default function BodyMeasurementsSection({
           isOpen={singleMeasurementsOpen}
           sexOptions={['Male', 'Female']}
           measurementFields={step1FieldsBySex(persons[0].sex)}
-          measurementTitle="Body Measurements (cm)"
+          measurementTitle="Body Measurements (in)"
           itemValue={persons[0].itemType || itemType}
           itemPlaceholder="e.g. Shirt, Gown, Agbada"
           onToggle={() => onSingleMeasurementsOpenChange((prev) => !prev)}
@@ -66,7 +66,7 @@ export default function BodyMeasurementsSection({
   if (jobType === 'Couple') {
     return (
       <div className="stack gap-8 wizard-step1-measurements">
-        <p className="input-label">Measurements</p>
+        <MeasurementSectionIntro />
         {persons.slice(0, 2).map((person, index) => (
           <BodyPersonMeasurementsCard
             key={person.id}
@@ -76,7 +76,7 @@ export default function BodyMeasurementsSection({
             isOpen={stepOneMeasurementsOpen[person.id] ?? true}
             sexOptions={['Male', 'Female']}
             measurementFields={step1FieldsBySex(person.sex)}
-            measurementTitle="Body Measurements (cm)"
+            measurementTitle="Body Measurements (in)"
             itemValue={sameItemForAll ? itemType : person.itemType}
             itemPlaceholder="e.g. Suit, Gown, Kaftan"
             showNameInput
@@ -95,7 +95,7 @@ export default function BodyMeasurementsSection({
 
   return (
     <div className="stack gap-8 wizard-step1-measurements">
-      <p className="input-label">Measurements</p>
+      <MeasurementSectionIntro />
       {persons.map((person, index) => {
         const adultIndex = persons.filter((p, i) => p.role === 'adult' && i <= index).length
         const isPrimaryAdult = person.role === 'adult' && adultIndex === 1
@@ -112,7 +112,7 @@ export default function BodyMeasurementsSection({
             isOpen={stepOneMeasurementsOpen[person.id] ?? true}
             sexOptions={sexOptions}
             measurementFields={measurementFields}
-            measurementTitle={person.role === 'child' ? 'Child Measurements (cm)' : 'Body Measurements (cm)'}
+            measurementTitle={person.role === 'child' ? 'Child Measurements (in)' : 'Body Measurements (in)'}
             itemValue={sameItemForAll ? itemType : person.itemType}
             itemPlaceholder="e.g. Agbada, Gown, Shirt"
             showNameInput
@@ -139,6 +139,15 @@ export default function BodyMeasurementsSection({
         <Plus size={22} />
         <span>Add Child</span>
       </button>
+    </div>
+  )
+}
+
+function MeasurementSectionIntro() {
+  return (
+    <div className="wizard-measurement-intro">
+      <p className="input-label">Measurements</p>
+      <p>Only fill what this job needs. You can remove unused fields or add more measurements.</p>
     </div>
   )
 }

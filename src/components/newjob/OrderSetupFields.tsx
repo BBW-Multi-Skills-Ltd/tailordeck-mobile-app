@@ -1,10 +1,12 @@
 import {
-  bodyWearItems,
+  type MakeCategory,
+  type OrderMode,
   makeCategories,
   nonBodyItems,
   orderModes,
   scopeForBodyWear,
   scopeForNonBody,
+  bodyWearItems,
 } from './newJobConfig'
 import type { StepClientMeasurementsProps } from './stepClientMeasurements.types'
 
@@ -27,33 +29,75 @@ type OrderSetupFieldsProps = Pick<
 export function OrderSetupFields(props: OrderSetupFieldsProps) {
   return (
     <>
-      <div className="input-group">
-        <span className="input-label">What type of order is this?</span>
-        <div className="wizard-sex-group">
+      <section className="wizard-guided-card">
+        <div className="wizard-guided-title-row">
+          <span className="wizard-guided-step">1</span>
+          <div>
+            <p className="wizard-guided-title">What kind of work is this?</p>
+            <p className="wizard-guided-copy">Start broad. TailorDeck will show the right measurement flow.</p>
+          </div>
+        </div>
+
+        <div className="wizard-choice-grid">
           {makeCategories.map((category) => (
-            <button key={category} type="button" className={`pill wizard-jobtype-pill${props.makeCategory === category ? ' active' : ''}`} onClick={() => props.onMakeCategoryChange(category)}>
-              {category}
-            </button>
+            <ChoiceCard
+              key={category}
+              active={props.makeCategory === category}
+              title={category}
+              description={category === 'Body Wear' ? 'Clothes worn by a person' : 'Beddings, caps, covers, and more'}
+              onClick={() => props.onMakeCategoryChange(category)}
+            />
           ))}
         </div>
-      </div>
 
-      <div className="input-group">
-        <span className="input-label">Order Mode</span>
-        <div className="wizard-sex-group">
+        <div className="wizard-choice-grid">
           {orderModes.map((mode) => (
-            <button key={mode} type="button" className={`pill wizard-jobtype-pill${props.orderMode === mode ? ' active' : ''}`} onClick={() => props.onOrderModeChange(mode)}>
-              {mode}
-            </button>
+            <ChoiceCard
+              key={mode}
+              active={props.orderMode === mode}
+              title={mode}
+              description={mode === 'New Stitch' ? 'Fresh job from material to finish' : 'Fix, resize, replace, or adjust'}
+              onClick={() => props.onOrderModeChange(mode)}
+            />
           ))}
         </div>
-      </div>
+      </section>
 
-      {!(props.showBodyMeasurementFlow && props.jobType === 'Single') ? <ItemTypeField {...props} /> : null}
+      <section className="wizard-guided-card">
+        <div className="wizard-guided-title-row">
+          <span className="wizard-guided-step">2</span>
+          <div>
+            <p className="wizard-guided-title">Job details</p>
+            <p className="wizard-guided-copy">Tell us who this job is for and what you are making.</p>
+          </div>
+        </div>
+
+        {!(props.showBodyMeasurementFlow && props.jobType === 'Single') ? <ItemTypeField {...props} /> : null}
+        {!props.isAmendmentMode ? <OrderScopeField {...props} /> : <p className="wizard-guided-copy">Repair jobs start with one client. You can add notes below.</p>}
+        {props.showBodyMeasurementFlow && props.jobType !== 'Single' ? <SameItemToggle {...props} /> : null}
+      </section>
+
       <ItemTypeOptions />
-      {!props.isAmendmentMode ? <OrderScopeField {...props} /> : null}
-      {props.showBodyMeasurementFlow && props.jobType !== 'Single' ? <SameItemToggle {...props} /> : null}
     </>
+  )
+}
+
+function ChoiceCard({
+  active,
+  description,
+  onClick,
+  title,
+}: {
+  active: boolean
+  description: string
+  onClick: () => void
+  title: MakeCategory | OrderMode
+}) {
+  return (
+    <button type="button" className={`wizard-choice-card${active ? ' active' : ''}`} onClick={onClick}>
+      <span className="wizard-choice-title">{title}</span>
+      <span className="wizard-choice-copy">{description}</span>
+    </button>
   )
 }
 

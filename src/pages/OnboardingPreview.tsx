@@ -33,6 +33,11 @@ export default function OnboardingPreview() {
           </div>
         </header>
 
+        <div className="onboarding-preview-trust">
+          <span>Sample workspace</span>
+          <span>No signup needed yet</span>
+        </div>
+
         <section className="onboarding-preview-board">
           <div className="onboarding-preview-top">
             <p className="onboarding-preview-kicker">Today</p>
@@ -60,7 +65,7 @@ export default function OnboardingPreview() {
             <span className="onboarding-preview-avatar">A</span>
             <div className="min-w-0 flex-1">
               <p className="onboarding-preview-job-title">Asoebi Family Pack</p>
-              <p className="onboarding-preview-job-meta">Due: Jul 24 - Balance: ₦45,000</p>
+              <p className="onboarding-preview-job-meta">Due: Jul 24 - Balance: {'\u20A6'}45,000</p>
             </div>
             <span className="badge badge-progress">In Progress</span>
           </article>

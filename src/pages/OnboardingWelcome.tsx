@@ -13,6 +13,7 @@ export default function OnboardingWelcome() {
           </div>
           <h1 className="onboarding-title">Welcome to TailorDeck</h1>
           <p className="onboarding-subtitle">Your shop, in your pocket</p>
+          <p className="onboarding-trust-copy">See the workspace first. Create an account only when you are ready to save your shop.</p>
         </div>
 
         <div className="onboarding-hero-image" aria-hidden>
@@ -50,7 +51,7 @@ export default function OnboardingWelcome() {
         </section>
 
         <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/onboarding/preview')}>
-          See How It Works
+          Preview My Shop
         </button>
       </div>
     </main>

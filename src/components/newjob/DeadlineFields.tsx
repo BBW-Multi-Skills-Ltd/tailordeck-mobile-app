@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ChevronDown, Clock, WalletCards } from 'lucide-react'
 import { formatNaira } from '../../lib/utils'
 import { reminders, type Reminder } from './newJobConfig'
 
@@ -21,22 +21,58 @@ export function DeadlineFields({
   onDeadlineTimeChange,
   onReminderChange,
 }: DeadlineFieldsProps) {
+  const reminderLabel = reminder === 'none' ? 'No reminder' : reminder
+  const checklistItems = [
+    {
+      icon: <WalletCards size={15} />,
+      label: 'Balance due',
+      value: formatNaira(balance),
+      complete: true,
+    },
+    {
+      icon: <CheckCircle2 size={15} />,
+      label: 'Delivery date',
+      value: deadlineDate || 'Select date',
+      complete: Boolean(deadlineDate),
+    },
+    {
+      icon: <Clock size={15} />,
+      label: 'Delivery time',
+      value: deadlineTime || 'Optional',
+      complete: Boolean(deadlineTime),
+    },
+    {
+      icon: <AlertCircle size={15} />,
+      label: 'Reminder',
+      value: reminderLabel,
+      complete: true,
+    },
+  ]
+
   return (
     <div className="stack gap-12">
       <article className="card stack gap-8 wizard-deadline-checklist">
-        <h4>Delivery Checklist</h4>
-        <p className="text-sm text-muted">
-          Balance due on delivery: <strong>{formatNaira(balance)}</strong>
-        </p>
-        <p className="text-sm text-muted">
-          Reminder set: <strong>{reminder === 'none' ? 'No reminder' : reminder}</strong>
-        </p>
-        <p className="text-sm text-muted">
-          Deadline readiness:{' '}
-          <strong className={deadlineDate ? 'text-success' : 'text-danger'}>
-            {deadlineDate ? 'Ready to proceed' : 'Select delivery date'}
-          </strong>
-        </p>
+        <div className="row-between">
+          <div>
+            <h4>Delivery Checklist</h4>
+            <p className="text-sm text-muted">Confirm the details needed before final review.</p>
+          </div>
+          <span className={deadlineDate ? 'wizard-checklist-score is-ready' : 'wizard-checklist-score'}>
+            {deadlineDate ? 'Ready' : '1 left'}
+          </span>
+        </div>
+        <div className="wizard-checklist-grid">
+          {checklistItems.map((item) => (
+            <div key={item.label} className={`wizard-checklist-row${item.complete ? ' is-complete' : ''}`}>
+              <span className="wizard-checklist-icon">{item.icon}</span>
+              <span className="wizard-checklist-copy">
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </span>
+              <CheckCircle2 size={15} className="wizard-checklist-status" />
+            </div>
+          ))}
+        </div>
       </article>
 
       <label className="input-group">

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
-import { ChevronDown, ChevronUp, Trash2, UserRound } from 'lucide-react'
-import { labelFromField, type PersonForm, type PersonSex } from './newJobConfig'
+import { ChevronDown, ChevronUp, Plus, Trash2, UserRound, X } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { commonFieldsBySex, labelFromField, type PersonForm, type PersonSex } from './newJobConfig'
 
 type BodyPersonMeasurementsCardProps = {
   person: PersonForm
@@ -47,9 +48,38 @@ export default function BodyPersonMeasurementsCard({
   onUpdateDescription,
   onSharedItemTypeChange,
 }: BodyPersonMeasurementsCardProps) {
+  const measurementFieldKey = measurementFields.join('|')
+  const defaultVisibleFields = useMemo(
+    () => commonFieldsBySex(person.sex).filter((field) => measurementFields.includes(field)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [measurementFieldKey, person.sex],
+  )
+  const [visibleFields, setVisibleFields] = useState<string[]>(defaultVisibleFields)
+  const [customFieldName, setCustomFieldName] = useState('')
+  const hiddenFields = measurementFields.filter((field) => !visibleFields.includes(field))
+
+  useEffect(() => {
+    setVisibleFields(defaultVisibleFields)
+  }, [defaultVisibleFields, person.id])
+
   function handleItemChange(value: string): void {
     onSharedItemTypeChange(value)
     onUpdatePerson((current) => ({ ...current, itemType: value }))
+  }
+
+  function addMeasurementField(field: string): void {
+    setVisibleFields((current) => (current.includes(field) ? current : [...current, field]))
+  }
+
+  function removeMeasurementField(field: string): void {
+    setVisibleFields((current) => current.filter((item) => item !== field))
+  }
+
+  function addCustomMeasurement(): void {
+    const normalized = customFieldName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
+    if (!normalized) return
+    addMeasurementField(normalized)
+    setCustomFieldName('')
   }
 
   return (
@@ -124,13 +154,45 @@ export default function BodyPersonMeasurementsCard({
 
         <div className="stack gap-8">
           <p className="text-sm text-muted">{measurementTitle}</p>
+          <p className="wizard-measurement-helper">Common measurements are shown first. Add only what this job needs.</p>
           <div className="wizard-measurements-grid">
-            {measurementFields.map((field) => (
-              <label key={`${person.id}-${field}`} className="input-group">
-                <span className="input-label">{labelFromField(field)} (cm)</span>
+            {visibleFields.map((field) => (
+              <div key={`${person.id}-${field}`} className="input-group wizard-measurement-field">
+                <div className="row-between">
+                  <span className="input-label">{labelFromField(field)} (in)</span>
+                  <button type="button" className="wizard-measure-remove" onClick={() => removeMeasurementField(field)} aria-label={`Remove ${labelFromField(field)}`}>
+                    <X size={13} />
+                  </button>
+                </div>
                 <input className="input" value={person.measurements[field] ?? ''} onChange={(event) => onUpdateMeasurement(field, event.target.value)} placeholder="0" inputMode="decimal" />
-              </label>
+              </div>
             ))}
+          </div>
+
+          {hiddenFields.length ? (
+            <div className="wizard-add-measurements">
+              <p className="wizard-add-measurements-title">Add measurement</p>
+              <div className="wizard-add-measurements-row">
+                {hiddenFields.map((field) => (
+                  <button key={`${person.id}-add-${field}`} type="button" className="wizard-add-measurement-chip" onClick={() => addMeasurementField(field)}>
+                    <Plus size={12} />
+                    {labelFromField(field)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="wizard-custom-measurement">
+            <input
+              className="input"
+              value={customFieldName}
+              onChange={(event) => setCustomFieldName(event.target.value)}
+              placeholder="Custom measurement name"
+            />
+            <button type="button" className="btn btn-secondary" onClick={addCustomMeasurement}>
+              Add
+            </button>
           </div>
         </div>
 

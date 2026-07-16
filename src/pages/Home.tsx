@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { HomeKpiGrid } from '../components/home/HomeKpiGrid'
 import { HomeProfitCard } from '../components/home/HomeProfitCard'
 import { HomeRecentJobs } from '../components/home/HomeRecentJobs'
+import { HomeSetupGuide } from '../components/home/HomeSetupGuide'
 import { formatHomeProfit, getCurrentMonthStats, getGreeting, getHomeKpiCards } from '../components/home/homeMetrics'
 import { useMonthlyStatsQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
 import { loadTailorSettings } from '../lib/settings'
@@ -19,6 +20,9 @@ export default function Home() {
   const firstName = settings.profile.fullName.trim().split(/\s+/)[0] || 'Tailor'
   const greeting = getGreeting()
   const kpiCards = useMemo(() => getHomeKpiCards(currentMonth), [currentMonth])
+  const homeSubcopy = hasJobs
+    ? 'Your workshop activity is ready for today.'
+    : 'Start with one job. TailorDeck will organize the client, measurements, and deadline for you.'
 
   useEffect(() => {
     function syncSettings() {
@@ -37,9 +41,10 @@ export default function Home() {
     <section className="section stack gap-16">
       <div className="stack gap-4">
         <h1 className="home-greeting-title">{greeting}, {firstName}</h1>
-        <p className="text-base text-muted">Your workshop is busy today.</p>
+        <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
+      {!hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
       {hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       <HomeRecentJobs jobs={recentJobs} />

@@ -46,7 +46,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       avatarUrl: AVATAR_PLACEHOLDER,
     },
     preferences: {
-      measurementUnit: 'cm',
+      measurementUnit: 'inches',
       currencySymbol: '\u20A6',
       defaultMaterialQuality: 'Normal',
     },
