@@ -56,7 +56,7 @@ export function JobDocumentDrawer({
               lineItems={[
                 {
                   description: details.itemType,
-                  details: `${details.jobType} • ${details.orderScope}`,
+                  details: `${details.jobType} - ${details.orderScope}`,
                   qty: 1,
                   unitPrice: job.chargeAmount,
                   total: job.chargeAmount,
@@ -79,11 +79,11 @@ export function JobDocumentDrawer({
           <div className="stack gap-8 side-sheet-actions">
             <button type="button" className="btn btn-primary btn-full" onClick={() => onShare(type)}>
               <Share2 size={16} />
-              Share
+              Share PDF
             </button>
             <button type="button" className="btn btn-full whatsapp-send-btn" onClick={() => onWhatsApp(type)}>
               <FaWhatsapp size={18} />
-              Send to Client (WhatsApp)
+              Send PDF to Client
             </button>
             <button type="button" className="btn btn-secondary btn-full" onClick={() => onDownload(type)}>
               Download PDF

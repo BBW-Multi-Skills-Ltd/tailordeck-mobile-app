@@ -4974,6 +4974,38 @@ p { margin: 0; }
   text-transform: uppercase;
 }
 
+.job-pricing-snapshot {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.job-pricing-snapshot > div {
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--bg-input);
+  padding: 10px 8px;
+  min-width: 0;
+}
+
+.job-pricing-snapshot span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.job-pricing-snapshot strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-h);
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .recent-job-card {
   display: flex;
   align-items: flex-start;

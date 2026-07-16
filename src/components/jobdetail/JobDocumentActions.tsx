@@ -10,7 +10,7 @@ export function JobDocumentActions({ onInvoice, onReceipt }: JobDocumentActionsP
     <article className="job-doc-actions card stack gap-12">
       <div className="stack gap-4">
         <h4>Documents</h4>
-        <p>Send an invoice before payment or a receipt after collecting money from the client.</p>
+        <p>Create a PDF invoice before payment, or a receipt after collecting money.</p>
       </div>
 
       <div className="job-doc-action-grid">
@@ -18,7 +18,7 @@ export function JobDocumentActions({ onInvoice, onReceipt }: JobDocumentActionsP
           <FileText size={17} />
           <span>
             <strong>Invoice</strong>
-            <small>Request payment</small>
+            <small>Send amount due</small>
           </span>
         </button>
         <button type="button" className="job-doc-action-btn" onClick={onReceipt}>

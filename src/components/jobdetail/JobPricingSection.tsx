@@ -46,6 +46,20 @@ export function JobPricingSection({
         <span className="text-primary">{'\u20A6'}</span>
         <span>Pricing</span>
       </h4>
+      <div className="job-pricing-snapshot">
+        <div>
+          <span>Charge</span>
+          <strong>{formatNaira(chargeAmount)}</strong>
+        </div>
+        <div>
+          <span>Balance</span>
+          <strong>{formatNaira(balanceToCollect)}</strong>
+        </div>
+        <div>
+          <span>Profit</span>
+          <strong className={estimatedProfit >= 0 ? 'text-success' : 'text-danger'}>{formatNaira(estimatedProfit)}</strong>
+        </div>
+      </div>
       <div className="stack gap-8">
         <PricingRow icon={<CircleDollarSign size={14} />} label="Charge Amount" value={formatNaira(chargeAmount)} />
         <PricingRow icon={<HandCoins size={14} />} label="Deposit Collected" value={formatNaira(depositAmount)} />
