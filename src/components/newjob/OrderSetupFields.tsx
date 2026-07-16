@@ -1,5 +1,4 @@
 import {
-  type MakeCategory,
   type OrderMode,
   makeCategories,
   nonBodyItems,
@@ -33,8 +32,8 @@ export function OrderSetupFields(props: OrderSetupFieldsProps) {
         <div className="wizard-guided-title-row">
           <span className="wizard-guided-step">1</span>
           <div>
-            <p className="wizard-guided-title">What kind of work is this?</p>
-            <p className="wizard-guided-copy">Start broad. TailorDeck will show the right measurement flow.</p>
+            <p className="wizard-guided-title">What kind of item is this?</p>
+            <p className="wizard-guided-copy">Choose the item type first.</p>
           </div>
         </div>
 
@@ -44,19 +43,31 @@ export function OrderSetupFields(props: OrderSetupFieldsProps) {
               key={category}
               active={props.makeCategory === category}
               title={category}
-              description={category === 'Body Wear' ? 'Clothes worn by a person' : 'Beddings, caps, covers, and more'}
+              description={category === 'Body Wear' ? 'Clothes worn by people' : 'Beddings, caps, covers'}
               onClick={() => props.onMakeCategoryChange(category)}
             />
           ))}
         </div>
+      </section>
 
-        <div className="wizard-choice-grid">
+      <section className="wizard-guided-card wizard-mode-card">
+        <div className="wizard-mode-reveal">
+          <div className="wizard-guided-title-row">
+            <span className="wizard-guided-step">2</span>
+            <div>
+              <p className="wizard-guided-title">What do you want to do?</p>
+              <p className="wizard-guided-copy">Choose sewing or amendment.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="wizard-choice-grid wizard-mode-grid">
           {orderModes.map((mode) => (
             <ChoiceCard
               key={mode}
               active={props.orderMode === mode}
-              title={mode}
-              description={mode === 'New Stitch' ? 'Fresh job from material to finish' : 'Fix, resize, replace, or adjust'}
+              title={getOrderModeLabel(mode)}
+              description={mode === 'New Stitch' ? 'Make from start to finish' : 'Fix, resize, or amend'}
               onClick={() => props.onOrderModeChange(mode)}
             />
           ))}
@@ -65,10 +76,10 @@ export function OrderSetupFields(props: OrderSetupFieldsProps) {
 
       <section className="wizard-guided-card">
         <div className="wizard-guided-title-row">
-          <span className="wizard-guided-step">2</span>
+          <span className="wizard-guided-step">3</span>
           <div>
-            <p className="wizard-guided-title">Job details</p>
-            <p className="wizard-guided-copy">Tell us who this job is for and what you are making.</p>
+            <p className="wizard-guided-title">Who is this for?</p>
+            <p className="wizard-guided-copy">Choose client count and item.</p>
           </div>
         </div>
 
@@ -91,7 +102,7 @@ function ChoiceCard({
   active: boolean
   description: string
   onClick: () => void
-  title: MakeCategory | OrderMode
+  title: string
 }) {
   return (
     <button type="button" className={`wizard-choice-card${active ? ' active' : ''}`} onClick={onClick}>
@@ -99,6 +110,11 @@ function ChoiceCard({
       <span className="wizard-choice-copy">{description}</span>
     </button>
   )
+}
+
+function getOrderModeLabel(mode: OrderMode): string {
+  if (mode === 'New Stitch') return 'Sew New Item'
+  return 'Repair / Amendment'
 }
 
 function ItemTypeField(props: OrderSetupFieldsProps) {

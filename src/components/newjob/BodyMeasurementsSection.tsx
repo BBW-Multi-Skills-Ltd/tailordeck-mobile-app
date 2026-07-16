@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react'
-import { CHILD_FIELDS, step1FieldsBySex, type JobType, type PersonForm } from './newJobConfig'
+import { step1FieldsBySex, type JobType, type PersonForm, type PersonSex } from './newJobConfig'
 import BodyPersonMeasurementsCard from './BodyPersonMeasurementsCard'
 
 type BodyMeasurementsSectionProps = {
@@ -79,6 +79,7 @@ export default function BodyMeasurementsSection({
             measurementTitle="Body Measurements (in)"
             itemValue={sameItemForAll ? itemType : person.itemType}
             itemPlaceholder="e.g. Suit, Gown, Kaftan"
+            showItemField={!sameItemForAll}
             showNameInput
             namePlaceholder={`Person ${index + 1} name`}
             disableName={index === 0}
@@ -99,8 +100,9 @@ export default function BodyMeasurementsSection({
       {persons.map((person, index) => {
         const adultIndex = persons.filter((p, i) => p.role === 'adult' && i <= index).length
         const isPrimaryAdult = person.role === 'adult' && adultIndex === 1
+        const canRemovePerson = person.role === 'child' || adultIndex > 2
         const personLabel = isPrimaryAdult ? person.name || clientName || 'Client' : person.role === 'adult' ? `Adult ${adultIndex}` : person.name || 'Child'
-        const measurementFields = person.role === 'child' ? CHILD_FIELDS : step1FieldsBySex(person.sex)
+        const measurementFields = step1FieldsBySex(toMeasurementSex(person.sex))
         const sexOptions = person.role === 'child' ? (['Boy', 'Girl'] as const) : (['Male', 'Female'] as const)
 
         return (
@@ -115,11 +117,12 @@ export default function BodyMeasurementsSection({
             measurementTitle={person.role === 'child' ? 'Child Measurements (in)' : 'Body Measurements (in)'}
             itemValue={sameItemForAll ? itemType : person.itemType}
             itemPlaceholder="e.g. Agbada, Gown, Shirt"
+            showItemField={!sameItemForAll}
             showNameInput
             namePlaceholder={person.role === 'child' ? 'Child name' : 'Adult name'}
             disableName={isPrimaryAdult}
             showAge={person.role === 'child'}
-            allowRemove={person.role === 'child'}
+            allowRemove={canRemovePerson}
             onRemove={() => onRemovePerson(person.id)}
             onToggle={() => onTogglePersonMeasurements(person.id)}
             onUpdatePerson={(updater) => onUpdatePerson(person.id, updater)}
@@ -143,11 +146,17 @@ export default function BodyMeasurementsSection({
   )
 }
 
+function toMeasurementSex(sex: PersonSex): PersonSex {
+  if (sex === 'Girl') return 'Female'
+  if (sex === 'Boy') return 'Male'
+  return sex
+}
+
 function MeasurementSectionIntro() {
   return (
     <div className="wizard-measurement-intro">
       <p className="input-label">Measurements</p>
-      <p>Only fill what this job needs. You can remove unused fields or add more measurements.</p>
+      <p>Fill only needed fields. Add or remove measurements.</p>
     </div>
   )
 }

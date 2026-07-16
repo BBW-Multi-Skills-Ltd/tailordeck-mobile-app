@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { ChevronDown, ChevronUp, Plus, Trash2, UserRound, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { commonFieldsBySex, labelFromField, type PersonForm, type PersonSex } from './newJobConfig'
 
 type BodyPersonMeasurementsCardProps = {
@@ -14,6 +15,7 @@ type BodyPersonMeasurementsCardProps = {
   itemValue: string
   itemPlaceholder: string
   showNameInput?: boolean
+  showItemField?: boolean
   namePlaceholder?: string
   disableName?: boolean
   showAge?: boolean
@@ -37,6 +39,7 @@ export default function BodyPersonMeasurementsCard({
   itemValue,
   itemPlaceholder,
   showNameInput = false,
+  showItemField = true,
   namePlaceholder = 'Person name',
   disableName = false,
   showAge = false,
@@ -50,13 +53,14 @@ export default function BodyPersonMeasurementsCard({
 }: BodyPersonMeasurementsCardProps) {
   const measurementFieldKey = measurementFields.join('|')
   const defaultVisibleFields = useMemo(
-    () => commonFieldsBySex(person.sex).filter((field) => measurementFields.includes(field)),
+    () => commonFieldsBySex(toMeasurementSex(person.sex)).filter((field) => measurementFields.includes(field)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [measurementFieldKey, person.sex],
   )
   const [visibleFields, setVisibleFields] = useState<string[]>(defaultVisibleFields)
   const [customFieldName, setCustomFieldName] = useState('')
   const [showAddMeasurements, setShowAddMeasurements] = useState(false)
+  const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false)
   const hiddenFields = measurementFields.filter((field) => !visibleFields.includes(field))
 
   useEffect(() => {
@@ -99,7 +103,7 @@ export default function BodyPersonMeasurementsCard({
 
         <div className="row gap-8">
           {allowRemove ? (
-            <button type="button" className="btn btn-ghost btn-icon" onClick={onRemove} aria-label="Remove person">
+            <button type="button" className="btn btn-ghost btn-icon wizard-person-remove-btn" onClick={() => setConfirmRemoveOpen(true)} aria-label={`Remove ${title}`}>
               <Trash2 size={15} />
             </button>
           ) : null}
@@ -126,10 +130,12 @@ export default function BodyPersonMeasurementsCard({
           </label>
         ) : null}
 
-        <label className="input-group">
-          <span className="input-label">What are you making for this person?</span>
-          <input className="input" value={itemValue} onChange={(event) => handleItemChange(event.target.value)} placeholder={itemPlaceholder} list="body-wear-item-options" />
-        </label>
+        {showItemField ? (
+          <label className="input-group">
+            <span className="input-label">What are you making for this person?</span>
+            <input className="input" value={itemValue} onChange={(event) => handleItemChange(event.target.value)} placeholder={itemPlaceholder} list="body-wear-item-options" />
+          </label>
+        ) : null}
 
         <div className="input-group">
           <span className="input-label">Sex</span>
@@ -223,6 +229,87 @@ export default function BodyPersonMeasurementsCard({
           <input className="input" value={person.description} onChange={(event) => onUpdateDescription(event.target.value)} placeholder="Any style notes for this person" />
         </label>
       </motion.div>
+
+      <RemovePersonConfirmDialog
+        isOpen={confirmRemoveOpen}
+        personId={person.id}
+        title={title}
+        onCancel={() => setConfirmRemoveOpen(false)}
+        onConfirm={() => {
+          setConfirmRemoveOpen(false)
+          onRemove?.()
+        }}
+      />
     </article>
   )
+}
+
+type RemovePersonConfirmDialogProps = {
+  isOpen: boolean
+  personId: string
+  title: string
+  onCancel: () => void
+  onConfirm: () => void
+}
+
+function RemovePersonConfirmDialog({ isOpen, personId, title, onCancel, onConfirm }: RemovePersonConfirmDialogProps) {
+  if (!isOpen) return null
+
+  return createPortal(
+    <div
+      className="wizard-confirm-overlay"
+      role="presentation"
+      onClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+      onPointerDown={(event) => {
+        event.stopPropagation()
+      }}
+    >
+      <div
+        className="wizard-confirm-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby={`remove-${personId}-title`}
+        aria-describedby={`remove-${personId}-desc`}
+        onClick={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+      >
+        <p id={`remove-${personId}-title`} className="wizard-confirm-title">Remove {title}?</p>
+        <p id={`remove-${personId}-desc`} className="wizard-confirm-copy">This person&apos;s measurements will be removed from this job.</p>
+        <div className="wizard-confirm-actions">
+          <button
+            type="button"
+            className="btn btn-secondary flex-1"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onCancel()
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger flex-1"
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              onConfirm()
+            }}
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+function toMeasurementSex(sex: PersonSex): PersonSex {
+  if (sex === 'Girl') return 'Female'
+  if (sex === 'Boy') return 'Male'
+  return sex
 }

@@ -1,4 +1,3 @@
-import { UserRound } from 'lucide-react'
 import AmendmentDetailsForm from './AmendmentDetailsForm'
 import BodyMeasurementsSection from './BodyMeasurementsSection'
 import { ClientIdentityFields } from './ClientIdentityFields'
@@ -19,7 +18,6 @@ export default function StepClientMeasurements(props: StepClientMeasurementsProp
         onClientPhoneChange={props.onClientPhoneChange}
       />
 
-      {!hasClientIdentity ? <ClientIdentityPrompt /> : null}
       {!hasClientIdentity ? null : (
         <>
           <OrderSetupFields {...props} />
@@ -72,19 +70,5 @@ export default function StepClientMeasurements(props: StepClientMeasurementsProp
         </>
       )}
     </div>
-  )
-}
-
-function ClientIdentityPrompt() {
-  return (
-    <article className="wizard-next-step-card">
-      <span className="wizard-next-step-icon">
-        <UserRound size={17} />
-      </span>
-      <div className="stack gap-3">
-        <strong>Start with the client</strong>
-        <p>After name and WhatsApp number are added, TailorDeck will guide you through the job details and measurements.</p>
-      </div>
-    </article>
   )
 }

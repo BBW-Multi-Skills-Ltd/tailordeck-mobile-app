@@ -5901,7 +5901,7 @@ p { margin: 0; }
 }
 
 .wizard-page {
-  padding-bottom: 46px;
+  padding-bottom: 76px;
 }
 
 .wizard-footer {
@@ -5913,6 +5913,10 @@ p { margin: 0; }
   max-width: 430px;
   padding: 0;
   z-index: 85;
+}
+
+.page-no-bottom-nav .wizard-footer {
+  bottom: var(--safe-bottom);
 }
 
 .wizard-footer-inner {
@@ -6003,6 +6007,34 @@ p { margin: 0; }
   gap: 8px;
 }
 
+.wizard-mode-reveal {
+  margin-top: 8px;
+  animation: wizard-slide-up 220ms ease both;
+}
+
+.wizard-mode-question {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.wizard-mode-grid {
+  animation: wizard-slide-up 260ms ease both;
+}
+
+@keyframes wizard-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .wizard-choice-card {
   min-height: 70px;
   border: 1px solid var(--border);
@@ -6030,17 +6062,17 @@ p { margin: 0; }
 }
 
 .wizard-choice-title {
-  color: var(--text-h);
+  color: var(--text);
   font-size: 13px;
   line-height: 1.2;
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .wizard-choice-copy {
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1.25;
-  font-weight: 500;
+  font-weight: 450;
 }
 
 .wizard-person-icon {
@@ -6095,14 +6127,59 @@ p { margin: 0; }
 .wizard-measure-remove {
   width: 22px;
   height: 22px;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--border));
   border-radius: 999px;
-  background: var(--bg-card);
-  color: var(--text-muted);
+  background: color-mix(in srgb, var(--danger) 7%, var(--bg-card));
+  color: var(--danger);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.wizard-person-remove-btn {
+  color: var(--danger);
+}
+
+.wizard-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(38, 26, 30, 0.36);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.wizard-confirm-dialog {
+  width: min(100%, 340px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xl);
+  padding: 16px;
+}
+
+.wizard-confirm-title {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.wizard-confirm-copy {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.wizard-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
 }
 
 .wizard-add-measurements {
