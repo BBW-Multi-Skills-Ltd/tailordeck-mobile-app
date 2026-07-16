@@ -6934,6 +6934,43 @@ p { margin: 0; }
   transform: scale(0.96);
 }
 
+.wizard-expense-chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.wizard-expense-chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.wizard-expense-chip {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wizard-expense-chip.active {
+  border-color: rgba(5, 150, 105, 0.55);
+  background: rgba(5, 150, 105, 0.11);
+  color: var(--success);
+}
+
 .wizard-costing-label {
   font-size: 12px;
   font-weight: 500;
@@ -7511,6 +7548,21 @@ p { margin: 0; }
 
 .wizard-costing-summary .divider {
   margin: 2px 0;
+}
+
+.wizard-pricing-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.wizard-pricing-entry-card {
+  padding: 12px;
+}
+
+.wizard-pricing-stack {
+  display: grid;
+  gap: 6px;
 }
 
 .wizard-worth-grid {

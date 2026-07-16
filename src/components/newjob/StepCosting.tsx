@@ -3,6 +3,23 @@ import { digitsOnly, formatNairaInput, numericValue, type ExpenseForm } from './
 import { formatNaira } from '../../lib/utils'
 import { PricingDepositFields, type PricingDepositFieldsProps } from './PricingDepositFields'
 
+const commonExpenseNames = [
+  'Fuel',
+  'Transport',
+  'Thread',
+  'Needle',
+  'Material',
+  'Gumstay',
+  'Zip',
+  'Buttons',
+  'Lining',
+  'Beads',
+  'Embroidery',
+  'Ironing',
+  'Packaging',
+  'Dispatch',
+]
+
 type StepCostingProps = PricingDepositFieldsProps & {
   expenseDraftName: string
   expenseDraftCost: string
@@ -43,15 +60,6 @@ export default function StepCosting({
   return (
     <div className="stack gap-12">
       <section className="stack gap-10">
-        <div className="wizard-step-section-heading">
-          <span>
-            <Check size={15} />
-          </span>
-          <div>
-            <strong>Pricing</strong>
-            <p>Set charge and deposit before adding expenses.</p>
-          </div>
-        </div>
         <PricingDepositFields
           balance={balance}
           chargeAmount={chargeAmount}
@@ -65,7 +73,27 @@ export default function StepCosting({
       </section>
 
       <div className="stack gap-8">
-        <p className="wizard-section-label">Expenses</p>
+        <div className="stack gap-4">
+          <p className="wizard-section-label">Expenses</p>
+          <p className="text-sm text-muted wizard-helper-inline">Add job costs to see your take-home profit.</p>
+        </div>
+        <div className="wizard-expense-chip-row">
+          {commonExpenseNames.map((expenseName) => {
+            const isSelected = expenseDraftName.trim().toLowerCase() === expenseName.toLowerCase()
+            return (
+              <button
+                key={expenseName}
+                type="button"
+                className={`wizard-expense-chip${isSelected ? ' active' : ''}`}
+                onClick={() => onExpenseDraftNameChange(isSelected ? '' : expenseName)}
+                aria-pressed={isSelected}
+              >
+                {isSelected ? <X size={13} /> : <Plus size={13} />}
+                {expenseName}
+              </button>
+            )
+          })}
+        </div>
         <div className="wizard-expense-entry-row">
           <input
             className="input wizard-expense-name-input"
@@ -145,9 +173,6 @@ export default function StepCosting({
             Not worth it
           </button>
         </div>
-        {worthIt === 'Yes' ? (
-          <p className="text-sm text-muted">Choosing Yes moves you straight to deadline setup.</p>
-        ) : null}
         {worthIt === 'No' ? (
           <p className="text-sm text-danger">Consider revising price or reducing costs before finalizing.</p>
         ) : null}

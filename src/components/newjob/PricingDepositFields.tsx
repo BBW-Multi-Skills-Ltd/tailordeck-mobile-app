@@ -20,27 +20,29 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
   }
 
   return (
-    <>
-      <label className="input-group">
-        <span className="input-label">How much are you charging the client?</span>
-        <p className="text-sm text-muted">Enter the total agreed price. TailorDeck auto-formats in Naira.</p>
-        <input className="input" value={formatNairaInput(props.chargeAmount)} onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))} placeholder={formatNairaInput('0')} inputMode="numeric" />
-      </label>
+    <div className="wizard-pricing-stack">
+      <div className="card wizard-pricing-entry-card">
+        <div className="wizard-pricing-input-grid">
+        <label className="input-group">
+          <span className="input-label">Charge amount</span>
+          <input className="input" value={formatNairaInput(props.chargeAmount)} onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))} placeholder={formatNairaInput('0')} inputMode="numeric" />
+        </label>
 
-      <label className="input-group">
-        <span className="input-label">How many percent deposit are you collecting first?</span>
-        <p className="text-sm text-muted">Set upfront percentage. Deposit and balance are calculated automatically.</p>
-        <input
-          className="input"
-          value={formatPercentInput(props.depositPercent)}
-          onKeyDown={props.onDepositPercentKeyDown}
-          onChange={(event) => handleDepositPercentChange(event.target.value)}
-          placeholder="0%"
-          inputMode="numeric"
-        />
-      </label>
+        <label className="input-group">
+          <span className="input-label">Deposit %</span>
+          <input
+            className="input"
+            value={formatPercentInput(props.depositPercent)}
+            onKeyDown={props.onDepositPercentKeyDown}
+            onChange={(event) => handleDepositPercentChange(event.target.value)}
+            placeholder="0%"
+            inputMode="numeric"
+          />
+        </label>
+        </div>
+      </div>
 
-      <div className="card stack gap-8">
+      <div className="card stack gap-8 wizard-deposit-summary-card">
         <div className="row-between">
           <p className="text-sm text-muted">Deposit Percent</p>
           <p className="font-semibold">{props.depositPercentValue}%</p>
@@ -54,6 +56,6 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
           <p className="font-semibold">{formatNaira(props.balance)}</p>
         </div>
       </div>
-    </>
+    </div>
   )
 }
