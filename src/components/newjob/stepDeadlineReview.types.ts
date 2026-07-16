@@ -1,5 +1,6 @@
 import type {
   ExpenseForm,
+  JobType,
   MakeCategory,
   MaterialQuality,
   MaterialSource,
@@ -18,6 +19,7 @@ export type StepDeadlineReviewProps = {
   deadlineTime: string
   clientName: string
   clientPhone: string
+  jobType: JobType
   orderMode: OrderMode
   makeCategory: MakeCategory
   scopeLabel: string
@@ -39,11 +41,13 @@ export type StepDeadlineReviewProps = {
   charge: number
   deposit: number
   referencePhotoNames: string[]
+  referencePhotoNamesByTarget: Record<string, string[]>
   expenses: ExpenseForm[]
   totalExpenses: number
   projectedProfit: number
   onDeadlineDateChange: (value: string) => void
   onDeadlineTimeChange: (value: string) => void
+  onReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles: number) => void
   onReminderChange: (value: Reminder) => void
   onDetailsOpenChange: (updater: (previous: boolean) => boolean) => void
 }

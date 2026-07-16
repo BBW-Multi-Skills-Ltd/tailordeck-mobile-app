@@ -14,7 +14,6 @@ export type StepMaterialPricingProps = {
   materialSource: MaterialSource
   amendmentPartName: string
   amendmentPartQuantity: string
-  referencePhotoNames: string[]
   onAmendmentMaterialsToggle: (needsMaterials: boolean) => void
   onOpenMaterialCategoryChange: (categoryId: string) => void
   onMaterialTypeChange: (value: string) => void
@@ -25,5 +24,4 @@ export type StepMaterialPricingProps = {
   onMaterialSourceChange: (source: MaterialSource) => void
   onAmendmentPartNameChange: (value: string) => void
   onAmendmentPartQuantityChange: (value: string) => void
-  onReferencePhotoUpload: (files: FileList | null) => void
 }

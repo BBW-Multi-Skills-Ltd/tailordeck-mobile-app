@@ -7130,6 +7130,16 @@ p { margin: 0; }
   color: var(--text-h);
 }
 
+.wizard-deadline-entry-card {
+  padding: 12px;
+}
+
+.wizard-deadline-input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .wizard-checklist-score {
   min-width: 54px;
   border-radius: var(--radius-full);
@@ -7203,6 +7213,95 @@ p { margin: 0; }
 .wizard-checklist-row.is-complete .wizard-checklist-status {
   color: var(--success);
   opacity: 1;
+}
+
+.wizard-reference-target-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.wizard-reference-target-head {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.wizard-reference-target-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  color: var(--primary);
+}
+
+.wizard-reference-target-head strong {
+  display: block;
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizard-reference-target-head p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizard-reference-count {
+  min-width: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  padding: 5px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.wizard-reference-upload-box {
+  min-height: 48px;
+  border-radius: 16px;
+}
+
+.wizard-reference-name-list {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.wizard-reference-name-list::-webkit-scrollbar {
+  display: none;
+}
+
+.wizard-reference-name-chip {
+  max-width: 180px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--success) 26%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 8%, var(--card));
+  color: var(--success);
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-setup-card {

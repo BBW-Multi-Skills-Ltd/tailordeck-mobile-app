@@ -42,6 +42,8 @@ export function useNewJobWizardState() {
   const [depositPercent, setDepositPercent] = useState('')
   const [referencePhotoFiles, setReferencePhotoFiles] = useState<File[]>([])
   const [referencePhotoNames, setReferencePhotoNames] = useState<string[]>([])
+  const [referencePhotoFilesByTarget, setReferencePhotoFilesByTarget] = useState<Record<string, File[]>>({})
+  const [referencePhotoNamesByTarget, setReferencePhotoNamesByTarget] = useState<Record<string, string[]>>({})
   const [expenses, setExpenses] = useState<ExpenseForm[]>([])
   const [expenseDraftName, setExpenseDraftName] = useState('')
   const [expenseDraftCost, setExpenseDraftCost] = useState('')
@@ -92,7 +94,9 @@ export function useNewJobWizardState() {
     orderMode,
     persons,
     referencePhotoFiles,
+    referencePhotoFilesByTarget,
     referencePhotoNames,
+    referencePhotoNamesByTarget,
     reminder,
     sameItemForAll,
     setAmendmentArea,
@@ -130,6 +134,8 @@ export function useNewJobWizardState() {
     setPersons,
     setReferencePhotoNames,
     setReferencePhotoFiles,
+    setReferencePhotoFilesByTarget,
+    setReferencePhotoNamesByTarget,
     setReminder,
     setSameItemForAll,
     setSingleMeasurementsOpen,

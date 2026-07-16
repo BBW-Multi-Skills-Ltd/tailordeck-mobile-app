@@ -19,6 +19,7 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       deadlineTime={state.deadlineTime}
       clientName={state.clientName}
       clientPhone={state.clientPhone}
+      jobType={state.jobType}
       orderMode={state.orderMode}
       makeCategory={state.makeCategory}
       scopeLabel={derived.scopeLabel}
@@ -40,14 +41,15 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       charge={derived.charge}
       deposit={derived.deposit}
       referencePhotoNames={state.referencePhotoNames}
+      referencePhotoNamesByTarget={state.referencePhotoNamesByTarget}
       expenses={state.expenses}
       totalExpenses={derived.totalExpenses}
       projectedProfit={derived.projectedProfit}
       onDeadlineDateChange={actions.setDeadlineDate}
       onDeadlineTimeChange={actions.setDeadlineTime}
+      onReferencePhotoUpload={actions.handleReferencePhotoUpload}
       onReminderChange={actions.setReminder}
       onDetailsOpenChange={actions.setStepFourDetailsOpen}
     />
   )
 }
-

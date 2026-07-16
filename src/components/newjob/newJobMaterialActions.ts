@@ -11,7 +11,9 @@ type MaterialActionParams = {
   setMaterialType: (value: string) => void
   setMaterialYards: (value: string) => void
   setReferencePhotoFiles: (value: File[]) => void
+  setReferencePhotoFilesByTarget: Dispatch<SetStateAction<Record<string, File[]>>>
   setReferencePhotoNames: (value: string[]) => void
+  setReferencePhotoNamesByTarget: Dispatch<SetStateAction<Record<string, string[]>>>
 }
 
 export function createMaterialActions({
@@ -25,7 +27,9 @@ export function createMaterialActions({
   setMaterialType,
   setMaterialYards,
   setReferencePhotoFiles,
+  setReferencePhotoFilesByTarget,
   setReferencePhotoNames,
+  setReferencePhotoNamesByTarget,
 }: MaterialActionParams) {
   function handleAmendmentMaterialsToggle(needsMaterials: boolean): void {
     setAmendmentNeedsMaterials(needsMaterials)
@@ -39,10 +43,20 @@ export function createMaterialActions({
     setAmendmentPartQuantity('')
   }
 
-  function handleReferencePhotoUpload(files: FileList | null): void {
-    const nextFiles = files ? Array.from(files).slice(0, 3) : []
-    setReferencePhotoFiles(nextFiles)
-    setReferencePhotoNames(nextFiles.map((file) => file.name))
+  function handleReferencePhotoUpload(targetId: string, files: FileList | null, maxFiles = 2): void {
+    const nextTargetFiles = files ? Array.from(files).slice(0, maxFiles) : []
+
+    setReferencePhotoFilesByTarget((previous) => {
+      const nextByTarget = { ...previous, [targetId]: nextTargetFiles }
+      setReferencePhotoFiles(Object.values(nextByTarget).flat())
+      return nextByTarget
+    })
+
+    setReferencePhotoNamesByTarget((previous) => {
+      const nextByTarget = { ...previous, [targetId]: nextTargetFiles.map((file) => file.name) }
+      setReferencePhotoNames(Object.values(nextByTarget).flat())
+      return nextByTarget
+    })
   }
 
   function handleDepositPercentKeyDown(event: KeyboardEvent<HTMLInputElement>): void {

@@ -23,7 +23,6 @@ export function RenderMaterialPricingStep({ wizard }: StepRendererProps) {
       materialSource={state.materialSource}
       amendmentPartName={state.amendmentPartName}
       amendmentPartQuantity={state.amendmentPartQuantity}
-      referencePhotoNames={state.referencePhotoNames}
       onAmendmentMaterialsToggle={actions.handleAmendmentMaterialsToggle}
       onOpenMaterialCategoryChange={actions.setOpenMaterialCategory}
       onMaterialTypeChange={actions.setMaterialType}
@@ -34,7 +33,6 @@ export function RenderMaterialPricingStep({ wizard }: StepRendererProps) {
       onMaterialSourceChange={actions.setMaterialSource}
       onAmendmentPartNameChange={actions.setAmendmentPartName}
       onAmendmentPartQuantityChange={actions.setAmendmentPartQuantity}
-      onReferencePhotoUpload={actions.handleReferencePhotoUpload}
     />
   )
 }

@@ -7,11 +7,19 @@ export default function StepDeadlineReview(props: StepDeadlineReviewProps) {
     return (
       <DeadlineFields
         balance={props.balance}
+        clientName={props.clientName}
         deadlineDate={props.deadlineDate}
         deadlineTime={props.deadlineTime}
+        effectiveItemType={props.effectiveItemType}
+        jobType={props.jobType}
+        makeCategory={props.makeCategory}
+        persons={props.persons}
+        referencePhotoNamesByTarget={props.referencePhotoNamesByTarget}
         reminder={props.reminder}
+        sameItemForAll={props.sameItemForAll}
         onDeadlineDateChange={props.onDeadlineDateChange}
         onDeadlineTimeChange={props.onDeadlineTimeChange}
+        onReferencePhotoUpload={props.onReferencePhotoUpload}
         onReminderChange={props.onReminderChange}
       />
     )

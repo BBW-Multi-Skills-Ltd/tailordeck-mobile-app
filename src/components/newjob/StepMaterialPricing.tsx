@@ -2,7 +2,6 @@ import { CheckCircle2, Wrench } from 'lucide-react'
 import { AmendmentMaterialFields } from './AmendmentMaterialFields'
 import { MaterialFlowFields } from './MaterialFlowFields'
 import { MaterialSourceSelector } from './MaterialSourceSelector'
-import { ReferencePhotoUpload } from './ReferencePhotoUpload'
 import type { StepMaterialPricingProps } from './stepMaterialPricing.types'
 
 export default function StepMaterialPricing(props: StepMaterialPricingProps) {
@@ -48,9 +47,6 @@ export default function StepMaterialPricing(props: StepMaterialPricingProps) {
         </article>
       ) : null}
 
-      <section className="stack gap-8">
-        <ReferencePhotoUpload referencePhotoNames={props.referencePhotoNames} onReferencePhotoUpload={props.onReferencePhotoUpload} />
-      </section>
     </div>
   )
 }
