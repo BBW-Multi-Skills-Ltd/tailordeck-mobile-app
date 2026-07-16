@@ -2,8 +2,8 @@
 import { checkFeatureAccess, getSubscription } from '../services/subscriptionService'
 import { queryKeys } from './queryKeys'
 
-export function useSubscriptionQuery() {
-  return useQuery({ queryKey: queryKeys.subscription, queryFn: getSubscription })
+export function useSubscriptionQuery(enabled = true) {
+  return useQuery({ queryKey: queryKeys.subscription, queryFn: getSubscription, enabled })
 }
 
 export function useFeatureAccess(featureKey: string) {

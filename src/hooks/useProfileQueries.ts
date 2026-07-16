@@ -2,8 +2,8 @@
 import { getProfile, updateProfile, uploadAvatar } from '../services/profileService'
 import { queryKeys } from './queryKeys'
 
-export function useProfileQuery() {
-  return useQuery({ queryKey: queryKeys.profile, queryFn: getProfile })
+export function useProfileQuery(enabled = true) {
+  return useQuery({ queryKey: queryKeys.profile, queryFn: getProfile, enabled })
 }
 
 export function useUpdateProfileMutation() {

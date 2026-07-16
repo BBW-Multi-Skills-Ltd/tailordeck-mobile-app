@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Plus, Search, Scissors } from 'lucide-react'
+import { Search, Scissors } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/shared/EmptyState'
@@ -47,10 +47,6 @@ export default function Jobs() {
     <section className="section stack gap-16">
       <header className="row-between">
         <h1 className="app-page-heading">Jobs</h1>
-        <Link to="/jobs/new" className="btn btn-primary btn-sm">
-          <Plus size={16} />
-          New Job
-        </Link>
       </header>
 
       <div className="pill-group">

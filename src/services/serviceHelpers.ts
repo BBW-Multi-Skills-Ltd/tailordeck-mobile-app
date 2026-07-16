@@ -17,6 +17,10 @@ export function getServiceErrorMessage(error: unknown, fallback: string): string
 }
 
 export async function requireUserId(): Promise<string> {
+  const { data: sessionData } = await supabase.auth.getSession()
+  const sessionUserId = sessionData.session?.user.id
+  if (sessionUserId) return sessionUserId
+
   const { data, error } = await supabase.auth.getUser()
   if (error) throw error
   const userId = data.user?.id

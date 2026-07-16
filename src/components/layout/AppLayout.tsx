@@ -1,15 +1,24 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import BottomNav from './BottomNav'
 
+const HIDE_NAV_PATHS = ['/welcome', '/onboarding', '/jobs/new']
+
+function shouldHideNav(pathname: string): boolean {
+  return HIDE_NAV_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
+}
+
 export default function AppLayout() {
+  const { pathname } = useLocation()
+  const hideNav = shouldHideNav(pathname)
+
   return (
     <>
       <AppHeader />
-      <main className="page page-with-header">
+      <main className={`page page-with-header${hideNav ? ' page-no-bottom-nav' : ''}`}>
         <Outlet />
       </main>
-      <BottomNav />
+      {hideNav ? null : <BottomNav />}
     </>
   )
 }

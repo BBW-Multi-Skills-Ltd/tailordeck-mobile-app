@@ -1,0 +1,115 @@
+import { motion } from 'framer-motion'
+import { BarChart3, ChevronRight, CircleHelp, FileText, Settings } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
+
+type MoreHubItem = {
+  to: string
+  icon: typeof BarChart3
+  label: string
+  desc: string
+}
+
+type MoreHubGroup = {
+  title: string
+  items: MoreHubItem[]
+}
+
+const moreGroups: MoreHubGroup[] = [
+  {
+    title: 'Insights',
+    items: [
+      {
+        to: '/dashboard',
+        icon: BarChart3,
+        label: 'Dashboard',
+        desc: 'Revenue, expenses, profit, and job performance.',
+      },
+      {
+        to: '/settings',
+        icon: FileText,
+        label: 'Invoices & Receipts',
+        desc: 'Brand colors, logo, signature, and PDF setup.',
+      },
+    ],
+  },
+  {
+    title: 'Account',
+    items: [
+      {
+        to: '/settings',
+        icon: Settings,
+        label: 'Settings',
+        desc: 'Profile, business info, reminders, and security.',
+      },
+      {
+        to: '/settings',
+        icon: CircleHelp,
+        label: 'Help & Support',
+        desc: 'App info, support details, and TailorDeck guidance.',
+      },
+    ],
+  },
+]
+
+export default function More() {
+  const settings = loadTailorSettings()
+  const fullName = settings.profile.fullName || 'TailorDeck User'
+  const email = settings.profile.email || 'Complete your profile in Settings'
+  const initial = fullName.trim().charAt(0).toUpperCase() || 'T'
+
+  return (
+    <section className="section stack gap-16 more-page">
+      <header className="stack gap-4">
+        <h2 className="app-page-heading">More</h2>
+        <p className="text-sm text-muted">Everything else, neatly tucked away.</p>
+      </header>
+
+      <article className="clay-card more-profile-card">
+        <div className="more-avatar clay-inset" aria-hidden>
+          {settings.profile.avatarUrl ? (
+            <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" />
+          ) : (
+            <span>{initial}</span>
+          )}
+        </div>
+        <div className="stack gap-2 min-w-0">
+          <p className="more-profile-name truncate">{fullName}</p>
+          <p className="more-profile-email truncate">{email}</p>
+        </div>
+      </article>
+
+      <div className="stack gap-14">
+        {moreGroups.map((group, groupIndex) => (
+          <motion.section
+            key={group.title}
+            className="stack gap-8"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: groupIndex * 0.05, duration: 0.22, ease: 'easeOut' }}
+          >
+            <p className="more-group-title">{group.title}</p>
+            <div className="clay-card more-group-card">
+              {group.items.map((item, itemIndex) => {
+                const Icon = item.icon
+                return (
+                  <Link key={`${group.title}-${item.label}`} to={item.to} className="more-row">
+                    <span className="more-row-icon clay-inset">
+                      <Icon size={18} />
+                    </span>
+                    <span className="stack gap-2 min-w-0 flex-1">
+                      <span className="more-row-label">{item.label}</span>
+                      <span className="more-row-desc">{item.desc}</span>
+                    </span>
+                    <ChevronRight size={17} className="more-row-chevron" />
+                    {itemIndex < group.items.length - 1 ? <span className="more-row-divider" aria-hidden /> : null}
+                  </Link>
+                )
+              })}
+            </div>
+          </motion.section>
+        ))}
+      </div>
+    </section>
+  )
+}

@@ -1,5 +1,4 @@
-import { FiPlus } from 'react-icons/fi'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { HomeKpiGrid } from '../components/home/HomeKpiGrid'
 import { HomeProfitCard } from '../components/home/HomeProfitCard'
@@ -35,7 +34,7 @@ export default function Home() {
   }, [])
 
   return (
-    <section className="section stack gap-16 page-fab-clearance">
+    <section className="section stack gap-16">
       <div className="stack gap-4">
         <h1 className="home-greeting-title">{greeting}, {firstName}</h1>
         <p className="text-base text-muted">Your workshop is busy today.</p>
@@ -44,10 +43,6 @@ export default function Home() {
       {hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       <HomeRecentJobs jobs={recentJobs} />
-
-      <Link to="/jobs/new" className="fab" aria-label="Create new job">
-        <FiPlus size={26} className="fab-icon" />
-      </Link>
     </section>
   )
 }

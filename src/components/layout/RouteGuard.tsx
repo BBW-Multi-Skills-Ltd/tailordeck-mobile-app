@@ -5,14 +5,9 @@ import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
 
 function RouteGuardFallback() {
   return (
-    <main className="app-shell">
-      <div className="app-main">
-        <section className="section stack gap-12">
-          <div className="skeleton" style={{ height: 34, width: '54%' }} />
-          <div className="skeleton" style={{ height: 92 }} />
-          <div className="skeleton" style={{ height: 92 }} />
-        </section>
-      </div>
+    <main className="page-full route-guard-loading">
+      <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
+      <p>Opening TailorDeck...</p>
     </main>
   )
 }
@@ -20,8 +15,9 @@ function RouteGuardFallback() {
 export function RouteGuard() {
   const location = useLocation()
   const auth = useAuth()
-  const profile = useProfileQuery()
-  const subscription = useSubscriptionQuery()
+  const hasSession = Boolean(auth.session)
+  const profile = useProfileQuery(hasSession)
+  const subscription = useSubscriptionQuery(hasSession)
 
   if (auth.loading) return <RouteGuardFallback />
   if (!auth.session) return <Navigate to="/auth/signin" replace state={{ from: location.pathname }} />

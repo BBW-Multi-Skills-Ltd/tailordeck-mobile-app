@@ -14,6 +14,7 @@ const JobMeasurements = lazy(() => import('./pages/JobMeasurements'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const SettingsPage = lazy(() => import('./pages/Settings'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
+const More = lazy(() => import('./pages/More'))
 const OnboardingWelcome = lazy(() => import('./pages/OnboardingWelcome'))
 const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
 const OnboardingPlan = lazy(() => import('./pages/OnboardingPlan'))
@@ -23,14 +24,9 @@ const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
 function RouteLoadingFallback() {
   return (
-    <main className="app-shell">
-      <div className="app-main">
-        <section className="section stack gap-12">
-          <div className="skeleton" style={{ height: 34, width: '54%' }} />
-          <div className="skeleton" style={{ height: 92 }} />
-          <div className="skeleton" style={{ height: 92 }} />
-        </section>
-      </div>
+    <main className="page-full route-guard-loading">
+      <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
+      <p>Opening TailorDeck...</p>
     </main>
   )
 }
@@ -59,6 +55,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/subscription" element={<SubscriptionPage />} />
+            <Route path="/more" element={<More />} />
           </Route>
         </Route>
 
