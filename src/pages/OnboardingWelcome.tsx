@@ -49,8 +49,8 @@ export default function OnboardingWelcome() {
           </article>
         </section>
 
-        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/auth/signup')}>
-          Get Started
+        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/onboarding/preview')}>
+          See How It Works
         </button>
       </div>
     </main>

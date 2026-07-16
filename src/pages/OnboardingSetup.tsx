@@ -57,6 +57,19 @@ export default function OnboardingSetup() {
           <h2 className="onboarding-section-title">Set Up Your Shop</h2>
         </div>
 
+        <section className="onboarding-progress-card">
+          <div className="row-between">
+            <div className="stack gap-2">
+              <p className="onboarding-progress-title">Your workspace is ready</p>
+              <p className="onboarding-progress-copy">Add your shop basics now. Business info and invoices can be finished later.</p>
+            </div>
+            <span className="onboarding-progress-percent">50%</span>
+          </div>
+          <div className="onboarding-progress">
+            <span className="onboarding-progress-fill" style={{ width: '50%' }} />
+          </div>
+        </section>
+
         <section className="onboarding-card onboarding-card-plain onboarding-card-step">
           <div className="input-group">
             <label htmlFor="onboard-shop-name" className="auth-label">

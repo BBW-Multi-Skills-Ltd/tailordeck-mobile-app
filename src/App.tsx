@@ -16,6 +16,7 @@ const SettingsPage = lazy(() => import('./pages/Settings'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
 const More = lazy(() => import('./pages/More'))
 const OnboardingWelcome = lazy(() => import('./pages/OnboardingWelcome'))
+const OnboardingPreview = lazy(() => import('./pages/OnboardingPreview'))
 const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
 const OnboardingPlan = lazy(() => import('./pages/OnboardingPlan'))
 const SignIn = lazy(() => import('./pages/SignIn'))
@@ -36,6 +37,7 @@ export default function App() {
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         <Route path="/onboarding" element={<OnboardingWelcome />} />
+        <Route path="/onboarding/preview" element={<OnboardingPreview />} />
         <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/auth/forgot" element={<ForgotPassword />} />
