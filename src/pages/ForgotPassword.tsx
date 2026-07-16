@@ -6,15 +6,19 @@ import { sendPasswordReset } from '../services/authService'
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setMessage('')
+    setErrorMessage('')
     setLoading(true)
     try {
       await sendPasswordReset(email)
-      window.alert('Password reset link sent. Check your email.')
+      setMessage('Password reset link sent. Check your email.')
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to send reset link.')
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to send reset link.')
     } finally {
       setLoading(false)
     }
@@ -41,6 +45,9 @@ export default function ForgotPassword() {
         <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
           {loading ? 'Sending...' : 'Send Reset Link'}
         </button>
+
+        {message ? <p className="auth-feedback success" role="status">{message}</p> : null}
+        {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
       </form>
 
       <p className="auth-switch-line">

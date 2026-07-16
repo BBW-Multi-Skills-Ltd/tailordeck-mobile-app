@@ -1,4 +1,6 @@
 import { BellRing, Building2, CircleHelp, Database, LogOut, Moon, Palette, ShieldCheck, Store, Sun, UserRound, WandSparkles } from 'lucide-react'
+import { useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import AboutTailorDeckPanel from '../components/settings/AboutTailorDeckPanel'
 import AccountSecurityPanel from '../components/settings/AccountSecurityPanel'
 import BusinessInfoPanel from '../components/settings/BusinessInfoPanel'
@@ -16,6 +18,18 @@ import type { MaterialQuality, NotificationBellOption, ReminderLead, RingtoneOpt
 export default function SettingsPage() {
   const { actions, derived, state } = useSettingsPage()
   const { settings } = state
+  const [searchParams] = useSearchParams()
+  const requestedPanel = searchParams.get('panel')
+
+  useEffect(() => {
+    if (!isSettingsPanel(requestedPanel)) return
+
+    actions.setPanel(requestedPanel)
+    window.setTimeout(() => {
+      document.querySelector(`[data-settings-panel="${requestedPanel}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requestedPanel])
 
   return (
     <section className="section stack gap-16">
@@ -28,7 +42,15 @@ export default function SettingsPage() {
         )}
       />
 
-      <SettingsSetupProgress settings={settings} />
+      <SettingsSetupProgress
+        settings={settings}
+        onOpenPanel={(panel) => {
+          actions.setPanel(panel)
+          window.setTimeout(() => {
+            document.querySelector(`[data-settings-panel="${panel}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          }, 80)
+        }}
+      />
 
       <div className="settings-list">
         <SettingAccordion icon={<UserRound size={20} />} title="My Profile" order={1} panelKey="profile" panel={state.panel} onToggle={actions.handleToggle}>
@@ -159,4 +181,8 @@ export default function SettingsPage() {
       ) : null}
     </section>
   )
+}
+
+function isSettingsPanel(value: string | null): value is 'profile' | 'security' | 'preferences' | 'reminders' | 'business' | 'brand' | 'about' {
+  return value === 'profile' || value === 'security' || value === 'preferences' || value === 'reminders' || value === 'business' || value === 'brand' || value === 'about'
 }

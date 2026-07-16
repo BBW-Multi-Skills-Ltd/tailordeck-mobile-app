@@ -1,37 +1,43 @@
 import { CheckCircle2, Circle, FileText, Store, UserRound } from 'lucide-react'
 import type { TailorSettings } from '../../lib/settings'
+import type { SettingsPanel } from './SettingsRows'
 
 type SettingsSetupProgressProps = {
   settings: TailorSettings
+  onOpenPanel: (panel: Exclude<SettingsPanel, null>) => void
 }
 
 type SetupStep = {
   label: string
   complete: boolean
   icon: typeof UserRound
+  panel: Exclude<SettingsPanel, null>
 }
 
-export function SettingsSetupProgress({ settings }: SettingsSetupProgressProps) {
+export function SettingsSetupProgress({ settings, onOpenPanel }: SettingsSetupProgressProps) {
   const steps: SetupStep[] = [
     {
       label: 'Profile',
       complete: Boolean(settings.profile.fullName.trim()) && settings.profile.fullName !== 'Your Name',
       icon: UserRound,
+      panel: 'profile',
     },
     {
       label: 'Business',
       complete: Boolean(settings.businessInfo.shopName.trim()),
       icon: Store,
+      panel: 'business',
     },
     {
       label: 'Invoice',
       complete: Boolean(settings.brand.logoUrl || settings.brand.signatureUrl),
       icon: FileText,
+      panel: 'brand',
     },
   ]
   const completeCount = steps.filter((step) => step.complete).length
   const progress = Math.round((completeCount / steps.length) * 100)
-  const nextStep = steps.find((step) => !step.complete)?.label ?? 'Ready'
+  const nextStep = steps.find((step) => !step.complete)
 
   return (
     <article className="settings-setup-card card stack gap-12">
@@ -40,7 +46,7 @@ export function SettingsSetupProgress({ settings }: SettingsSetupProgressProps) 
           <p className="settings-setup-eyebrow">Shop setup</p>
           <h2 className="settings-setup-title">{progress}% complete</h2>
           <p className="settings-setup-copy">
-            {progress === 100 ? 'Your core shop setup is ready.' : `Next: finish ${nextStep.toLowerCase()} setup.`}
+            {progress === 100 ? 'Your shop is ready to send professional documents.' : `You are close. Next: finish ${nextStep?.label.toLowerCase()} setup.`}
           </p>
         </div>
         <span className="settings-setup-percent">{progress}%</span>
@@ -55,6 +61,12 @@ export function SettingsSetupProgress({ settings }: SettingsSetupProgressProps) 
           <SetupStepPill key={step.label} step={step} />
         ))}
       </div>
+
+      {nextStep ? (
+        <button type="button" className="settings-setup-action" onClick={() => onOpenPanel(nextStep.panel)}>
+          Continue {nextStep.label}
+        </button>
+      ) : null}
     </article>
   )
 }

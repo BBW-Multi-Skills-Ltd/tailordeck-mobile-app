@@ -56,6 +56,7 @@ export default function BodyPersonMeasurementsCard({
   )
   const [visibleFields, setVisibleFields] = useState<string[]>(defaultVisibleFields)
   const [customFieldName, setCustomFieldName] = useState('')
+  const [showAddMeasurements, setShowAddMeasurements] = useState(false)
   const hiddenFields = measurementFields.filter((field) => !visibleFields.includes(field))
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function BodyPersonMeasurementsCard({
 
   function removeMeasurementField(field: string): void {
     setVisibleFields((current) => current.filter((item) => item !== field))
+    setShowAddMeasurements(true)
   }
 
   function addCustomMeasurement(): void {
@@ -153,8 +155,11 @@ export default function BodyPersonMeasurementsCard({
         ) : null}
 
         <div className="stack gap-8">
-          <p className="text-sm text-muted">{measurementTitle}</p>
-          <p className="wizard-measurement-helper">Common measurements are shown first. Add only what this job needs.</p>
+          <div className="row-between">
+            <p className="text-sm text-muted">{measurementTitle}</p>
+            <span className="wizard-measurement-count">{visibleFields.length} fields</span>
+          </div>
+          <p className="wizard-measurement-helper">Common measurements are shown first. Remove what you do not need, then add more if this job requires it.</p>
           <div className="wizard-measurements-grid">
             {visibleFields.map((field) => (
               <div key={`${person.id}-${field}`} className="input-group wizard-measurement-field">
@@ -171,29 +176,46 @@ export default function BodyPersonMeasurementsCard({
 
           {hiddenFields.length ? (
             <div className="wizard-add-measurements">
-              <p className="wizard-add-measurements-title">Add measurement</p>
-              <div className="wizard-add-measurements-row">
-                {hiddenFields.map((field) => (
-                  <button key={`${person.id}-add-${field}`} type="button" className="wizard-add-measurement-chip" onClick={() => addMeasurementField(field)}>
-                    <Plus size={12} />
-                    {labelFromField(field)}
-                  </button>
-                ))}
-              </div>
+              <button
+                type="button"
+                className="wizard-add-measurements-toggle"
+                onClick={() => setShowAddMeasurements((current) => !current)}
+                aria-expanded={showAddMeasurements}
+              >
+                <Plus size={13} />
+                Add measurement
+                <span>{hiddenFields.length} available</span>
+              </button>
+
+              {showAddMeasurements ? (
+                <div className="stack gap-8">
+                  <p className="wizard-add-measurements-title">Restore or add a field</p>
+                  <div className="wizard-add-measurements-row">
+                    {hiddenFields.map((field) => (
+                      <button key={`${person.id}-add-${field}`} type="button" className="wizard-add-measurement-chip" onClick={() => addMeasurementField(field)}>
+                        <Plus size={12} />
+                        {labelFromField(field)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           ) : null}
 
-          <div className="wizard-custom-measurement">
-            <input
-              className="input"
-              value={customFieldName}
-              onChange={(event) => setCustomFieldName(event.target.value)}
-              placeholder="Custom measurement name"
-            />
-            <button type="button" className="btn btn-secondary" onClick={addCustomMeasurement}>
-              Add
-            </button>
-          </div>
+          {showAddMeasurements ? (
+            <div className="wizard-custom-measurement">
+              <input
+                className="input"
+                value={customFieldName}
+                onChange={(event) => setCustomFieldName(event.target.value)}
+                placeholder="Custom measurement name"
+              />
+              <button type="button" className="btn btn-secondary" onClick={addCustomMeasurement}>
+                Add
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <label className="input-group">

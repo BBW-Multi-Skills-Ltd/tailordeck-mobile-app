@@ -32,9 +32,14 @@ export default function InvoiceReceiptPanel({
 }: InvoiceReceiptPanelProps) {
   return (
     <div className="stack settings-brand-form">
+      <article className="settings-panel-guide">
+        <strong>Set this once, reuse everywhere</strong>
+        <p>Pick document colors, upload logo/signature, choose business details, then generate a preview before saving.</p>
+      </article>
+
       <div className="stack settings-brand-group">
         <p className="settings-brand-label">Document Template</p>
-        <p className="settings-help-text">One shared template is used for both invoice and receipt. Choose your header/body colors, upload logo and signature, then generate preview to review before saving.</p>
+        <p className="settings-help-text">One clean template is used for both invoice and receipt.</p>
         <div className="settings-brand-template-grid">
           <div className="settings-brand-template-card active">
             <div className="settings-brand-template-preview">

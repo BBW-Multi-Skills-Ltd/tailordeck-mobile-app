@@ -13,7 +13,7 @@ type NotificationItemProps = {
 export function NotificationItem({ item, onDelete, onItemOpen, onMarkRead }: NotificationItemProps) {
   return (
     <article className={`notification-item${item.read ? '' : ' unread'}`}>
-      <button type="button" className="notification-main" onClick={() => onItemOpen(item)}>
+      <button type="button" className="notification-main" aria-label={`Open notification: ${item.title}`} onClick={() => onItemOpen(item)}>
         <span className={`notification-icon ${item.type}`}>{getItemIcon(item.type)}</span>
         <div className="notification-text">
           <p className="notification-title">{item.title}</p>
@@ -24,9 +24,9 @@ export function NotificationItem({ item, onDelete, onItemOpen, onMarkRead }: Not
       </button>
       <div className="notification-actions">
         {!item.read ? (
-          <button type="button" className="btn btn-ghost notification-item-btn" onClick={() => onMarkRead(item.id)}>Mark read</button>
+          <button type="button" className="btn btn-ghost notification-item-btn" aria-label={`Mark ${item.title} as read`} onClick={() => onMarkRead(item.id)}>Mark read</button>
         ) : null}
-        <button type="button" className="btn btn-ghost notification-item-btn danger" onClick={() => onDelete(item.id)}>
+        <button type="button" className="btn btn-ghost notification-item-btn danger" aria-label={`Delete notification: ${item.title}`} onClick={() => onDelete(item.id)}>
           <Trash2 size={14} />
           Delete
         </button>

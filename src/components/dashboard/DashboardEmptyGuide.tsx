@@ -1,5 +1,4 @@
-import { BarChart3, BriefcaseBusiness, TrendingUp } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { BarChart3, BriefcaseBusiness, PlusCircle, TrendingUp } from 'lucide-react'
 
 export default function DashboardEmptyGuide() {
   return (
@@ -25,9 +24,10 @@ export default function DashboardEmptyGuide() {
           View profit
         </span>
       </div>
-      <Link to="/jobs/new" className="btn btn-primary btn-full">
-        Create first job
-      </Link>
+      <p className="dashboard-empty-hint">
+        <PlusCircle size={14} />
+        Use the center plus button to create your first job.
+      </p>
     </article>
   )
 }

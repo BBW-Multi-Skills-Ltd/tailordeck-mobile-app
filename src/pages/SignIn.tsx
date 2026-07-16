@@ -11,15 +11,17 @@ export default function SignIn() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setErrorMessage('')
     setLoading(true)
     try {
       await signInWithEmail({ email, password })
       navigate('/')
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to sign in.')
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in.')
     } finally {
       setLoading(false)
     }
@@ -74,6 +76,8 @@ export default function SignIn() {
         <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
+
+        {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
 
         <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={() => void signInWithGoogle()}>
           <FcGoogle size={16} />

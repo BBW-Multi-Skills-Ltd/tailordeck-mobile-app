@@ -9,9 +9,9 @@ import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
-type JobFilter = 'All' | JobStatus
+type JobFilter = 'All' | Exclude<JobStatus, 'Pending'>
 
-const filters: JobFilter[] = ['All', 'Pending', 'In Progress', 'Completed']
+const filters: JobFilter[] = ['All', 'In Progress', 'Completed']
 
 function statusClass(status: JobStatus): string {
   if (status === 'Completed') return 'badge badge-done'
@@ -40,7 +40,7 @@ export default function Jobs() {
   )
 
   function emptyMessage(filter: JobFilter): string {
-    if (jobs.length === 0 && !search.trim()) return 'Create your first job to store client details, measurements, pricing, and deadline.'
+    if (jobs.length === 0 && !search.trim()) return 'Tap the center plus button to create your first job with client details, measurements, pricing, and deadline.'
     if (filter === 'All') return 'No jobs match that search.'
     return `No ${filter.toLowerCase()} jobs yet.`
   }
@@ -78,8 +78,6 @@ export default function Jobs() {
           icon={Scissors}
           title={jobs.length === 0 && !search.trim() ? 'No jobs yet' : 'Nothing here yet'}
           description={emptyMessage(activeFilter)}
-          actionLabel={jobs.length === 0 && !search.trim() ? 'Create Job' : undefined}
-          actionTo={jobs.length === 0 && !search.trim() ? '/jobs/new' : undefined}
         />
       ) : (
         <motion.div

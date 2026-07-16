@@ -13,14 +13,16 @@ export function useSignUpForm() {
   const [agree, setAgree] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const strength = useMemo(() => calculatePasswordStrength(password), [password])
   const passwordLabel = strength <= 1 ? 'Weak password' : strength <= 3 ? 'Medium password' : 'Strong password'
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setErrorMessage('')
     if (!email.trim() || !password.trim()) {
-      window.alert('Enter at least email and password to create account.')
+      setErrorMessage('Enter at least email and password to create account.')
       return
     }
 
@@ -40,10 +42,9 @@ export function useSignUpForm() {
           phone: normalizedPhone,
         },
       })
-      window.alert('Account created. Continue with setup.')
       navigate('/onboarding/setup')
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to create account.')
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to create account.')
     } finally {
       setLoading(false)
     }
@@ -57,6 +58,7 @@ export function useSignUpForm() {
     agree,
     confirmPassword,
     email,
+    errorMessage,
     fullName,
     handleGoogleSignUp,
     handleSubmit,

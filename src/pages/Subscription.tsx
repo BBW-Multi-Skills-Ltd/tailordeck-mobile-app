@@ -2,6 +2,7 @@ import { AlertCircle, ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/shared/PageHeader'
+import ProgressHeader from '../components/shared/ProgressHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 
@@ -84,7 +85,7 @@ export default function SubscriptionPage() {
         <div className="row-between">
           <div className="stack gap-2">
             <p className="subscription-current-title">Free Trial</p>
-            <p className="subscription-current-subtitle">Still on free trial. Pro tools are available while trial is active.</p>
+            <p className="subscription-current-subtitle">Pro tools are active during your trial. Upgrade before it ends to keep them available.</p>
           </div>
           <span className="subscription-active-chip">Active</span>
         </div>
@@ -93,13 +94,20 @@ export default function SubscriptionPage() {
         </button>
       </article>
 
+      <ProgressHeader
+        title="Trial momentum"
+        description="You have already started your shop workspace. Keep invoices, sharing, analytics, and branding active by choosing a plan before trial expiry."
+        percent={70}
+        className="subscription-progress-card"
+      />
+
       <article className="subscription-trial-note">
         <span className="subscription-trial-note-icon">
           <AlertCircle size={16} />
         </span>
         <div className="stack gap-2">
           <strong>Keep your professional tools active</strong>
-          <p>When trial ends, branded PDFs, WhatsApp sharing, and business analytics pause until you choose a plan.</p>
+          <p>Without an active plan, branded PDF invoices, WhatsApp sharing, analytics, and invoice customization will pause.</p>
         </div>
       </article>
 

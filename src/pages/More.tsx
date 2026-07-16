@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BarChart3, ChevronRight, CircleHelp, FileText, Settings } from 'lucide-react'
+import { BarChart3, ChevronRight, CircleHelp, CreditCard, FileText, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/shared/PageHeader'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
@@ -27,7 +27,7 @@ const moreGroups: MoreHubGroup[] = [
         desc: 'Revenue, expenses, profit, and job performance.',
       },
       {
-        to: '/settings',
+        to: '/settings?panel=brand',
         icon: FileText,
         label: 'Invoices & Receipts',
         desc: 'Brand colors, logo, signature, and PDF setup.',
@@ -44,7 +44,13 @@ const moreGroups: MoreHubGroup[] = [
         desc: 'Profile, business info, reminders, and security.',
       },
       {
-        to: '/settings',
+        to: '/settings/subscription',
+        icon: CreditCard,
+        label: 'Subscription',
+        desc: 'Current plan, billing cycle, and upgrade options.',
+      },
+      {
+        to: '/settings?panel=about',
         icon: CircleHelp,
         label: 'Help & Support',
         desc: 'App info, support details, and TailorDeck guidance.',

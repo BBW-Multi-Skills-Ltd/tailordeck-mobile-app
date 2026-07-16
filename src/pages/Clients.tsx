@@ -50,11 +50,9 @@ export default function Clients() {
           title={clients.length === 0 ? 'No clients yet' : 'No clients found'}
           description={
             clients.length === 0
-              ? 'Clients will appear here after you create jobs. Start from New Job to store client details and measurements.'
+              ? 'Clients appear automatically after you create jobs. Tap the center plus button to add your first client and measurements.'
               : 'No client matches that search. Try another name.'
           }
-          actionLabel={clients.length === 0 ? 'Create Job' : undefined}
-          actionTo={clients.length === 0 ? '/jobs/new' : undefined}
         />
       ) : (
         <motion.div

@@ -18,6 +18,7 @@ export default function MaterialSelector({
   onSelectMaterial,
 }: MaterialSelectorProps) {
   const [searchValue, setSearchValue] = useState('')
+  const [showBrowse, setShowBrowse] = useState(false)
   const activeCategory = categories.find((category) => category.id === openCategoryId) ?? categories[0]
   const commonMaterials = useMemo(
     () => categories.flatMap((category) => category.options).filter((option) => ['Ankara', 'Lace', 'Guinea Brocade', 'Satin', 'Crepe', 'Other Material'].includes(option.name)),
@@ -63,52 +64,65 @@ export default function MaterialSelector({
         ))}
       </div>
 
-      <div className="wizard-material-category-row" aria-label="Material categories">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            type="button"
-            className={`wizard-material-category-chip${activeCategory.id === category.id && !searchValue.trim() ? ' active' : ''}`}
-            onClick={() => {
-              setSearchValue('')
-              onOpenCategoryChange(category.id)
-            }}
-          >
-            {category.title.replace(' Materials', '')}
-          </button>
-        ))}
-      </div>
+      <button
+        type="button"
+        className="wizard-material-browse-toggle"
+        onClick={() => setShowBrowse((current) => !current)}
+        aria-expanded={showBrowse}
+      >
+        Browse all material categories
+        <span>{categories.length} groups</span>
+      </button>
 
-      <article className="wizard-material-options-panel">
-        <div className="row-between">
-          <h5>{searchValue.trim() ? 'Search results' : activeCategory.title}</h5>
-          <span>{visibleOptions.length}</span>
+      {showBrowse || searchValue.trim() ? (
+        <div className="stack gap-8">
+          {!searchValue.trim() ? (
+            <div className="wizard-material-category-row" aria-label="Material categories">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={`wizard-material-category-chip${activeCategory.id === category.id ? ' active' : ''}`}
+                  onClick={() => onOpenCategoryChange(category.id)}
+                >
+                  {category.title.replace(' Materials', '')}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <article className="wizard-material-options-panel">
+            <div className="row-between">
+              <h5>{searchValue.trim() ? 'Search results' : activeCategory.title}</h5>
+              <span>{visibleOptions.length}</span>
+            </div>
+
+            {visibleOptions.length ? (
+              <div className="stack gap-8">
+                {visibleOptions.map((option) => (
+                  <button
+                    key={option.name}
+                    type="button"
+                    className={`wizard-material-option${selectedMaterial === option.name ? ' active' : ''}`}
+                    onClick={() => onSelectMaterial(option.name)}
+                  >
+                    <span className="wizard-material-title">{option.name}</span>
+                    <span className="wizard-material-description">{option.description}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="wizard-material-empty">
+                <strong>No material found</strong>
+                <p>Select Other Material and type the fabric name yourself.</p>
+                <button type="button" className="wizard-add-measurement-chip" onClick={() => onSelectMaterial('Other Material')}>
+                  Use Other Material
+                </button>
+              </div>
+            )}
+          </article>
         </div>
-
-        {visibleOptions.length ? (
-          <div className="stack gap-8">
-            {visibleOptions.map((option) => (
-              <button
-                key={option.name}
-                type="button"
-                className={`wizard-material-option${selectedMaterial === option.name ? ' active' : ''}`}
-                onClick={() => onSelectMaterial(option.name)}
-              >
-                <span className="wizard-material-title">{option.name}</span>
-                <span className="wizard-material-description">{option.description}</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="wizard-material-empty">
-            <strong>No material found</strong>
-            <p>Select Other Material and type the fabric name yourself.</p>
-            <button type="button" className="wizard-add-measurement-chip" onClick={() => onSelectMaterial('Other Material')}>
-              Use Other Material
-            </button>
-          </div>
-        )}
-      </article>
+      ) : null}
 
       {selectedMaterial ? (
         <div className="wizard-selected-material">

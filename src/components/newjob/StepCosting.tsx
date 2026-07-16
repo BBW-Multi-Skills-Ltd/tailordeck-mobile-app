@@ -46,7 +46,7 @@ export default function StepCosting({
             className="input wizard-expense-cost-input"
             value={formatNairaInput(expenseDraftCost)}
             onChange={(event) => onExpenseDraftCostChange(digitsOnly(event.target.value))}
-            placeholder="₦ Amount"
+            placeholder={formatNairaInput('0')}
             inputMode="numeric"
           />
           <button type="button" className="wizard-expense-add-btn" onClick={onAddExpense} aria-label="Add expense">
@@ -115,7 +115,7 @@ export default function StepCosting({
           </button>
         </div>
         {worthIt === 'Yes' ? (
-          <p className="text-sm text-muted">Tap Yes to continue straight to deadline setup.</p>
+          <p className="text-sm text-muted">Choosing Yes moves you straight to deadline setup.</p>
         ) : null}
         {worthIt === 'No' ? (
           <p className="text-sm text-danger">Consider revising price or reducing costs before finalizing.</p>
@@ -124,3 +124,4 @@ export default function StepCosting({
     </div>
   )
 }
+

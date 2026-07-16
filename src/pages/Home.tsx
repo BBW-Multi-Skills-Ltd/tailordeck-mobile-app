@@ -47,7 +47,7 @@ export default function Home() {
       {!hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
       {hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
-      <HomeRecentJobs jobs={recentJobs} />
+      {hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}
     </section>
   )
 }

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { queryKeys } from '../hooks/queryKeys'
 import PageHeader from '../components/shared/PageHeader'
+import ProgressHeader from '../components/shared/ProgressHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { updateProfile } from '../services/profileService'
@@ -98,7 +99,6 @@ export default function OnboardingPlan() {
         queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
         queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),
       ])
-      window.alert('Plan selected. Welcome to TailorDeck.')
       navigate('/')
     } catch (error) {
       console.error('Unable to activate onboarding plan:', error)
@@ -113,18 +113,11 @@ export default function OnboardingPlan() {
       <section className="section stack gap-10 subscription-page subscription-page-onboarding">
         <PageHeader title="Subscription" centered />
 
-        <section className="onboarding-progress-card">
-          <div className="row-between">
-            <div className="stack gap-2">
-              <p className="onboarding-progress-title">Almost done</p>
-              <p className="onboarding-progress-copy">Your shop basics are saved. Pick how you want to start using TailorDeck.</p>
-            </div>
-            <span className="onboarding-progress-percent">75%</span>
-          </div>
-          <div className="onboarding-progress">
-            <span className="onboarding-progress-fill" style={{ width: '75%' }} />
-          </div>
-        </section>
+        <ProgressHeader
+          title="Almost done"
+          description="Your shop basics are saved. Pick how you want to start using TailorDeck."
+          percent={75}
+        />
 
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />
 

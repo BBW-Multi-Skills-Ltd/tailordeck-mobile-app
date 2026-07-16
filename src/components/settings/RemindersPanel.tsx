@@ -27,6 +27,11 @@ export default function RemindersPanel({
 }: RemindersPanelProps) {
   return (
     <div className="stack settings-reminder-form">
+      <article className="settings-panel-guide">
+        <strong>Deadline reminders protect delivery promises</strong>
+        <p>Keep push notifications on to receive phone alerts before a client's delivery date.</p>
+      </article>
+
       <div className="row-between settings-reminder-row">
         <div className="stack gap-4">
           <p className="settings-reminder-label">Push Notifications</p>
@@ -58,6 +63,9 @@ export default function RemindersPanel({
             </button>
           ))}
         </div>
+        {!settings.reminders.pushNotifications || !settings.reminders.notificationBellEnabled ? (
+          <p className="settings-disabled-note">Bell sounds are paused until push notifications and bell sound are both enabled.</p>
+        ) : null}
       </div>
 
       <div className="stack settings-reminder-group">
@@ -71,6 +79,9 @@ export default function RemindersPanel({
             </button>
           ))}
         </div>
+        {!settings.reminders.pushNotifications || !settings.reminders.ringtoneEnabled ? (
+          <p className="settings-disabled-note">Ringtone alerts are paused until push notifications and ringtone are both enabled.</p>
+        ) : null}
       </div>
 
       <div className="stack settings-reminder-group">

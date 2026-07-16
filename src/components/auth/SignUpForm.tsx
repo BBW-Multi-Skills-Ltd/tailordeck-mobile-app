@@ -41,6 +41,7 @@ export function SignUpForm(props: SignUpFormProps) {
       <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={props.loading}>
         {props.loading ? 'Creating account...' : 'Create Account'}
       </button>
+      {props.errorMessage ? <p className="auth-feedback error" role="alert">{props.errorMessage}</p> : null}
       <div className="auth-divider"><span>or</span></div>
       <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={props.handleGoogleSignUp}><FcGoogle size={16} />Sign up with Google</button>
     </form>

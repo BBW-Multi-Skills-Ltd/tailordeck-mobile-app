@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Ruler } from 'lucide-react'
+import ChoiceCard from '../components/shared/ChoiceCard'
+import ProgressHeader from '../components/shared/ProgressHeader'
 import { loadTailorSettings, saveTailorSettings, type MeasurementUnit } from '../lib/settings'
 import { updateBusinessProfile } from '../services/businessService'
 import { updatePreferences } from '../services/preferencesService'
@@ -38,7 +40,6 @@ export default function OnboardingSetup() {
         updateBusinessProfile({ shop_name: normalizedShopName }),
         updatePreferences({ measurement_unit: measurementUnit }),
       ])
-      window.alert('Setup saved. Choose your plan to continue.')
       navigate('/onboarding/plan')
     } catch (error) {
       window.alert(error instanceof Error ? error.message : 'Unable to save setup.')
@@ -57,18 +58,11 @@ export default function OnboardingSetup() {
           <h2 className="onboarding-section-title">Set Up Your Shop</h2>
         </div>
 
-        <section className="onboarding-progress-card">
-          <div className="row-between">
-            <div className="stack gap-2">
-              <p className="onboarding-progress-title">Your workspace is ready</p>
-              <p className="onboarding-progress-copy">Add your shop basics now. Business info and invoices can be finished later.</p>
-            </div>
-            <span className="onboarding-progress-percent">50%</span>
-          </div>
-          <div className="onboarding-progress">
-            <span className="onboarding-progress-fill" style={{ width: '50%' }} />
-          </div>
-        </section>
+        <ProgressHeader
+          title="Your workspace is ready"
+          description="Add your shop basics now. Business info and invoices can be finished later."
+          percent={50}
+        />
 
         <section className="onboarding-card onboarding-card-plain onboarding-card-step">
           <div className="input-group">
@@ -88,35 +82,25 @@ export default function OnboardingSetup() {
           <div className="input-group">
             <span className="auth-label">Measurement Preference</span>
             <div className="stack gap-8">
-              <button
-                type="button"
-                className={`onboarding-unit-card${measurementUnit === 'cm' ? ' active' : ''}`}
+              <ChoiceCard
+                title="Centimeters (cm)"
+                description="Metric system, commonly used internationally"
+                icon={Ruler}
+                active={measurementUnit === 'cm'}
                 onClick={() => setMeasurementUnit('cm')}
               >
-                <span className="onboarding-unit-icon">
-                  <Ruler size={14} />
-                </span>
-                <span className="onboarding-unit-copy">
-                  <span className="onboarding-unit-title">Centimeters (cm)</span>
-                  <span className="onboarding-unit-text">Metric system, commonly used internationally</span>
-                </span>
                 <span className={`onboarding-radio${measurementUnit === 'cm' ? ' checked' : ''}`} aria-hidden />
-              </button>
+              </ChoiceCard>
 
-              <button
-                type="button"
-                className={`onboarding-unit-card${measurementUnit === 'inches' ? ' active' : ''}`}
+              <ChoiceCard
+                title="Inches (in)"
+                description="Traditional tailoring measurements"
+                icon={Ruler}
+                active={measurementUnit === 'inches'}
                 onClick={() => setMeasurementUnit('inches')}
               >
-                <span className="onboarding-unit-icon">
-                  <Ruler size={14} />
-                </span>
-                <span className="onboarding-unit-copy">
-                  <span className="onboarding-unit-title">Inches (in)</span>
-                  <span className="onboarding-unit-text">Traditional tailoring measurements</span>
-                </span>
                 <span className={`onboarding-radio${measurementUnit === 'inches' ? ' checked' : ''}`} aria-hidden />
-              </button>
+              </ChoiceCard>
             </div>
           </div>
 

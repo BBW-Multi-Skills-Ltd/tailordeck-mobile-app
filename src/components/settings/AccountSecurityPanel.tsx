@@ -72,7 +72,13 @@ export default function AccountSecurityPanel({
       </button>
       {saved ? <p className="text-sm text-success">Account changes saved locally.</p> : null}
 
-      <div className="stack settings-security-danger-wrap">
+      <div className="settings-danger-zone stack gap-8">
+        <div className="stack gap-3">
+          <p className="settings-danger-zone-title">Danger zone</p>
+          <p className="settings-danger-zone-copy">
+            These actions affect account access. They are placeholders until Supabase account controls are fully connected.
+          </p>
+        </div>
         <button type="button" className="settings-security-danger-btn" onClick={() => onDanger('deactivate')}>
           <ShieldAlert size={15} />
           Deactivate Account
