@@ -3,12 +3,15 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { queryKeys } from '../hooks/queryKeys'
+import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { updateProfile } from '../services/profileService'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
 import { selectSubscriptionPlan } from '../services/subscriptionService'
 
 type BillingCycle = 'monthly' | 'yearly'
+
+const billingCycles: BillingCycle[] = ['monthly', 'yearly']
 
 const PLAN_DATA: Array<{
   id: SubscriptionPlan
@@ -111,22 +114,7 @@ export default function OnboardingPlan() {
           <h1 className="subscription-page-title">Subscription</h1>
         </header>
 
-        <div className="subscription-cycle-tabs" aria-label="Billing cycle">
-          <button
-            type="button"
-            className={`subscription-cycle-tab${cycle === 'monthly' ? ' active' : ''}`}
-            onClick={() => setCycle('monthly')}
-          >
-            Monthly
-          </button>
-          <button
-            type="button"
-            className={`subscription-cycle-tab${cycle === 'yearly' ? ' active' : ''}`}
-            onClick={() => setCycle('yearly')}
-          >
-            Yearly
-          </button>
-        </div>
+        <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />
 
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 

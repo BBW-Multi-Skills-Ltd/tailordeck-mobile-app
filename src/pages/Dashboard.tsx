@@ -8,6 +8,7 @@ import { buildDashboardMetricsFromStats } from '../components/dashboard/dashboar
 import JobStatusBreakdown from '../components/dashboard/JobStatusBreakdown'
 import MonthlyPerformanceTable from '../components/dashboard/MonthlyPerformanceTable'
 import EmptyState from '../components/shared/EmptyState'
+import PageHeader from '../components/shared/PageHeader'
 import { useJobStatusBreakdownQuery, useMonthlyStatsQuery } from '../hooks/useDashboardQueries'
 
 export default function Dashboard() {
@@ -23,11 +24,7 @@ export default function Dashboard() {
 
   return (
     <section className="section stack gap-14">
-      <header className="row-between">
-        <span style={{ width: '44px' }} />
-        <h2 className="app-page-heading">Dashboard</h2>
-        <span style={{ width: '44px' }} />
-      </header>
+      <PageHeader title="Dashboard" centered />
 
       {monthlyStatsQuery.isLoading || statusQuery.isLoading ? (
         <div className="stack gap-12">

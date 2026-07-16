@@ -3,6 +3,7 @@ import { ChevronRight, Phone, Search, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import EmptyState from '../components/shared/EmptyState'
+import PageHeader from '../components/shared/PageHeader'
 import { useClientsQuery } from '../hooks/useClientQueries'
 import { formatDateShort, getInitial } from '../lib/utils'
 
@@ -19,9 +20,7 @@ export default function Clients() {
 
   return (
     <section className="section stack gap-16">
-      <header className="row-between">
-        <h1 className="app-page-heading">Clients</h1>
-      </header>
+      <PageHeader title="Clients" />
 
       <label className="search-bar" aria-label="Search clients by name">
         <Search size={17} className="text-muted" />

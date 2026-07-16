@@ -3,6 +3,8 @@ import { Search, Scissors } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/shared/EmptyState'
+import PageHeader from '../components/shared/PageHeader'
+import SegmentedControl from '../components/shared/SegmentedControl'
 import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
@@ -45,22 +47,9 @@ export default function Jobs() {
 
   return (
     <section className="section stack gap-16">
-      <header className="row-between">
-        <h1 className="app-page-heading">Jobs</h1>
-      </header>
+      <PageHeader title="Jobs" />
 
-      <div className="pill-group">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            type="button"
-            className={`pill${activeFilter === filter ? ' active' : ''}`}
-            onClick={() => setActiveFilter(filter)}
-          >
-            {filter}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl label="Filter jobs" options={filters} value={activeFilter} onChange={setActiveFilter} />
 
       <label className="search-bar" aria-label="Search jobs by client name">
         <Search size={17} className="text-muted" />

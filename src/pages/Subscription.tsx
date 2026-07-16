@@ -1,6 +1,8 @@
 import { ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import PageHeader from '../components/shared/PageHeader'
+import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 
 type BillingCycle = 'monthly' | 'yearly'
@@ -54,6 +56,8 @@ const PLAN_DATA: Array<{
   },
 ]
 
+const billingCycles: BillingCycle[] = ['monthly', 'yearly']
+
 export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
@@ -66,13 +70,15 @@ export default function SubscriptionPage() {
 
   return (
     <section className="section stack gap-12 subscription-page">
-      <header className="subscription-header subscription-header-with-back">
-        <Link to="/settings" className="btn btn-ghost btn-icon subscription-back-btn" aria-label="Back to settings">
-          <ArrowLeft size={18} />
-        </Link>
-        <h1 className="subscription-page-title app-page-heading">Subscription</h1>
-        <span className="subscription-header-spacer" aria-hidden />
-      </header>
+      <PageHeader
+        title="Subscription"
+        centered
+        leading={(
+          <Link to="/settings" className="btn btn-ghost btn-icon subscription-back-btn" aria-label="Back to settings">
+            <ArrowLeft size={18} />
+          </Link>
+        )}
+      />
 
       <article className="subscription-current-card">
         <div className="row-between">
@@ -87,22 +93,7 @@ export default function SubscriptionPage() {
         </button>
       </article>
 
-      <div className="subscription-cycle-tabs" aria-label="Billing cycle">
-        <button
-          type="button"
-          className={`subscription-cycle-tab${cycle === 'monthly' ? ' active' : ''}`}
-          onClick={() => setCycle('monthly')}
-        >
-          Monthly
-        </button>
-        <button
-          type="button"
-          className={`subscription-cycle-tab${cycle === 'yearly' ? ' active' : ''}`}
-          onClick={() => setCycle('yearly')}
-        >
-          Yearly
-        </button>
-      </div>
+      <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />
 
       <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
