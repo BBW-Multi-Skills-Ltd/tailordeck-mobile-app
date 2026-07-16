@@ -33,15 +33,6 @@ export default function StepMaterialPricing(props: StepMaterialPricingProps) {
 
       {props.showFullMaterialFlow || props.showAmendmentMaterialFlow ? (
         <section className="stack gap-10">
-          <div className="wizard-step-section-heading">
-            <span>
-              <Sparkles size={15} />
-            </span>
-            <div>
-              <strong>{props.showAmendmentMaterialFlow ? 'Parts needed' : 'Material details'}</strong>
-              <p>{props.showAmendmentMaterialFlow ? 'Add the repair part details if the client needs replacement materials.' : 'Start with the fabric, then add color, yards, quality, and who provides it.'}</p>
-            </div>
-          </div>
           {props.showFullMaterialFlow ? <MaterialFlowFields {...props} /> : null}
           {props.showAmendmentMaterialFlow ? <AmendmentMaterialFields {...props} /> : null}
           <MaterialSourceSelector {...props} />

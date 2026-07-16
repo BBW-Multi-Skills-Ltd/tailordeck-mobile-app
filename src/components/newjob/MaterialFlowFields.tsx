@@ -1,5 +1,7 @@
 import { materialCategories, qualities } from './newJobConfig'
+import { MaterialColorSelector } from './MaterialColorSelector'
 import MaterialSelector from './MaterialSelector'
+import { MaterialYardSelector } from './MaterialYardSelector'
 import type { StepMaterialPricingProps } from './stepMaterialPricing.types'
 
 type MaterialFlowFieldsProps = Pick<
@@ -36,20 +38,12 @@ export function MaterialFlowFields(props: MaterialFlowFieldsProps) {
         </label>
       ) : null}
 
-      <div className="wizard-step2-two-col">
-        <label className="input-group">
-          <span className="input-label">Color</span>
-          <input className="input" value={props.materialColor} onChange={(event) => props.onMaterialColorChange(event.target.value)} placeholder="e.g. Navy Blue" />
-        </label>
-
-        <label className="input-group">
-          <span className="input-label">Total Yards</span>
-          <input className="input" value={props.materialYards} onChange={(event) => props.onMaterialYardsChange(event.target.value)} placeholder="0" inputMode="decimal" />
-        </label>
-      </div>
+      <MaterialColorSelector selectedColor={props.materialColor} onSelectColor={props.onMaterialColorChange} />
+      <MaterialYardSelector selectedYards={props.materialYards} onSelectYards={props.onMaterialYardsChange} />
 
       <div className="input-group">
         <span className="input-label">Material Quality</span>
+        <p className="text-sm text-muted wizard-helper-inline">What quality is the material?</p>
         <div className="wizard-quality-scroll">
           {qualities.map((quality) => (
             <button key={quality} type="button" className={`pill${props.materialQuality === quality ? ' active' : ''}`} onClick={() => props.onMaterialQualityChange(quality)}>

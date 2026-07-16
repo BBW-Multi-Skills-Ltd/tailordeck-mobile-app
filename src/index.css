@@ -6631,13 +6631,9 @@ p { margin: 0; }
 
 .wizard-helper-inline {
   white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.wizard-helper-inline::-webkit-scrollbar {
-  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .wizard-quality-scroll {
@@ -6656,6 +6652,93 @@ p { margin: 0; }
 .wizard-quality-scroll .pill {
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.wizard-color-chip,
+.wizard-yard-chip {
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.wizard-color-chip.active,
+.wizard-yard-chip.active {
+  border-color: var(--primary-border);
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.wizard-color-swatch {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, #000);
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.wizard-color-option-grid,
+.wizard-yard-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.wizard-color-option,
+.wizard-yard-option {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wizard-color-option.active,
+.wizard-yard-option.active {
+  border-color: var(--primary-border);
+  background: var(--primary-bg);
+}
+
+.wizard-color-option span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.wizard-color-option strong,
+.wizard-yard-option strong {
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.wizard-color-option small,
+.wizard-yard-option span {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.1;
+}
+
+.wizard-yard-option {
+  justify-content: space-between;
 }
 
 .wizard-source-grid {

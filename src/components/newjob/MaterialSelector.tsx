@@ -40,7 +40,7 @@ export default function MaterialSelector({
   return (
     <div className="stack gap-8">
       <span className="input-label">Material Type</span>
-      <p className="text-sm text-muted wizard-helper-inline">Choose from common fabrics first, or search if you need something else.</p>
+      <p className="text-sm text-muted wizard-helper-inline">Pick a fabric or search.</p>
 
       <label className="wizard-material-search">
         <Search size={15} />
