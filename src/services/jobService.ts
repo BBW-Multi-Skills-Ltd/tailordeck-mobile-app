@@ -180,7 +180,7 @@ export async function createFullJob(input: CreateFullJobInput): Promise<MockJob>
     description: person.description?.trim() || null,
     is_primary: person.isPrimary,
     measurement_kind: person.measurementKind,
-    quantity: person.quantity?.trim() || null,
+    quantity: person.quantity?.trim() || '1',
     measurements: person.measurements,
     measurement_unit: person.measurementUnit,
     sort_order: person.sortOrder,
