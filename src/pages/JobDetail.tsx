@@ -76,6 +76,7 @@ function JobDetailContent({
   measurementOrderScope?: string
 }) {
   const [openDrawer, setOpenDrawer] = useState<InvoiceType | null>(null)
+  const [sentDocuments, setSentDocuments] = useState<Record<InvoiceType, boolean>>({ invoice: false, receipt: false })
   const [viewerIndex, setViewerIndex] = useState<number | null>(null)
 
   useJobImageViewer({
@@ -114,6 +115,11 @@ function JobDetailContent({
     setViewerIndex((prev) => (prev === null ? 0 : (prev + 1) % details.referencePhotos.length))
   }
 
+  async function handleSharedDocument(type: InvoiceType, shareAction: (type: InvoiceType) => Promise<void>): Promise<void> {
+    await shareAction(type)
+    setSentDocuments((prev) => ({ ...prev, [type]: true }))
+  }
+
   return (
     <>
       <section className="section stack gap-16">
@@ -140,7 +146,12 @@ function JobDetailContent({
         <JobReferencePhotos photos={details.referencePhotos} onOpen={setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
 
-        <JobDocumentActions onInvoice={() => setOpenDrawer('invoice')} onReceipt={() => setOpenDrawer('receipt')} />
+        <JobDocumentActions
+          invoiceSent={sentDocuments.invoice}
+          onInvoice={() => setOpenDrawer('invoice')}
+          onReceipt={() => setOpenDrawer('receipt')}
+          receiptSent={sentDocuments.receipt}
+        />
       </section>
 
       {activePhoto ? (
@@ -164,8 +175,8 @@ function JobDetailContent({
             balanceToCollect={balanceToCollect}
             docPreviewRef={docPreviewRef}
             onClose={() => setOpenDrawer(null)}
-            onShare={(type) => void handleSystemShare(type)}
-            onWhatsApp={(type) => void handleWhatsAppToClient(type)}
+            onShare={(type) => void handleSharedDocument(type, handleSystemShare)}
+            onWhatsApp={(type) => void handleSharedDocument(type, handleWhatsAppToClient)}
             onDownload={(type) => void handleDownload(type)}
           />
         </Suspense>

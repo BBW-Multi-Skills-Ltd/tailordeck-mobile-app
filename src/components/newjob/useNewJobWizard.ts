@@ -45,7 +45,8 @@ export function useNewJobWizard() {
     state.setDraftSaved(false)
 
     try {
-      await createFullJobMutation.mutateAsync(buildNewJobPayload({ state, derived, repeatClientId }))
+      const createdJob = await createFullJobMutation.mutateAsync(buildNewJobPayload({ state, derived, repeatClientId }))
+      state.setCreatedJobId(createdJob.id)
       state.setSuccessOpen(true)
     } catch (error) {
       window.alert(getServiceErrorMessage(error, 'Unable to finalize this job.'))
@@ -57,7 +58,11 @@ export function useNewJobWizard() {
   const actions = createNewJobWizardActions({ navigate, state })
 
   return {
-    actions: { ...actions, handleFinalizeJob },
+    actions: {
+      ...actions,
+      handleFinalizeJob,
+      viewCreatedJob: () => navigate(state.createdJobId ? `/jobs/${state.createdJobId}` : '/jobs'),
+    },
     derived,
     repeatClient: Boolean(repeatClient),
     sectionRef,

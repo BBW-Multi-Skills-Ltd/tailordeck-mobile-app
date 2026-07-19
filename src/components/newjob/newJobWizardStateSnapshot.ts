@@ -12,6 +12,7 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     chargeAmount: state.chargeAmount,
     clientName: state.clientName,
     clientPhone: state.clientPhone,
+    createdJobId: state.createdJobId,
     customMaterialType: state.customMaterialType,
     deadlineDate: state.deadlineDate,
     deadlineTime: state.deadlineTime,

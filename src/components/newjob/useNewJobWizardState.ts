@@ -55,6 +55,7 @@ export function useNewJobWizardState() {
   const [stepFourReviewMode, setStepFourReviewMode] = useState(false)
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
+  const [createdJobId, setCreatedJobId] = useState('')
   const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
   const [stepOneMeasurementsOpen, setStepOneMeasurementsOpen] = useState<Record<string, boolean>>({})
   const [stepFourDetailsOpen, setStepFourDetailsOpen] = useState(true)
@@ -70,6 +71,7 @@ export function useNewJobWizardState() {
     chargeAmount,
     clientName,
     clientPhone,
+    createdJobId,
     customMaterialType,
     deadlineDate,
     deadlineTime,
@@ -109,6 +111,7 @@ export function useNewJobWizardState() {
     setChargeAmount,
     setClientName,
     setClientPhone,
+    setCreatedJobId,
     setCustomMaterialType,
     setDeadlineDate,
     setDeadlineTime,

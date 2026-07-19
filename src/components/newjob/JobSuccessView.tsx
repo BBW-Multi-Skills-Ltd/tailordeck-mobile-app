@@ -1,15 +1,119 @@
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import type { DetailedJobData } from '../../data/mockJobDetails'
 import { formatNaira } from '../../lib/utils'
+import type { MockJob } from '../../types/job'
+import { readBrandConfig } from '../invoice/documentHelpers'
+import { JobDocumentDrawer } from '../jobdetail/JobDocumentDrawer'
+import { useJobDocumentActions } from '../jobdetail/useJobDocumentActions'
+import type { ExpenseForm, JobType, MakeCategory, OrderMode, Reminder } from './newJobConfig'
 
 type JobSuccessViewProps = {
   clientName: string
+  clientPhone: string
+  color: string
+  deadlineTime: string
+  deposit: number
+  effectiveItemType: string
+  expenses: ExpenseForm[]
   jobType: string
+  makeCategory: MakeCategory
+  materialQuality: string
+  materialSource: string
+  materialType: string
+  orderMode: OrderMode
+  reminder: Reminder
+  scopeLabel: JobType | string
   charge: number
   deadlineDate: string
-  onViewJobs: () => void
+  totalYard: string
+  onViewJobDetails: () => void
 }
 
-export function JobSuccessView({ clientName, jobType, charge, deadlineDate, onViewJobs }: JobSuccessViewProps) {
+export function JobSuccessView({
+  clientName,
+  clientPhone,
+  color,
+  deadlineTime,
+  deposit,
+  effectiveItemType,
+  expenses,
+  jobType,
+  makeCategory,
+  materialQuality,
+  materialSource,
+  materialType,
+  orderMode,
+  reminder,
+  scopeLabel,
+  charge,
+  deadlineDate,
+  totalYard,
+  onViewJobDetails,
+}: JobSuccessViewProps) {
+  const [invoiceOpen, setInvoiceOpen] = useState(false)
+  const brand = useMemo(() => readBrandConfig(), [])
+  const balanceToCollect = Math.max(charge - deposit, 0)
+  const service = effectiveItemType || 'Tailoring job'
+  const successJob = useMemo<MockJob>(
+    () => ({
+      id: `new-job-${Date.now()}`,
+      clientId: 'new-client',
+      clientName: clientName || 'Client',
+      clientPhone,
+      title: service,
+      jobType: scopeLabel === 'Couple' || scopeLabel === 'Family' ? scopeLabel : 'Single',
+      chargeAmount: charge,
+      status: 'Pending',
+      deadlineDate,
+      createdDate: new Date().toISOString(),
+    }),
+    [charge, clientName, clientPhone, deadlineDate, scopeLabel, service],
+  )
+  const successDetails = useMemo<DetailedJobData>(
+    () => ({
+      orderMode,
+      jobType: makeCategory,
+      itemType: service,
+      orderScope: jobType,
+      measurement: `${jobType} measurement captured`,
+      materialType: materialType || '-',
+      color: color || '-',
+      totalYard: totalYard || '0',
+      materialQuality: materialQuality || 'Normal',
+      materialSource: materialSource || '-',
+      deliveryTime: deadlineTime || '-',
+      reminder,
+      referencePhotos: [],
+      expenses: expenses.map((expense) => ({
+        name: expense.name,
+        cost: Number(expense.cost.replace(/\D/g, '')) || 0,
+      })),
+      depositAmount: deposit,
+    }),
+    [
+      color,
+      deadlineTime,
+      deposit,
+      expenses,
+      jobType,
+      makeCategory,
+      materialQuality,
+      materialSource,
+      materialType,
+      orderMode,
+      reminder,
+      service,
+      totalYard,
+    ],
+  )
+  const { docPreviewRef, handleDownload, handleSystemShare, handleWhatsAppToClient } = useJobDocumentActions({
+    brand,
+    job: successJob,
+    details: successDetails,
+    balanceToCollect,
+  })
+
   return (
     <section className="section stack gap-16 wizard-page wizard-success-page">
       <div className="stack gap-16 wizard-success-screen">
@@ -40,11 +144,30 @@ export function JobSuccessView({ clientName, jobType, charge, deadlineDate, onVi
           </div>
         </div>
 
-        <button type="button" className="btn btn-primary btn-full" onClick={onViewJobs}>
-          View in Jobs <ArrowRight size={18} />
+        <button type="button" className="btn btn-primary btn-full" onClick={onViewJobDetails}>
+          View Job Details <ArrowRight size={18} />
+        </button>
+
+        <button type="button" className="btn btn-secondary btn-full wizard-success-invoice-btn" onClick={() => setInvoiceOpen(true)}>
+          <FileText size={17} />
+          Send Invoice
         </button>
       </div>
+
+      {invoiceOpen ? (
+        <JobDocumentDrawer
+          type="invoice"
+          brand={brand}
+          job={successJob}
+          details={successDetails}
+          balanceToCollect={balanceToCollect}
+          docPreviewRef={docPreviewRef}
+          onClose={() => setInvoiceOpen(false)}
+          onShare={(type) => void handleSystemShare(type)}
+          onWhatsApp={(type) => void handleWhatsAppToClient(type)}
+          onDownload={(type) => void handleDownload(type)}
+        />
+      ) : null}
     </section>
   )
 }
-
