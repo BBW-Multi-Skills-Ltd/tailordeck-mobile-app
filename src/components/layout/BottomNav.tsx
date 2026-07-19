@@ -10,7 +10,7 @@ type NavItem = {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Today', path: '/', icon: Home },
+  { label: 'Home', path: '/', icon: Home },
   { label: 'Jobs', path: '/jobs', icon: Scissors },
   { label: 'Clients', path: '/clients', icon: Users },
   { label: 'More', path: '/more', icon: MoreHorizontal, activePaths: ['/more', '/dashboard', '/settings'] },

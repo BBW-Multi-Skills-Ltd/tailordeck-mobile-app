@@ -1,5 +1,6 @@
-import { ArrowRight, CheckCircle2, FileText } from 'lucide-react'
+import { ArrowRight, CheckCircle2, FileText, Home } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { DetailedJobData } from '../../data/mockJobDetails'
 import { formatNaira } from '../../lib/utils'
 import type { MockJob } from '../../types/job'
@@ -52,6 +53,7 @@ export function JobSuccessView({
   onViewJobDetails,
 }: JobSuccessViewProps) {
   const [invoiceOpen, setInvoiceOpen] = useState(false)
+  const navigate = useNavigate()
   const brand = useMemo(() => readBrandConfig(), [])
   const balanceToCollect = Math.max(charge - deposit, 0)
   const service = effectiveItemType || 'Tailoring job'
@@ -144,13 +146,20 @@ export function JobSuccessView({
           </div>
         </div>
 
-        <button type="button" className="btn btn-primary btn-full" onClick={onViewJobDetails}>
-          View Job Details <ArrowRight size={18} />
-        </button>
+        <div className="wizard-success-action-row">
+          <button type="button" className="btn btn-primary btn-full" onClick={onViewJobDetails}>
+            View Details <ArrowRight size={16} />
+          </button>
 
-        <button type="button" className="btn btn-secondary btn-full wizard-success-invoice-btn" onClick={() => setInvoiceOpen(true)}>
-          <FileText size={17} />
-          Send Invoice
+          <button type="button" className="btn btn-secondary btn-full wizard-success-invoice-btn" onClick={() => setInvoiceOpen(true)}>
+            <FileText size={16} />
+            Send Invoice
+          </button>
+        </div>
+
+        <button type="button" className="btn btn-ghost btn-full wizard-success-home-btn" onClick={() => navigate('/')}>
+          <Home size={16} />
+          Return to Home
         </button>
       </div>
 
