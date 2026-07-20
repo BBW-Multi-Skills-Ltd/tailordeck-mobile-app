@@ -13,7 +13,7 @@ const navItems: NavItem[] = [
   { label: 'Home', path: '/', icon: Home },
   { label: 'Jobs', path: '/jobs', icon: Scissors },
   { label: 'Clients', path: '/clients', icon: Users },
-  { label: 'More', path: '/more', icon: MoreHorizontal, activePaths: ['/more', '/dashboard', '/settings'] },
+  { label: 'More', path: '/more', icon: MoreHorizontal, activePaths: ['/more', '/dashboard', '/profile', '/business', '/documents', '/help', '/settings'] },
 ]
 
 function isRouteActive(currentPath: string, item: NavItem): boolean {

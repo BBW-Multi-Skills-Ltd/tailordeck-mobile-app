@@ -27,11 +27,18 @@ export default function DashboardRevenueChart({ months }: DashboardRevenueChartP
           </div>
           <div className="dashboard-chart-area">
             <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={months} barGap={4} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+              <BarChart accessibilityLayer={false} data={months} barGap={4} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#8A7060', fontSize: 12 }} />
                 <YAxis hide domain={[0, chartTop]} />
                 <Tooltip
-                  cursor={<Rectangle radius={10} fill="color-mix(in srgb, var(--primary) 20%, transparent)" />}
+                  cursor={
+                    <Rectangle
+                      radius={10}
+                      fill="color-mix(in srgb, var(--primary) 12%, transparent)"
+                      stroke="none"
+                      strokeWidth={0}
+                    />
+                  }
                   contentStyle={{
                     backgroundColor: 'var(--bg-card)',
                     border: '1px solid var(--border)',
@@ -44,12 +51,12 @@ export default function DashboardRevenueChart({ months }: DashboardRevenueChartP
                   labelStyle={{ color: 'var(--text)', fontWeight: 600, marginBottom: 4 }}
                   wrapperStyle={{ outline: 'none' }}
                 />
-                <Bar dataKey="revenue" radius={[8, 8, 0, 0]} maxBarSize={22}>
+                <Bar dataKey="revenue" radius={[8, 8, 0, 0]} maxBarSize={22} activeBar={false}>
                   {months.map((month) => (
                     <Cell key={`${month.key}-rev`} fill="#7B1E37" />
                   ))}
                 </Bar>
-                <Bar dataKey="expenses" radius={[8, 8, 0, 0]} maxBarSize={22}>
+                <Bar dataKey="expenses" radius={[8, 8, 0, 0]} maxBarSize={22} activeBar={false}>
                   {months.map((month) => (
                     <Cell key={`${month.key}-exp`} fill="#C9A84C" />
                   ))}

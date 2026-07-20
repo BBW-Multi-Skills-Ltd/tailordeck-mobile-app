@@ -1,5 +1,6 @@
-import { BarChart3 } from 'lucide-react'
+import { ArrowLeft, BarChart3 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import BestMonthCard from '../components/dashboard/BestMonthCard'
 import DashboardEmptyGuide from '../components/dashboard/DashboardEmptyGuide'
 import DashboardInsightCard from '../components/dashboard/DashboardInsightCard'
@@ -25,8 +26,16 @@ export default function Dashboard() {
   const visibleMonthLabel = visibleMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
 
   return (
-    <section className="section stack gap-14">
-      <PageHeader title="Dashboard" centered />
+    <section className="section stack dashboard-page">
+      <PageHeader
+        title="Dashboard"
+        centered
+        leading={
+          <Link to="/more" className="btn btn-ghost btn-icon" aria-label="Back to more">
+            <ArrowLeft size={18} />
+          </Link>
+        }
+      />
 
       {monthlyStatsQuery.isLoading || statusQuery.isLoading ? (
         <div className="stack gap-12">

@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
-import { BarChart3, ChevronRight, CircleHelp, CreditCard, FileText, Settings } from 'lucide-react'
+import { BarChart3, BriefcaseBusiness, ChevronRight, CircleHelp, CreditCard, FileText, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import PageHeader from '../components/shared/PageHeader'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
 
 type MoreHubItem = {
@@ -27,10 +26,16 @@ const moreGroups: MoreHubGroup[] = [
         desc: 'Revenue, expenses, profit, and job performance.',
       },
       {
-        to: '/settings?panel=brand',
+        to: '/documents',
         icon: FileText,
         label: 'Invoices & Receipts',
         desc: 'Brand colors, logo, signature, and PDF setup.',
+      },
+      {
+        to: '/business',
+        icon: BriefcaseBusiness,
+        label: 'Business & Shop',
+        desc: 'Shop info, handles, measurement unit, and preferences.',
       },
     ],
   },
@@ -50,10 +55,10 @@ const moreGroups: MoreHubGroup[] = [
         desc: 'Current plan, billing cycle, and upgrade options.',
       },
       {
-        to: '/settings?panel=about',
+        to: '/help',
         icon: CircleHelp,
         label: 'Help & Support',
-        desc: 'App info, support details, and TailorDeck guidance.',
+        desc: 'Guides, support details, and TailorDeck guidance.',
       },
     ],
   },
@@ -66,10 +71,8 @@ export default function More() {
   const initial = fullName.trim().charAt(0).toUpperCase() || 'T'
 
   return (
-    <section className="section stack gap-16 more-page">
-      <PageHeader title="More" subtitle="Everything else, neatly tucked away." />
-
-      <article className="clay-card more-profile-card">
+    <section className="section stack gap-12 more-page">
+      <Link to="/profile" className="clay-card more-profile-card">
         <div className="more-avatar clay-inset" aria-hidden>
           {settings.profile.avatarUrl ? (
             <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" />
@@ -81,9 +84,10 @@ export default function More() {
           <p className="more-profile-name truncate">{fullName}</p>
           <p className="more-profile-email truncate">{email}</p>
         </div>
-      </article>
+        <ChevronRight size={17} className="more-row-chevron more-profile-chevron" />
+      </Link>
 
-      <div className="stack gap-14">
+      <div className="stack gap-7">
         {moreGroups.map((group, groupIndex) => (
           <motion.section
             key={group.title}

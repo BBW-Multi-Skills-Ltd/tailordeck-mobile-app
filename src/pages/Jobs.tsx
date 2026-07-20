@@ -3,7 +3,6 @@ import { Search, Scissors } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/shared/EmptyState'
-import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
@@ -47,8 +46,6 @@ export default function Jobs() {
 
   return (
     <section className="section stack gap-16">
-      <PageHeader title="Jobs" />
-
       <SegmentedControl label="Filter jobs" options={filters} value={activeFilter} onChange={setActiveFilter} />
 
       <label className="search-bar" aria-label="Search jobs by client name">

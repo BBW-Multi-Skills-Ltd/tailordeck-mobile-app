@@ -7,10 +7,9 @@ type ProfileSettingsPanelProps = {
   saved: boolean
   onAvatarUpload: (event: ChangeEvent<HTMLInputElement>) => void
   onSavePhoto: () => void
-  onEditProfile: () => void
 }
 
-export default function ProfileSettingsPanel({ settings, saved, onAvatarUpload, onSavePhoto, onEditProfile }: ProfileSettingsPanelProps) {
+export default function ProfileSettingsPanel({ settings, saved, onAvatarUpload, onSavePhoto }: ProfileSettingsPanelProps) {
   return (
     <div className="stack gap-14 settings-profile-summary-panel">
       <div className="settings-profile-summary">
@@ -27,11 +26,12 @@ export default function ProfileSettingsPanel({ settings, saved, onAvatarUpload, 
           <p>{settings.profile.email || 'your@email.com'}</p>
           <p>{settings.businessInfo.shopName || settings.brand.name || 'Your shop name'}</p>
           <div className="settings-profile-summary-actions">
+            <label className="settings-profile-edit-btn upload-photo">
+              Upload Photo
+              <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={onAvatarUpload} />
+            </label>
             <button type="button" className="settings-profile-edit-btn save-photo" onClick={onSavePhoto}>
               Save Photo
-            </button>
-            <button type="button" className="settings-profile-edit-btn" onClick={onEditProfile}>
-              Edit Profile
             </button>
           </div>
         </div>

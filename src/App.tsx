@@ -13,8 +13,15 @@ const JobDetail = lazy(() => import('./pages/JobDetail'))
 const JobMeasurements = lazy(() => import('./pages/JobMeasurements'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const SettingsPage = lazy(() => import('./pages/Settings'))
+const SettingsReminders = lazy(() => import('./pages/SettingsReminders'))
+const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
+const SettingsAbout = lazy(() => import('./pages/SettingsAbout'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
 const More = lazy(() => import('./pages/More'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Business = lazy(() => import('./pages/Business'))
+const Documents = lazy(() => import('./pages/Documents'))
+const Help = lazy(() => import('./pages/Help'))
 const OnboardingWelcome = lazy(() => import('./pages/OnboardingWelcome'))
 const OnboardingPreview = lazy(() => import('./pages/OnboardingPreview'))
 const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
@@ -55,7 +62,14 @@ export default function App() {
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/business" element={<Business />} />
+            <Route path="/documents" element={<Documents />} />
+            <Route path="/help" element={<Help />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/reminders" element={<SettingsReminders />} />
+            <Route path="/settings/security" element={<SettingsSecurity />} />
+            <Route path="/settings/about" element={<SettingsAbout />} />
             <Route path="/settings/subscription" element={<SubscriptionPage />} />
             <Route path="/more" element={<More />} />
           </Route>
