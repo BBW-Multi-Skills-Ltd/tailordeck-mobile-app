@@ -39,6 +39,7 @@ export interface TailorSettings {
     businessPhone: string
     businessEmail: string
     website: string
+    cacRegistrationNumber: string
     socialHandles: SocialHandle[]
   }
   brand: {
@@ -53,6 +54,7 @@ export interface TailorSettings {
       website: boolean
       social: boolean
       address: boolean
+      cac: boolean
     }
   }
   subscription: {

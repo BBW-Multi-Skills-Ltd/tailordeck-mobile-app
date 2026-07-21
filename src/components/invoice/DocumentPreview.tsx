@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { renderTemplate } from '../../lib/docTemplates'
 import type { DocumentTemplatePayload } from '../../templates/types'
 import type { BrandConfig, InvoiceType } from './documentTypes'
+import { FitDocumentPreview } from './FitDocumentPreview'
 
 export type { BrandConfig, InvoiceType }
 
@@ -53,10 +54,14 @@ export function DocumentPreview({
       businessPhone: brand.businessPhone,
       businessEmail: brand.businessEmail,
       website: brand.website,
+      cacRegistrationNumber: brand.cacRegistrationNumber ?? '',
       socialHandles: brand.socialHandles,
-      includeBusinessDetails: brand.includeBusinessDetails,
+      includeBusinessDetails: {
+        ...brand.includeBusinessDetails,
+        cac: brand.includeBusinessDetails.cac ?? false,
+      },
     },
   }
 
-  return <div className="stack gap-12">{renderTemplate(templatePayload)}</div>
+  return <FitDocumentPreview>{renderTemplate(templatePayload)}</FitDocumentPreview>
 }

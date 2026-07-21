@@ -34,6 +34,7 @@ export function normalizeSettings(value: Partial<TailorSettings>): TailorSetting
       businessPhone: normalizeBusinessPhone(value.businessInfo?.businessPhone ?? defaults.businessInfo.businessPhone),
       businessEmail: value.businessInfo?.businessEmail ?? defaults.businessInfo.businessEmail,
       website: value.businessInfo?.website ?? defaults.businessInfo.website,
+      cacRegistrationNumber: value.businessInfo?.cacRegistrationNumber ?? defaults.businessInfo.cacRegistrationNumber,
       socialHandles: normalizeSocialHandles(value, defaults),
     },
     brand: {
@@ -56,6 +57,7 @@ export function normalizeSettings(value: Partial<TailorSettings>): TailorSetting
         website: value.brand?.includeBusinessDetails?.website ?? defaults.brand.includeBusinessDetails.website,
         social: value.brand?.includeBusinessDetails?.social ?? defaults.brand.includeBusinessDetails.social,
         address: value.brand?.includeBusinessDetails?.address ?? defaults.brand.includeBusinessDetails.address,
+        cac: value.brand?.includeBusinessDetails?.cac ?? defaults.brand.includeBusinessDetails.cac,
       },
     },
     subscription: {

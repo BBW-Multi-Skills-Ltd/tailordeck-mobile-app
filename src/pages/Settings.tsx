@@ -1,5 +1,5 @@
-import { BellRing, ChevronRight, CircleHelp, Database, LogOut, Moon, ShieldCheck, Sun, WandSparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { ArrowLeft, BellRing, ChevronRight, CircleHelp, Database, LogOut, Moon, ShieldCheck, Sun, WandSparkles } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
 import PageHeader from '../components/shared/PageHeader'
 import { AVATAR_PLACEHOLDER } from '../lib/settings'
@@ -43,6 +43,7 @@ function SettingsHubRow({ desc, icon: Icon, onClick, title, to, tone = 'default'
 }
 
 export default function SettingsPage() {
+  const navigate = useNavigate()
   const { actions, state } = useSettingsPage()
   const { settings } = state
   const fullName = settings.profile.fullName || 'TailorDeck User'
@@ -53,6 +54,12 @@ export default function SettingsPage() {
     <section className="section stack gap-16">
       <PageHeader
         title="Settings"
+        centered
+        leading={(
+          <button type="button" className="btn btn-ghost btn-icon" aria-label="Go back" onClick={() => navigate('/more')}>
+            <ArrowLeft size={20} />
+          </button>
+        )}
         trailing={(
           <button type="button" className="btn btn-ghost btn-icon settings-theme-btn" aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} onClick={actions.setTheme}>
             {state.theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -75,7 +82,7 @@ export default function SettingsPage() {
         <section className="stack gap-8">
           <p className="more-group-title">App</p>
           <div className="clay-card more-group-card">
-            <SettingsHubRow icon={BellRing} title="Reminders & Notifications" desc="Alerts, ringtone, bell sound, and reminder timing." to="/settings/reminders" />
+            <SettingsHubRow icon={BellRing} title="Reminders & Notifications" desc="Push alerts and delivery reminder timing." to="/settings/reminders" />
             <span className="more-row-divider settings-hub-divider" aria-hidden />
             <SettingsHubRow icon={WandSparkles} title="Upgrade" desc={`Currently on ${settings.subscription.plan === 'free' ? 'Free' : settings.subscription.plan}.`} to="/settings/subscription" tone="accent" />
           </div>

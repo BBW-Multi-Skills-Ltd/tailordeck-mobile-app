@@ -64,6 +64,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       businessPhone: '+234',
       businessEmail: '',
       website: 'https://',
+      cacRegistrationNumber: '',
       socialHandles: [],
     },
     brand: {
@@ -78,6 +79,7 @@ export function getDefaultTailorSettings(): TailorSettings {
         website: false,
         social: true,
         address: true,
+        cac: false,
       },
     },
     subscription: {

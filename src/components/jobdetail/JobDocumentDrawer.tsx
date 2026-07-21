@@ -2,6 +2,7 @@ import { Share2, X } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import type { RefObject } from 'react'
 import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DocumentTemplateLineItem } from '../../templates/types'
 import type { MockJob } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
@@ -29,6 +30,8 @@ export function JobDocumentDrawer({
   onWhatsApp: (type: InvoiceType) => void
   onDownload: (type: InvoiceType) => void
 }) {
+  const lineItems = buildClientFacingLineItems({ details, job })
+
   return (
     <div
       className="side-sheet-overlay"
@@ -53,22 +56,7 @@ export function JobDocumentDrawer({
               clientName={job.clientName}
               clientPhone={job.clientPhone}
               service={details.itemType}
-              lineItems={[
-                {
-                  description: details.itemType,
-                  details: `${details.jobType} - ${details.orderScope}`,
-                  qty: 1,
-                  unitPrice: job.chargeAmount,
-                  total: job.chargeAmount,
-                },
-                ...details.expenses.slice(0, 2).map((expense) => ({
-                  description: expense.name,
-                  details: 'Work item',
-                  qty: 1,
-                  unitPrice: expense.cost,
-                  total: expense.cost,
-                })),
-              ]}
+              lineItems={lineItems}
               charge={job.chargeAmount}
               deposit={details.depositAmount}
               balance={balanceToCollect}
@@ -93,4 +81,33 @@ export function JobDocumentDrawer({
       </aside>
     </div>
   )
+}
+
+function buildClientFacingLineItems({
+  details,
+  job,
+}: {
+  details: DetailedJobData
+  job: MockJob
+}): DocumentTemplateLineItem[] {
+  const descriptionParts = [
+    details.orderMode,
+    details.jobType,
+    details.orderScope,
+    details.materialType && details.materialType !== '-' ? `Material: ${details.materialType}` : '',
+    details.color && details.color !== '-' ? `Color: ${details.color}` : '',
+    details.totalYard && details.totalYard !== '0' ? `${details.totalYard} yards` : '',
+    details.materialQuality ? `Quality: ${details.materialQuality}` : '',
+    details.materialSource && details.materialSource !== '-' ? `Source: ${details.materialSource}` : '',
+  ].filter(Boolean)
+
+  return [
+    {
+      description: details.itemType || job.title || 'Tailoring service',
+      details: descriptionParts.join(' | '),
+      qty: 1,
+      unitPrice: job.chargeAmount,
+      total: job.chargeAmount,
+    },
+  ]
 }

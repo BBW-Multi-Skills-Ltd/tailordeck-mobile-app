@@ -1,4 +1,4 @@
-import { Globe, Mail, MapPin, PhoneCall } from 'lucide-react'
+import { BadgeCheck, Globe, Mail, MapPin, PhoneCall } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { DocumentTemplatePayload } from '../types'
 import { formatDateShort } from '../../lib/utils'
@@ -11,7 +11,7 @@ type InvoiceClassicMetaProps = {
 }
 
 export function InvoiceClassicMeta({ dueLabel, isInvoice, payload }: InvoiceClassicMetaProps) {
-  const { businessAddress, businessEmail, businessPhone, details, website } = getClassicWaveBusinessDetails(payload)
+  const { businessAddress, businessEmail, businessPhone, cacRegistrationNumber, details, website } = getClassicWaveBusinessDetails(payload)
 
   return (
     <section className="doc-clean-meta">
@@ -27,6 +27,7 @@ export function InvoiceClassicMeta({ dueLabel, isInvoice, payload }: InvoiceClas
         {details.phone ? <ContactLine icon={<PhoneCall size={12} />} label="Call" value={businessPhone} /> : null}
         {details.email ? <ContactLine icon={<Mail size={12} />} label="Email us at" value={businessEmail} /> : null}
         {details.website ? <ContactLine icon={<Globe size={12} />} label="Visit our website" value={website} /> : null}
+        {details.cac && cacRegistrationNumber ? <ContactLine icon={<BadgeCheck size={12} />} label="CAC" value={cacRegistrationNumber} /> : null}
       </div>
 
       <div className="doc-clean-block doc-clean-dates">

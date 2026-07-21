@@ -1,4 +1,5 @@
-import DocumentPreviewSheet from '../components/settings/DocumentPreviewSheet'
+import { ArrowLeft } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import InvoiceReceiptPanel from '../components/settings/InvoiceReceiptPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
 import PageHeader from '../components/shared/PageHeader'
@@ -8,43 +9,23 @@ export default function Documents() {
 
   return (
     <section className="section stack gap-16">
-      <PageHeader title="Invoice & Receipt" centered />
+      <PageHeader
+        title="Invoice & Receipt"
+        centered
+        leading={
+          <Link to="/more" className="btn btn-ghost btn-icon" aria-label="Back to more">
+            <ArrowLeft size={18} />
+          </Link>
+        }
+      />
 
-      <article className="clay-card settings-standalone-card">
-        <InvoiceReceiptPanel
-          settings={state.settings}
-          openColorPicker={state.openColorPicker}
-          invoicePreviewGenerated={state.invoicePreviewGenerated}
-          saved={state.savedSection === 'Invoice & Receipt Setup' && Boolean(state.savedTick)}
-          onColorPickerToggle={(index) => actions.setOpenColorPicker((prev) => (prev === index ? null : index))}
-          onColorChange={actions.updateColor}
-          onFileUpload={(field, event) => actions.uploadSettingsImage(field, event)}
-          onToggleBrandDetail={actions.toggleBrandDetail}
-          onGeneratePreview={() => {
-            actions.setGeneratedPreviewKind('invoice')
-            actions.setInvoicePreviewGenerated(true)
-            actions.setOpenBrandPreviewSheet(true)
-          }}
-          onSave={() => actions.markSaved('Invoice & Receipt Setup')}
-        />
-      </article>
-
-      {state.openBrandPreviewSheet ? (
-        <DocumentPreviewSheet
-          settings={state.settings}
-          previewKind={state.generatedPreviewKind}
-          onPreviewKindChange={actions.setGeneratedPreviewKind}
-          onClose={() => actions.setOpenBrandPreviewSheet(false)}
-          onEdit={() => {
-            actions.setInvoicePreviewGenerated(false)
-            actions.setOpenBrandPreviewSheet(false)
-          }}
-          onSave={() => {
-            actions.markSaved('Invoice & Receipt Setup')
-            actions.setOpenBrandPreviewSheet(false)
-          }}
-        />
-      ) : null}
+      <InvoiceReceiptPanel
+        settings={state.settings}
+        saved={state.savedSection === 'Invoice & Receipt Setup' && Boolean(state.savedTick)}
+        onFileUpload={(field, event) => actions.uploadSettingsImage(field, event)}
+        onToggleBrandDetail={actions.toggleBrandDetail}
+        onSave={() => actions.markSaved('Invoice & Receipt Setup')}
+      />
     </section>
   )
 }

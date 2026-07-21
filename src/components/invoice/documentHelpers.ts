@@ -26,6 +26,7 @@ export function readBrandConfig(): BrandConfig {
     businessPhone: settings.businessInfo.businessPhone,
     businessEmail: settings.businessInfo.businessEmail,
     website: settings.businessInfo.website,
+    cacRegistrationNumber: settings.businessInfo.cacRegistrationNumber,
     socialHandles: settings.businessInfo.socialHandles,
     includeBusinessDetails: settings.brand.includeBusinessDetails,
     documentTemplate: settings.brand.documentTemplate,
@@ -60,4 +61,3 @@ export function buildDocumentShareText(params: {
     `Delivery Date: ${formatDateShort(deadlineDate)}`,
   ].join('\n')
 }
-

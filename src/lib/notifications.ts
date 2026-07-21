@@ -1,4 +1,4 @@
-export type NotificationType = 'deadline' | 'payment' | 'system'
+export type NotificationType = 'deadline' | 'balance' | 'document' | 'job'
 
 export interface AppNotification {
   id: string
@@ -23,8 +23,8 @@ const DEFAULT_NOTIFICATIONS: AppNotification[] = [
     read: false,
   },
   {
-    id: 'notif-payment-1',
-    type: 'payment',
+    id: 'notif-balance-1',
+    type: 'balance',
     title: 'Balance pending',
     message: 'Wedding Lace order still has balance to collect.',
     href: '/jobs/job-2',
@@ -32,11 +32,11 @@ const DEFAULT_NOTIFICATIONS: AppNotification[] = [
     read: false,
   },
   {
-    id: 'notif-system-1',
-    type: 'system',
-    title: 'Complete your invoice setup',
-    message: 'Upload your signature to make receipts look professional.',
-    href: '/settings',
+    id: 'notif-document-1',
+    type: 'document',
+    title: 'Invoice sent',
+    message: 'Invoice for Family Native Set was sent to the client.',
+    href: '/jobs/job-1',
     createdAt: '2026-05-22T09:00:00.000Z',
     read: true,
   },
@@ -58,10 +58,17 @@ export function loadNotifications(): AppNotification[] {
   try {
     const parsed = JSON.parse(raw) as AppNotification[]
     if (!Array.isArray(parsed)) return getDefaultNotifications()
-    return parsed
+    return parsed.map(normalizeNotification)
   } catch {
     return getDefaultNotifications()
   }
+}
+
+function normalizeNotification(item: AppNotification): AppNotification {
+  const legacyType = item.type as NotificationType | 'payment' | 'system'
+  if (legacyType === 'payment') return { ...item, type: 'balance' }
+  if (legacyType === 'system') return { ...item, type: 'job' }
+  return item
 }
 
 export function saveNotifications(list: AppNotification[]): AppNotification[] {

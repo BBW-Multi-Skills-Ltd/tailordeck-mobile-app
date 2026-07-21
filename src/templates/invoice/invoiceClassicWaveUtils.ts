@@ -13,6 +13,7 @@ export function getClassicWaveLabels(kind: DocumentTemplatePayload['kind']) {
 export function getClassicWaveBusinessDetails(payload: DocumentTemplatePayload) {
   return {
     businessAddress: payload.brand.shopAddress || 'Lagos, Nigeria',
+    cacRegistrationNumber: payload.brand.cacRegistrationNumber,
     businessEmail: payload.brand.businessEmail || 'hello@tailordeck.app',
     businessPhone: payload.brand.businessPhone || '+234 000 000 0000',
     details: payload.brand.includeBusinessDetails,

@@ -24,6 +24,7 @@ export interface DocumentTemplateBrand {
   businessPhone: string
   businessEmail: string
   website: string
+  cacRegistrationNumber: string
   socialHandles: SocialHandle[]
   includeBusinessDetails: {
     phone: boolean
@@ -31,6 +32,7 @@ export interface DocumentTemplateBrand {
     website: boolean
     social: boolean
     address: boolean
+    cac: boolean
   }
 }
 

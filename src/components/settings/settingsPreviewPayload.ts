@@ -34,6 +34,7 @@ export function buildSettingsTemplatePreviewPayload(settings: TailorSettings, ki
       businessPhone: settings.businessInfo.businessPhone,
       businessEmail: settings.businessInfo.businessEmail,
       website: settings.businessInfo.website,
+      cacRegistrationNumber: settings.businessInfo.cacRegistrationNumber,
       socialHandles: settings.businessInfo.socialHandles,
       includeBusinessDetails: settings.brand.includeBusinessDetails,
     },

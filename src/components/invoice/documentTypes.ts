@@ -11,6 +11,7 @@ export type BrandConfig = {
   businessPhone: string
   businessEmail: string
   website: string
+  cacRegistrationNumber?: string
   socialHandles: SocialHandle[]
   includeBusinessDetails: {
     phone: boolean
@@ -18,9 +19,9 @@ export type BrandConfig = {
     website: boolean
     social: boolean
     address: boolean
+    cac?: boolean
   }
   documentTemplate: DocumentTemplateOption
   logoUrl: string
   signatureUrl: string
 }
-

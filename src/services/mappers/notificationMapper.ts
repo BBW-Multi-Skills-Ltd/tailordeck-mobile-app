@@ -3,8 +3,9 @@ import type { DbNotificationType, NotificationRow } from '../types'
 
 function mapNotificationType(type: DbNotificationType): NotificationType {
   if (type === 'deadline') return 'deadline'
-  if (type === 'balance' || type === 'invoice') return 'payment'
-  return 'system'
+  if (type === 'balance') return 'balance'
+  if (type === 'invoice') return 'document'
+  return 'job'
 }
 
 export function mapNotificationRow(row: NotificationRow): AppNotification {
