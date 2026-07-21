@@ -7,84 +7,21 @@ import PageHeader from '../components/shared/PageHeader'
 import ProgressHeader from '../components/shared/ProgressHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
+import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import { updateProfile } from '../services/profileService'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
 import { selectSubscriptionPlan } from '../services/subscriptionService'
-
-type BillingCycle = 'monthly' | 'yearly'
-
-const billingCycles: BillingCycle[] = ['monthly', 'yearly']
-
-const PLAN_DATA: Array<{
-  id: SubscriptionPlan
-  label: string
-  badge?: string
-  recommended?: boolean
-  price: { monthly: string; yearly: string }
-  suffix: { monthly: string; yearly: string }
-  subtitle: string
-  helper?: string
-  cta: string
-  yearlyDiscountNote?: string
-  features: string[]
-}> = [
-  {
-    id: 'free',
-    label: '14 Days Free Trial',
-    badge: 'FREE TRIAL',
-    price: { monthly: '\u20A60', yearly: '\u20A60' },
-    suffix: { monthly: 'for 14 days', yearly: 'for 14 days' },
-    subtitle: 'Get access to all TailorDeck features for 14 days.',
-    helper: 'Start free, then upgrade to a plan when your trial ends.',
-    cta: 'Get Started',
-    features: [
-      'Unlimited clients during trial',
-      'Invoice and receipt preview',
-      'Dashboard analytics',
-      'Brand customization preview',
-      'Deadline reminders',
-    ],
-  },
-  {
-    id: 'starter',
-    label: 'Starter',
-    badge: 'STARTER',
-    price: { monthly: '\u20A62,500', yearly: '\u20A624,000' },
-    suffix: { monthly: '/month', yearly: '/year' },
-    subtitle: 'Core operations',
-    cta: 'Choose Starter',
-    yearlyDiscountNote: 'Save 20%',
-    features: ['Clients', 'Jobs', 'Measurements', 'Expenses and profit', 'Reminders', 'Basic history'],
-  },
-  {
-    id: 'pro',
-    label: 'Pro',
-    badge: 'PRO',
-    recommended: true,
-    price: { monthly: '\u20A64,500', yearly: '\u20A642,000' },
-    suffix: { monthly: '/month', yearly: '/year' },
-    subtitle: 'Growth and professionalism',
-    cta: 'Choose Pro',
-    yearlyDiscountNote: 'Save 22%',
-    features: [
-      'Everything in Starter',
-      'Invoice and receipt PDF',
-      'WhatsApp sharing',
-      'Dashboard analytics',
-      'Brand customization',
-      'Priority support',
-    ],
-  },
-]
 
 export default function OnboardingPlan() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
 
   async function activatePlan(plan: SubscriptionPlan) {
+    setSelectedPlan(plan)
     const next = saveTailorSettings({
       ...settings,
       subscription: { plan },
@@ -124,8 +61,12 @@ export default function OnboardingPlan() {
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
         <div className="subscription-plan-carousel onboarding-plan-carousel" aria-label="Onboarding pricing plans">
-          {PLAN_DATA.map((plan) => (
-            <article key={plan.id} className={`subscription-plan-card subscription-plan-slide${plan.id === 'pro' ? ' pro-card' : ''}`}>
+          {subscriptionPlans.map((plan) => (
+            <article
+              key={plan.id}
+              className={`subscription-plan-card subscription-plan-slide${selectedPlan === plan.id ? ' selected' : ''}`}
+              onClick={() => setSelectedPlan(plan.id)}
+            >
               <div className="subscription-plan-badges">
                 {plan.badge ? <span className={`subscription-plan-badge${plan.id === 'pro' ? ' pro' : ''}`}>{plan.badge}</span> : null}
                 {plan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
@@ -148,8 +89,11 @@ export default function OnboardingPlan() {
 
               <button
                 type="button"
-                className={`btn btn-full subscription-plan-btn${plan.id === 'pro' ? ' btn-primary' : ' btn-secondary'}`}
-                onClick={() => void activatePlan(plan.id)}
+                className={`btn btn-full subscription-plan-btn${selectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  void activatePlan(plan.id)
+                }}
                 disabled={savingPlan !== null}
               >
                 {savingPlan === plan.id ? 'Saving...' : plan.cta}

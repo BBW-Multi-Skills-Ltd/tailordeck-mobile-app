@@ -1,69 +1,19 @@
-import { AlertCircle, ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/shared/PageHeader'
-import ProgressHeader from '../components/shared/ProgressHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
-
-type BillingCycle = 'monthly' | 'yearly'
-type PaidPlan = 'starter' | 'pro'
-
-const PLAN_DATA: Array<{
-  id: PaidPlan
-  label: string
-  badge?: string
-  recommended?: boolean
-  price: { monthly: string; yearly: string }
-  suffix: { monthly: string; yearly: string }
-  subtitle: string
-  yearlyDiscountNote?: string
-  features: string[]
-}> = [
-  {
-    id: 'starter',
-    label: 'Starter',
-    badge: 'STARTER',
-    price: { monthly: '\u20A62,500', yearly: '\u20A624,000' },
-    suffix: { monthly: '/month', yearly: '/year' },
-    subtitle: 'Core operations',
-    yearlyDiscountNote: 'Save 20%',
-    features: [
-      'Clients',
-      'Jobs',
-      'Measurements',
-      'Expenses and profit',
-      'Reminders',
-      'Basic history',
-    ],
-  },
-  {
-    id: 'pro',
-    label: 'Pro',
-    badge: 'PRO',
-    recommended: true,
-    price: { monthly: '\u20A64,500', yearly: '\u20A642,000' },
-    suffix: { monthly: '/month', yearly: '/year' },
-    subtitle: 'Growth and professionalism',
-    yearlyDiscountNote: 'Save 22%',
-    features: [
-      'Everything in Starter',
-      'Invoice and receipt PDF',
-      'WhatsApp sharing',
-      'Dashboard analytics',
-      'Brand customization (logo, colors, signature)',
-      'Priority support',
-    ],
-  },
-]
-
-const billingCycles: BillingCycle[] = ['monthly', 'yearly']
+import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 
 export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
+  const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
 
   function choosePlan(plan: PaidPlan) {
+    setSelectedPlan(plan)
     const next = { ...settings, subscription: { plan } }
     setSettings(saveTailorSettings(next))
     window.alert(`${plan.toUpperCase()} upgrade flow will be connected to payments backend.`)
@@ -84,8 +34,8 @@ export default function SubscriptionPage() {
       <article className="subscription-current-card">
         <div className="row-between">
           <div className="stack gap-2">
-            <p className="subscription-current-title">Free Trial</p>
-            <p className="subscription-current-subtitle">Pro tools are active during your trial. Upgrade before it ends to keep them available.</p>
+            <p className="subscription-current-title">{currentPlanCopy.title}</p>
+            <p className="subscription-current-subtitle">{currentPlanCopy.subtitle}</p>
           </div>
           <span className="subscription-active-chip">Active</span>
         </div>
@@ -94,30 +44,17 @@ export default function SubscriptionPage() {
         </button>
       </article>
 
-      <ProgressHeader
-        title="Trial momentum"
-        description="You have already started your shop workspace. Keep invoices, sharing, analytics, and branding active by choosing a plan before trial expiry."
-        percent={70}
-        className="subscription-progress-card"
-      />
-
-      <article className="subscription-trial-note">
-        <span className="subscription-trial-note-icon">
-          <AlertCircle size={16} />
-        </span>
-        <div className="stack gap-2">
-          <strong>Keep your professional tools active</strong>
-          <p>Without an active plan, branded PDF invoices, WhatsApp sharing, analytics, and invoice customization will pause.</p>
-        </div>
-      </article>
-
-      <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />
-
       <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
+      <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+
       <div className="subscription-plan-carousel" aria-label="Pricing plans">
-        {PLAN_DATA.map((plan) => (
-          <article key={plan.id} className={`subscription-plan-card subscription-plan-slide${plan.id === 'pro' ? ' pro-card' : ''}`}>
+        {paidSubscriptionPlans.map((plan) => (
+          <article
+            key={plan.id}
+            className={`subscription-plan-card subscription-plan-slide${selectedPlan === plan.id ? ' selected' : ''}`}
+            onClick={() => setSelectedPlan(plan.id)}
+          >
             <div className="subscription-plan-badges">
               {plan.badge ? <span className={`subscription-plan-badge${plan.id === 'pro' ? ' pro' : ''}`}>{plan.badge}</span> : null}
               {plan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
@@ -138,8 +75,11 @@ export default function SubscriptionPage() {
 
             <button
               type="button"
-              className={`btn btn-full subscription-plan-btn${plan.id === 'pro' ? ' btn-primary' : ' btn-secondary'}`}
-              onClick={() => choosePlan(plan.id)}
+              className={`btn btn-full subscription-plan-btn${selectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
+              onClick={(event) => {
+                event.stopPropagation()
+                choosePlan(plan.id)
+              }}
             >
               {`Upgrade to ${plan.label}`}
             </button>

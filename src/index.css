@@ -5474,6 +5474,13 @@ button.more-row {
   text-align: center;
 }
 
+.subscription-billing-toggle {
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 .subscription-plan-carousel {
   display: flex;
   gap: 12px;
@@ -5523,6 +5530,8 @@ button.more-row {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 160ms ease;
 }
 
 .subscription-plan-slide {
@@ -5531,13 +5540,15 @@ button.more-row {
   min-height: 430px;
 }
 
-.subscription-plan-card.active {
-  border-color: color-mix(in srgb, var(--primary) 58%, var(--bg-card) 42%);
-}
-
-.subscription-plan-card.pro-card {
+.subscription-plan-card.selected {
   border-width: 1.5px;
   border-color: color-mix(in srgb, var(--primary) 58%, var(--bg-card) 42%);
+  background: color-mix(in srgb, var(--primary) 3%, var(--bg-card) 97%);
+  box-shadow: var(--shadow-sm), 0 10px 24px color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+.subscription-plan-card:active {
+  transform: scale(0.995);
 }
 
 .subscription-plan-badges {
