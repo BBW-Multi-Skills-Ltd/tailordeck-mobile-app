@@ -7,6 +7,7 @@ import App from './App.tsx'
 import { ClientsProvider } from './context/ClientsContext'
 import { AuthProvider } from './context/AuthContext'
 import { initializeTheme } from './lib/theme'
+import ScrollToTop from './components/layout/ScrollToTop'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +41,7 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <ScrollToTop />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ClientsProvider>
