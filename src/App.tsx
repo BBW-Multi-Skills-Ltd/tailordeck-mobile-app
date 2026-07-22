@@ -23,7 +23,6 @@ const Business = lazy(() => import('./pages/Business'))
 const Documents = lazy(() => import('./pages/Documents'))
 const Help = lazy(() => import('./pages/Help'))
 const OnboardingWelcome = lazy(() => import('./pages/OnboardingWelcome'))
-const OnboardingPreview = lazy(() => import('./pages/OnboardingPreview'))
 const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
 const OnboardingPlan = lazy(() => import('./pages/OnboardingPlan'))
 const SignIn = lazy(() => import('./pages/SignIn'))
@@ -44,13 +43,12 @@ export default function App() {
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         <Route path="/onboarding" element={<OnboardingWelcome />} />
-        <Route path="/onboarding/preview" element={<OnboardingPreview />} />
+        <Route path="/onboarding/setup" element={<OnboardingSetup />} />
         <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
         <Route path="/auth/forgot" element={<ForgotPassword />} />
 
         <Route element={<RouteGuard />}>
-          <Route path="/onboarding/setup" element={<OnboardingSetup />} />
           <Route path="/onboarding/plan" element={<OnboardingPlan />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, ClipboardCheck, Users } from 'lucide-react'
-import ProgressHeader from '../components/shared/ProgressHeader'
 
 export default function OnboardingWelcome() {
   const navigate = useNavigate()
@@ -14,14 +13,7 @@ export default function OnboardingWelcome() {
           </div>
           <h1 className="onboarding-title">Welcome to TailorDeck</h1>
           <p className="onboarding-subtitle">Your shop, in your pocket</p>
-          <p className="onboarding-trust-copy">See the workspace first. Create an account only when you are ready to save your shop.</p>
         </div>
-
-        <ProgressHeader
-          title="Start with a preview"
-          description="You are one tap away from seeing how TailorDeck organizes a shop."
-          percent={25}
-        />
 
         <div className="onboarding-hero-image" aria-hidden>
           <img src="/images/onboarding-tailor-shop-3d.svg" alt="" />
@@ -57,8 +49,8 @@ export default function OnboardingWelcome() {
           </article>
         </section>
 
-        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/onboarding/preview')}>
-          Preview My Shop
+        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/onboarding/setup')}>
+          Get Started
         </button>
       </div>
     </main>

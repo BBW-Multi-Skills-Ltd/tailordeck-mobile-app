@@ -55,8 +55,21 @@ createRoot(document.getElementById('root')!).render(
 
 const splash = document.getElementById('app-splash')
 if (splash) {
-  window.requestAnimationFrame(() => {
+  let splashRemoved = false
+
+  const removeSplash = () => {
+    if (splashRemoved) return
+    splashRemoved = true
     splash.classList.add('is-hidden')
     window.setTimeout(() => splash.remove(), 220)
-  })
+  }
+
+  const isPublicBootPath = window.location.pathname.startsWith('/auth') || window.location.pathname.startsWith('/onboarding')
+
+  if (isPublicBootPath) {
+    window.requestAnimationFrame(removeSplash)
+  } else {
+    window.addEventListener('tailordeck:app-ready', removeSplash, { once: true })
+    window.setTimeout(removeSplash, 3500)
+  }
 }

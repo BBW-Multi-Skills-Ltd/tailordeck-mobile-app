@@ -1,19 +1,15 @@
+import { X } from 'lucide-react'
 import { NotificationFilters } from './NotificationFilters'
 import { NotificationList } from './NotificationList'
 import type { NotificationDrawerProps, NotificationFilter } from './notificationDrawer.types'
 
 export default function NotificationDrawer({
-  dragOffset,
   filter,
-  isDragging,
   notifications,
   onClearAll,
   onClose,
   onDelete,
   onFilterChange,
-  onHandleClick,
-  onHandlePointerCancel,
-  onHandlePointerDown,
   onItemOpen,
   onMarkAllRead,
   onMarkRead,
@@ -25,14 +21,20 @@ export default function NotificationDrawer({
   })
 
   return (
-    <div className="sheet-overlay" role="dialog" aria-modal="true" aria-label="Notifications drawer" onClick={(event) => event.target === event.currentTarget && onClose()}>
-      <div className="sheet notification-sheet" style={{ transform: `translateY(${dragOffset}px)`, transition: isDragging ? 'none' : 'transform 180ms ease' }}>
-        <button type="button" className="sheet-handle-button" aria-label="Drag down to close notifications drawer" onClick={onHandleClick} onPointerDown={onHandlePointerDown} onPointerCancel={onHandlePointerCancel}>
-          <span className="sheet-handle" />
-        </button>
-
+    <div className="notification-panel-overlay" role="dialog" aria-modal="true" aria-label="Notifications" onClick={(event) => event.target === event.currentTarget && onClose()}>
+      <aside className="notification-panel">
         <div className="notification-sheet-content">
-          <div className="row gap-8" style={{ justifyContent: 'flex-end' }}>
+          <header className="notification-panel-header">
+            <div>
+              <h2 className="notification-sheet-title">Notifications</h2>
+              <p className="notification-panel-subtitle">Deadlines and unread updates.</p>
+            </div>
+            <button type="button" className="btn btn-ghost btn-icon notification-panel-close" aria-label="Close notifications" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </header>
+
+          <div className="row gap-8 notification-panel-actions">
             <button type="button" className="btn btn-ghost notification-sheet-top-btn" onClick={onMarkAllRead}>Mark all as read</button>
             <button type="button" className="btn btn-ghost notification-sheet-top-btn danger" onClick={onClearAll}>Clear all</button>
           </div>
@@ -40,7 +42,7 @@ export default function NotificationDrawer({
           <NotificationFilters activeFilter={filter} onChange={onFilterChange} />
           <NotificationList filter={filter} notifications={visibleNotifications} onDelete={onDelete} onItemOpen={onItemOpen} onMarkRead={onMarkRead} />
         </div>
-      </div>
+      </aside>
     </div>
   )
 }

@@ -54,6 +54,7 @@ export function useSettingsPage() {
   const [socialHandleInput, setSocialHandleInput] = useState('')
   const [passwordDraft, setPasswordDraft] = useState('')
   const [confirmPasswordDraft, setConfirmPasswordDraft] = useState('')
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!settingsQuery.data) return
@@ -126,7 +127,12 @@ export function useSettingsPage() {
   }
 
   async function handleSignOut(): Promise<void> {
+    setSignOutConfirmOpen(true)
+  }
+
+  async function confirmSignOut(): Promise<void> {
     clearPreviewSession()
+    setSignOutConfirmOpen(false)
     await signOut()
     navigate('/auth/signin')
   }
@@ -219,6 +225,7 @@ export function useSettingsPage() {
       handleSaveAccountSecurity,
       handleSecurityDanger,
       handleSignOut,
+      confirmSignOut,
       handleToggle,
       handleWebsiteChange,
       markSaved,
@@ -232,6 +239,7 @@ export function useSettingsPage() {
       setPanel,
       setPasswordDraft,
       setSettings,
+      setSignOutConfirmOpen,
       setSocialHandleInput,
       setSocialPlatform,
       setTheme,
@@ -254,6 +262,7 @@ export function useSettingsPage() {
       savedSection,
       savedTick,
       securityFeedback,
+      signOutConfirmOpen,
       settings,
       socialHandleInput,
       socialPlatform,

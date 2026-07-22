@@ -15,12 +15,15 @@ export default function Home() {
   const recentJobsQuery = useRecentJobsQuery(3)
   const monthlyStats = monthlyStatsQuery.data ?? []
   const recentJobs = recentJobsQuery.data ?? []
+  const homeDataReady = !monthlyStatsQuery.isLoading && !recentJobsQuery.isLoading
   const currentMonth = useMemo(() => getCurrentMonthStats(monthlyStats), [monthlyStats])
   const hasJobs = recentJobs.length > 0 || monthlyStats.some((month) => month.jobs > 0)
   const firstName = settings.profile.fullName.trim().split(/\s+/)[0] || 'Tailor'
   const greeting = getGreeting()
   const kpiCards = useMemo(() => getHomeKpiCards(currentMonth), [currentMonth])
-  const homeSubcopy = hasJobs
+  const homeSubcopy = !homeDataReady
+    ? 'Preparing your shop for today.'
+    : hasJobs
     ? 'Your workshop activity is ready for today.'
     : 'Start with one job. TailorDeck will organize the client, measurements, and deadline for you.'
 
@@ -44,10 +47,10 @@ export default function Home() {
         <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
-      {!hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
-      {hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
-      {hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
-      {hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}
+      {homeDataReady && !hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
+      {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
+      {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
+      {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}
     </section>
   )
 }

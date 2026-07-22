@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import BottomNav from './BottomNav'
@@ -11,6 +12,10 @@ function shouldHideNav(pathname: string): boolean {
 export default function AppLayout() {
   const { pathname } = useLocation()
   const hideNav = shouldHideNav(pathname)
+
+  useEffect(() => {
+    window.dispatchEvent(new Event('tailordeck:app-ready'))
+  }, [pathname])
 
   return (
     <>

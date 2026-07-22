@@ -47,12 +47,12 @@ export default function BottomNav() {
         aria-current={active ? 'page' : undefined}
       >
         <span className="clay-nav-hitbox">
-          {active ? <motion.span layoutId="clayNavKnob" className="clay-nav-knob" /> : null}
           <motion.span
             className="clay-nav-icon-wrap"
             animate={{ scale: active ? 1.12 : 1, y: active ? -1 : 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18 }}
           >
+            {active ? <motion.span layoutId="clayNavKnob" className="clay-nav-knob" /> : null}
             <Icon size={20} strokeWidth={active ? 2.5 : 1.8} className="clay-nav-icon" />
           </motion.span>
           <span className={`clay-nav-label${active ? ' active' : ''}`}>{item.label}</span>

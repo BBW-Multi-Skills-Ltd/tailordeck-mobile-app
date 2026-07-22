@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import { clearPreviewSession } from '../../lib/auth'
 import {
   clearNotifications,
@@ -10,17 +11,17 @@ import {
 } from '../../lib/notifications'
 import type { NotificationFilter } from './NotificationDrawer'
 import { useSyncedHeaderSettings, useSyncedNotifications } from './useAppHeaderData'
-import { useNotificationDrawerDrag } from './useNotificationDrawerDrag'
 
 export function useAppHeader() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
   const [filter, setFilter] = useState<NotificationFilter>('all')
   const menuRef = useRef<HTMLDivElement | null>(null)
   const settings = useSyncedHeaderSettings()
   const { notifications, setNotifications } = useSyncedNotifications()
-  const drawerDrag = useNotificationDrawerDrag({ onClose: closeNotificationDrawer })
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -34,14 +35,11 @@ export function useAppHeader() {
 
   function closeNotificationDrawer(): void {
     setDrawerOpen(false)
-    drawerDrag.setDragOffset(0)
-    drawerDrag.resetDrag()
     setFilter('all')
   }
 
   function handleBellClick(): void {
     setMenuOpen(false)
-    drawerDrag.setDragOffset(0)
     setDrawerOpen(true)
   }
 
@@ -56,8 +54,15 @@ export function useAppHeader() {
   }
 
   function handleSignOut(): void {
-    clearPreviewSession()
     setMenuOpen(false)
+    setSignOutConfirmOpen(true)
+  }
+
+  async function confirmSignOut(): Promise<void> {
+    clearPreviewSession()
+    setSignOutConfirmOpen(false)
+    setMenuOpen(false)
+    await signOut()
     navigate('/auth/signin')
   }
 
@@ -67,23 +72,22 @@ export function useAppHeader() {
       deleteItem: (id: string) => setNotifications(deleteNotification(id)),
       handleBellClick,
       handleClearAll,
-      handleDrawerHandlePointerCancel: drawerDrag.cancelDrag,
-      handleDrawerHandlePointerDown: drawerDrag.handlePointerDown,
       handleItemOpen,
       handleSignOut,
+      confirmSignOut,
       markAllRead: () => setNotifications(markAllNotificationsRead()),
       markRead: (id: string) => setNotifications(markNotificationRead(id)),
       setFilter,
       setMenuOpen,
+      setSignOutConfirmOpen,
     },
     menuRef,
     state: {
-      drawerDragOffset: drawerDrag.dragOffset,
       drawerOpen,
       filter,
-      isDrawerDragging: drawerDrag.isDragging,
       menuOpen,
       notifications,
+      signOutConfirmOpen,
       settings,
       unreadCount: notifications.filter((item) => !item.read).length,
     },

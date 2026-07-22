@@ -4,7 +4,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { queryKeys } from '../hooks/queryKeys'
 import PageHeader from '../components/shared/PageHeader'
-import ProgressHeader from '../components/shared/ProgressHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
@@ -50,15 +49,20 @@ export default function OnboardingPlan() {
       <section className="section stack gap-10 subscription-page subscription-page-onboarding">
         <PageHeader title="Subscription" centered />
 
-        <ProgressHeader
-          title="Almost done"
-          description="Your shop basics are saved. Pick how you want to start using TailorDeck."
-          percent={75}
-        />
-
-        <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} />
+        <section className="wizard-progress-card onboarding-plan-progress" aria-label="Onboarding plan progress 75% complete">
+          <div className="row-between wizard-progress-head">
+            <p className="wizard-progress-step">Almost done</p>
+            <span className="wizard-progress-percent onboarding-plan-progress-percent">75% done</span>
+          </div>
+          <div className="wizard-progress-track" aria-hidden>
+            <span className="wizard-progress-fill" style={{ width: '75%' }} />
+          </div>
+          <p className="onboarding-plan-progress-copy">Your shop basics are saved. Choose a plan.</p>
+        </section>
 
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
+
+        <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
 
         <div className="subscription-plan-carousel onboarding-plan-carousel" aria-label="Onboarding pricing plans">
           {subscriptionPlans.map((plan) => (

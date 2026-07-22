@@ -1,5 +1,6 @@
 import { ArrowLeft, BellRing, ChevronRight, CircleHelp, Database, LogOut, Moon, ShieldCheck, Sun, WandSparkles } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import SignOutConfirmDialog from '../components/layout/SignOutConfirmDialog'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
 import PageHeader from '../components/shared/PageHeader'
 import { AVATAR_PLACEHOLDER } from '../lib/settings'
@@ -106,6 +107,15 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
+
+      {state.signOutConfirmOpen ? (
+        <SignOutConfirmDialog
+          onCancel={() => actions.setSignOutConfirmOpen(false)}
+          onConfirm={() => {
+            void actions.confirmSignOut()
+          }}
+        />
+      ) : null}
     </section>
   )
 }

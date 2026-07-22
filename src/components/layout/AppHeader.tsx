@@ -1,6 +1,7 @@
 import { HiOutlineBell } from 'react-icons/hi2'
 import NotificationDrawer from './NotificationDrawer'
 import ProfileMenu from './ProfileMenu'
+import SignOutConfirmDialog from './SignOutConfirmDialog'
 import { useAppHeader } from './useAppHeader'
 
 export default function AppHeader() {
@@ -39,20 +40,24 @@ export default function AppHeader() {
 
       {state.drawerOpen ? (
         <NotificationDrawer
-          dragOffset={state.drawerDragOffset}
           filter={state.filter}
-          isDragging={state.isDrawerDragging}
           notifications={state.notifications}
           onClearAll={actions.handleClearAll}
           onClose={actions.closeNotificationDrawer}
           onDelete={actions.deleteItem}
           onFilterChange={actions.setFilter}
-          onHandleClick={() => undefined}
-          onHandlePointerCancel={actions.handleDrawerHandlePointerCancel}
-          onHandlePointerDown={actions.handleDrawerHandlePointerDown}
           onItemOpen={actions.handleItemOpen}
           onMarkAllRead={actions.markAllRead}
           onMarkRead={actions.markRead}
+        />
+      ) : null}
+
+      {state.signOutConfirmOpen ? (
+        <SignOutConfirmDialog
+          onCancel={() => actions.setSignOutConfirmOpen(false)}
+          onConfirm={() => {
+            void actions.confirmSignOut()
+          }}
         />
       ) : null}
     </>

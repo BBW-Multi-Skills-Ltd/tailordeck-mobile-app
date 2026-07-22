@@ -31,9 +31,8 @@ export function useSignUpForm() {
     setLoading(true)
     try {
       await signUpWithEmail({ fullName, email: normalizedEmail, password, phone: normalizedPhone })
-      window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({ fullName: fullName.trim(), email: normalizedEmail, shopName: '' }))
       const currentSettings = loadTailorSettings()
-      saveTailorSettings({
+      const nextSettings = saveTailorSettings({
         ...currentSettings,
         profile: {
           ...currentSettings.profile,
@@ -42,7 +41,12 @@ export function useSignUpForm() {
           phone: normalizedPhone,
         },
       })
-      navigate('/onboarding/setup')
+      window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({
+        fullName: nextSettings.profile.fullName,
+        email: normalizedEmail,
+        shopName: nextSettings.businessInfo.shopName,
+      }))
+      navigate('/onboarding/plan')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to create account.')
     } finally {
