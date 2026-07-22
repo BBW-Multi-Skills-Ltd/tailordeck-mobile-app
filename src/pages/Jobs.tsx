@@ -22,7 +22,7 @@ export default function Jobs() {
   const [activeFilter, setActiveFilter] = useState<JobFilter>('All')
   const [search, setSearch] = useState('')
   const jobsQuery = useJobsQuery(activeFilter === 'All' ? undefined : activeFilter)
-  const jobs = jobsQuery.data ?? []
+  const jobs = useMemo(() => jobsQuery.data ?? [], [jobsQuery.data])
 
   const filteredJobs = useMemo(() => {
     const term = search.trim().toLowerCase()

@@ -10,13 +10,14 @@ export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
+  const [planFeedback, setPlanFeedback] = useState('')
   const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
 
   function choosePlan(plan: PaidPlan) {
     setSelectedPlan(plan)
     const next = { ...settings, subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false } }
     setSettings(saveTailorSettings(next))
-    window.alert(`${plan.toUpperCase()} upgrade flow will be connected to payments backend.`)
+    setPlanFeedback(`${plan === 'starter' ? 'Starter' : 'Pro'} selected. Payment checkout will open here when billing is connected.`)
   }
 
   return (
@@ -47,6 +48,7 @@ export default function SubscriptionPage() {
       <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
       <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+      {planFeedback ? <p className="auth-feedback success" role="status">{planFeedback}</p> : null}
 
       <div className="subscription-plan-carousel" aria-label="Pricing plans">
         {paidSubscriptionPlans.map((plan) => (

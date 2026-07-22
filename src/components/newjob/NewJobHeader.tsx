@@ -2,7 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import PageHeader from '../shared/PageHeader'
 
 type NewJobHeaderProps = {
-  onBack: () => void
+  onBack: () => void | Promise<void>
 }
 
 export function NewJobHeader({ onBack }: NewJobHeaderProps) {

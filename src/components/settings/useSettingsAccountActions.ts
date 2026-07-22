@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
+import { useAppFeedback } from '../shared/appFeedbackCore'
 import { getSecurityDangerAlert, getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
 
 type UseSettingsAccountActionsArgs = {
@@ -19,11 +20,19 @@ export function useSettingsAccountActions({
   setSignOutConfirmOpen,
   signOut,
 }: UseSettingsAccountActionsArgs) {
-  function clearJobHistory(): void {
-    if (!window.confirm('Clear all job history data? This action cannot be undone once backend is connected.')) return
+  const feedback = useAppFeedback()
+
+  async function clearJobHistory(): Promise<void> {
+    const confirmed = await feedback.confirm({
+      title: 'Clear job history?',
+      message: 'This removes locally stored job history from this device.',
+      confirmLabel: 'Clear history',
+      tone: 'danger',
+    })
+    if (!confirmed) return
     window.localStorage.removeItem('tailordeck-job-history')
     window.localStorage.removeItem('tailordeck-jobs')
-    window.alert('Job history cleared locally.')
+    feedback.toast('Job history cleared.', 'success')
   }
 
   async function handleSignOut(): Promise<void> {
@@ -42,11 +51,17 @@ export function useSettingsAccountActions({
     setSecurityFeedback('Account details saved. Login email/password changes will be handled through Supabase Auth flows.')
   }
 
-  function handleSecurityDanger(kind: 'deactivate' | 'delete'): void {
-    if (!window.confirm(getSecurityDangerMessage(kind))) return
+  async function handleSecurityDanger(kind: 'deactivate' | 'delete'): Promise<void> {
+    const confirmed = await feedback.confirm({
+      title: kind === 'delete' ? 'Delete account?' : 'Deactivate account?',
+      message: getSecurityDangerMessage(kind),
+      confirmLabel: kind === 'delete' ? 'Delete account' : 'Deactivate',
+      tone: 'danger',
+    })
+    if (!confirmed) return
 
     setSecurityFeedback(getSecurityDangerFeedback(kind))
-    window.alert(getSecurityDangerAlert(kind))
+    feedback.toast(getSecurityDangerAlert(kind), 'info')
   }
 
   return {

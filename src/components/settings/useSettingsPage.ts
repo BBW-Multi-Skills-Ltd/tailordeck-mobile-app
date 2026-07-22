@@ -4,7 +4,7 @@ import {
   loadTailorSettings,
   saveTailorSettings,
 } from '../../lib/settings'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/authContextCore'
 import {
   useSaveBrandSettingsMutation,
   useSaveBusinessSettingsMutation,
@@ -66,7 +66,7 @@ export function useSettingsPage() {
     if (!settingsQuery.data) return
     const next = saveTailorSettings(settingsQuery.data)
     setSettings(next)
-  }, [settingsQuery.data])
+  }, [settingsQuery.data, setSettings])
 
   function handleToggle(next: Exclude<SettingsPanel, null>): void {
     setPanel((prev) => (prev === next ? null : next))

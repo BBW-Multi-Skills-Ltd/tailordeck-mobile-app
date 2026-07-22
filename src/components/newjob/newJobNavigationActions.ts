@@ -3,6 +3,7 @@ import type { NavigateFunction } from 'react-router-dom'
 import { stepLabels } from './newJobConfig'
 
 type NavigationActionParams = {
+  confirmDiscard: () => Promise<boolean>
   navigate: NavigateFunction
   setDraftSaved: (value: boolean) => void
   setIsFinalizing: (value: boolean) => void
@@ -14,6 +15,7 @@ type NavigationActionParams = {
 }
 
 export function createNavigationActions({
+  confirmDiscard,
   navigate,
   setDraftSaved,
   setIsFinalizing,
@@ -23,7 +25,7 @@ export function createNavigationActions({
   step,
   stepFourReviewMode,
 }: NavigationActionParams) {
-  function goBack(): void {
+  async function goBack(): Promise<void> {
     if (step === 3 && stepFourReviewMode) {
       setStepFourReviewMode(false)
       return
@@ -34,7 +36,8 @@ export function createNavigationActions({
       return
     }
 
-    if (window.confirm('Discard this new job and return to Jobs?')) navigate('/jobs')
+    const confirmed = await confirmDiscard()
+    if (confirmed) navigate('/jobs')
   }
 
   function goNext(): void {

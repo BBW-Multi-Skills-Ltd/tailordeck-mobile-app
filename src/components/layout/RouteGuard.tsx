@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/authContextCore'
 import { useProfileQuery } from '../../hooks/useProfileQueries'
 import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
 
@@ -21,19 +21,20 @@ export function RouteGuard() {
   const hasSession = Boolean(auth.session)
   const profile = useProfileQuery(hasSession)
   const subscription = useSubscriptionQuery(hasSession)
-  const [dataWaitTimedOut, setDataWaitTimedOut] = useState(false)
+  const dataWaitKey = `${location.pathname}:${hasSession}:${profile.isLoading}:${subscription.isLoading}`
+  const [dataWaitTimeout, setDataWaitTimeout] = useState({ key: '', timedOut: false })
+  const dataWaitTimedOut = dataWaitTimeout.key === dataWaitKey && dataWaitTimeout.timedOut
 
   useEffect(() => {
-    setDataWaitTimedOut(false)
     if (!hasSession) return undefined
     if (!profile.isLoading && !subscription.isLoading) return undefined
 
     const timeoutId = window.setTimeout(() => {
-      setDataWaitTimedOut(true)
+      setDataWaitTimeout({ key: dataWaitKey, timedOut: true })
     }, ROUTE_GUARD_DATA_TIMEOUT_MS)
 
     return () => window.clearTimeout(timeoutId)
-  }, [hasSession, location.pathname, profile.isLoading, subscription.isLoading])
+  }, [dataWaitKey, hasSession, profile.isLoading, subscription.isLoading])
 
   if (auth.loading) return <RouteGuardFallback />
   if (!auth.session) return <Navigate to="/auth/signin" replace state={{ from: location.pathname }} />

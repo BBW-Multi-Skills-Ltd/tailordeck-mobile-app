@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import { step1FieldsBySex } from '../newJobConfig'
 import BodyPersonMeasurementsCard from '../BodyPersonMeasurementsCard'
 import type { BodyMeasurementsSectionProps } from './bodyMeasurementsTypes'
-import { toMeasurementSex } from './bodyMeasurementUtils'
+import { toMeasurementSex } from './bodyMeasurementSex'
 
 export function FamilyBodyMeasurementCards(props: BodyMeasurementsSectionProps) {
   return (

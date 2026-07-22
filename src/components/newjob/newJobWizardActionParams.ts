@@ -55,8 +55,9 @@ export function getCostingActionParams(state: NewJobWizardStateModel) {
   }
 }
 
-export function getNavigationActionParams(navigate: NavigateFunction, state: NewJobWizardStateModel) {
+export function getNavigationActionParams(confirmDiscard: () => Promise<boolean>, navigate: NavigateFunction, state: NewJobWizardStateModel) {
   return {
+    confirmDiscard,
     navigate,
     setDraftSaved: state.setDraftSaved,
     setIsFinalizing: state.setIsFinalizing,

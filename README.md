@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# TailorDeck Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TailorDeck is a mobile-first SaaS workspace for Nigerian tailors and fashion designers. The frontend covers onboarding, authentication screens, job creation, clients, job details, dashboard analytics, invoice/receipt previews, subscription screens, settings, notifications, and Supabase service wiring.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 + TypeScript
+- Vite
+- Tailwind CSS v4
+- React Router
+- TanStack Query
+- Supabase JS client
+- Framer Motion
+- Recharts
+- jsPDF + html2canvas for document export
 
-## React Compiler
+## Local Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Create `.env` in the project root:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Never commit `.env` or a Supabase service-role key. `.env` is ignored by git.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Install and run:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+## Quality Commands
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+npm run quality
+```
+
+`npm run quality` runs lint and the production build.
+
+## Frontend Architecture
+
+- `src/pages`: route-level screens, lazy-loaded in `App.tsx`.
+- `src/components`: feature and shared UI components.
+- `src/hooks`: React Query and domain hooks.
+- `src/services`: Supabase service layer.
+- `src/services/mappers`: database row to frontend model mappers.
+- `src/lib`: shared utilities for settings, money, phone, auth, theme, and subscription plans.
+- `src/templates`: invoice and receipt document templates.
+- `src/data`: temporary mock/static data used where backend replacement is still pending.
+
+## Backend Status
+
+Supabase frontend wiring exists, but backend work is paused while frontend UX is finalized. Client and job data flows are partially connected through service files and React Query hooks. Some local settings flows still use local storage and will be replaced with Supabase-backed persistence later.
+
+Important: the current `supabase/migrations/20260604141720_remote_schema.sql` file is empty. Before backend resumes, pull or recreate the actual schema into committed migration files so the database can be reproduced from source control.
+
+## Production Notes
+
+- Routes are lazy-loaded to keep initial navigation lighter.
+- Heavy document export libraries are dynamically imported only when exporting PDFs.
+- Clients and jobs use soft-delete patterns in the frontend service layer.
+- Money values should be stored as kobo in Supabase and formatted as Naira in the UI.
+- Nigerian phone numbers should be normalized before persistence.

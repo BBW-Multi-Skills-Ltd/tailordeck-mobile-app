@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { commonFieldsBySex, type PersonForm, type PersonSex } from '../newJobConfig'
+import { useMemo, useState } from 'react'
+import { toMeasurementSex } from '../body-measurements/bodyMeasurementSex'
+import { commonFieldsBySex, type PersonForm } from '../newJobConfig'
 
 export function useVisibleMeasurementFields({
   measurementFields,
@@ -14,21 +15,26 @@ export function useVisibleMeasurementFields({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [measurementFieldKey, person.sex],
   )
-  const [visibleFields, setVisibleFields] = useState<string[]>(defaultVisibleFields)
+  const sourceKey = `${person.id}:${person.sex}:${measurementFieldKey}`
+  const [visibleState, setVisibleState] = useState(() => ({ fields: defaultVisibleFields, sourceKey }))
   const [customFieldName, setCustomFieldName] = useState('')
   const [showAddMeasurements, setShowAddMeasurements] = useState(false)
+  const visibleFields = visibleState.sourceKey === sourceKey ? visibleState.fields : defaultVisibleFields
   const hiddenFields = measurementFields.filter((field) => !visibleFields.includes(field))
 
-  useEffect(() => {
-    setVisibleFields(defaultVisibleFields)
-  }, [defaultVisibleFields, person.id])
+  function setCurrentVisibleFields(updater: (fields: string[]) => string[]): void {
+    setVisibleState((currentState) => {
+      const currentFields = currentState.sourceKey === sourceKey ? currentState.fields : defaultVisibleFields
+      return { fields: updater(currentFields), sourceKey }
+    })
+  }
 
   function addMeasurementField(field: string): void {
-    setVisibleFields((current) => (current.includes(field) ? current : [...current, field]))
+    setCurrentVisibleFields((current) => (current.includes(field) ? current : [...current, field]))
   }
 
   function removeMeasurementField(field: string): void {
-    setVisibleFields((current) => current.filter((item) => item !== field))
+    setCurrentVisibleFields((current) => current.filter((item) => item !== field))
     setShowAddMeasurements(true)
   }
 
@@ -50,10 +56,4 @@ export function useVisibleMeasurementFields({
     showAddMeasurements,
     visibleFields,
   }
-}
-
-function toMeasurementSex(sex: PersonSex): PersonSex {
-  if (sex === 'Girl') return 'Female'
-  if (sex === 'Boy') return 'Male'
-  return sex
 }

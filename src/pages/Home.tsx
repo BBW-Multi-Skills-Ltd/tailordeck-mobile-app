@@ -13,8 +13,8 @@ export default function Home() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const monthlyStatsQuery = useMonthlyStatsQuery()
   const recentJobsQuery = useRecentJobsQuery(3)
-  const monthlyStats = monthlyStatsQuery.data ?? []
-  const recentJobs = recentJobsQuery.data ?? []
+  const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
+  const recentJobs = useMemo(() => recentJobsQuery.data ?? [], [recentJobsQuery.data])
   const homeDataReady = !monthlyStatsQuery.isLoading && !recentJobsQuery.isLoading
   const currentMonth = useMemo(() => getCurrentMonthStats(monthlyStats), [monthlyStats])
   const hasJobs = recentJobs.length > 0 || monthlyStats.some((month) => month.jobs > 0)

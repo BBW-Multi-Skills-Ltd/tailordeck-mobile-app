@@ -8,6 +8,7 @@ import { ClientsProvider } from './context/ClientsContext'
 import { AuthProvider } from './context/AuthContext'
 import { initializeTheme } from './lib/theme'
 import ScrollToTop from './components/layout/ScrollToTop'
+import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,7 +46,9 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ClientsProvider>
-            <App />
+            <AppFeedbackProvider>
+              <App />
+            </AppFeedbackProvider>
           </ClientsProvider>
         </AuthProvider>
       </QueryClientProvider>

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientQuery } from '../../hooks/useClientQueries'
 import { useCreateFullJobMutation } from '../../hooks/useJobQueries'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { useAppFeedback } from '../shared/appFeedbackCore'
 import { createNewJobWizardActions } from './newJobWizardActions'
 import { getNewJobWizardDerived } from './newJobWizardDerived'
 import { getNewJobWizardStateSnapshot } from './newJobWizardStateSnapshot'
@@ -13,6 +14,7 @@ import { useNewJobWizardState } from './useNewJobWizardState'
 
 export function useNewJobWizard() {
   const navigate = useNavigate()
+  const feedback = useAppFeedback()
   const [searchParams] = useSearchParams()
   const sectionRef = useRef<HTMLElement | null>(null)
   const state = useNewJobWizardState()
@@ -49,13 +51,23 @@ export function useNewJobWizard() {
       state.setCreatedJobId(createdJob.id)
       state.setSuccessOpen(true)
     } catch (error) {
-      window.alert(getServiceErrorMessage(error, 'Unable to finalize this job.'))
+      feedback.toast(getServiceErrorMessage(error, 'Unable to finalize this job.'), 'error')
     } finally {
       state.setIsFinalizing(false)
     }
   }
 
-  const actions = createNewJobWizardActions({ navigate, state })
+  const actions = createNewJobWizardActions({
+    confirmDiscard: () =>
+      feedback.confirm({
+        title: 'Discard this job?',
+        message: 'This will remove the current job draft and return to Jobs.',
+        confirmLabel: 'Discard',
+        tone: 'danger',
+      }),
+    navigate,
+    state,
+  })
 
   return {
     actions: {

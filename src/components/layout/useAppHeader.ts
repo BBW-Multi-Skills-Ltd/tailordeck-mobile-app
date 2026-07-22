@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../context/authContextCore'
 import { clearPreviewSession } from '../../lib/auth'
 import {
   clearNotifications,
@@ -9,12 +9,14 @@ import {
   markNotificationRead,
   type AppNotification,
 } from '../../lib/notifications'
+import { useAppFeedback } from '../shared/appFeedbackCore'
 import type { NotificationFilter } from './NotificationDrawer'
 import { useSyncedHeaderSettings, useSyncedNotifications } from './useAppHeaderData'
 
 export function useAppHeader() {
   const navigate = useNavigate()
   const { signOut } = useAuth()
+  const feedback = useAppFeedback()
   const [menuOpen, setMenuOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
@@ -43,8 +45,16 @@ export function useAppHeader() {
     setDrawerOpen(true)
   }
 
-  function handleClearAll(): void {
-    if (window.confirm('Clear all notifications?')) setNotifications(clearNotifications())
+  async function handleClearAll(): Promise<void> {
+    const confirmed = await feedback.confirm({
+      title: 'Clear notifications?',
+      message: 'This removes all notifications from this device.',
+      confirmLabel: 'Clear all',
+      tone: 'danger',
+    })
+    if (!confirmed) return
+    setNotifications(clearNotifications())
+    feedback.toast('Notifications cleared.', 'success')
   }
 
   function handleItemOpen(item: AppNotification): void {

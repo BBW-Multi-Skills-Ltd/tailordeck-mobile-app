@@ -4,7 +4,7 @@ type WizardFooterProps = {
   step: number
   isReviewMode: boolean
   isFinalizing: boolean
-  onBack: () => void
+  onBack: () => void | Promise<void>
   onNext: () => void
   onProceedToReview: () => void
   onSaveDraft: () => void
@@ -56,4 +56,3 @@ export function WizardFooter({
     </div>
   )
 }
-

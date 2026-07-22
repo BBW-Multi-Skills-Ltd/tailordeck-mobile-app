@@ -1,30 +1,41 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
 import type { JobWithRelations } from '../../services/types'
 import { buildMeasurementDrafts } from './clientMeasurementMappers'
 export { blockKey, toTitleCase } from './clientMeasurementUtils'
 
 export function useClientMeasurements(jobs: JobWithRelations[] = []) {
+  const sourceKey = useMemo(
+    () => jobs.map((job) => `${job.id}:${job.updated_at ?? ''}:${job.job_persons?.length ?? 0}`).join('|'),
+    [jobs],
+  )
   const initialDrafts = useMemo(() => buildMeasurementDrafts(jobs), [jobs])
-  const [measurementDrafts, setMeasurementDrafts] = useState<Record<string, JobMeasurementSnapshot>>(initialDrafts)
-  const [editState, setEditState] = useState<Record<string, boolean>>({})
+  const [draftState, setDraftState] = useState(() => ({ drafts: initialDrafts, sourceKey }))
+  const [editState, setEditState] = useState(() => ({ sourceKey, value: {} as Record<string, boolean> }))
+  const measurementDrafts = draftState.sourceKey === sourceKey ? draftState.drafts : initialDrafts
+  const activeEditState = editState.sourceKey === sourceKey ? editState.value : {}
 
-  useEffect(() => {
-    setMeasurementDrafts(initialDrafts)
-    setEditState({})
-  }, [initialDrafts])
+  function setCurrentDrafts(updater: (drafts: Record<string, JobMeasurementSnapshot>) => Record<string, JobMeasurementSnapshot>): void {
+    setDraftState((currentState) => {
+      const currentDrafts = currentState.sourceKey === sourceKey ? currentState.drafts : initialDrafts
+      return { drafts: updater(currentDrafts), sourceKey }
+    })
+  }
 
   function isEditing(key: string): boolean {
-    return Boolean(editState[key])
+    return Boolean(activeEditState[key])
   }
 
   function toggleEdit(key: string): void {
-    setEditState((prev) => ({ ...prev, [key]: !prev[key] }))
+    setEditState((currentState) => {
+      const currentEditState = currentState.sourceKey === sourceKey ? currentState.value : {}
+      return { sourceKey, value: { ...currentEditState, [key]: !currentEditState[key] } }
+    })
   }
 
   function updateBodyMeasurement(jobId: string, personId: string, field: string, value: string): void {
     const parsed = Number(value)
-    setMeasurementDrafts((prev) => {
+    setCurrentDrafts((prev) => {
       const current = prev[jobId]
       if (!current || current.kind !== 'body') return prev
 
@@ -47,7 +58,7 @@ export function useClientMeasurements(jobs: JobWithRelations[] = []) {
 
   function updateNonBodyMeasurement(jobId: string, field: string, value: string): void {
     const parsed = Number(value)
-    setMeasurementDrafts((prev) => {
+    setCurrentDrafts((prev) => {
       const current = prev[jobId]
       if (!current || current.kind !== 'non-body') return prev
 

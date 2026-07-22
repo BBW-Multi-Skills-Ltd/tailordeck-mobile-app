@@ -27,9 +27,16 @@ export function useJobSuccessDocumentData({
   const brand = useMemo(() => readBrandConfig(), [])
   const balanceToCollect = Math.max(charge - deposit, 0)
   const service = effectiveItemType || 'Tailoring job'
+  const successJobId = useMemo(() => {
+    const slug = `${clientName || 'client'}-${deadlineDate || 'pending'}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    return `new-job-${slug || 'draft'}`
+  }, [clientName, deadlineDate])
   const successJob = useMemo<MockJob>(
     () => ({
-      id: `new-job-${Date.now()}`,
+      id: successJobId,
       clientId: 'new-client',
       clientName: clientName || 'Client',
       clientPhone,
@@ -38,9 +45,9 @@ export function useJobSuccessDocumentData({
       chargeAmount: charge,
       status: 'Pending',
       deadlineDate,
-      createdDate: new Date().toISOString(),
+      createdDate: deadlineDate || '',
     }),
-    [charge, clientName, clientPhone, deadlineDate, scopeLabel, service],
+    [charge, clientName, clientPhone, deadlineDate, scopeLabel, service, successJobId],
   )
   const successDetails = useMemo<DetailedJobData>(
     () => ({

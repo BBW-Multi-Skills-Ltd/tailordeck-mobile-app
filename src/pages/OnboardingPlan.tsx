@@ -18,8 +18,10 @@ export default function OnboardingPlan() {
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function activatePlan(plan: SubscriptionPlan) {
+    setErrorMessage('')
     setSelectedPlan(plan)
     const next = saveTailorSettings({
       ...settings,
@@ -38,7 +40,7 @@ export default function OnboardingPlan() {
       navigate('/')
     } catch (error) {
       console.error('Unable to activate onboarding plan:', error)
-      window.alert(getServiceErrorMessage(error, 'Unable to activate plan.'))
+      setErrorMessage(getServiceErrorMessage(error, 'Unable to activate plan.'))
     } finally {
       setSavingPlan(null)
     }
@@ -63,6 +65,7 @@ export default function OnboardingPlan() {
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+        {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
 
         <div className="subscription-plan-carousel onboarding-plan-carousel" aria-label="Onboarding pricing plans">
           {subscriptionPlans.map((plan) => (

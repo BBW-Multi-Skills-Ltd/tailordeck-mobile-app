@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { useAppFeedback } from '../shared/appFeedbackCore'
 import { persistSettingsSection, type SettingsPersistenceMutations } from './settingsPersistence'
 
 type UseSettingsSaveActionArgs = SettingsPersistenceMutations & {
@@ -21,6 +22,8 @@ export function useSettingsSaveAction({
   setSavedSection,
   setSavedTick,
 }: UseSettingsSaveActionArgs) {
+  const feedback = useAppFeedback()
+
   async function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): Promise<void> {
     try {
       await persistSettingsSection(sectionLabel, nextSettings, {
@@ -35,7 +38,7 @@ export function useSettingsSaveAction({
       setSavedTick(Date.now())
       setSavedSection(sectionLabel)
     } catch (error) {
-      window.alert(getServiceErrorMessage(error, `Unable to save ${sectionLabel}.`))
+      feedback.toast(getServiceErrorMessage(error, `Unable to save ${sectionLabel}.`), 'error')
     }
   }
 

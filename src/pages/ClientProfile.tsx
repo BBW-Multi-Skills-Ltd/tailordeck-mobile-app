@@ -6,6 +6,7 @@ import ClientMeasurementsSection from '../components/clientprofile/ClientMeasure
 import ClientProfileCard from '../components/clientprofile/ClientProfileCard'
 import { useClientMeasurements } from '../components/clientprofile/useClientMeasurements'
 import EmptyState from '../components/shared/EmptyState'
+import { useAppFeedback } from '../components/shared/appFeedbackCore'
 import PageHeader from '../components/shared/PageHeader'
 import { useClientQuery, useSoftDeleteClientMutation } from '../hooks/useClientQueries'
 import { useClientJobsQuery } from '../hooks/useJobQueries'
@@ -14,10 +15,11 @@ import { mapJobRow } from '../services/mappers/jobMapper'
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const feedback = useAppFeedback()
   const clientQuery = useClientQuery(id)
   const client = clientQuery.data
   const clientJobsQuery = useClientJobsQuery(client?.id)
-  const clientJobs = clientJobsQuery.data ?? []
+  const clientJobs = useMemo(() => clientJobsQuery.data ?? [], [clientJobsQuery.data])
   const deleteClientMutation = useSoftDeleteClientMutation()
   const measurements = useClientMeasurements(clientJobs)
 
@@ -51,14 +53,20 @@ export default function ClientProfile() {
 
   async function handleDeleteClient(): Promise<void> {
     if (!client) return
-    const confirmed = window.confirm(`Delete ${client.name}? This will remove this client profile. This action cannot be undone.`)
+    const confirmed = await feedback.confirm({
+      title: `Delete ${client.name}?`,
+      message: 'This removes the client profile from your active client list.',
+      confirmLabel: 'Delete client',
+      tone: 'danger',
+    })
     if (!confirmed) return
 
     try {
       await deleteClientMutation.mutateAsync(client.id)
+      feedback.toast('Client deleted.', 'success')
       navigate('/clients')
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to delete client.')
+      feedback.toast(error instanceof Error ? error.message : 'Unable to delete client.', 'error')
     }
   }
 

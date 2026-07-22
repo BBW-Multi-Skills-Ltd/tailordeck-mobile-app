@@ -8,7 +8,7 @@ import { formatDateShort, getInitial } from '../lib/utils'
 
 export default function Clients() {
   const clientsQuery = useClientsQuery()
-  const clients = clientsQuery.data ?? []
+  const clients = useMemo(() => clientsQuery.data ?? [], [clientsQuery.data])
   const [search, setSearch] = useState('')
 
   const filteredClients = useMemo(() => {

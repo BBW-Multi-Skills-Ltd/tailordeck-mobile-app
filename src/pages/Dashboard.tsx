@@ -18,8 +18,11 @@ export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
   const monthlyStatsQuery = useMonthlyStatsQuery()
   const statusQuery = useJobStatusBreakdownQuery()
-  const monthlyStats = monthlyStatsQuery.data ?? []
-  const statusCounts = statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 }
+  const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
+  const statusCounts = useMemo(
+    () => statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 },
+    [statusQuery.data],
+  )
   const metrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts), [monthlyStats, statusCounts])
   const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)
   const visibleMonth = new Date(metrics.latestDate.getFullYear(), metrics.latestDate.getMonth() + monthOffset, 1)

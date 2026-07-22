@@ -1,5 +1,3 @@
-import type { PersonSex } from '../newJobConfig'
-
 export function MeasurementSectionIntro() {
   return (
     <div className="wizard-measurement-intro">
@@ -7,10 +5,4 @@ export function MeasurementSectionIntro() {
       <p>Fill only needed fields. Add or remove measurements.</p>
     </div>
   )
-}
-
-export function toMeasurementSex(sex: PersonSex): PersonSex {
-  if (sex === 'Girl') return 'Female'
-  if (sex === 'Boy') return 'Male'
-  return sex
 }
