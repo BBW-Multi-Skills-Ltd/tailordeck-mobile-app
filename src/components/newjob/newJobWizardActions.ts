@@ -3,6 +3,12 @@ import { createCostingActions } from './newJobCostingActions'
 import { createMaterialActions } from './newJobMaterialActions'
 import { createNavigationActions } from './newJobNavigationActions'
 import { createStepOneActions } from './newJobStepOneActions'
+import {
+  getCostingActionParams,
+  getMaterialActionParams,
+  getNavigationActionParams,
+  getStepOneActionParams,
+} from './newJobWizardActionParams'
 import type { NewJobWizardStateModel } from './useNewJobWizardState'
 
 type NewJobWizardActionParams = {
@@ -11,61 +17,10 @@ type NewJobWizardActionParams = {
 }
 
 export function createNewJobWizardActions({ navigate, state }: NewJobWizardActionParams) {
-  const stepOneActions = createStepOneActions({
-    clientName: state.clientName,
-    itemType: state.itemType,
-    jobType: state.jobType,
-    makeCategory: state.makeCategory,
-    persons: state.persons,
-    sameItemForAll: state.sameItemForAll,
-    setAmendmentArea: state.setAmendmentArea,
-    setAmendmentDescription: state.setAmendmentDescription,
-    setAmendmentIssueType: state.setAmendmentIssueType,
-    setAmendmentNeedsMaterials: state.setAmendmentNeedsMaterials,
-    setAmendmentPartName: state.setAmendmentPartName,
-    setAmendmentPartQuantity: state.setAmendmentPartQuantity,
-    setAmendmentTarget: state.setAmendmentTarget,
-    setClientName: state.setClientName,
-    setItemType: state.setItemType,
-    setJobType: state.setJobType,
-    setMakeCategory: state.setMakeCategory,
-    setNonBodyMeasurements: state.setNonBodyMeasurements,
-    setOrderMode: state.setOrderMode,
-    setPersons: state.setPersons,
-    setSameItemForAll: state.setSameItemForAll,
-  })
-  const materialActions = createMaterialActions({
-    depositPercent: state.depositPercent,
-    setAmendmentNeedsMaterials: state.setAmendmentNeedsMaterials,
-    setAmendmentPartName: state.setAmendmentPartName,
-    setAmendmentPartQuantity: state.setAmendmentPartQuantity,
-    setCustomMaterialType: state.setCustomMaterialType,
-    setDepositPercent: state.setDepositPercent,
-    setMaterialColor: state.setMaterialColor,
-    setMaterialType: state.setMaterialType,
-    setMaterialYards: state.setMaterialYards,
-    setReferencePhotoFiles: state.setReferencePhotoFiles,
-    setReferencePhotoFilesByTarget: state.setReferencePhotoFilesByTarget,
-    setReferencePhotoNames: state.setReferencePhotoNames,
-    setReferencePhotoNamesByTarget: state.setReferencePhotoNamesByTarget,
-  })
-  const costingActions = createCostingActions({
-    expenseDraftCost: state.expenseDraftCost,
-    expenseDraftName: state.expenseDraftName,
-    setExpenseDraftCost: state.setExpenseDraftCost,
-    setExpenseDraftName: state.setExpenseDraftName,
-    setExpenses: state.setExpenses,
-  })
-  const navigationActions = createNavigationActions({
-    navigate,
-    setDraftSaved: state.setDraftSaved,
-    setIsFinalizing: state.setIsFinalizing,
-    setStep: state.setStep,
-    setStepFourReviewMode: state.setStepFourReviewMode,
-    setSuccessOpen: state.setSuccessOpen,
-    step: state.step,
-    stepFourReviewMode: state.stepFourReviewMode,
-  })
+  const stepOneActions = createStepOneActions(getStepOneActionParams(state))
+  const materialActions = createMaterialActions(getMaterialActionParams(state))
+  const costingActions = createCostingActions(getCostingActionParams(state))
+  const navigationActions = createNavigationActions(getNavigationActionParams(navigate, state))
 
   return {
     addAdult: stepOneActions.addAdult,
