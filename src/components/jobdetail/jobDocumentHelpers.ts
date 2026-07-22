@@ -12,3 +12,12 @@ export function canSharePdfFile(file: File): boolean {
   if (!('canShare' in navigator) || typeof navigator.canShare !== 'function') return true
   return navigator.canShare({ files: [file] })
 }
+
+export function triggerPdfDownload(blob: Blob, brand: BrandConfig, type: InvoiceType, jobId: string): void {
+  const objectUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = objectUrl
+  link.download = documentFileName(brand, type, jobId)
+  link.click()
+  URL.revokeObjectURL(objectUrl)
+}

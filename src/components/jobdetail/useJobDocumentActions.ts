@@ -6,7 +6,8 @@ import {
 } from '../invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import type { MockJob } from '../../types/job'
-import { canSharePdfFile, createPdfFile, documentFileName } from './jobDocumentHelpers'
+import { canSharePdfFile, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
+import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
 export function useJobDocumentActions({
   brand,
@@ -21,61 +22,7 @@ export function useJobDocumentActions({
 }) {
   const docPreviewRef = useRef<HTMLDivElement | null>(null)
 
-  const buildPdfBlob = useCallback(async (): Promise<Blob | null> => {
-    if (!docPreviewRef.current) return null
-    const documentNode = docPreviewRef.current.querySelector<HTMLElement>('.doc-landscape-root') ?? docPreviewRef.current
-    const fitStage = documentNode.closest<HTMLElement>('.document-fit-stage')
-    const fitShell = documentNode.closest<HTMLElement>('.document-fit-shell')
-    const previousStageTransform = fitStage?.style.transform
-    const previousShellHeight = fitShell?.style.height
-
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ])
-
-    try {
-      if (fitStage) fitStage.style.transform = 'none'
-      if (fitShell) fitShell.style.height = `${documentNode.offsetHeight}px`
-
-      const canvas = await html2canvas(documentNode, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        onclone: (clonedDoc) => {
-          clonedDoc.querySelectorAll('.job-doc-ui-title').forEach((node) => node.remove())
-        },
-      })
-
-      const imageData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-      const margin = 6
-      const imageRatio = Math.min((pageWidth - margin * 2) / canvas.width, (pageHeight - margin * 2) / canvas.height)
-      const width = canvas.width * imageRatio
-      const height = canvas.height * imageRatio
-      const x = (pageWidth - width) / 2
-      const y = (pageHeight - height) / 2
-      pdf.addImage(imageData, 'PNG', x, y, width, height)
-      return pdf.output('blob')
-    } finally {
-      if (fitStage && previousStageTransform !== undefined) fitStage.style.transform = previousStageTransform
-      if (fitShell && previousShellHeight !== undefined) fitShell.style.height = previousShellHeight
-    }
-  }, [])
-
-  const triggerPdfDownload = useCallback(
-    (blob: Blob, type: InvoiceType): void => {
-      const objectUrl = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = objectUrl
-      link.download = documentFileName(brand, type, job.id)
-      link.click()
-      URL.revokeObjectURL(objectUrl)
-    },
-    [brand, job.id],
-  )
+  const buildPdfBlob = useCallback((): Promise<Blob | null> => buildJobDocumentPdfBlob(docPreviewRef.current), [])
 
   const shareText = useCallback(
     (type: InvoiceType): string =>
@@ -97,9 +44,9 @@ export function useJobDocumentActions({
     async (type: InvoiceType): Promise<void> => {
       const blob = await buildPdfBlob()
       if (!blob) return
-      triggerPdfDownload(blob, type)
+      triggerPdfDownload(blob, brand, type, job.id)
     },
-    [buildPdfBlob, triggerPdfDownload],
+    [brand, buildPdfBlob, job.id],
   )
 
   const handleSystemShare = useCallback(
@@ -120,14 +67,14 @@ export function useJobDocumentActions({
           })
           return
         } catch {
-          triggerPdfDownload(blob, type)
+          triggerPdfDownload(blob, brand, type, job.id)
           return
         }
       }
 
-      triggerPdfDownload(blob, type)
+      triggerPdfDownload(blob, brand, type, job.id)
     },
-    [brand, buildPdfBlob, job.id, shareText, triggerPdfDownload],
+    [brand, buildPdfBlob, job.id, shareText],
   )
 
   const handleWhatsAppToClient = useCallback(
@@ -144,18 +91,18 @@ export function useJobDocumentActions({
               files: [pdfFile],
             })
           } else {
-            triggerPdfDownload(blob, type)
+            triggerPdfDownload(blob, brand, type, job.id)
           }
         } catch {
-          triggerPdfDownload(blob, type)
+          triggerPdfDownload(blob, brand, type, job.id)
         }
       } else if (blob) {
-        triggerPdfDownload(blob, type)
+        triggerPdfDownload(blob, brand, type, job.id)
       }
 
       window.open(buildWhatsAppURL(job.clientPhone, shareText(type)), '_blank', 'noopener,noreferrer')
     },
-    [brand, buildPdfBlob, job, shareText, triggerPdfDownload],
+    [brand, buildPdfBlob, job, shareText],
   )
 
   return {
