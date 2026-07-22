@@ -4,12 +4,11 @@ import {
   BrandBlock,
   CompanyBlock,
   DecorativeStrip,
-  InvoiceBody,
   MetaBar,
-  ReceiptBody,
-  SignatureSection,
   TitleBlock,
-} from './classicWave/InvoiceClassicWaveParts'
+} from './classicWave/ClassicWaveHeader'
+import { InvoiceBody, ReceiptBody } from './classicWave/ClassicWaveBody'
+import { SignatureSection } from './classicWave/ClassicWaveSignature'
 import { styles } from './classicWave/invoiceClassicWaveStyles'
 
 export function InvoiceClassicWaveTemplate(payload: DocumentTemplatePayload) {
@@ -50,3 +49,4 @@ export function InvoiceClassicWaveTemplate(payload: DocumentTemplatePayload) {
     </article>
   )
 }
+
