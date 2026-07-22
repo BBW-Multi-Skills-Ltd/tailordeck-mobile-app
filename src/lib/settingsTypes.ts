@@ -2,6 +2,7 @@ export type MeasurementUnit = 'cm' | 'inches'
 export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 export type ReminderLead = '1 day before' | '3 days before' | '1 week before'
 export type SubscriptionPlan = 'free' | 'starter' | 'pro'
+export type SubscriptionBillingCycle = 'monthly' | 'yearly'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
 export type NotificationBellOption = 'Standard Bell' | 'Soft Bell' | 'Sharp Bell'
 export type SocialPlatform = 'Instagram' | 'Facebook' | 'TikTok'
@@ -59,6 +60,8 @@ export interface TailorSettings {
   }
   subscription: {
     plan: SubscriptionPlan
+    billingCycle: SubscriptionBillingCycle
+    cancelAtPeriodEnd: boolean
   }
   updatedAt: string
 }

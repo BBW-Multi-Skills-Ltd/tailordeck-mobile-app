@@ -1,4 +1,5 @@
-import { BookOpen, ChevronRight, LifeBuoy, MessageCircle, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, BookOpen, ChevronRight, LifeBuoy, MessageCircle, ShieldCheck } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
 import PageHeader from '../components/shared/PageHeader'
 
 const helpItems = [
@@ -20,9 +21,21 @@ const helpItems = [
 ]
 
 export default function Help() {
+  const [searchParams] = useSearchParams()
+  const returnTo = searchParams.get('from') === 'subscription' ? '/settings/subscription/manage' : '/more'
+  const returnLabel = searchParams.get('from') === 'subscription' ? 'Back to manage plan' : 'Back to more'
+
   return (
     <section className="section stack gap-16">
-      <PageHeader title="Help & Support" centered />
+      <PageHeader
+        title="Help & Support"
+        centered
+        leading={(
+          <Link to={returnTo} className="btn btn-ghost btn-icon" aria-label={returnLabel}>
+            <ArrowLeft size={18} />
+          </Link>
+        )}
+      />
 
       <article className="clay-card settings-standalone-card stack gap-8">
         <p className="settings-help-page-title">How can we help?</p>

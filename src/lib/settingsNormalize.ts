@@ -62,6 +62,8 @@ export function normalizeSettings(value: Partial<TailorSettings>): TailorSetting
     },
     subscription: {
       plan: value.subscription?.plan ?? defaults.subscription.plan,
+      billingCycle: value.subscription?.billingCycle ?? defaults.subscription.billingCycle,
+      cancelAtPeriodEnd: value.subscription?.cancelAtPeriodEnd ?? defaults.subscription.cancelAtPeriodEnd,
     },
     updatedAt: value.updatedAt ?? defaults.updatedAt,
   }

@@ -16,7 +16,7 @@ export default function OnboardingPlan() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [settings, setSettings] = useState(() => loadTailorSettings())
-  const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
 
@@ -24,7 +24,7 @@ export default function OnboardingPlan() {
     setSelectedPlan(plan)
     const next = saveTailorSettings({
       ...settings,
-      subscription: { plan },
+      subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false },
       updatedAt: new Date().toISOString(),
     })
     setSettings(next)

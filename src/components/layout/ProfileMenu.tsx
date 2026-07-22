@@ -23,7 +23,7 @@ export default function ProfileMenu({ menuOpen, menuRef, onClose, onSignOut, onT
 
       {menuOpen ? (
         <div className="app-profile-dropdown" role="menu" aria-label="Profile menu">
-          <Link to="/profile" className="app-profile-menu-item" role="menuitem" onClick={onClose}>
+          <Link to="/settings/security" className="app-profile-menu-item" role="menuitem" onClick={onClose}>
             My Profile
           </Link>
           <Link to="/settings" className="app-profile-menu-item" role="menuitem" onClick={onClose}>

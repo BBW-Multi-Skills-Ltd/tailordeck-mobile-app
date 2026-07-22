@@ -72,7 +72,7 @@ export default function More() {
 
   return (
     <section className="section stack gap-12 more-page">
-      <Link to="/profile" className="clay-card more-profile-card">
+      <Link to="/settings/security" className="clay-card more-profile-card">
         <div className="more-avatar clay-inset" aria-hidden>
           {settings.profile.avatarUrl ? (
             <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" />

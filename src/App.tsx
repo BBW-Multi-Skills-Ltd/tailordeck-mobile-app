@@ -17,8 +17,8 @@ const SettingsReminders = lazy(() => import('./pages/SettingsReminders'))
 const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
 const SettingsAbout = lazy(() => import('./pages/SettingsAbout'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
+const ManagePlan = lazy(() => import('./pages/ManagePlan'))
 const More = lazy(() => import('./pages/More'))
-const Profile = lazy(() => import('./pages/Profile'))
 const Business = lazy(() => import('./pages/Business'))
 const Documents = lazy(() => import('./pages/Documents'))
 const Help = lazy(() => import('./pages/Help'))
@@ -62,7 +62,7 @@ export default function App() {
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/measurements" element={<JobMeasurements />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Navigate to="/settings/security" replace />} />
             <Route path="/business" element={<Business />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/help" element={<Help />} />
@@ -71,6 +71,7 @@ export default function App() {
             <Route path="/settings/security" element={<SettingsSecurity />} />
             <Route path="/settings/about" element={<SettingsAbout />} />
             <Route path="/settings/subscription" element={<SubscriptionPage />} />
+            <Route path="/settings/subscription/manage" element={<ManagePlan />} />
             <Route path="/more" element={<More />} />
           </Route>
         </Route>

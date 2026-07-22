@@ -68,6 +68,8 @@ export function mergeSettingsRows(rows: {
     },
     subscription: {
       plan: rows.subscription?.plan_name || fallback.subscription.plan,
+      billingCycle: fallback.subscription.billingCycle,
+      cancelAtPeriodEnd: fallback.subscription.cancelAtPeriodEnd,
     },
     updatedAt: rows.profile?.updated_at || fallback.updatedAt,
   }

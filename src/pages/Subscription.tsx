@@ -8,13 +8,13 @@ import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingC
 
 export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
-  const [cycle, setCycle] = useState<BillingCycle>('monthly')
+  const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
   const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
 
   function choosePlan(plan: PaidPlan) {
     setSelectedPlan(plan)
-    const next = { ...settings, subscription: { plan } }
+    const next = { ...settings, subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false } }
     setSettings(saveTailorSettings(next))
     window.alert(`${plan.toUpperCase()} upgrade flow will be connected to payments backend.`)
   }
@@ -39,9 +39,9 @@ export default function SubscriptionPage() {
           </div>
           <span className="subscription-active-chip">Active</span>
         </div>
-        <button type="button" className="btn btn-secondary btn-full subscription-manage-btn">
+        <Link to="/settings/subscription/manage" className="btn btn-secondary btn-full subscription-manage-btn">
           Manage Plan
-        </button>
+        </Link>
       </article>
 
       <h3 className="subscription-section-title">Choose the plan that's right for you</h3>

@@ -5,6 +5,7 @@ import type { TailorSettings } from '../../lib/settings'
 type AccountSecurityPanelProps = {
   settings: TailorSettings
   layout?: 'stacked' | 'grouped'
+  mode?: 'profile' | 'security' | 'full'
   profilePhoneLocalPart: string
   passwordDraft: string
   confirmPasswordDraft: string
@@ -22,6 +23,7 @@ type AccountSecurityPanelProps = {
 export default function AccountSecurityPanel({
   settings,
   layout = 'stacked',
+  mode = 'full',
   profilePhoneLocalPart,
   passwordDraft,
   confirmPasswordDraft,
@@ -51,6 +53,9 @@ export default function AccountSecurityPanel({
     currentDetails.email !== savedDetails.email ||
     currentDetails.phone !== savedDetails.phone
   const passwordDirty = passwordDraft.trim().length > 0 || confirmPasswordDraft.trim().length > 0
+  const showFullName = true
+  const showSensitiveSections = mode !== 'profile'
+  const detailsTitle = mode === 'security' ? 'Login Details' : 'Personal Details'
 
   function handleDetailsAction() {
     if (!isEditingDetails) {
@@ -95,16 +100,18 @@ export default function AccountSecurityPanel({
     return (
       <div className="stack gap-7 settings-profile-grouped-form">
         <section className="stack gap-8">
-          <p className="more-group-title">Personal Details</p>
+          <p className="more-group-title">{detailsTitle}</p>
           <div className="clay-card more-group-card profile-settings-form-card">
-            <div className="profile-settings-form-row">
-              <span className="more-row-icon clay-inset">
-                <UserRound size={17} />
-              </span>
-              <label>Full Name</label>
-              <input className="input profile-settings-form-input" value={settings.profile.fullName} disabled={!isEditingDetails} onChange={(event) => onFullNameChange(event.target.value)} />
-              <span className="more-row-divider" aria-hidden />
-            </div>
+            {showFullName ? (
+              <div className="profile-settings-form-row">
+                <span className="more-row-icon clay-inset">
+                  <UserRound size={17} />
+                </span>
+                <label>Full Name</label>
+                <input className="input profile-settings-form-input" value={settings.profile.fullName} disabled={!isEditingDetails} onChange={(event) => onFullNameChange(event.target.value)} />
+                <span className="more-row-divider" aria-hidden />
+              </div>
+            ) : null}
 
             <div className="profile-settings-form-row">
               <span className="more-row-icon clay-inset">
@@ -138,95 +145,99 @@ export default function AccountSecurityPanel({
             ) : (
               'Edit Details'
             )}
-          </button>
+            </button>
         </section>
 
-        <section className="stack gap-8">
-          <p className="more-group-title">Password & Security</p>
-          <div className="clay-card more-group-card profile-settings-form-card">
-            <button type="button" className="profile-settings-control-row" onClick={() => setShowPasswordForm((value) => !value)}>
-              <span className="more-row-icon clay-inset">
-                <KeyRound size={17} />
-              </span>
-              <span className="stack gap-2 min-w-0 flex-1">
-                <span className="more-row-label">Change Password</span>
-                <span className="more-row-desc">Update your login password safely.</span>
-              </span>
-              <ChevronDown size={17} className={`more-row-chevron profile-settings-chevron${showPasswordForm ? ' open' : ''}`} />
-            </button>
+        {showSensitiveSections ? (
+          <>
+            <section className="stack gap-8">
+              <p className="more-group-title">Password & Security</p>
+              <div className="clay-card more-group-card profile-settings-form-card">
+                <button type="button" className="profile-settings-control-row" onClick={() => setShowPasswordForm((value) => !value)}>
+                  <span className="more-row-icon clay-inset">
+                    <KeyRound size={17} />
+                  </span>
+                  <span className="stack gap-2 min-w-0 flex-1">
+                    <span className="more-row-label">Change Password</span>
+                    <span className="more-row-desc">Update your login password safely.</span>
+                  </span>
+                  <ChevronDown size={17} className={`more-row-chevron profile-settings-chevron${showPasswordForm ? ' open' : ''}`} />
+                </button>
 
-            {showPasswordForm ? (
-              <div className="profile-settings-password-panel">
-                <div className="input-group settings-profile-field">
-                  <label className="settings-profile-label">New Password</label>
-                  <div className="auth-password-wrap">
-                    <input className="input settings-profile-input auth-input-password" type={showNewPassword ? 'text' : 'password'} placeholder="Create password" value={passwordDraft} onChange={(event) => onPasswordChange(event.target.value)} />
+                {showPasswordForm ? (
+                  <div className="profile-settings-password-panel">
+                    <div className="input-group settings-profile-field">
+                      <label className="settings-profile-label">New Password</label>
+                      <div className="auth-password-wrap">
+                        <input className="input settings-profile-input auth-input-password" type={showNewPassword ? 'text' : 'password'} placeholder="Create password" value={passwordDraft} onChange={(event) => onPasswordChange(event.target.value)} />
+                        <button
+                          type="button"
+                          className="auth-eye-btn"
+                          aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                          onClick={() => setShowNewPassword((value) => !value)}
+                        >
+                          {showNewPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="input-group settings-profile-field">
+                      <label className="settings-profile-label">Confirm Password</label>
+                      <div className="auth-password-wrap">
+                        <input className="input settings-profile-input auth-input-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm password" value={confirmPasswordDraft} onChange={(event) => onConfirmPasswordChange(event.target.value)} />
+                        <button
+                          type="button"
+                          className="auth-eye-btn"
+                          aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                          onClick={() => setShowConfirmPassword((value) => !value)}
+                        >
+                          {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
-                      className="auth-eye-btn"
-                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
-                      onClick={() => setShowNewPassword((value) => !value)}
+                      className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn profile-settings-update-btn${passwordSavedFlash ? ' profile-settings-action-saved' : ''}`}
+                      disabled={!passwordDirty || passwordSaving || passwordSavedFlash}
+                      onClick={handlePasswordUpdate}
                     >
-                      {showNewPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {passwordSaving ? (
+                        'Updating...'
+                      ) : passwordSavedFlash ? (
+                        <>
+                          <CheckCircle2 size={15} />
+                          Updated
+                        </>
+                      ) : (
+                        'Update Password'
+                      )}
                     </button>
                   </div>
-                </div>
+                ) : null}
+              </div>
+            </section>
 
-                <div className="input-group settings-profile-field">
-                  <label className="settings-profile-label">Confirm Password</label>
-                  <div className="auth-password-wrap">
-                    <input className="input settings-profile-input auth-input-password" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm password" value={confirmPasswordDraft} onChange={(event) => onConfirmPasswordChange(event.target.value)} />
-                    <button
-                      type="button"
-                      className="auth-eye-btn"
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                      onClick={() => setShowConfirmPassword((value) => !value)}
-                    >
-                      {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn profile-settings-update-btn${passwordSavedFlash ? ' profile-settings-action-saved' : ''}`}
-                  disabled={!passwordDirty || passwordSaving || passwordSavedFlash}
-                  onClick={handlePasswordUpdate}
-                >
-                  {passwordSaving ? (
-                    'Updating...'
-                  ) : passwordSavedFlash ? (
-                    <>
-                      <CheckCircle2 size={15} />
-                      Updated
-                    </>
-                  ) : (
-                    'Update Password'
-                  )}
+            <section className="stack gap-8">
+              <p className="more-group-title">Account Controls</p>
+              <div className="clay-card more-group-card">
+                <button type="button" className="profile-settings-control-row danger" onClick={() => onDanger('deactivate')}>
+                  <span className="more-row-icon clay-inset">
+                    <ShieldAlert size={17} />
+                  </span>
+                  <span className="more-row-label">Deactivate Account</span>
+                  <span className="more-row-divider" aria-hidden />
+                </button>
+                <button type="button" className="profile-settings-control-row danger permanent" onClick={() => onDanger('delete')}>
+                  <span className="more-row-icon clay-inset">
+                    <Trash2 size={17} />
+                  </span>
+                  <span className="more-row-label">Delete Account Permanently</span>
                 </button>
               </div>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="stack gap-8">
-          <p className="more-group-title">Account Controls</p>
-          <div className="clay-card more-group-card">
-            <button type="button" className="profile-settings-control-row danger" onClick={() => onDanger('deactivate')}>
-              <span className="more-row-icon clay-inset">
-                <ShieldAlert size={17} />
-              </span>
-              <span className="more-row-label">Deactivate Account</span>
-              <span className="more-row-divider" aria-hidden />
-            </button>
-            <button type="button" className="profile-settings-control-row danger permanent" onClick={() => onDanger('delete')}>
-              <span className="more-row-icon clay-inset">
-                <Trash2 size={17} />
-              </span>
-              <span className="more-row-label">Delete Account Permanently</span>
-            </button>
-          </div>
-        </section>
+            </section>
+          </>
+        ) : null}
       </div>
     )
   }

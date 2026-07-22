@@ -84,6 +84,8 @@ export function getDefaultTailorSettings(): TailorSettings {
     },
     subscription: {
       plan: 'free',
+      billingCycle: 'monthly',
+      cancelAtPeriodEnd: false,
     },
     updatedAt: new Date().toISOString(),
   }

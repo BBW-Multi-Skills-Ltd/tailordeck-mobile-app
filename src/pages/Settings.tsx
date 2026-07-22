@@ -67,7 +67,7 @@ export default function SettingsPage() {
         )}
       />
 
-      <Link to="/profile" className="clay-card more-profile-card settings-profile-top-card">
+      <Link to="/settings/security" className="clay-card more-profile-card settings-profile-top-card">
         <div className="more-avatar clay-inset" aria-hidden>
           {settings.profile.avatarUrl ? <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" /> : <span>{initial}</span>}
         </div>

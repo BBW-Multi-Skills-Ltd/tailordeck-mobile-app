@@ -5306,12 +5306,103 @@ button.more-row {
 .settings-about-content {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-top: -8px;
+  gap: 13px;
 }
 
 .settings-about-content p {
   margin: 0;
+}
+
+.settings-about-section {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.settings-about-hero {
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-card) 76%, transparent);
+  box-shadow: 0 4px 12px rgba(40, 23, 23, 0.05);
+  padding: 10px;
+}
+
+.settings-about-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-about-logo-wrap {
+  width: 34px;
+  height: 34px;
+}
+
+.settings-about-brand-text {
+  font-size: 17px;
+}
+
+.settings-about-section h2,
+.settings-about-section h3 {
+  margin: 0;
+  color: var(--text-h);
+  line-height: 1.2;
+}
+
+.settings-about-section h2 {
+  font-size: 19px;
+  font-weight: 650;
+}
+
+.settings-about-section h3 {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.settings-about-section p {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.settings-about-link-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-about-link-grid span {
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-elevated) 58%, transparent);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.settings-about-bullet-list {
+  margin: 0;
+  padding-left: 17px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.settings-about-bullet-list li::marker {
+  color: var(--primary);
+}
+
+.settings-about-footer {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .subscription-card-active {
@@ -5493,6 +5584,15 @@ button.more-row {
 
 .subscription-plan-carousel::-webkit-scrollbar {
   display: none;
+}
+
+.manage-plan-carousel.single {
+  margin-right: 0;
+  padding-right: 0;
+}
+
+.manage-plan-carousel.single .subscription-plan-slide {
+  flex-basis: 100%;
 }
 
 .subscription-plan-tabs {
@@ -5725,6 +5825,168 @@ button.more-row {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.manage-plan-current-card {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
+}
+
+.manage-plan-current-card h2 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+.manage-plan-current-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.manage-plan-status {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--success) 36%, var(--bg-card) 64%);
+  background: var(--success-bg);
+  color: var(--success);
+  padding: 4px 9px;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.manage-plan-status.warning {
+  border-color: color-mix(in srgb, var(--gold) 44%, var(--bg-card) 56%);
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg-card) 88%);
+  color: var(--gold);
+}
+
+.manage-plan-info-row {
+  cursor: default;
+}
+
+.manage-plan-row-icon.success {
+  color: var(--success);
+}
+
+.manage-plan-row-icon.danger {
+  color: var(--danger);
+}
+
+.manage-plan-row-value {
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.manage-plan-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.manage-plan-choice {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  background: var(--bg-card);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 140ms ease;
+}
+
+.manage-plan-choice.selected {
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--bg-card) 42%);
+  background: color-mix(in srgb, var(--primary) 4%, var(--bg-card) 96%);
+  box-shadow: var(--shadow-sm), 0 10px 24px color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.manage-plan-choice:active {
+  transform: scale(0.995);
+}
+
+.manage-plan-choice strong {
+  color: var(--text-h);
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.manage-plan-choice small {
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.manage-plan-price {
+  color: var(--text-h);
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.manage-plan-price small {
+  margin-left: 2px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.manage-plan-danger-row .more-row-icon {
+  color: var(--danger);
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.confirm-modal {
+  width: min(100%, 360px);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+}
+
+.confirm-modal h3 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.confirm-modal p {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 :root[data-theme='dark'] .dashboard-best-month-card {
