@@ -1,0 +1,16 @@
+export const commonExpenseNames = [
+  'Fuel',
+  'Transport',
+  'Thread',
+  'Needle',
+  'Material',
+  'Gumstay',
+  'Zip',
+  'Buttons',
+  'Lining',
+  'Beads',
+  'Embroidery',
+  'Ironing',
+  'Packaging',
+  'Dispatch',
+]

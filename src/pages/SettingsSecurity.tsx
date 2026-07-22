@@ -31,13 +31,9 @@ export default function SettingsSecurity() {
 
       <AccountSecurityPanel
         settings={state.settings}
-        layout="grouped"
-        mode="security"
         profilePhoneLocalPart={derived.profilePhoneLocalPart}
         passwordDraft={state.passwordDraft}
         confirmPasswordDraft={state.confirmPasswordDraft}
-        securityFeedback={state.securityFeedback}
-        saved={state.savedSection === 'Account & Security' && Boolean(state.savedTick)}
         onFullNameChange={(fullName) => actions.setSettings((prev) => ({ ...prev, profile: { ...prev.profile, fullName } }))}
         onEmailChange={(email) => actions.setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email } }))}
         onPhoneChange={actions.handleProfilePhoneChange}
