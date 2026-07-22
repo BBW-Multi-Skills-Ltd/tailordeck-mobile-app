@@ -1811,6 +1811,8 @@ p { margin: 0; }
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   border-radius: var(--clay-radius-md);
+  margin-inline: -3px;
+  padding: 3px;
 }
 
 .td-segmented::-webkit-scrollbar {
@@ -1823,7 +1825,7 @@ p { margin: 0; }
   border-radius: var(--clay-radius-sm);
   background: var(--clay-surface);
   color: var(--text-muted);
-  box-shadow: var(--clay-shadow-rest);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   padding: 0 14px;
   font-size: 12px;
   line-height: 1;
@@ -1841,7 +1843,7 @@ p { margin: 0; }
   border-color: color-mix(in srgb, var(--primary) 58%, var(--border) 42%);
   background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 12%, var(--bg-card) 88%), var(--bg-card));
   color: var(--primary);
-  box-shadow: var(--clay-shadow-press);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 8%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 /* ============================================
@@ -2116,12 +2118,15 @@ button.more-row {
   top: calc(100% + 8px);
   left: 0;
   min-width: 156px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  background: var(--clay-surface);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  box-shadow: var(--clay-shadow-rest);
   padding: 6px;
   z-index: 130;
+  overflow: hidden;
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
 }
 
 .app-profile-menu-item {
@@ -2133,17 +2138,23 @@ button.more-row {
   background: transparent;
   color: var(--text-h);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--clay-radius-sm);
   padding: 9px 10px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .app-profile-menu-item:hover,
 .app-profile-menu-item:focus-visible {
-  background: var(--bg-muted);
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg-card) 93%);
   outline: none;
+}
+
+.app-profile-menu-item:active {
+  transform: scale(0.985);
+  background: color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%);
 }
 
 .app-profile-menu-item.danger {
@@ -2288,14 +2299,15 @@ button.more-row {
   flex-shrink: 0;
   min-height: 28px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
+  border: 1px solid var(--clay-border);
+  background: var(--clay-surface-muted);
   color: var(--text-muted);
   font-size: 11px;
   font-weight: 500;
   padding: 0 9px;
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  box-shadow: 0 4px 10px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .notification-filter-pill:hover {
@@ -2306,7 +2318,8 @@ button.more-row {
 .notification-filter-pill.active {
   border-color: var(--primary);
   color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .notification-sheet-body {
