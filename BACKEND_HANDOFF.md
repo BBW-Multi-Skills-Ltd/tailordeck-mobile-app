@@ -153,28 +153,14 @@ Backend should eventually create deadline reminders from job delivery date/time.
   - job-photos
   - documents
 
-## Current Blocker Before Backend Resumes
-
-The committed migration file is empty:
-
-```text
-supabase/migrations/20260604141720_remote_schema.sql
-```
-
-Before backend implementation continues, the real Supabase schema must be captured into migrations so another developer can recreate the database from git.
-
-Recommended options:
-
-1. Install/start Docker Desktop, then run `npx supabase db pull` again and commit the generated schema migration.
-2. If Docker is not available, manually create migration SQL files from the SQL already run in the Supabase dashboard.
-
-## Frontend Quality Status
+## Migration Status`r`n`r`nThe remote Supabase schema has been captured locally:`r`n`r`n```text`r`nsupabase/migrations/20260722221024_remote_schema.sql`r`n``` `r`n`r`nThe old empty migration `supabase/migrations/20260604141720_remote_schema.sql` was removed. Future backend work should add incremental migration files instead of editing the pulled baseline directly unless intentionally rebuilding the baseline before launch.`r`n`r`n## Frontend Quality Status
 
 Current verified commands:
 
 ```bash
-npm run lint
-npm run build
+npm run lint\r\nnpm run test\r\nnpm run build
 ```
 
 Both pass.
+
+

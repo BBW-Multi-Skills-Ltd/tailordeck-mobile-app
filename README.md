@@ -35,13 +35,10 @@ npm run dev
 ## Quality Commands
 
 ```bash
-npm run lint
-npm run typecheck
-npm run build
-npm run quality
+npm run lint\r\nnpm run test\r\nnpm run typecheck\r\nnpm run build\r\nnpm run quality
 ```
 
-`npm run quality` runs lint and the production build.
+`npm run quality` runs lint, unit tests, and the production build.
 
 ## Frontend Architecture
 
@@ -58,7 +55,7 @@ npm run quality
 
 Supabase frontend wiring exists, but backend work is paused while frontend UX is finalized. Client and job data flows are partially connected through service files and React Query hooks. Some local settings flows still use local storage and will be replaced with Supabase-backed persistence later.
 
-Important: the current `supabase/migrations/20260604141720_remote_schema.sql` file is empty. Before backend resumes, pull or recreate the actual schema into committed migration files so the database can be reproduced from source control.
+Supabase schema has been pulled into `supabase/migrations/20260722221024_remote_schema.sql`. Keep future database changes in committed migration files so the project remains reproducible.
 
 ## Production Notes
 
@@ -67,3 +64,5 @@ Important: the current `supabase/migrations/20260604141720_remote_schema.sql` fi
 - Clients and jobs use soft-delete patterns in the frontend service layer.
 - Money values should be stored as kobo in Supabase and formatted as Naira in the UI.
 - Nigerian phone numbers should be normalized before persistence.
+
+

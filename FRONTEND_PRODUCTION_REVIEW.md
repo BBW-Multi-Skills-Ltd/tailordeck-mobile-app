@@ -4,7 +4,7 @@ Date: 2026-07-22
 
 ## CTO Score
 
-Overall frontend production score: 7.7 / 10
+Overall frontend production score: 8.2 / 10
 
 TailorDeck is no longer a rough prototype. The app has a coherent product flow, route-level code splitting, Supabase service boundaries, strong mobile UX direction, and a much cleaner component structure than before. It is good enough for internal testing and controlled beta review.
 
@@ -21,12 +21,11 @@ It is not yet a hard production-grade SaaS frontend for large-scale public launc
 - Invoice/receipt preview is isolated under template and document components.
 - `.env` is git-ignored and no service-role key is exposed in frontend code.
 - `npm run lint` is clean with no warnings.
-- `npm run build` passes.
+- `npm run test`\r\n- `npm run build` passes.
 
 ## Main Risks Before Public Launch
 
-1. Backend reproducibility is incomplete.
-The remote Supabase database may work, but the committed migration file is empty. If the project is recreated, the schema cannot be rebuilt from git yet.
+1. Backend reproducibility is now partially covered.`r`nThe remote Supabase schema has been pulled into `supabase/migrations/20260722221024_remote_schema.sql`. Future backend changes still need disciplined incremental migrations.
 
 2. Some flows still use local storage.
 Several settings and subscription UI flows still save locally. This is acceptable while backend work is paused, but not acceptable for real multi-device usage.
@@ -35,7 +34,7 @@ Several settings and subscription UI flows still save locally. This is acceptabl
 The most visible subscription alerts were removed, but client deletion, job discard, clear history, and some settings failures still use native browser dialogs.
 
 5. Automated tests are missing.
-There are no unit, integration, or E2E tests. The app relies on manual testing and TypeScript/lint/build checks.
+Basic unit tests now cover money formatting, Nigerian phone normalization, and new-job Supabase payload mapping. E2E coverage is still missing.
 
 6. Bundle size should be watched.
 The dashboard route is heavy because of Recharts. PDF export libraries are heavy but correctly dynamically imported.
@@ -51,7 +50,7 @@ Some empty states exist, but the final quality depends on replacing all remainin
 Passed:
 
 - `npm run lint`
-- `npm run build`
+- `npm run test`\r\n- `npm run build`
 
 Recommended before every review handoff:
 
@@ -68,5 +67,7 @@ npm run quality
 5. Consolidate repeated card, row, input, modal, and confirmation UI into shared primitives.
 6. Add a bundle analyzer before optimizing chart libraries.
 7. Do manual mobile QA on Android Chrome and iOS Safari safe-area behavior.
+
+
 
 
