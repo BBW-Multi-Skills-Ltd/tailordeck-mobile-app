@@ -3868,6 +3868,8 @@ button.more-row {
 
 .settings-reminder-card {
   padding: 12px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--clay-highlight) 34%, var(--bg-card) 66%), var(--bg-card));
 }
 
 .settings-panel-guide {
@@ -3901,6 +3903,7 @@ button.more-row {
 
 .settings-reminder-row {
   min-height: 44px;
+  gap: 12px;
 }
 
 .settings-reminder-group {
@@ -3909,8 +3912,8 @@ button.more-row {
 
 .settings-reminder-label {
   margin: 0;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 650;
   color: var(--text-h);
   letter-spacing: -0.08px;
 }
@@ -3937,6 +3940,8 @@ button.more-row {
   padding: 12px;
   display: grid;
   gap: 9px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--clay-highlight) 34%, var(--bg-card) 66%), var(--bg-card));
 }
 
 .business-form-card-title {
@@ -3958,9 +3963,10 @@ button.more-row {
 
 .settings-business-label {
   margin: 0;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 650;
   color: var(--text-h);
+  letter-spacing: -0.08px;
 }
 
 .settings-business-input {
@@ -3969,7 +3975,7 @@ button.more-row {
 
 .settings-panel-save-btn {
   min-height: 42px;
-  border-radius: 12px;
+  border-radius: var(--clay-radius-sm);
 }
 
 .settings-security-form {
@@ -4213,7 +4219,8 @@ button.more-row {
   max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0 2px 2px;
+  margin-inline: -2px;
+  padding: 1px 2px 3px;
   scrollbar-width: none;
 }
 
@@ -4223,10 +4230,20 @@ button.more-row {
 
 .settings-business-platform-btn {
   min-height: 40px;
+  border-radius: var(--clay-radius-sm);
+  border-color: var(--clay-border);
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
   padding: 0 12px;
   font-size: 13px;
+  font-weight: 650;
   flex-shrink: 0;
   white-space: nowrap;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-business-platform-btn:active {
+  transform: scale(0.97);
 }
 
 .settings-business-platform-pill-content {
@@ -4236,9 +4253,10 @@ button.more-row {
 }
 
 .settings-business-platform-btn.active {
-  border-color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%);
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--clay-border) 52%);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--primary);
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .settings-business-handle-row {
@@ -4251,7 +4269,7 @@ button.more-row {
 
 .settings-business-add-btn {
   min-height: 46px;
-  border-radius: 12px;
+  border-radius: var(--clay-radius-sm);
   padding: 0 12px;
   white-space: nowrap;
 }
@@ -4267,9 +4285,10 @@ button.more-row {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--bg-input);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
   min-height: 42px;
   padding: 0 10px;
 }
@@ -4303,10 +4322,10 @@ button.more-row {
 
 .settings-document-progress,
 .settings-document-section {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .settings-document-progress {
@@ -4335,19 +4354,21 @@ button.more-row {
 
 .settings-document-progress-count {
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border) 72%);
-  background: color-mix(in srgb, var(--primary) 9%, var(--bg-card) 91%);
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--clay-border) 72%);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 9%, var(--bg-card) 91%), var(--bg-card));
   color: var(--primary);
   font-size: 12px;
   font-weight: 700;
   padding: 5px 9px;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--primary) 8%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .settings-document-progress-track {
   height: 8px;
   border-radius: 999px;
-  background: var(--bg-muted);
+  background: color-mix(in srgb, var(--border) 58%, var(--bg-card) 42%);
   overflow: hidden;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .settings-document-progress-track span {
@@ -4376,18 +4397,19 @@ button.more-row {
   align-items: center;
   gap: 5px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
+  border: 1px solid var(--clay-border);
+  background: var(--clay-surface-muted);
   color: var(--text-muted);
   min-height: 30px;
   padding: 0 9px;
   font-size: 11px;
   font-weight: 600;
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.04), inset 0 1px 0 var(--clay-highlight);
 }
 
 .settings-document-check.complete {
-  border-color: color-mix(in srgb, var(--success) 34%, var(--border) 66%);
-  background: var(--success-bg);
+  border-color: color-mix(in srgb, var(--success) 34%, var(--clay-border) 66%);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 12%, var(--bg-card) 88%), var(--bg-card));
   color: var(--success);
 }
 
@@ -4437,15 +4459,16 @@ button.more-row {
 .settings-document-preview-card {
   min-width: 100%;
   scroll-snap-align: start;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--bg-input);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-rest);
   overflow: hidden;
 }
 
 .settings-document-preview-card-head {
   padding: 9px 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--clay-border);
 }
 
 .settings-document-preview-card-head p {
@@ -4467,17 +4490,25 @@ button.more-row {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--clay-border));
   border-radius: 999px;
-  background: var(--bg-card);
+  background: var(--clay-surface);
   color: var(--primary);
   font-size: 11px;
   font-weight: 700;
   padding: 5px 9px;
+  box-shadow: var(--clay-shadow-press);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-document-open-btn:active {
+  transform: scale(0.97);
 }
 
 .settings-document-preview-paper {
-  background: var(--bg-muted);
+  background:
+    radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--primary) 6%, transparent) 0 28%, transparent 44%),
+    color-mix(in srgb, var(--bg-muted) 78%, var(--bg-card) 22%);
   padding: 8px;
   overflow: hidden;
 }
@@ -4499,17 +4530,18 @@ button.more-row {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(20, 12, 16, 0.72);
-  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, #140c10 72%, transparent);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
 }
 
 .document-preview-modal {
   width: min(1180px, 100%);
   max-height: calc(100svh - 32px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 22px;
-  background: var(--bg-card);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-lg);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest), 0 24px 60px rgba(0, 0, 0, 0.28);
   overflow: hidden;
 }
 
@@ -4518,7 +4550,10 @@ button.more-row {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--clay-border);
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
 }
 
 .document-preview-modal-head p {
@@ -4538,12 +4573,13 @@ button.more-row {
 .document-preview-zoom-value {
   min-width: 34px;
   height: 32px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--clay-border);
   border-radius: 999px;
-  background: var(--bg-soft);
+  background: var(--clay-surface-muted);
   color: var(--text-h);
   font-size: 14px;
   font-weight: 800;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .document-preview-zoom-value {
@@ -4557,6 +4593,10 @@ button.more-row {
   height: calc(100svh - 90px);
   padding: 8px;
   overflow: auto;
+  background:
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--primary) 7%, transparent) 0 24%, transparent 45%),
+    radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 9%, transparent) 0 24%, transparent 42%),
+    color-mix(in srgb, var(--bg-muted) 82%, var(--bg-card) 18%);
 }
 
 .document-preview-zoom-shell {
@@ -4685,10 +4725,10 @@ button.more-row {
 .settings-brand-upload-box {
   width: 100%;
   min-height: 62px;
-  border-radius: 18px;
-  border: 2px dashed var(--border);
+  border-radius: var(--clay-radius-md);
+  border: 1.5px dashed color-mix(in srgb, var(--primary) 18%, var(--clay-border));
   color: var(--text-muted);
-  background: var(--bg-input);
+  background: var(--clay-surface-muted);
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
@@ -4697,6 +4737,12 @@ button.more-row {
   font-weight: 500;
   cursor: pointer;
   padding: 8px 12px;
+  box-shadow: var(--clay-shadow-press);
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
+}
+
+.settings-brand-upload-box:active {
+  transform: scale(0.99);
 }
 
 .settings-brand-upload-input {
@@ -4771,15 +4817,16 @@ button.more-row {
 .settings-brand-upload-preview {
   width: 44px;
   height: 44px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
+  border-radius: var(--clay-radius-sm);
+  border: 1px solid var(--clay-border);
+  background: var(--clay-surface);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .settings-brand-upload-preview img {
@@ -4873,10 +4920,11 @@ button.more-row {
 .settings-reminder-chip-row {
   display: flex;
   flex-wrap: nowrap;
-  gap: 10px;
+  gap: 8px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 2px;
+  margin-inline: -2px;
+  padding: 1px 2px 3px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -4888,6 +4936,14 @@ button.more-row {
 .settings-reminder-chip {
   flex-shrink: 0;
   white-space: nowrap;
+  border-color: var(--clay-border);
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.settings-reminder-chip:active {
+  transform: scale(0.97);
 }
 
 .settings-reminder-sound-chip {
@@ -4902,10 +4958,10 @@ button.more-row {
 }
 
 .settings-reminder-chip.active {
-  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
-  background: color-mix(in srgb, var(--primary) 10%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--clay-border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--primary);
-  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 10%, transparent);
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .settings-choice-pill {
@@ -5011,15 +5067,20 @@ button.more-row {
   transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
+.settings-business-detail-chip:active {
+  transform: scale(0.97);
+}
+
 .settings-business-detail-chip.active {
   border-color: var(--primary);
   background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--primary);
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .settings-business-detail-chip.missing {
-  border-color: color-mix(in srgb, var(--border) 76%, transparent);
-  background: color-mix(in srgb, var(--bg-input) 72%, var(--bg-card) 28%);
+  border-color: color-mix(in srgb, var(--clay-border) 76%, transparent);
+  background: color-mix(in srgb, var(--clay-surface-muted) 82%, var(--bg-card) 18%);
   color: var(--text-muted);
 }
 
@@ -5037,6 +5098,8 @@ button.more-row {
 .settings-business-detail-chip .settings-radio-indicator {
   width: 14px;
   height: 14px;
+  border-color: currentColor;
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
 }
 
 .settings-business-detail-chip .settings-radio-indicator::after {
@@ -5116,26 +5179,28 @@ button.more-row {
   width: 48px;
   height: 28px;
   border-radius: 999px;
-  border: 1px solid var(--border-strong);
-  background: var(--bg-muted);
+  border: 1px solid var(--clay-border);
+  background: var(--clay-surface-muted);
   padding: 2px;
   display: inline-flex;
   align-items: center;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  box-shadow: var(--clay-shadow-press);
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .settings-toggle-knob {
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: var(--bg-card);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--shadow-color) 18%, transparent), inset 0 1px 0 var(--clay-highlight);
   transition: transform var(--transition-fast);
 }
 
 .settings-toggle.active {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: linear-gradient(145deg, var(--primary), color-mix(in srgb, var(--primary) 82%, var(--gold) 18%));
+  border-color: color-mix(in srgb, var(--primary) 58%, var(--clay-border) 42%);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 16%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .settings-toggle.active .settings-toggle-knob {
@@ -6342,20 +6407,22 @@ button.more-row {
   align-items: center;
   gap: 9px;
   min-height: 58px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--card-soft);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface-muted);
   color: var(--text-h);
   padding: 10px;
   text-align: left;
   cursor: pointer;
+  box-shadow: var(--clay-shadow-press);
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .job-doc-action-btn.primary {
-  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
-  background: color-mix(in srgb, var(--primary) 9%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--clay-border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--primary);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .job-doc-action-btn:active:not(:disabled) {
@@ -6364,8 +6431,8 @@ button.more-row {
 
 .job-doc-action-btn:disabled {
   cursor: default;
-  border-color: color-mix(in srgb, var(--success) 36%, var(--border));
-  background: color-mix(in srgb, var(--success) 10%, var(--card));
+  border-color: color-mix(in srgb, var(--success) 36%, var(--clay-border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--success);
   opacity: 0.78;
   filter: saturate(0.86);
@@ -6587,20 +6654,22 @@ button.more-row {
 .side-sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.52);
+  background: color-mix(in srgb, #000 52%, transparent);
   z-index: 260;
   display: flex;
   justify-content: flex-end;
   overscroll-behavior: contain;
+  backdrop-filter: blur(10px) saturate(135%);
+  -webkit-backdrop-filter: blur(10px) saturate(135%);
 }
 
 .side-sheet {
   width: min(430px, 100vw);
   height: 100svh;
   margin-right: max(0px, calc((100vw - 430px) / 2));
-  background: var(--bg-card);
-  border-left: 1px solid var(--border);
-  box-shadow: -16px 0 32px rgba(0, 0, 0, 0.22);
+  background: var(--clay-surface);
+  border-left: 1px solid var(--clay-border);
+  box-shadow: var(--clay-shadow-rest), -16px 0 34px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   transform: translateX(0);
@@ -6615,8 +6684,10 @@ button.more-row {
   align-items: center;
   justify-content: space-between;
   padding: 12px 12px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
+  border-bottom: 1px solid var(--clay-border);
+  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  backdrop-filter: blur(12px) saturate(145%);
+  -webkit-backdrop-filter: blur(12px) saturate(145%);
 }
 
 .side-sheet-title {
@@ -6636,6 +6707,9 @@ button.more-row {
   min-height: 0;
   overflow-y: auto;
   padding: 12px 12px calc(16px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at 8% 6%, color-mix(in srgb, var(--primary) 5%, transparent) 0 20%, transparent 42%),
+    color-mix(in srgb, var(--bg) 88%, var(--bg-card) 12%);
 }
 
 .side-sheet-doc-preview {
@@ -6701,9 +6775,11 @@ button.more-row {
   display: grid;
   gap: 7px;
   padding: 9px 16px 11px;
-  background: color-mix(in srgb, var(--bg) 94%, var(--bg-card) 6%);
-  border-bottom: 1px solid var(--divider);
-  box-shadow: 0 12px 22px -18px color-mix(in srgb, var(--shadow-color) 40%, transparent);
+  background: color-mix(in srgb, var(--bg) 86%, var(--bg-card) 14%);
+  border-bottom: 1px solid var(--clay-border);
+  box-shadow: 0 12px 26px -18px rgba(74, 55, 40, 0.22), inset 0 -1px 0 var(--clay-highlight);
+  backdrop-filter: blur(16px) saturate(145%);
+  -webkit-backdrop-filter: blur(16px) saturate(145%);
 }
 
 .wizard-fixed-top::after {
@@ -6721,10 +6797,10 @@ button.more-row {
   display: grid;
   gap: 7px;
   padding: 9px 10px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--bg-card) 96%, var(--bg) 4%);
-  box-shadow: var(--shadow-sm), 0 10px 22px color-mix(in srgb, var(--shadow-color) 12%, transparent);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
   isolation: isolate;
 }
 
@@ -6756,7 +6832,8 @@ button.more-row {
   height: 5px;
   overflow: hidden;
   border-radius: var(--radius-full);
-  background: color-mix(in srgb, var(--border) 76%, var(--bg-card) 24%);
+  background: color-mix(in srgb, var(--border) 62%, var(--bg-card) 38%);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-progress-fill {
@@ -6786,25 +6863,26 @@ button.more-row {
   gap: 4px;
   flex: 1 0 auto;
   padding: 5px 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--card-soft);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
   color: var(--text-muted);
   font-size: 11px;
   font-weight: 650;
   line-height: 1;
   white-space: nowrap;
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.04), inset 0 1px 0 var(--clay-highlight);
 }
 
 .wizard-progress-pill.is-active {
   border-color: color-mix(in srgb, var(--primary) 36%, var(--border));
-  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--primary);
 }
 
 .wizard-progress-pill.is-done {
   border-color: color-mix(in srgb, var(--success) 38%, var(--border));
-  background: color-mix(in srgb, var(--success) 11%, var(--card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 12%, var(--bg-card) 88%), var(--bg-card));
   color: var(--success);
 }
 
@@ -6856,11 +6934,11 @@ button.more-row {
   display: flex;
   gap: 10px;
   border-radius: 0;
-  background: color-mix(in srgb, var(--bg) 94%, white 6%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--bg) 86%, var(--bg-card) 14%);
+  backdrop-filter: blur(16px) saturate(145%);
+  -webkit-backdrop-filter: blur(16px) saturate(145%);
   padding: 8px 16px 6px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--clay-border);
   border-left: none;
   border-right: none;
   border-bottom: none;
@@ -6891,10 +6969,10 @@ button.more-row {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
   padding: 12px;
 }
 
@@ -6912,11 +6990,12 @@ button.more-row {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  background: var(--primary-bg);
+  background: var(--clay-surface-muted);
   border: 1px solid var(--primary-border);
   color: var(--primary);
   font-size: 12px;
   font-weight: 800;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-guided-title {
@@ -6970,9 +7049,9 @@ button.more-row {
 
 .wizard-choice-card {
   min-height: 70px;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg-input);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
   color: var(--text);
   padding: 10px;
   text-align: left;
@@ -6981,6 +7060,7 @@ button.more-row {
   justify-content: center;
   gap: 4px;
   cursor: pointer;
+  box-shadow: var(--clay-shadow-press);
   transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -6990,8 +7070,8 @@ button.more-row {
 
 .wizard-choice-card.active {
   border-color: color-mix(in srgb, var(--primary) 55%, var(--border) 45%);
-  background: color-mix(in srgb, var(--primary) 8%, var(--bg-card) 92%);
-  box-shadow: var(--clay-shadow-press);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 9%, var(--bg-card) 91%), var(--bg-card));
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--primary) 10%, transparent), inset 0 1px 0 var(--clay-highlight);
 }
 
 .wizard-choice-title {
@@ -7258,10 +7338,10 @@ button.more-row {
 
 .wizard-material-decision-card,
 .wizard-no-material-card {
-  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--primary) 5%, var(--card));
-  box-shadow: var(--shadow-sm);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--clay-border));
+  border-radius: var(--clay-radius-md);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 5%, var(--bg-card) 95%), var(--bg-card));
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .wizard-material-decision-card {
@@ -7290,7 +7370,8 @@ button.more-row {
   align-items: center;
   justify-content: center;
   color: var(--primary);
-  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-material-decision-head strong,
@@ -7359,9 +7440,9 @@ button.more-row {
 .wizard-material-browse-toggle {
   width: 100%;
   min-height: 38px;
-  border: 1px dashed color-mix(in srgb, var(--primary) 26%, var(--border));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
+  border: 1px dashed color-mix(in srgb, var(--primary) 26%, var(--clay-border));
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
   color: var(--primary);
   display: flex;
   align-items: center;
@@ -7370,6 +7451,7 @@ button.more-row {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-material-browse-toggle span {
@@ -7381,11 +7463,11 @@ button.more-row {
 .wizard-material-quick-chip,
 .wizard-material-category-chip {
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   padding: 0 11px;
   font-size: 12px;
   font-weight: 650;
@@ -7403,14 +7485,14 @@ button.more-row {
 .wizard-material-category-chip.active {
   color: var(--primary);
   border-color: color-mix(in srgb, var(--primary) 50%, var(--border) 50%);
-  background: color-mix(in srgb, var(--primary) 9%, var(--bg-card) 91%);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 9%, var(--bg-card) 91%), var(--bg-card));
 }
 
 .wizard-material-options-panel {
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -7487,9 +7569,9 @@ button.more-row {
 
 .wizard-material-option {
   width: 100%;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-input);
+  border: 1.5px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
   min-height: 74px;
   padding: 10px 12px;
   text-align: left;
@@ -7498,12 +7580,13 @@ button.more-row {
   gap: 4px;
   cursor: pointer;
   scroll-snap-align: start;
-  transition: border-color var(--transition-fast), background var(--transition-fast);
+  box-shadow: var(--clay-shadow-press);
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
 }
 
 .wizard-material-option.active {
   border-color: var(--primary-border);
-  background: var(--primary-bg);
+  background: linear-gradient(145deg, var(--primary-bg), var(--bg-card));
 }
 
 .wizard-material-custom-option {
@@ -7546,9 +7629,10 @@ button.more-row {
   align-items: flex-start;
   border: 1px solid color-mix(in srgb, var(--success) 22%, var(--border));
   border-radius: 15px;
-  background: color-mix(in srgb, var(--success) 7%, var(--card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 8%, var(--bg-card) 92%), var(--bg-card));
   padding: 10px 11px;
   color: var(--success);
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .wizard-selected-material strong {
@@ -7589,15 +7673,16 @@ button.more-row {
 
 .wizard-upload-box {
   width: 100%;
-  border: 1.5px dashed var(--border-strong);
-  border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--clay-border);
+  border-radius: var(--clay-radius-md);
   min-height: 56px;
   padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: var(--bg-card);
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-upload-input {
@@ -7643,9 +7728,9 @@ button.more-row {
 
 .wizard-color-chip {
   min-height: 34px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--clay-border);
   border-radius: 999px;
-  background: var(--bg-card);
+  background: var(--clay-surface);
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
@@ -7656,15 +7741,16 @@ button.more-row {
   font-weight: 550;
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
 }
 
 .wizard-yard-chip {
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -7677,11 +7763,11 @@ button.more-row {
 
 .wizard-quality-chip {
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -7694,11 +7780,11 @@ button.more-row {
 
 .wizard-source-chip {
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -7714,7 +7800,7 @@ button.more-row {
 .wizard-quality-chip.active,
 .wizard-source-chip.active {
   border-color: var(--primary-border);
-  background: var(--primary-bg);
+  background: linear-gradient(145deg, var(--primary-bg), var(--bg-card));
   color: var(--primary);
 }
 
@@ -7753,9 +7839,9 @@ button.more-row {
 .wizard-color-option,
 .wizard-yard-option {
   min-height: 46px;
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg-card);
+  border: 1.5px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -7764,12 +7850,13 @@ button.more-row {
   text-align: left;
   cursor: pointer;
   scroll-snap-align: start;
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .wizard-color-option.active,
 .wizard-yard-option.active {
   border-color: var(--primary-border);
-  background: var(--primary-bg);
+  background: linear-gradient(145deg, var(--primary-bg), var(--bg-card));
 }
 
 .wizard-color-option span:last-child {
@@ -7852,11 +7939,11 @@ button.more-row {
 .wizard-expense-add-btn {
   width: 100%;
   min-height: 58px;
-  border: none;
-  border-radius: var(--radius-lg);
-  background: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary-light) 55%, transparent);
+  border-radius: var(--clay-radius-md);
+  background: linear-gradient(145deg, var(--primary-light), var(--primary));
   color: #FAF0E8;
-  box-shadow: var(--shadow-primary);
+  box-shadow: var(--clay-shadow-primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -7882,11 +7969,11 @@ button.more-row {
 
 .wizard-expense-chip {
   min-height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-card);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface);
   color: var(--text);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 7px rgba(74, 55, 40, 0.05), inset 0 1px 0 var(--clay-highlight);
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -8026,10 +8113,11 @@ button.more-row {
   grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
-  border-radius: 18px;
-  background: color-mix(in srgb, var(--primary) 6%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--clay-border));
+  border-radius: var(--clay-radius-md);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--primary) 6%, var(--bg-card) 94%), var(--bg-card));
   padding: 12px;
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .wizard-next-step-icon {
@@ -8039,8 +8127,9 @@ button.more-row {
   width: 42px;
   height: 42px;
   border-radius: 16px;
-  background: color-mix(in srgb, var(--primary) 12%, var(--card));
+  background: var(--clay-surface-muted);
   color: var(--primary);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-next-step-card strong {
@@ -8077,7 +8166,7 @@ button.more-row {
   min-width: 54px;
   border-radius: var(--radius-full);
   border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent);
-  background: color-mix(in srgb, var(--danger) 9%, var(--card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--danger) 9%, var(--bg-card) 91%), var(--bg-card));
   color: var(--danger);
   padding: 6px 10px;
   text-align: center;
@@ -8088,7 +8177,7 @@ button.more-row {
 
 .wizard-checklist-score.is-ready {
   border-color: color-mix(in srgb, var(--success) 26%, transparent);
-  background: color-mix(in srgb, var(--success) 10%, var(--card));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 10%, var(--bg-card) 90%), var(--bg-card));
   color: var(--success);
 }
 
@@ -8103,10 +8192,11 @@ button.more-row {
   align-items: center;
   gap: 8px;
   min-height: 54px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--card-soft);
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-md);
+  background: var(--clay-surface);
   padding: 8px 10px;
+  box-shadow: var(--clay-shadow-rest);
 }
 
 .wizard-checklist-icon {
@@ -8116,8 +8206,9 @@ button.more-row {
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: color-mix(in srgb, var(--gold) 14%, var(--card));
+  background: var(--clay-surface-muted);
   color: var(--gold);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-checklist-copy {
@@ -8168,8 +8259,9 @@ button.more-row {
   width: 36px;
   height: 36px;
   border-radius: 13px;
-  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  background: var(--clay-surface-muted);
   color: var(--primary);
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-reference-target-head strong {
@@ -8196,13 +8288,14 @@ button.more-row {
 .wizard-reference-count {
   min-width: 44px;
   border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg-soft);
+  border: 1px solid var(--clay-border);
+  background: var(--clay-surface-muted);
   color: var(--text-muted);
   padding: 5px 8px;
   text-align: center;
   font-size: 11px;
   font-weight: 700;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .wizard-reference-upload-box {
@@ -8491,7 +8584,9 @@ button.more-row {
   width: 92px;
   height: 92px;
   border-radius: var(--radius-full);
-  background: rgba(5, 150, 105, 0.18);
+  background: linear-gradient(145deg, rgba(5, 150, 105, 0.18), var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--success) 22%, var(--clay-border));
+  box-shadow: var(--clay-shadow-rest);
   display: flex;
   align-items: center;
   justify-content: center;
