@@ -32,6 +32,7 @@ export async function saveBusinessSettings(settings: TailorSettings) {
       business_phone: settings.businessInfo.businessPhone,
       business_email: settings.businessInfo.businessEmail,
       website: settings.businessInfo.website,
+      cac_registration_number: settings.businessInfo.cacRegistrationNumber,
     }),
     updateSocialHandles(socialRows),
   ])
@@ -69,5 +70,6 @@ export async function saveBrandSettings(settings: TailorSettings) {
     show_website: settings.brand.includeBusinessDetails.website,
     show_social: settings.brand.includeBusinessDetails.social,
     show_address: settings.brand.includeBusinessDetails.address,
+    show_cac: settings.brand.includeBusinessDetails.cac,
   })
 }

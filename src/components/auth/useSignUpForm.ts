@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadTailorSettings, saveTailorSettings, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
+import { parseAuthInput, signUpFormSchema } from '../../validation/authSchemas'
 
 export function useSignUpForm() {
   const navigate = useNavigate()
@@ -21,8 +22,10 @@ export function useSignUpForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setErrorMessage('')
-    if (!email.trim() || !password.trim()) {
-      setErrorMessage('Enter at least email and password to create account.')
+    try {
+      parseAuthInput(signUpFormSchema, { agree, confirmPassword, email, fullName, password, phone })
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Please review your details.')
       return
     }
 

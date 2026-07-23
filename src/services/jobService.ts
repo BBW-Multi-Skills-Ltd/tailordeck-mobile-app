@@ -10,6 +10,7 @@ import { buildJobExpenseRows, buildJobPersonRows } from './jobs/jobRelationRows'
 import { buildFullJobRow, buildJobRow } from './jobs/jobRows'
 import { buildJobUpdateRow } from './jobs/jobUpdateRows'
 import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
+import { validateCreateFullJobInput } from '../validation/jobSchemas'
 
 export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput } from './jobs/jobServiceTypes'
 
@@ -57,6 +58,7 @@ export async function createJob(input: CreateJobInput): Promise<MockJob> {
 }
 
 export async function createFullJob(input: CreateFullJobInput): Promise<MockJob> {
+  validateCreateFullJobInput(input)
   const userId = await requireUserId()
   const client = input.clientId
     ? null

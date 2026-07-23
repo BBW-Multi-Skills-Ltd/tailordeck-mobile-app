@@ -31,6 +31,7 @@ export interface BrandSettingsRow {
   show_website: boolean
   show_social: boolean
   show_address: boolean
+  show_cac: boolean
   created_at: string
   updated_at: string
 }

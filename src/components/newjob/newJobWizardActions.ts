@@ -15,13 +15,14 @@ type NewJobWizardActionParams = {
   confirmDiscard: () => Promise<boolean>
   navigate: NavigateFunction
   state: NewJobWizardStateModel
+  validateCurrentStep: () => boolean
 }
 
-export function createNewJobWizardActions({ confirmDiscard, navigate, state }: NewJobWizardActionParams) {
+export function createNewJobWizardActions({ confirmDiscard, navigate, state, validateCurrentStep }: NewJobWizardActionParams) {
   const stepOneActions = createStepOneActions(getStepOneActionParams(state))
   const materialActions = createMaterialActions(getMaterialActionParams(state))
   const costingActions = createCostingActions(getCostingActionParams(state))
-  const navigationActions = createNavigationActions(getNavigationActionParams(confirmDiscard, navigate, state))
+  const navigationActions = createNavigationActions(getNavigationActionParams(confirmDiscard, navigate, state, validateCurrentStep))
 
   return {
     addAdult: stepOneActions.addAdult,

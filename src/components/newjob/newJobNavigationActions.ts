@@ -12,6 +12,7 @@ type NavigationActionParams = {
   setSuccessOpen: (value: boolean) => void
   step: number
   stepFourReviewMode: boolean
+  validateCurrentStep: () => boolean
 }
 
 export function createNavigationActions({
@@ -24,6 +25,7 @@ export function createNavigationActions({
   setSuccessOpen,
   step,
   stepFourReviewMode,
+  validateCurrentStep,
 }: NavigationActionParams) {
   async function goBack(): Promise<void> {
     if (step === 3 && stepFourReviewMode) {
@@ -41,6 +43,8 @@ export function createNavigationActions({
   }
 
   function goNext(): void {
+    if (!validateCurrentStep()) return
+
     if (step === 2) {
       setStepFourReviewMode(false)
       setDraftSaved(false)

@@ -55,7 +55,12 @@ export function getCostingActionParams(state: NewJobWizardStateModel) {
   }
 }
 
-export function getNavigationActionParams(confirmDiscard: () => Promise<boolean>, navigate: NavigateFunction, state: NewJobWizardStateModel) {
+export function getNavigationActionParams(
+  confirmDiscard: () => Promise<boolean>,
+  navigate: NavigateFunction,
+  state: NewJobWizardStateModel,
+  validateCurrentStep: () => boolean,
+) {
   return {
     confirmDiscard,
     navigate,
@@ -66,5 +71,6 @@ export function getNavigationActionParams(confirmDiscard: () => Promise<boolean>
     setSuccessOpen: state.setSuccessOpen,
     step: state.step,
     stepFourReviewMode: state.stepFourReviewMode,
+    validateCurrentStep,
   }
 }

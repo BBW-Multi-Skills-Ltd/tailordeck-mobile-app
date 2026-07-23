@@ -56,7 +56,7 @@ export default function NewJob() {
         isFinalizing={state.isFinalizing}
         onBack={actions.goBack}
         onNext={actions.goNext}
-        onProceedToReview={() => actions.setStepFourReviewMode(true)}
+        onProceedToReview={actions.proceedToReview}
         onSaveDraft={actions.saveDraft}
         onFinalize={actions.handleFinalizeJob}
       />

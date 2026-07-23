@@ -44,7 +44,7 @@ export function mergeSettingsRows(rows: {
       businessPhone: rows.business?.business_phone || fallback.businessInfo.businessPhone,
       businessEmail: rows.business?.business_email || fallback.businessInfo.businessEmail,
       website: rows.business?.website || fallback.businessInfo.website,
-      cacRegistrationNumber: fallback.businessInfo.cacRegistrationNumber,
+      cacRegistrationNumber: rows.business?.cac_registration_number || fallback.businessInfo.cacRegistrationNumber,
       socialHandles: (rows.handles ?? []).map((handle) => ({
         id: handle.id,
         platform: handle.platform,
@@ -63,7 +63,7 @@ export function mergeSettingsRows(rows: {
         website: rows.brand?.show_website ?? fallback.brand.includeBusinessDetails.website,
         social: rows.brand?.show_social ?? fallback.brand.includeBusinessDetails.social,
         address: rows.brand?.show_address ?? fallback.brand.includeBusinessDetails.address,
-        cac: fallback.brand.includeBusinessDetails.cac,
+        cac: rows.brand?.show_cac ?? fallback.brand.includeBusinessDetails.cac,
       },
     },
     subscription: {

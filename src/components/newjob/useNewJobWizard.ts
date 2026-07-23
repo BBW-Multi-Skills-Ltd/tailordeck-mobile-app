@@ -8,6 +8,7 @@ import { createNewJobWizardActions } from './newJobWizardActions'
 import { getNewJobWizardDerived } from './newJobWizardDerived'
 import { getNewJobWizardStateSnapshot } from './newJobWizardStateSnapshot'
 import { buildNewJobPayload } from './newJobSupabasePayload'
+import { validateNewJobStep } from './newJobStepValidation'
 import { usePageNoScroll, useSharedItemTypeSync } from './useNewJobEffects'
 import { useRepeatClientPrefill } from './useRepeatClientPrefill'
 import { useNewJobWizardState } from './useNewJobWizardState'
@@ -23,6 +24,13 @@ export function useNewJobWizard() {
   const createFullJobMutation = useCreateFullJobMutation()
   const derived = getNewJobWizardDerived(state)
   const repeatClient = repeatClientQuery.data ?? undefined
+
+  function validateCurrentStep(): boolean {
+    const result = validateNewJobStep({ derived, repeatClientId, state, step: state.step })
+    if (result.ok) return true
+    feedback.toast(result.message, 'error')
+    return false
+  }
 
   useRepeatClientPrefill(repeatClient, {
     setClientName: state.setClientName,
@@ -67,12 +75,17 @@ export function useNewJobWizard() {
       }),
     navigate,
     state,
+    validateCurrentStep,
   })
 
   return {
     actions: {
       ...actions,
       handleFinalizeJob,
+      proceedToReview: () => {
+        if (!validateCurrentStep()) return
+        state.setStepFourReviewMode(true)
+      },
       viewCreatedJob: () => navigate(state.createdJobId ? `/jobs/${state.createdJobId}` : '/jobs'),
     },
     derived,

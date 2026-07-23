@@ -2,6 +2,7 @@
 import { supabase } from '../lib/supabase'
 import type { ProfileRow } from './types'
 import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
+import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
 
 export async function getProfile(): Promise<ProfileRow | null> {
   const userId = await requireUserId()
@@ -12,9 +13,10 @@ export async function getProfile(): Promise<ProfileRow | null> {
 
 export async function updateProfile(updates: Partial<Pick<ProfileRow, 'full_name' | 'email' | 'phone' | 'avatar_url' | 'avatar_storage_path' | 'onboarding_complete'>>): Promise<ProfileRow> {
   const userId = await requireUserId()
+  const safeUpdates = parseSettingsUpdate(profileUpdateSchema, updates)
   const next = {
-    ...updates,
-    phone_normalized: updates.phone ? normalizeNigerianPhone(updates.phone) : undefined,
+    ...safeUpdates,
+    phone_normalized: safeUpdates.phone ? normalizeNigerianPhone(safeUpdates.phone) : undefined,
     updated_at: new Date().toISOString(),
   }
   const { data, error } = await supabase.from('profiles').update(next).eq('user_id', userId).select('*').maybeSingle<ProfileRow>()
@@ -24,6 +26,7 @@ export async function updateProfile(updates: Partial<Pick<ProfileRow, 'full_name
 }
 
 export async function uploadAvatar(file: File): Promise<{ storagePath: string; signedUrl: string }> {
+  fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const storagePath = userScopedPath(userId, `avatar.${fileExtension(file)}`)
   await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file })

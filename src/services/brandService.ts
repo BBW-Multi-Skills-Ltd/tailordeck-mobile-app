@@ -1,4 +1,5 @@
-﻿import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
+import { brandSettingsUpdateSchema, fileUploadSchema, parseSettingsUpdate } from '../validation/settingsSchemas'
 import type { BrandSettingsRow } from './types'
 import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile } from './serviceHelpers'
 
@@ -11,9 +12,10 @@ export async function getBrandSettings(): Promise<BrandSettingsRow | null> {
 
 export async function updateBrandSettings(updates: Partial<BrandSettingsRow>): Promise<BrandSettingsRow> {
   const userId = await requireUserId()
+  const safeUpdates = parseSettingsUpdate(brandSettingsUpdateSchema, updates)
   const { data, error } = await supabase
     .from('brand_settings')
-    .upsert({ ...updates, user_id: userId, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+    .upsert({ ...safeUpdates, user_id: userId, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
     .select('*')
     .single<BrandSettingsRow>()
   if (error) throw error
@@ -21,6 +23,7 @@ export async function updateBrandSettings(updates: Partial<BrandSettingsRow>): P
 }
 
 export async function uploadLogo(file: File): Promise<{ storagePath: string; signedUrl: string }> {
+  fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const storagePath = `${userId}/logo.${fileExtension(file)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })
@@ -30,6 +33,7 @@ export async function uploadLogo(file: File): Promise<{ storagePath: string; sig
 }
 
 export async function uploadSignature(file: File): Promise<{ storagePath: string; signedUrl: string }> {
+  fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const storagePath = `${userId}/signature.${fileExtension(file)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })

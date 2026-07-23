@@ -9,6 +9,7 @@ export interface BusinessProfileRow {
   business_phone_normalized: string | null
   business_email: string | null
   website: string | null
+  cac_registration_number: string | null
   created_at: string
   updated_at: string
 }
