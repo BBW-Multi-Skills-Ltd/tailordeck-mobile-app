@@ -27,10 +27,10 @@ export default function JobStatusBreakdown({ statusCounts }: JobStatusBreakdownP
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--clay-surface)',
+                  border: '1px solid var(--clay-border)',
                   borderRadius: 14,
-                  boxShadow: 'var(--shadow-md)',
+                  boxShadow: 'var(--clay-shadow-rest)',
                   fontSize: 12,
                 }}
                 cursor={false}
