@@ -6,7 +6,8 @@ type UseAccountSecurityStateArgs = {
   confirmPasswordDraft: string
   onConfirmPasswordChange: (value: string) => void
   onPasswordChange: (value: string) => void
-  onSave: () => void | Promise<void>
+  onSaveDetails: () => void | Promise<void>
+  onUpdatePassword: () => void | Promise<void>
   passwordDraft: string
 }
 
@@ -15,7 +16,8 @@ export function useAccountSecurityState({
   currentDetails,
   onConfirmPasswordChange,
   onPasswordChange,
-  onSave,
+  onSaveDetails,
+  onUpdatePassword,
   passwordDraft,
 }: UseAccountSecurityStateArgs) {
   const [showPasswordForm, setShowPasswordForm] = useState(false)
@@ -33,7 +35,7 @@ export function useAccountSecurityState({
     currentDetails.phone !== savedDetails.phone
   const passwordDirty = passwordDraft.trim().length > 0 || confirmPasswordDraft.trim().length > 0
 
-  function handleDetailsAction() {
+  async function handleDetailsAction() {
     if (!isEditingDetails) {
       setSavedDetails(currentDetails)
       setIsEditingDetails(true)
@@ -45,7 +47,7 @@ export function useAccountSecurityState({
       return
     }
 
-    onSave()
+    await onSaveDetails()
     setSavedDetails(currentDetails)
     setIsEditingDetails(false)
     setDetailsSavedFlash(true)
@@ -57,7 +59,7 @@ export function useAccountSecurityState({
 
     setPasswordSaving(true)
     try {
-      await onSave()
+      await onUpdatePassword()
       setPasswordSavedFlash(true)
       window.setTimeout(() => {
         setPasswordSavedFlash(false)

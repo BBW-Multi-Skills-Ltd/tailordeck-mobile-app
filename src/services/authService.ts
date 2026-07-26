@@ -1,6 +1,13 @@
 import { normalizeNigerianPhone } from '../lib/phone'
 import { supabase } from '../lib/supabase'
-import { parseAuthInput, passwordResetSchema, signInSchema, signUpSchema } from '../validation/authSchemas'
+import {
+  emailUpdateSchema,
+  parseAuthInput,
+  passwordResetSchema,
+  passwordUpdateSchema,
+  signInSchema,
+  signUpSchema,
+} from '../validation/authSchemas'
 
 export async function signUpWithEmail(input: { fullName: string; email: string; password: string; phone: string }) {
   const safeInput = parseAuthInput(signUpSchema, input)
@@ -44,6 +51,26 @@ export async function sendPasswordReset(email: string) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(safeInput.email, {
     redirectTo: `${window.location.origin}/auth/signin`,
   })
+  if (error) throw error
+  return data
+}
+
+export async function updateLoginEmail(email: string): Promise<boolean> {
+  const safeInput = parseAuthInput(emailUpdateSchema, { email })
+  const { data: userData, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+
+  const currentEmail = userData.user?.email?.trim().toLowerCase()
+  if (currentEmail === safeInput.email) return false
+
+  const { error } = await supabase.auth.updateUser({ email: safeInput.email })
+  if (error) throw error
+  return true
+}
+
+export async function updateLoginPassword(input: { password: string; confirmPassword: string }) {
+  const safeInput = parseAuthInput(passwordUpdateSchema, input)
+  const { data, error } = await supabase.auth.updateUser({ password: safeInput.password })
   if (error) throw error
   return data
 }

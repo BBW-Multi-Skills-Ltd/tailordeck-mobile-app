@@ -28,6 +28,19 @@ export const passwordResetSchema = z.object({
   email: emailSchema,
 })
 
+export const emailUpdateSchema = z.object({
+  email: emailSchema,
+})
+
+export const passwordUpdateSchema = z.object({
+  password: passwordSchema,
+  confirmPassword: z.string().min(1, 'Confirm your password.'),
+}).superRefine((input, context) => {
+  if (input.password !== input.confirmPassword) {
+    context.addIssue({ code: 'custom', path: ['confirmPassword'], message: 'Passwords do not match.' })
+  }
+})
+
 export function parseAuthInput<T>(schema: z.ZodType<T>, input: unknown): T {
   const parsed = schema.safeParse(input)
   if (parsed.success) return parsed.data

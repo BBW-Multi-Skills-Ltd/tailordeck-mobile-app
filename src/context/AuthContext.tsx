@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue } from './authContextCore'
+import { syncPendingOnboardingSettings } from '../services/onboardingService'
 
 const AUTH_BOOT_TIMEOUT_MS = 5000
 
@@ -47,6 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data.subscription.unsubscribe()
     }
   }, [])
+
+  useEffect(() => {
+    if (!session?.user.id) return
+    syncPendingOnboardingSettings().catch((error) => {
+      console.warn('Unable to sync pending onboarding settings:', error)
+    })
+  }, [session?.user.id])
 
   const value = useMemo<AuthContextValue>(
     () => ({

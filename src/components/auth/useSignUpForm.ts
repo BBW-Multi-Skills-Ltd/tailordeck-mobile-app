@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadTailorSettings, saveTailorSettings, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
+import { syncPendingOnboardingSettings } from '../../services/onboardingService'
 import { parseAuthInput, signUpFormSchema } from '../../validation/authSchemas'
 
 export function useSignUpForm() {
@@ -49,6 +50,11 @@ export function useSignUpForm() {
         email: normalizedEmail,
         shopName: nextSettings.businessInfo.shopName,
       }))
+      try {
+        await syncPendingOnboardingSettings(nextSettings)
+      } catch (syncError) {
+        console.warn('Unable to sync onboarding settings after signup:', syncError)
+      }
       navigate('/onboarding/plan')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to create account.')

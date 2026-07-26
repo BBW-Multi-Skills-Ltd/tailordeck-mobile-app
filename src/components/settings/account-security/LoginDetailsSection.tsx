@@ -6,7 +6,7 @@ type LoginDetailsSectionProps = {
   fullName: string
   isEditingDetails: boolean
   phoneLocalPart: string
-  onDetailsAction: () => void
+  onDetailsAction: () => void | Promise<void>
   onEmailChange: (value: string) => void
   onFullNameChange: (value: string) => void
   onPhoneChange: (value: string) => void
@@ -57,7 +57,7 @@ export function LoginDetailsSection({
         </div>
       </div>
 
-      <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} onClick={onDetailsAction}>
+      <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} onClick={() => void onDetailsAction()}>
         {detailsSavedFlash ? (
           <>
             <CheckCircle2 size={15} />

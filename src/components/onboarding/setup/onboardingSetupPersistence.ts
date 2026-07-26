@@ -1,6 +1,7 @@
 import {
   loadTailorSettings,
   saveTailorSettings,
+  TAILOR_ONBOARDING_SYNC_PENDING_KEY,
   type SocialHandle,
   type SocialPlatform,
 } from '../../../lib/settings'
@@ -65,6 +66,9 @@ export function persistOnboardingSetup(draft: OnboardingSetupDraft): void {
     },
     updatedAt: new Date().toISOString(),
   })
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(TAILOR_ONBOARDING_SYNC_PENDING_KEY, 'true')
+  }
 }
 
 function normalizeSocialHandles(socialHandles: Record<SocialPlatform, string>): SocialHandle[] {

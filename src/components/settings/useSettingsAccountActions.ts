@@ -2,22 +2,31 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
+import { updateLoginEmail, updateLoginPassword } from '../../services/authService'
+import { updateProfile } from '../../services/profileService'
+import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import { getSecurityDangerAlert, getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
 
 type UseSettingsAccountActionsArgs = {
+  confirmPasswordDraft: string
   markSaved: (sectionLabel: string, nextSettings?: TailorSettings) => Promise<void>
   navigate: NavigateFunction
+  passwordDraft: string
   setSecurityFeedback: Dispatch<SetStateAction<string>>
   setSignOutConfirmOpen: Dispatch<SetStateAction<boolean>>
+  settings: TailorSettings
   signOut: () => Promise<void>
 }
 
 export function useSettingsAccountActions({
+  confirmPasswordDraft,
   markSaved,
   navigate,
+  passwordDraft,
   setSecurityFeedback,
   setSignOutConfirmOpen,
+  settings,
   signOut,
 }: UseSettingsAccountActionsArgs) {
   const feedback = useAppFeedback()
@@ -46,9 +55,25 @@ export function useSettingsAccountActions({
     navigate('/auth/signin')
   }
 
-  async function handleSaveAccountSecurity(): Promise<void> {
-    await markSaved('Account & Security')
-    setSecurityFeedback('Account details saved. Login email/password changes will be handled through Supabase Auth flows.')
+  async function handleSaveLoginDetails(): Promise<void> {
+    try {
+      await updateLoginEmail(settings.profile.email)
+      await markSaved('Account & Security')
+      setSecurityFeedback('')
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to save account details.'), 'error')
+      throw error
+    }
+  }
+
+  async function handleUpdatePassword(): Promise<void> {
+    try {
+      await updateLoginPassword({ password: passwordDraft, confirmPassword: confirmPasswordDraft })
+      setSecurityFeedback('')
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to update password.'), 'error')
+      throw error
+    }
   }
 
   async function handleSecurityDanger(kind: 'deactivate' | 'delete'): Promise<void> {
@@ -60,15 +85,25 @@ export function useSettingsAccountActions({
     })
     if (!confirmed) return
 
-    setSecurityFeedback(getSecurityDangerFeedback(kind))
-    feedback.toast(getSecurityDangerAlert(kind), 'info')
+    try {
+      await updateProfile(
+        kind === 'delete'
+          ? { account_status: 'deleted', deleted_at: new Date().toISOString() }
+          : { account_status: 'deactivated' },
+      )
+      setSecurityFeedback(getSecurityDangerFeedback(kind))
+      feedback.toast(getSecurityDangerAlert(kind), kind === 'delete' ? 'error' : 'info')
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to update account status.'), 'error')
+    }
   }
 
   return {
     clearJobHistory,
     confirmSignOut,
-    handleSaveAccountSecurity,
+    handleSaveLoginDetails,
     handleSecurityDanger,
     handleSignOut,
+    handleUpdatePassword,
   }
 }

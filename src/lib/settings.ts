@@ -2,7 +2,13 @@ import { getDefaultTailorSettings, TAILOR_SETTINGS_KEY } from './settingsDefault
 import { normalizeSettings } from './settingsNormalize'
 import type { TailorSettings } from './settingsTypes'
 
-export { AVATAR_PLACEHOLDER, TAILOR_SETTINGS_KEY, TAILOR_SIGNUP_PREFILL_KEY, getDefaultTailorSettings } from './settingsDefaults'
+export {
+  AVATAR_PLACEHOLDER,
+  TAILOR_ONBOARDING_SYNC_PENDING_KEY,
+  TAILOR_SETTINGS_KEY,
+  TAILOR_SIGNUP_PREFILL_KEY,
+  getDefaultTailorSettings,
+} from './settingsDefaults'
 export type {
   DocumentTemplateOption,
   MaterialQuality,

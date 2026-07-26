@@ -39,7 +39,8 @@ export default function SettingsSecurity() {
         onPhoneChange={actions.handleProfilePhoneChange}
         onPasswordChange={actions.setPasswordDraft}
         onConfirmPasswordChange={actions.setConfirmPasswordDraft}
-        onSave={actions.handleSaveAccountSecurity}
+        onSaveDetails={actions.handleSaveLoginDetails}
+        onUpdatePassword={actions.handleUpdatePassword}
         onDanger={actions.handleSecurityDanger}
       />
     </section>

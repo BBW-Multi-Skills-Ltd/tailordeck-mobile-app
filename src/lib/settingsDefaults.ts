@@ -2,6 +2,7 @@ import type { TailorSettings } from './settingsTypes'
 
 export const TAILOR_SETTINGS_KEY = 'tailordeck-settings'
 export const TAILOR_SIGNUP_PREFILL_KEY = 'tailordeck-signup-profile'
+export const TAILOR_ONBOARDING_SYNC_PENDING_KEY = 'tailordeck-onboarding-sync-pending'
 export const AVATAR_PLACEHOLDER =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='60' fill='%23F2EEE9'/%3E%3Ccircle cx='60' cy='44' r='20' fill='%23C9A84C'/%3E%3Cpath d='M24 104C24 82.9 41.2 66 62.3 66h-4.6C36.6 66 19.4 82.9 19.4 104V120H100.6V104C100.6 82.9 83.4 66 62.3 66z' fill='%237B1E37'/%3E%3Ccircle cx='60' cy='60' r='58' fill='none' stroke='%23E8E0D8' stroke-width='4'/%3E%3C/svg%3E"
 

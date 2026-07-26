@@ -12,7 +12,8 @@ export default function AccountSecurityPanel({
   onFullNameChange,
   onPasswordChange,
   onPhoneChange,
-  onSave,
+  onSaveDetails,
+  onUpdatePassword,
   passwordDraft,
   profilePhoneLocalPart,
   settings,
@@ -27,7 +28,8 @@ export default function AccountSecurityPanel({
     currentDetails,
     onConfirmPasswordChange,
     onPasswordChange,
-    onSave,
+    onSaveDetails,
+    onUpdatePassword,
     passwordDraft,
   })
 

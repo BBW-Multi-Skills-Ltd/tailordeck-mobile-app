@@ -55,10 +55,13 @@ export function useSettingsPage() {
   })
   const formActions = useSettingsFormActions({ setSettings, setSocialHandleInput, socialHandleInput, socialPlatform })
   const accountActions = useSettingsAccountActions({
+    confirmPasswordDraft,
     markSaved,
     navigate,
+    passwordDraft,
     setSecurityFeedback,
     setSignOutConfirmOpen,
+    settings,
     signOut,
   })
 
