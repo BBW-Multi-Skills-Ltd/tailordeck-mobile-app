@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
-import { checkFeatureAccess, getSubscription, selectSubscriptionPlan, setCancelAtPeriodEnd } from '../services/subscriptionService'
+import {
+  checkFeatureAccess,
+  getSubscription,
+  selectSubscriptionPlan,
+  setCancelAtPeriodEnd,
+  startSubscriptionCheckout,
+  verifySubscriptionPayment,
+} from '../services/subscriptionService'
 import { queryKeys } from './queryKeys'
 
 export function useSubscriptionQuery(enabled = true) {
@@ -35,6 +42,24 @@ export function useCancelAtPeriodEndMutation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+    },
+  })
+}
+
+export function useStartSubscriptionCheckoutMutation() {
+  return useMutation({
+    mutationFn: startSubscriptionCheckout,
+  })
+}
+
+export function useVerifySubscriptionPaymentMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: verifySubscriptionPayment,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
     },
   })
 }

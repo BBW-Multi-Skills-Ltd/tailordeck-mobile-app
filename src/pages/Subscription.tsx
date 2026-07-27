@@ -1,20 +1,20 @@
-import { ArrowLeft, Check } from 'lucide-react'
+﻿import { ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelectSubscriptionPlanMutation } from '../hooks/useFeatureAccess'
+import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
-import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
+import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
 
 export default function SubscriptionPage() {
-  const [settings, setSettings] = useState(() => loadTailorSettings())
+  const [settings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
   const [planFeedback, setPlanFeedback] = useState('')
   const [planError, setPlanError] = useState('')
-  const selectPlanMutation = useSelectSubscriptionPlanMutation()
+  const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
 
   async function choosePlan(plan: PaidPlan) {
@@ -22,12 +22,11 @@ export default function SubscriptionPage() {
     setPlanFeedback('')
     setSelectedPlan(plan)
     try {
-      await selectPlanMutation.mutateAsync({ planName: plan, billingCycle: cycle })
-      const next = { ...settings, subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false } }
-      setSettings(saveTailorSettings(next))
-      setPlanFeedback(`${plan === 'starter' ? 'Starter' : 'Pro'} selected.`)
+      const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
+      window.sessionStorage.setItem('tailordeck-paystack-return', '/settings/subscription')
+      window.location.assign(checkout.authorizationUrl)
     } catch (error) {
-      setPlanError(getServiceErrorMessage(error, 'Unable to update subscription.'))
+      setPlanError(getServiceErrorMessage(error, 'Unable to start checkout.'))
     }
   }
 
@@ -94,9 +93,9 @@ export default function SubscriptionPage() {
                   event.stopPropagation()
                   void choosePlan(plan.id)
                 }}
-                disabled={selectPlanMutation.isPending}
+                disabled={checkoutMutation.isPending}
               >
-              {selectPlanMutation.isPending && selectedPlan === plan.id ? 'Saving...' : `Upgrade to ${plan.label}`}
+              {checkoutMutation.isPending && selectedPlan === plan.id ? 'Opening checkout...' : `Upgrade to ${plan.label}`}
             </button>
 
             <div className="subscription-plan-divider" />

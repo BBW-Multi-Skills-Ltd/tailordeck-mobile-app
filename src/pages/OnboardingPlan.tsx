@@ -1,8 +1,9 @@
-import { Check } from 'lucide-react'
+﻿import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { queryKeys } from '../hooks/queryKeys'
+import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
@@ -19,20 +20,34 @@ export default function OnboardingPlan() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const checkoutMutation = useStartSubscriptionCheckoutMutation()
 
   async function activatePlan(plan: SubscriptionPlan) {
     setErrorMessage('')
     setSelectedPlan(plan)
-    const next = saveTailorSettings({
-      ...settings,
-      subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false },
-      updatedAt: new Date().toISOString(),
-    })
-    setSettings(next)
     setSavingPlan(plan)
     try {
-      await selectSubscriptionPlan(plan, cycle)
-      await updateProfile({ onboarding_complete: true })
+      if (plan === 'free') {
+        const next = saveTailorSettings({
+          ...settings,
+          subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false },
+          updatedAt: new Date().toISOString(),
+        })
+        setSettings(next)
+        await selectSubscriptionPlan(plan, cycle)
+        await updateProfile({ onboarding_complete: true })
+      } else {
+        setSettings(saveTailorSettings({
+          ...settings,
+          subscription: { ...settings.subscription, billingCycle: cycle },
+          updatedAt: new Date().toISOString(),
+        }))
+        const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
+        window.sessionStorage.setItem('tailordeck-paystack-return', '/onboarding/plan')
+        window.location.assign(checkout.authorizationUrl)
+        return
+      }
+
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
         queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),

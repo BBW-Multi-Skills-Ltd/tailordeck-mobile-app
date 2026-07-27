@@ -41,12 +41,13 @@ export function RouteGuard() {
   if ((profile.isLoading || subscription.isLoading) && !dataWaitTimedOut) return <RouteGuardFallback />
 
   const onboardingComplete = profile.data?.onboarding_complete === true
-  if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding')) {
+  const isBillingCallback = location.pathname.startsWith('/billing/callback')
+  if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding') && !isBillingCallback) {
     return <Navigate to="/onboarding/setup" replace />
   }
 
   const isExpired = subscription.data?.status === 'expired' || subscription.data?.status === 'past_due'
-  if (!subscription.isError && isExpired && location.pathname !== '/settings/subscription') {
+  if (!subscription.isError && isExpired && location.pathname !== '/settings/subscription' && !isBillingCallback) {
     return <Navigate to="/settings/subscription" replace />
   }
 

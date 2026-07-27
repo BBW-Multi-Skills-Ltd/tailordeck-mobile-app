@@ -5867,6 +5867,67 @@ button.more-row {
   box-shadow: var(--clay-shadow-press);
 }
 
+.billing-callback-page {
+  min-height: calc(100dvh - 86px);
+  display: grid;
+  place-items: center;
+}
+
+.billing-callback-card {
+  width: 100%;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-lg);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.billing-callback-icon {
+  color: var(--primary);
+}
+
+.billing-callback-icon.success {
+  color: var(--success);
+}
+
+.billing-callback-icon.error {
+  color: var(--danger);
+}
+
+.billing-callback-icon.spinning {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.billing-callback-card h1 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 22px;
+  line-height: 1.1;
+  font-weight: 650;
+}
+
+.billing-callback-card p {
+  margin: 0 0 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.billing-callback-actions {
+  width: 100%;
+}
+
 .manage-plan-current-card {
   border: 1px solid var(--clay-border);
   border-radius: var(--clay-radius-md);

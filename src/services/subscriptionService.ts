@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
-import { requireUserId } from './serviceHelpers'
+import { requireUserId, ServiceError } from './serviceHelpers'
 import type { PlanFeatureRow, SubscriptionRow } from './types'
 
 export async function getSubscription(): Promise<SubscriptionRow | null> {
@@ -14,6 +14,10 @@ export async function selectSubscriptionPlan(
   planName: SubscriptionPlan,
   billingCycle: SubscriptionBillingCycle = 'monthly',
 ): Promise<SubscriptionRow> {
+  if (planName !== 'free') {
+    throw new ServiceError('Paid plans must be activated through Paystack checkout.')
+  }
+
   const userId = await requireUserId()
   const now = new Date()
   const trialEndsAt = planName === 'free' ? getRelativeDateIso(now, 14) : null
@@ -45,6 +49,36 @@ export async function selectSubscriptionPlan(
     .single<SubscriptionRow>()
   if (insertError) throw insertError
   return inserted
+}
+
+export async function startSubscriptionCheckout(params: {
+  planName: Exclude<SubscriptionPlan, 'free'>
+  billingCycle: SubscriptionBillingCycle
+}): Promise<{ authorizationUrl: string; reference: string }> {
+  const { data, error } = await supabase.functions.invoke('paystack-initialize-subscription', {
+    body: params,
+  })
+
+  if (error) throw error
+
+  const authorizationUrl = typeof data?.authorizationUrl === 'string' ? data.authorizationUrl : ''
+  const reference = typeof data?.reference === 'string' ? data.reference : ''
+  if (!authorizationUrl || !reference) throw new ServiceError('Unable to start Paystack checkout.')
+
+  return { authorizationUrl, reference }
+}
+
+export async function verifySubscriptionPayment(reference: string): Promise<SubscriptionRow> {
+  const { data, error } = await supabase.functions.invoke('paystack-verify-transaction', {
+    body: { reference },
+  })
+
+  if (error) throw error
+
+  const subscription = data?.subscription as SubscriptionRow | undefined
+  if (!subscription?.id) throw new ServiceError('Unable to verify subscription payment.')
+
+  return subscription
 }
 
 export async function setCancelAtPeriodEnd(cancelAtPeriodEnd: boolean): Promise<SubscriptionRow> {

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useCancelAtPeriodEndMutation, useSelectSubscriptionPlanMutation, useSubscriptionQuery } from '../../../hooks/useFeatureAccess'
+﻿import { useMemo, useState } from 'react'
+import { useCancelAtPeriodEndMutation, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../../../hooks/useFeatureAccess'
 import { loadTailorSettings, saveTailorSettings } from '../../../lib/settings'
 import { subscriptionPlans, type BillingCycle, type PaidPlan } from '../../../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../../../services/serviceHelpers'
@@ -9,7 +9,7 @@ import { formatIsoDate, formatRelativeDate, getDefaultManagePlan, getManagePlanO
 export function useManagePlanState() {
   const feedback = useAppFeedback()
   const subscriptionQuery = useSubscriptionQuery()
-  const selectPlanMutation = useSelectSubscriptionPlanMutation()
+  const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const cancelMutation = useCancelAtPeriodEndMutation()
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycleOverride, setCycleOverride] = useState<BillingCycle | null>(null)
@@ -34,16 +34,16 @@ export function useManagePlanState() {
     setSelectedPlanState({ plan: nextPlan, selectedPlan: nextPlan })
 
     try {
-      await selectPlanMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
-      const nextSettings = saveTailorSettings({
+      const checkout = await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
+      setSettings(saveTailorSettings({
         ...settings,
-        subscription: { ...settings.subscription, plan: nextPlan, billingCycle: cycle, cancelAtPeriodEnd: false },
+        subscription: { ...settings.subscription, billingCycle: cycle },
         updatedAt: new Date().toISOString(),
-      })
-      setSettings(nextSettings)
-      feedback.toast(`${nextPlan === 'pro' ? 'Pro' : 'Starter'} selected.`, 'success')
+      }))
+      window.sessionStorage.setItem('tailordeck-paystack-return', '/settings/subscription/manage')
+      window.location.assign(checkout.authorizationUrl)
     } catch (error) {
-      const message = getServiceErrorMessage(error, 'Unable to update plan.')
+      const message = getServiceErrorMessage(error, 'Unable to start checkout.')
       setActionError(message)
       feedback.toast(message, 'error')
     }
@@ -102,7 +102,7 @@ export function useManagePlanState() {
       changePlanOptions,
       currentPlan,
       cycle,
-      isBusy: selectPlanMutation.isPending || cancelMutation.isPending,
+      isBusy: checkoutMutation.isPending || cancelMutation.isPending,
       isPaidPlan,
       plan,
       renewalDate,

@@ -18,6 +18,7 @@ const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
 const SettingsAbout = lazy(() => import('./pages/SettingsAbout'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
 const ManagePlan = lazy(() => import('./pages/ManagePlan'))
+const BillingCallback = lazy(() => import('./pages/BillingCallback'))
 const More = lazy(() => import('./pages/More'))
 const Business = lazy(() => import('./pages/Business'))
 const Documents = lazy(() => import('./pages/Documents'))
@@ -70,6 +71,7 @@ export default function App() {
             <Route path="/settings/about" element={<SettingsAbout />} />
             <Route path="/settings/subscription" element={<SubscriptionPage />} />
             <Route path="/settings/subscription/manage" element={<ManagePlan />} />
+            <Route path="/billing/callback" element={<BillingCallback />} />
             <Route path="/more" element={<More />} />
           </Route>
         </Route>
