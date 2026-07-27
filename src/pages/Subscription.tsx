@@ -1,23 +1,34 @@
 import { ArrowLeft, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useSelectSubscriptionPlanMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
+import { getServiceErrorMessage } from '../services/serviceHelpers'
 
 export default function SubscriptionPage() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
   const [planFeedback, setPlanFeedback] = useState('')
+  const [planError, setPlanError] = useState('')
+  const selectPlanMutation = useSelectSubscriptionPlanMutation()
   const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
 
-  function choosePlan(plan: PaidPlan) {
+  async function choosePlan(plan: PaidPlan) {
+    setPlanError('')
+    setPlanFeedback('')
     setSelectedPlan(plan)
-    const next = { ...settings, subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false } }
-    setSettings(saveTailorSettings(next))
-    setPlanFeedback(`${plan === 'starter' ? 'Starter' : 'Pro'} selected. Payment checkout will open here when billing is connected.`)
+    try {
+      await selectPlanMutation.mutateAsync({ planName: plan, billingCycle: cycle })
+      const next = { ...settings, subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false } }
+      setSettings(saveTailorSettings(next))
+      setPlanFeedback(`${plan === 'starter' ? 'Starter' : 'Pro'} selected.`)
+    } catch (error) {
+      setPlanError(getServiceErrorMessage(error, 'Unable to update subscription.'))
+    }
   }
 
   return (
@@ -49,6 +60,7 @@ export default function SubscriptionPage() {
 
       <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
       {planFeedback ? <p className="auth-feedback success" role="status">{planFeedback}</p> : null}
+      {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 
       <div className="subscription-plan-carousel" aria-label="Pricing plans">
         {paidSubscriptionPlans.map((plan) => (
@@ -78,12 +90,13 @@ export default function SubscriptionPage() {
             <button
               type="button"
               className={`btn btn-full subscription-plan-btn${selectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
-              onClick={(event) => {
-                event.stopPropagation()
-                choosePlan(plan.id)
-              }}
-            >
-              {`Upgrade to ${plan.label}`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  void choosePlan(plan.id)
+                }}
+                disabled={selectPlanMutation.isPending}
+              >
+              {selectPlanMutation.isPending && selectedPlan === plan.id ? 'Saving...' : `Upgrade to ${plan.label}`}
             </button>
 
             <div className="subscription-plan-divider" />

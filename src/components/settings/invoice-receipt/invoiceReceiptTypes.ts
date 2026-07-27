@@ -6,7 +6,9 @@ export type BrandDetailKey = keyof TailorSettings['brand']['includeBusinessDetai
 export type InvoiceReceiptPanelProps = {
   settings: TailorSettings
   saved: boolean
+  locked?: boolean
   onFileUpload: (field: 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>) => void
+  onUpgrade?: () => void
   onToggleBrandDetail: (key: BrandDetailKey) => void
   onSave: () => void
 }

@@ -31,7 +31,7 @@ export default function OnboardingPlan() {
     setSettings(next)
     setSavingPlan(plan)
     try {
-      await selectSubscriptionPlan(plan)
+      await selectSubscriptionPlan(plan, cycle)
       await updateProfile({ onboarding_complete: true })
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.profile }),

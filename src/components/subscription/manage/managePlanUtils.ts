@@ -7,6 +7,13 @@ export function formatRelativeDate(daysFromNow: number): string {
   return date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+export function formatIsoDate(value: string | null | undefined): string {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export function getCurrentPlanMessage(isPaidPlan: boolean, cancelScheduled: boolean, trialEndDate: string): string {
   if (cancelScheduled && isPaidPlan) return 'Your workspace stays active until the billing period ends.'
   if (cancelScheduled) return `Your free trial stays active until ${trialEndDate}.`

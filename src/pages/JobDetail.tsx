@@ -1,6 +1,6 @@
 import { ArrowLeft } from 'lucide-react'
 import { lazy, Suspense } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
 import { JobDeadlineSection } from '../components/jobdetail/JobDeadlineSection'
 import { JobDocumentActions } from '../components/jobdetail/JobDocumentActions'
@@ -12,9 +12,12 @@ import { getMeasurementScopeText } from '../components/jobdetail/jobDetailUtils'
 import { useJobDetailData } from '../components/jobdetail/page/useJobDetailData'
 import { useJobDetailInteractions } from '../components/jobdetail/page/useJobDetailInteractions'
 import PageHeader from '../components/shared/PageHeader'
+import { useAppFeedback } from '../components/shared/appFeedbackCore'
 import type { DetailedJobData } from '../data/mockJobDetails'
 import type { MockJob } from '../types/job'
-import type { BrandConfig } from '../components/invoice/documentTypes'
+import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
+import { useFeatureAccess } from '../hooks/useFeatureAccess'
+import { featureKeys } from '../lib/features'
 
 const JobDocumentDrawer = lazy(() =>
   import('../components/jobdetail/JobDocumentDrawer').then((module) => ({ default: module.JobDocumentDrawer })),
@@ -67,6 +70,30 @@ function JobDetailContent({
   const measurementScopeText = getMeasurementScopeText({ details, measurementOrderScope, fallbackScope: job.jobType })
   const interactions = useJobDetailInteractions({ balanceToCollect, brand, details, job })
   const { docPreviewRef, handleDownload, handleSystemShare, handleWhatsAppToClient } = interactions.documentActions
+  const navigate = useNavigate()
+  const feedback = useAppFeedback()
+  const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
+  const documentsLocked = documentSendingAccess.data === false
+
+  async function openDocument(type: InvoiceType): Promise<void> {
+    if (documentSendingAccess.isLoading) {
+      feedback.toast('Checking your plan...', 'info')
+      return
+    }
+
+    if (documentsLocked) {
+      const confirmed = await feedback.confirm({
+        title: 'Upgrade to send documents',
+        message: 'PDF invoice and receipt sending is available on Pro.',
+        confirmLabel: 'View Plans',
+        cancelLabel: 'Not now',
+      })
+      if (confirmed) navigate('/settings/subscription')
+      return
+    }
+
+    interactions.setOpenDrawer(type)
+  }
 
   return (
     <>
@@ -81,7 +108,13 @@ function JobDetailContent({
         <JobPricingSection chargeAmount={job.chargeAmount} depositAmount={details.depositAmount} balanceToCollect={balanceToCollect} totalExpenses={totalExpenses} estimatedProfit={estimatedProfit} expenses={details.expenses} />
         <JobReferencePhotos photos={details.referencePhotos} onOpen={interactions.setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
-        <JobDocumentActions invoiceSent={interactions.sentDocuments.invoice} onInvoice={() => interactions.setOpenDrawer('invoice')} onReceipt={() => interactions.setOpenDrawer('receipt')} receiptSent={interactions.sentDocuments.receipt} />
+        <JobDocumentActions
+          invoiceSent={interactions.sentDocuments.invoice}
+          locked={documentsLocked}
+          receiptSent={interactions.sentDocuments.receipt}
+          onInvoice={() => void openDocument('invoice')}
+          onReceipt={() => void openDocument('receipt')}
+        />
       </section>
 
       {interactions.activePhoto ? (

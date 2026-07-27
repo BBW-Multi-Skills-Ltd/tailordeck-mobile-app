@@ -10,9 +10,11 @@ import { InvoiceSetupProgress } from './invoice-receipt/InvoiceSetupProgress'
 import type { BrandDetailKey, InvoiceReceiptPanelProps } from './invoice-receipt/invoiceReceiptTypes'
 
 export default function InvoiceReceiptPanel({
+  locked = false,
   settings,
   saved,
   onFileUpload,
+  onUpgrade,
   onToggleBrandDetail,
   onSave,
 }: InvoiceReceiptPanelProps) {
@@ -52,9 +54,19 @@ export default function InvoiceReceiptPanel({
   return (
     <div className="stack settings-brand-form">
       <InvoiceSetupProgress completeCount={completeCount} items={checklist} progress={progress} />
-      <BusinessAssetSection settings={settings} onFileUpload={onFileUpload} />
+      {locked ? (
+        <article className="clay-card stack gap-6">
+          <h4>Pro document setup</h4>
+          <p className="text-muted">Upgrade to Pro to add logo, signature, and full business details to PDFs.</p>
+          <button type="button" className="btn btn-secondary btn-full" onClick={onUpgrade}>
+            View Plans
+          </button>
+        </article>
+      ) : null}
+      <BusinessAssetSection locked={locked} settings={settings} onFileUpload={onFileUpload} />
       <BusinessDetailsSection
         availableBusinessDetails={availableBusinessDetails}
+        locked={locked}
         onDetailClick={handleBusinessDetailClick}
         settings={settings}
         setupNotice={setupNotice}
@@ -63,7 +75,7 @@ export default function InvoiceReceiptPanel({
 
       {saved ? <p className="text-sm text-success">Invoice & Receipt Setup saved.</p> : null}
 
-      <button type="button" className="btn btn-primary settings-panel-save-btn" onClick={onSave}>
+      <button type="button" className="btn btn-primary settings-panel-save-btn" disabled={locked} onClick={onSave}>
         Save Invoice & Receipt Setup
       </button>
 

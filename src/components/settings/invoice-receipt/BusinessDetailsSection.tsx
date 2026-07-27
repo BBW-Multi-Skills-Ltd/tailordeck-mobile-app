@@ -6,12 +6,14 @@ import type { BrandDetailKey } from './invoiceReceiptTypes'
 
 export function BusinessDetailsSection({
   availableBusinessDetails,
+  locked = false,
   onDetailClick,
   settings,
   setupNotice,
 }: {
   settings: TailorSettings
   availableBusinessDetails: Record<BrandDetailKey, boolean>
+  locked?: boolean
   setupNotice: string
   onDetailClick: (item: { key: BrandDetailKey; label: string }) => void
 }) {
@@ -27,7 +29,8 @@ export function BusinessDetailsSection({
             <button
               key={item.key}
               type="button"
-              className={`settings-business-detail-chip${active ? ' active' : ''}${available ? '' : ' missing'}`}
+              className={`settings-business-detail-chip${active ? ' active' : ''}${available ? '' : ' missing'}${locked ? ' is-locked' : ''}`}
+              disabled={locked}
               onClick={() => onDetailClick(item)}
             >
               <span className="settings-radio-indicator" />

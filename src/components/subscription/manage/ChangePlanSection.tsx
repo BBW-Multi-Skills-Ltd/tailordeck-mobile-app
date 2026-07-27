@@ -8,8 +8,9 @@ type ChangePlanSectionProps = {
   changePlanOptions: Array<SubscriptionPlanCard & { id: PaidPlan }>
   currentPlan: SubscriptionPlan
   cycle: BillingCycle
+  isBusy?: boolean
   selectedPlan: PaidPlan
-  onChoosePlan: (plan: PaidPlan) => void
+  onChoosePlan: (plan: PaidPlan) => void | Promise<void>
   onCycleChange: (cycle: BillingCycle) => void
   onSelectedPlanChange: (plan: PaidPlan) => void
 }
@@ -18,6 +19,7 @@ export function ChangePlanSection({
   changePlanOptions,
   currentPlan,
   cycle,
+  isBusy = false,
   onChoosePlan,
   onCycleChange,
   onSelectedPlanChange,
@@ -57,10 +59,11 @@ export function ChangePlanSection({
               className={`btn btn-full subscription-plan-btn${selectedPlan === item.id ? ' btn-primary' : ' btn-secondary'}`}
               onClick={(event) => {
                 event.stopPropagation()
-                onChoosePlan(item.id)
+                void onChoosePlan(item.id)
               }}
+              disabled={isBusy}
             >
-              {getManagePlanCta(currentPlan, item.id)}
+              {isBusy && selectedPlan === item.id ? 'Saving...' : getManagePlanCta(currentPlan, item.id)}
             </button>
 
             <div className="subscription-plan-divider" />

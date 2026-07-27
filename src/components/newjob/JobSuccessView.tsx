@@ -3,14 +3,20 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { JobDocumentDrawer } from '../jobdetail/JobDocumentDrawer'
 import { useJobDocumentActions } from '../jobdetail/useJobDocumentActions'
+import { useAppFeedback } from '../shared/appFeedbackCore'
 import { JobSuccessActions } from './success/JobSuccessActions'
 import { JobSuccessSummaryCard } from './success/JobSuccessSummaryCard'
 import type { JobSuccessViewProps } from './success/jobSuccessTypes'
 import { useJobSuccessDocumentData } from './success/useJobSuccessDocumentData'
+import { useFeatureAccess } from '../../hooks/useFeatureAccess'
+import { featureKeys } from '../../lib/features'
 
 export function JobSuccessView(props: JobSuccessViewProps) {
   const [invoiceOpen, setInvoiceOpen] = useState(false)
   const navigate = useNavigate()
+  const feedback = useAppFeedback()
+  const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
+  const invoiceLocked = documentSendingAccess.data === false
   const { balanceToCollect, brand, successDetails, successJob } = useJobSuccessDocumentData(props)
   const { docPreviewRef, handleDownload, handleSystemShare, handleWhatsAppToClient } = useJobDocumentActions({
     brand,
@@ -18,6 +24,26 @@ export function JobSuccessView(props: JobSuccessViewProps) {
     details: successDetails,
     balanceToCollect,
   })
+
+  async function handleOpenInvoice(): Promise<void> {
+    if (documentSendingAccess.isLoading) {
+      feedback.toast('Checking your plan...', 'info')
+      return
+    }
+
+    if (invoiceLocked) {
+      const confirmed = await feedback.confirm({
+        title: 'Upgrade to send invoices',
+        message: 'Sending PDF invoices to clients is available on Pro.',
+        confirmLabel: 'View Plans',
+        cancelLabel: 'Not now',
+      })
+      if (confirmed) navigate('/settings/subscription')
+      return
+    }
+
+    setInvoiceOpen(true)
+  }
 
   return (
     <section className="section stack gap-16 wizard-page wizard-success-page">
@@ -31,7 +57,12 @@ export function JobSuccessView(props: JobSuccessViewProps) {
         <p className="wizard-success-client">{props.clientName || 'Client'}</p>
 
         <JobSuccessSummaryCard charge={props.charge} deadlineDate={props.deadlineDate} jobType={props.jobType} />
-        <JobSuccessActions onOpenInvoice={() => setInvoiceOpen(true)} onReturnHome={() => navigate('/')} onViewJobDetails={props.onViewJobDetails} />
+        <JobSuccessActions
+          invoiceLocked={invoiceLocked}
+          onOpenInvoice={() => void handleOpenInvoice()}
+          onReturnHome={() => navigate('/')}
+          onViewJobDetails={props.onViewJobDetails}
+        />
       </div>
 
       {invoiceOpen ? (

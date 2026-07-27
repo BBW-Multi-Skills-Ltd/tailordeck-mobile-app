@@ -4,18 +4,19 @@ import { ManagePlanRow } from './ManagePlanRow'
 
 type SubscriptionControlSectionProps = {
   cancelScheduled: boolean
+  isBusy?: boolean
   isPaidPlan: boolean
   onCancelClick: () => void
-  onKeepActive: () => void
+  onKeepActive: () => void | Promise<void>
 }
 
-export function SubscriptionControlSection({ cancelScheduled, isPaidPlan, onCancelClick, onKeepActive }: SubscriptionControlSectionProps) {
+export function SubscriptionControlSection({ cancelScheduled, isBusy = false, isPaidPlan, onCancelClick, onKeepActive }: SubscriptionControlSectionProps) {
   return (
     <section className="stack gap-8">
       <p className="more-group-title">{isPaidPlan ? 'Subscription Control' : 'Trial Details'}</p>
       <div className="clay-card more-group-card">
         {cancelScheduled ? (
-          <button type="button" className="more-row" onClick={onKeepActive}>
+          <button type="button" className="more-row" disabled={isBusy} onClick={() => void onKeepActive()}>
             <span className="more-row-icon clay-inset manage-plan-row-icon success">
               <Sparkles size={18} />
             </span>
@@ -26,7 +27,7 @@ export function SubscriptionControlSection({ cancelScheduled, isPaidPlan, onCanc
             <ChevronRight size={17} className="more-row-chevron" />
           </button>
         ) : (
-          <button type="button" className="more-row manage-plan-danger-row" onClick={onCancelClick}>
+          <button type="button" className="more-row manage-plan-danger-row" disabled={isBusy} onClick={onCancelClick}>
             <span className="more-row-icon clay-inset">
               <ShieldAlert size={18} />
             </span>

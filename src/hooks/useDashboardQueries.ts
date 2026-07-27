@@ -2,12 +2,12 @@
 import { getJobStatusBreakdown, getMonthlyStats, getRecentJobs } from '../services/dashboardService'
 import { queryKeys } from './queryKeys'
 
-export function useMonthlyStatsQuery() {
-  return useQuery({ queryKey: queryKeys.dashboardMonthly, queryFn: getMonthlyStats })
+export function useMonthlyStatsQuery(enabled = true) {
+  return useQuery({ queryKey: queryKeys.dashboardMonthly, queryFn: getMonthlyStats, enabled })
 }
 
-export function useJobStatusBreakdownQuery() {
-  return useQuery({ queryKey: queryKeys.dashboardStatus, queryFn: getJobStatusBreakdown })
+export function useJobStatusBreakdownQuery(enabled = true) {
+  return useQuery({ queryKey: queryKeys.dashboardStatus, queryFn: getJobStatusBreakdown, enabled })
 }
 
 export function useRecentJobsQuery(limit = 5) {

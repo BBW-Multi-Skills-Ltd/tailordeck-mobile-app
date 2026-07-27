@@ -1,7 +1,7 @@
 type CancelPlanDialogProps = {
   isPaidPlan: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: () => void | Promise<void>
 }
 
 export function CancelPlanDialog({ isPaidPlan, onClose, onConfirm }: CancelPlanDialogProps) {
@@ -18,7 +18,7 @@ export function CancelPlanDialog({ isPaidPlan, onClose, onConfirm }: CancelPlanD
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             Keep {isPaidPlan ? 'Plan' : 'Trial'}
           </button>
-          <button type="button" className="btn btn-danger" onClick={onConfirm}>
+          <button type="button" className="btn btn-danger" onClick={() => void onConfirm()}>
             Cancel at Period End
           </button>
         </div>

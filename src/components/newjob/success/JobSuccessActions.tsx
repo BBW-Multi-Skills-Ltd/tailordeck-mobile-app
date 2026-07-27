@@ -1,10 +1,12 @@
-import { ArrowRight, FileText, Home } from 'lucide-react'
+import { ArrowRight, FileText, Home, Lock } from 'lucide-react'
 
 export function JobSuccessActions({
+  invoiceLocked = false,
   onOpenInvoice,
   onReturnHome,
   onViewJobDetails,
 }: {
+  invoiceLocked?: boolean
   onViewJobDetails: () => void
   onOpenInvoice: () => void
   onReturnHome: () => void
@@ -17,7 +19,7 @@ export function JobSuccessActions({
         </button>
 
         <button type="button" className="btn btn-secondary btn-full wizard-success-invoice-btn" onClick={onOpenInvoice}>
-          <FileText size={16} />
+          {invoiceLocked ? <Lock size={16} /> : <FileText size={16} />}
           Send Invoice
         </button>
       </div>

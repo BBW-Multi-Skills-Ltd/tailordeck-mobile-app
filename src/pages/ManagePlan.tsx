@@ -41,14 +41,18 @@ export default function ManagePlan() {
         changePlanOptions={state.changePlanOptions}
         currentPlan={state.plan}
         cycle={state.cycle}
+        isBusy={state.isBusy}
         selectedPlan={state.selectedPlan}
         onChoosePlan={actions.choosePlan}
         onCycleChange={actions.setCycle}
         onSelectedPlanChange={actions.setSelectedPlan}
       />
 
+      {state.actionError ? <p className="auth-feedback error" role="alert">{state.actionError}</p> : null}
+
       <SubscriptionControlSection
         cancelScheduled={state.cancelScheduled}
+        isBusy={state.isBusy}
         isPaidPlan={state.isPaidPlan}
         onCancelClick={() => actions.setCancelOpen(true)}
         onKeepActive={actions.keepPlanActive}

@@ -13,11 +13,15 @@ import MonthlyPerformanceTable from '../components/dashboard/MonthlyPerformanceT
 import EmptyState from '../components/shared/EmptyState'
 import PageHeader from '../components/shared/PageHeader'
 import { useJobStatusBreakdownQuery, useMonthlyStatsQuery } from '../hooks/useDashboardQueries'
+import { useFeatureAccess } from '../hooks/useFeatureAccess'
+import { featureKeys } from '../lib/features'
 
 export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
-  const monthlyStatsQuery = useMonthlyStatsQuery()
-  const statusQuery = useJobStatusBreakdownQuery()
+  const analyticsAccess = useFeatureAccess(featureKeys.dashboardAnalytics)
+  const analyticsUnlocked = analyticsAccess.data !== false
+  const monthlyStatsQuery = useMonthlyStatsQuery(analyticsUnlocked)
+  const statusQuery = useJobStatusBreakdownQuery(analyticsUnlocked)
   const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
   const statusCounts = useMemo(
     () => statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 },
@@ -40,7 +44,17 @@ export default function Dashboard() {
         }
       />
 
-      {monthlyStatsQuery.isLoading || statusQuery.isLoading ? (
+      {analyticsAccess.isLoading ? (
+        <div className="skeleton" style={{ height: 180 }} />
+      ) : !analyticsUnlocked ? (
+        <EmptyState
+          icon={BarChart3}
+          title="Analytics is a Pro tool"
+          description="Upgrade to Pro to unlock revenue, expenses, profit trends, and job status analytics."
+          actionLabel="View Plans"
+          actionTo="/settings/subscription"
+        />
+      ) : monthlyStatsQuery.isLoading || statusQuery.isLoading ? (
         <div className="stack gap-12">
           <div className="dashboard-kpi-grid">
             <div className="skeleton" style={{ height: 112 }} />
@@ -60,7 +74,7 @@ export default function Dashboard() {
         <DashboardEmptyGuide />
       ) : null}
 
-      {hasAnalytics ? (
+      {analyticsUnlocked && hasAnalytics ? (
         <>
           <DashboardMonthNav
             label={visibleMonthLabel}
