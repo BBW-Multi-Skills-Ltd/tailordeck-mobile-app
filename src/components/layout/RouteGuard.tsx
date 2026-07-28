@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/authContextCore'
 import { useProfileQuery } from '../../hooks/useProfileQueries'
 import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
+import { hasStartedDeviceOnboarding } from '../../lib/auth'
 
 const ROUTE_GUARD_DATA_TIMEOUT_MS = 6000
 
@@ -37,7 +38,10 @@ export function RouteGuard() {
   }, [dataWaitKey, hasSession, profile.isLoading, subscription.isLoading])
 
   if (auth.loading) return <RouteGuardFallback />
-  if (!auth.session) return <Navigate to="/auth/signin" replace state={{ from: location.pathname }} />
+  if (!auth.session) {
+    const nextPath = hasStartedDeviceOnboarding() ? '/auth/signin' : '/onboarding'
+    return <Navigate to={nextPath} replace state={{ from: location.pathname }} />
+  }
   if ((profile.isLoading || subscription.isLoading) && !dataWaitTimedOut) return <RouteGuardFallback />
 
   const onboardingComplete = profile.data?.onboarding_complete === true

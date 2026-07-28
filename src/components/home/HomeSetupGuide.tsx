@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 
 type HomeSetupGuideProps = {
   shopName: string
+  setupWasSkipped: boolean
 }
 
 type SetupItem = {
@@ -12,17 +13,17 @@ type SetupItem = {
   icon: typeof Store
 }
 
-export function HomeSetupGuide({ shopName }: HomeSetupGuideProps) {
+export function HomeSetupGuide({ shopName, setupWasSkipped }: HomeSetupGuideProps) {
   const items: SetupItem[] = [
     {
       label: 'Shop basics',
-      description: shopName ? `${shopName} is ready.` : 'Add your shop name in Settings.',
+      description: shopName ? `${shopName} is ready.` : 'Add your business name.',
       complete: Boolean(shopName),
       icon: Store,
     },
     {
       label: 'Invoice setup',
-      description: 'Add logo, colors, and signature when you are ready.',
+      description: 'Add logo, signature, and business details.',
       complete: false,
       icon: FileText,
     },
@@ -35,14 +36,20 @@ export function HomeSetupGuide({ shopName }: HomeSetupGuideProps) {
   ]
   const completeCount = items.filter((item) => item.complete).length
   const progress = Math.max(25, Math.round((completeCount / items.length) * 100))
+  const title = setupWasSkipped ? 'Finish your shop setup' : 'Create your first job'
+  const copy = setupWasSkipped
+    ? 'Add missing shop details now, or start with a client job.'
+    : 'Add client details, measurements, pricing, and deadline in one guided flow.'
+  const secondaryLink = setupWasSkipped ? '/business' : '/documents'
+  const secondaryLabel = setupWasSkipped ? 'Finish setup' : 'Invoice setup'
 
   return (
     <article className="home-setup-card card stack gap-12">
       <div className="row-between">
         <div className="stack gap-4">
           <p className="home-setup-eyebrow">Workspace started</p>
-          <h2 className="home-setup-title">Set up your shop as you work</h2>
-          <p className="home-setup-copy">Create a job now. TailorDeck will save the client, measurements, and deadline automatically.</p>
+          <h2 className="home-setup-title">{title}</h2>
+          <p className="home-setup-copy">{copy}</p>
         </div>
         <span className="home-setup-percent">{progress}%</span>
       </div>
@@ -61,8 +68,8 @@ export function HomeSetupGuide({ shopName }: HomeSetupGuideProps) {
         <Link to="/jobs/new" className="btn btn-primary flex-1">
           Create first job
         </Link>
-        <Link to="/settings" className="btn btn-secondary flex-1">
-          Finish setup
+        <Link to={secondaryLink} className="btn btn-secondary flex-1">
+          {secondaryLabel}
         </Link>
       </div>
     </article>

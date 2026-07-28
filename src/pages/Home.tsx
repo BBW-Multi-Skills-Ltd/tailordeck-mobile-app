@@ -21,11 +21,13 @@ export default function Home() {
   const firstName = settings.profile.fullName.trim().split(/\s+/)[0] || 'Tailor'
   const greeting = getGreeting()
   const kpiCards = useMemo(() => getHomeKpiCards(currentMonth), [currentMonth])
+  const isNewWorkspace = homeDataReady && !hasJobs
+  const homeTitle = isNewWorkspace ? 'Welcome to TailorDeck' : `${greeting}, ${firstName}`
   const homeSubcopy = !homeDataReady
     ? 'Preparing your shop for today.'
     : hasJobs
     ? 'Your workshop activity is ready for today.'
-    : 'Start with one job. TailorDeck will organize the client, measurements, and deadline for you.'
+    : 'Your workspace is ready. Create your first job to begin.'
   const setupWasSkipped = typeof window !== 'undefined' && window.localStorage.getItem(TAILOR_ONBOARDING_SETUP_SKIPPED_KEY) === 'true'
 
   useEffect(() => {
@@ -44,11 +46,11 @@ export default function Home() {
   return (
     <section className="section stack gap-16">
       <div className="stack gap-4">
-        <h1 className="home-greeting-title">{greeting}, {firstName}</h1>
+        <h1 className="home-greeting-title">{homeTitle}</h1>
         <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
-      {homeDataReady && !hasJobs && setupWasSkipped ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
+      {homeDataReady && !hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} setupWasSkipped={setupWasSkipped} /> : null}
       {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}

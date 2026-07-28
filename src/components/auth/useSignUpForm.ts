@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { markOnboardingStage } from '../../lib/auth'
 import { loadTailorSettings, saveTailorSettings, TAILOR_ONBOARDING_SYNC_PENDING_KEY, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
 import { syncPendingOnboardingSettings } from '../../services/onboardingService'
@@ -56,6 +57,7 @@ export function useSignUpForm() {
       } catch (syncError) {
         console.warn('Unable to sync onboarding settings after signup:', syncError)
       }
+      markOnboardingStage(setupWasCompleted ? 'plan' : 'setup')
       navigate(setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup')
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Unable to create account.')

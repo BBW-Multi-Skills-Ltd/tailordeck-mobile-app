@@ -6,6 +6,7 @@ import { queryKeys } from '../hooks/queryKeys'
 import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
+import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import { updateProfile } from '../services/profileService'
@@ -36,6 +37,7 @@ export default function OnboardingPlan() {
         setSettings(next)
         await selectSubscriptionPlan(plan, cycle)
         await updateProfile({ onboarding_complete: true })
+        markOnboardingCompleted()
       } else {
         setSettings(saveTailorSettings({
           ...settings,
@@ -52,6 +54,7 @@ export default function OnboardingPlan() {
         queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
         queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),
       ])
+      markOnboardingCompleted()
       navigate('/')
     } catch (error) {
       console.error('Unable to activate onboarding plan:', error)

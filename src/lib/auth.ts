@@ -24,6 +24,11 @@ export function isOnboardingCompleted(): boolean {
   return getOnboardingStage() === 'done'
 }
 
+export function hasStartedDeviceOnboarding(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.localStorage.getItem(ONBOARDING_STAGE_KEY) !== null || window.localStorage.getItem(ONBOARDING_DONE_KEY) === 'true'
+}
+
 export function setPreviewAuthenticated(mode: 'signed-in' | 'signed-up'): void {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(AUTH_PREVIEW_KEY, mode)

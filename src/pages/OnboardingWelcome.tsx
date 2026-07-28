@@ -1,8 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { BarChart3, ClipboardCheck, Users } from 'lucide-react'
+import { markOnboardingStage } from '../lib/auth'
 
 export default function OnboardingWelcome() {
   const navigate = useNavigate()
+
+  function handleGetStarted() {
+    markOnboardingStage('setup')
+    navigate('/onboarding/setup')
+  }
 
   return (
     <main className="page-full onboarding-page onboarding-page-welcome">
@@ -49,7 +55,7 @@ export default function OnboardingWelcome() {
           </article>
         </section>
 
-        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={() => navigate('/onboarding/setup')}>
+        <button type="button" className="btn btn-primary btn-full onboarding-primary-btn" onClick={handleGetStarted}>
           Get Started
         </button>
       </div>

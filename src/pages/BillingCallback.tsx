@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import { useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../hooks/queryKeys'
 import { useVerifySubscriptionPaymentMutation } from '../hooks/useFeatureAccess'
+import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 import { updateProfile } from '../services/profileService'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
@@ -49,6 +50,7 @@ export default function BillingCallback() {
         const subscription = await verifyPaymentMutation(reference)
         syncSubscriptionToLocalSettings(subscription)
         await updateProfile({ onboarding_complete: true })
+        markOnboardingCompleted()
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
           queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),

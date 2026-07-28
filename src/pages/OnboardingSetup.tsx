@@ -6,6 +6,7 @@ import { OnboardingSetupStatusView } from '../components/onboarding/setup/Onboar
 import { onboardingSetupStepCopy, onboardingSetupSteps } from '../components/onboarding/setup/onboardingSetupConfig'
 import { useOnboardingSetupState } from '../components/onboarding/setup/useOnboardingSetupState'
 import { useAuth } from '../context/authContextCore'
+import { markOnboardingStage } from '../lib/auth'
 import { loadTailorSettings } from '../lib/settings'
 import { syncPendingOnboardingSettings } from '../services/onboardingService'
 
@@ -16,6 +17,7 @@ export default function OnboardingSetup() {
 
   async function handleProceed() {
     if (!auth.session) {
+      markOnboardingStage('setup')
       navigate('/auth/signup')
       return
     }
@@ -25,6 +27,7 @@ export default function OnboardingSetup() {
     } catch (error) {
       console.warn('Unable to sync onboarding setup before plan selection:', error)
     }
+    markOnboardingStage('plan')
     navigate('/onboarding/plan')
   }
 
