@@ -56,7 +56,12 @@ export const newJobDeadlineStepSchema = z.object({
   deadlineDate: z.string().trim().optional().nullable(),
   deadlineTime: z.string().trim().optional().nullable(),
   reminder: z.enum(['1 day before', '3 days before', '1 week before', 'none']),
-  referencePhotos: z.array(fileSchema).default([]),
+  referencePhotos: z.array(z.object({
+    file: fileSchema,
+    sortOrder: z.number().int().positive(),
+    targetId: optionalText,
+    targetLabel: optionalText,
+  })).default([]),
 })
 
 export const newJobPersonSchema = z.object({

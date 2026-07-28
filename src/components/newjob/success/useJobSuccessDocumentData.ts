@@ -9,6 +9,7 @@ export function useJobSuccessDocumentData({
   clientName,
   clientPhone,
   color,
+  createdJobId,
   deadlineDate,
   deadlineTime,
   deposit,
@@ -28,12 +29,13 @@ export function useJobSuccessDocumentData({
   const balanceToCollect = Math.max(charge - deposit, 0)
   const service = effectiveItemType || 'Tailoring job'
   const successJobId = useMemo(() => {
+    if (createdJobId) return createdJobId
     const slug = `${clientName || 'client'}-${deadlineDate || 'pending'}`
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
     return `new-job-${slug || 'draft'}`
-  }, [clientName, deadlineDate])
+  }, [clientName, createdJobId, deadlineDate])
   const successJob = useMemo<MockJob>(
     () => ({
       id: successJobId,

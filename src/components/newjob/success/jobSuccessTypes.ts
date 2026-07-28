@@ -1,6 +1,7 @@
 import type { ExpenseForm, JobType, MakeCategory, OrderMode, Reminder } from '../newJobConfig'
 
 export type JobSuccessViewProps = {
+  createdJobId: string
   clientName: string
   clientPhone: string
   color: string

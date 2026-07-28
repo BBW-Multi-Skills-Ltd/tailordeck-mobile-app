@@ -7,7 +7,12 @@ export async function getBrandSettings(): Promise<BrandSettingsRow | null> {
   const userId = await requireUserId()
   const { data, error } = await supabase.from('brand_settings').select('*').eq('user_id', userId).maybeSingle<BrandSettingsRow>()
   if (error) throw error
-  return data
+  if (!data) return data
+  const [logoUrl, signatureUrl] = await Promise.all([
+    data.logo_storage_path ? createSignedUrl('brand-assets', data.logo_storage_path) : Promise.resolve(data.logo_url),
+    data.signature_storage_path ? createSignedUrl('brand-assets', data.signature_storage_path) : Promise.resolve(data.signature_url),
+  ])
+  return { ...data, logo_url: logoUrl, signature_url: signatureUrl }
 }
 
 export async function updateBrandSettings(updates: Partial<BrandSettingsRow>): Promise<BrandSettingsRow> {
@@ -28,7 +33,7 @@ export async function uploadLogo(file: File): Promise<{ storagePath: string; sig
   const storagePath = `${userId}/logo.${fileExtension(file)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })
   const signedUrl = await createSignedUrl('brand-assets', storagePath)
-  await updateBrandSettings({ logo_storage_path: storagePath, logo_url: signedUrl })
+  await updateBrandSettings({ logo_storage_path: storagePath, logo_url: null })
   return { storagePath, signedUrl }
 }
 
@@ -38,6 +43,6 @@ export async function uploadSignature(file: File): Promise<{ storagePath: string
   const storagePath = `${userId}/signature.${fileExtension(file)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })
   const signedUrl = await createSignedUrl('brand-assets', storagePath)
-  await updateBrandSettings({ signature_storage_path: storagePath, signature_url: signedUrl })
+  await updateBrandSettings({ signature_storage_path: storagePath, signature_url: null })
   return { storagePath, signedUrl }
 }

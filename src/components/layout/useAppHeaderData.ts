@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { loadNotifications, type AppNotification } from '../../lib/notifications'
 import { loadTailorSettings } from '../../lib/settings'
 
 export function useSyncedHeaderSettings() {
@@ -19,23 +18,4 @@ export function useSyncedHeaderSettings() {
   }, [])
 
   return settings
-}
-
-export function useSyncedNotifications() {
-  const [notifications, setNotifications] = useState<AppNotification[]>(() => loadNotifications())
-
-  useEffect(() => {
-    function syncNotifications() {
-      setNotifications(loadNotifications())
-    }
-
-    window.addEventListener('storage', syncNotifications)
-    window.addEventListener('tailordeck-notifications-updated', syncNotifications)
-    return () => {
-      window.removeEventListener('storage', syncNotifications)
-      window.removeEventListener('tailordeck-notifications-updated', syncNotifications)
-    }
-  }, [])
-
-  return { notifications, setNotifications }
 }

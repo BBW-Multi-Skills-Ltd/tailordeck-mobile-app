@@ -1,4 +1,3 @@
-import { AVATAR_PLACEHOLDER } from '../lib/settings'
 import type { TailorSettings } from '../lib/settingsTypes'
 import { getBrandSettings, updateBrandSettings } from './brandService'
 import { getBusinessProfile, getSocialHandles, updateBusinessProfile, updateSocialHandles } from './businessService'
@@ -21,8 +20,7 @@ export async function getSettings(): Promise<TailorSettings> {
 }
 
 export async function saveProfileSettings(settings: TailorSettings) {
-  const avatarUrl = settings.profile.avatarUrl === AVATAR_PLACEHOLDER ? null : settings.profile.avatarUrl
-  return updateProfile({ full_name: settings.profile.fullName, email: settings.profile.email, phone: settings.profile.phone, avatar_url: avatarUrl })
+  return updateProfile({ full_name: settings.profile.fullName, email: settings.profile.email, phone: settings.profile.phone })
 }
 
 export async function saveBusinessSettings(settings: TailorSettings) {
@@ -62,8 +60,6 @@ export async function saveReminderSettings(settings: TailorSettings) {
 
 export async function saveBrandSettings(settings: TailorSettings) {
   return updateBrandSettings({
-    logo_url: settings.brand.logoUrl,
-    signature_url: settings.brand.signatureUrl,
     document_template: settings.brand.documentTemplate,
     header_color: settings.brand.colors[0],
     body_color: settings.brand.colors[1],

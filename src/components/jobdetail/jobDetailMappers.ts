@@ -82,7 +82,7 @@ function getMeasurementText(job: JobWithRelations): string {
 function getReferencePhotos(job: JobWithRelations): string[] {
   const photos = (job.job_reference_photos ?? [])
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((photo) => photo.storage_path)
+    .map((photo) => photo.signed_url ?? photo.storage_path)
 
   return photos.length ? photos : []
 }

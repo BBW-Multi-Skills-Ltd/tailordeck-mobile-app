@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/authContextCore'
-import { clearPreviewSession } from '../../lib/auth'
 import {
-  clearNotifications,
-  deleteNotification,
-  markAllNotificationsRead,
-  markNotificationRead,
-  type AppNotification,
-} from '../../lib/notifications'
+  useClearNotificationsMutation,
+  useDeleteNotificationMutation,
+  useMarkAllNotificationsReadMutation,
+  useMarkNotificationReadMutation,
+  useNotificationsQuery,
+} from '../../hooks/useNotificationQueries'
+import { clearPreviewSession } from '../../lib/auth'
+import type { AppNotification } from '../../lib/notifications'
+import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import type { NotificationFilter } from './NotificationDrawer'
-import { useSyncedHeaderSettings, useSyncedNotifications } from './useAppHeaderData'
+import { useSyncedHeaderSettings } from './useAppHeaderData'
 
 export function useAppHeader() {
   const navigate = useNavigate()
@@ -23,7 +25,12 @@ export function useAppHeader() {
   const [filter, setFilter] = useState<NotificationFilter>('all')
   const menuRef = useRef<HTMLDivElement | null>(null)
   const settings = useSyncedHeaderSettings()
-  const { notifications, setNotifications } = useSyncedNotifications()
+  const notificationsQuery = useNotificationsQuery()
+  const markReadMutation = useMarkNotificationReadMutation()
+  const markAllReadMutation = useMarkAllNotificationsReadMutation()
+  const deleteMutation = useDeleteNotificationMutation()
+  const clearMutation = useClearNotificationsMutation()
+  const notifications = notificationsQuery.data ?? []
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -46,21 +53,55 @@ export function useAppHeader() {
   }
 
   async function handleClearAll(): Promise<void> {
+    if (notifications.length === 0) return
     const confirmed = await feedback.confirm({
       title: 'Clear notifications?',
-      message: 'This removes all notifications from this device.',
+      message: 'This removes all notifications from your TailorDeck account.',
       confirmLabel: 'Clear all',
       tone: 'danger',
     })
     if (!confirmed) return
-    setNotifications(clearNotifications())
-    feedback.toast('Notifications cleared.', 'success')
+
+    try {
+      await clearMutation.mutateAsync()
+      feedback.toast('Notifications cleared.', 'success')
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to clear notifications.'), 'error')
+    }
   }
 
-  function handleItemOpen(item: AppNotification): void {
-    setNotifications(markNotificationRead(item.id))
+  async function handleItemOpen(item: AppNotification): Promise<void> {
+    try {
+      if (!item.read) await markReadMutation.mutateAsync(item.id)
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notification as read.'), 'error')
+    }
     closeNotificationDrawer()
     navigate(item.href)
+  }
+
+  async function handleDeleteItem(id: string): Promise<void> {
+    try {
+      await deleteMutation.mutateAsync(id)
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to delete notification.'), 'error')
+    }
+  }
+
+  async function handleMarkRead(id: string): Promise<void> {
+    try {
+      await markReadMutation.mutateAsync(id)
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notification as read.'), 'error')
+    }
+  }
+
+  async function handleMarkAllRead(): Promise<void> {
+    try {
+      await markAllReadMutation.mutateAsync()
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notifications as read.'), 'error')
+    }
   }
 
   function handleSignOut(): void {
@@ -79,14 +120,14 @@ export function useAppHeader() {
   return {
     actions: {
       closeNotificationDrawer,
-      deleteItem: (id: string) => setNotifications(deleteNotification(id)),
+      deleteItem: (id: string) => void handleDeleteItem(id),
       handleBellClick,
-      handleClearAll,
-      handleItemOpen,
+      handleClearAll: () => void handleClearAll(),
+      handleItemOpen: (item: AppNotification) => void handleItemOpen(item),
       handleSignOut,
       confirmSignOut,
-      markAllRead: () => setNotifications(markAllNotificationsRead()),
-      markRead: (id: string) => setNotifications(markNotificationRead(id)),
+      markAllRead: () => void handleMarkAllRead(),
+      markRead: (id: string) => void handleMarkRead(id),
       setFilter,
       setMenuOpen,
       setSignOutConfirmOpen,
@@ -97,6 +138,7 @@ export function useAppHeader() {
       filter,
       menuOpen,
       notifications,
+      notificationsLoading: notificationsQuery.isLoading,
       signOutConfirmOpen,
       settings,
       unreadCount: notifications.filter((item) => !item.read).length,

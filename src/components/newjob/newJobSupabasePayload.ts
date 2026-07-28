@@ -1,5 +1,6 @@
-import type { CreateFullJobInput, CreateJobPersonInput } from '../../services/jobService'
+import type { CreateFullJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from '../../services/jobService'
 import { digitsOnly, numericValue } from './newJobConfig'
+import { getReferencePhotoTargets } from './deadline/referencePhotoTargets'
 import type { NewJobWizardDerivedModel } from './newJobWizardDerived'
 import type { NewJobWizardStateModel } from './useNewJobWizardState'
 
@@ -65,6 +66,39 @@ function buildPersons(state: NewJobWizardStateModel): CreateJobPersonInput[] {
   return bodyPersons.length ? bodyPersons : [buildNonBodyPerson(state)]
 }
 
+function buildReferencePhotos(state: NewJobWizardStateModel, derived: NewJobWizardDerivedModel): CreateJobReferencePhotoInput[] {
+  const targets = getReferencePhotoTargets({
+    clientName: state.clientName,
+    effectiveItemType: derived.effectiveItemType,
+    jobType: state.jobType,
+    makeCategory: state.makeCategory,
+    persons: state.persons,
+    sameItemForAll: state.sameItemForAll,
+  })
+  const photos: CreateJobReferencePhotoInput[] = []
+
+  targets.forEach((target) => {
+    const targetFiles = state.referencePhotoFilesByTarget[target.id] ?? []
+    targetFiles.slice(0, target.maxFiles).forEach((file) => {
+      photos.push({
+        file,
+        sortOrder: photos.length + 1,
+        targetId: target.id,
+        targetLabel: target.label,
+      })
+    })
+  })
+
+  if (photos.length) return photos
+
+  return state.referencePhotoFiles.map((file, index) => ({
+    file,
+    sortOrder: index + 1,
+    targetId: null,
+    targetLabel: null,
+  }))
+}
+
 export function buildNewJobPayload(params: {
   state: NewJobWizardStateModel
   derived: NewJobWizardDerivedModel
@@ -109,6 +143,6 @@ export function buildNewJobPayload(params: {
     isWorthIt: state.worthIt === 'Yes',
     persons: buildPersons(state),
     expenses: state.expenses.map((expense) => ({ name: expense.name, cost: moneyValue(expense.cost) })),
-    referencePhotos: state.referencePhotoFiles,
+    referencePhotos: buildReferencePhotos(state, derived),
   }
 }

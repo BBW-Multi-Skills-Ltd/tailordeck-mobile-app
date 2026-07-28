@@ -4,7 +4,7 @@ import { createClient } from './clientService'
 import { mapJobRow } from './mappers/jobMapper'
 import { mapJobStatusToDb } from './mappers/statusMapper'
 import { uploadJobPhoto } from './photoService'
-import { requireUserId } from './serviceHelpers'
+import { createSignedUrl, requireUserId } from './serviceHelpers'
 import type { JobRow, JobWithRelations } from './types'
 import { buildJobExpenseRows, buildJobPersonRows } from './jobs/jobRelationRows'
 import { buildFullJobRow, buildJobRow } from './jobs/jobRows'
@@ -12,7 +12,7 @@ import { buildJobUpdateRow } from './jobs/jobUpdateRows'
 import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
 import { validateCreateFullJobInput } from '../validation/jobSchemas'
 
-export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput } from './jobs/jobServiceTypes'
+export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from './jobs/jobServiceTypes'
 
 export async function getJobs(status?: JobStatus): Promise<MockJob[]> {
   const userId = await requireUserId()
@@ -33,7 +33,7 @@ export async function getJob(id: string): Promise<JobWithRelations | null> {
     .is('deleted_at', null)
     .maybeSingle<JobWithRelations>()
   if (error) throw error
-  return data
+  return data ? hydrateJobPhotoUrls(data) : null
 }
 
 export async function getClientJobs(clientId: string): Promise<JobWithRelations[]> {
@@ -47,7 +47,7 @@ export async function getClientJobs(clientId: string): Promise<JobWithRelations[
     .order('created_at', { ascending: false })
     .returns<JobWithRelations[]>()
   if (error) throw error
-  return data ?? []
+  return Promise.all((data ?? []).map(hydrateJobPhotoUrls))
 }
 
 export async function createJob(input: CreateJobInput): Promise<MockJob> {
@@ -86,13 +86,37 @@ export async function createFullJob(input: CreateFullJobInput): Promise<MockJob>
     if (error) throw error
   }
 
-  await Promise.all(input.referencePhotos.slice(0, 3).map((file, index) => uploadJobPhoto(job.id, file, index + 1)))
+  await Promise.all(
+    input.referencePhotos.map((photo, index) =>
+      uploadJobPhoto({
+        file: photo.file,
+        jobId: job.id,
+        sortOrder: photo.sortOrder || index + 1,
+        targetId: photo.targetId,
+        targetLabel: photo.targetLabel,
+      }),
+    ),
+  )
 
   if (clientId) {
     await supabase.from('clients').update({ last_job_date: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() }).eq('user_id', userId).eq('id', clientId)
   }
 
   return mapJobRow(job)
+}
+
+async function hydrateJobPhotoUrls(job: JobWithRelations): Promise<JobWithRelations> {
+  const photos = job.job_reference_photos ?? []
+  if (!photos.length) return job
+
+  const signedPhotos = await Promise.all(
+    photos.map(async (photo) => ({
+      ...photo,
+      signed_url: await createSignedUrl('job-photos', photo.storage_path),
+    })),
+  )
+
+  return { ...job, job_reference_photos: signedPhotos }
 }
 
 export async function updateJob(id: string, updates: Partial<CreateJobInput>): Promise<MockJob> {

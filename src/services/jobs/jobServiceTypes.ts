@@ -34,6 +34,13 @@ export interface CreateJobPersonInput {
   sortOrder: number
 }
 
+export interface CreateJobReferencePhotoInput {
+  file: File
+  targetId?: string | null
+  targetLabel?: string | null
+  sortOrder: number
+}
+
 export interface CreateFullJobInput extends CreateJobInput {
   clientSex: 'Male' | 'Female'
   measurementUnit: JobPersonRow['measurement_unit']
@@ -55,5 +62,5 @@ export interface CreateFullJobInput extends CreateJobInput {
   isWorthIt: boolean
   persons: CreateJobPersonInput[]
   expenses: Array<{ name: string; cost: number }>
-  referencePhotos: File[]
+  referencePhotos: CreateJobReferencePhotoInput[]
 }

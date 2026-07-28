@@ -18,6 +18,7 @@ export default function NewJob() {
   if (state.successOpen) {
     return (
       <JobSuccessView
+        createdJobId={state.createdJobId}
         clientName={state.clientName}
         clientPhone={state.clientPhone}
         color={state.materialColor}

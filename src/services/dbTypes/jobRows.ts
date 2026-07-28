@@ -80,11 +80,15 @@ export interface JobReferencePhotoRow {
   user_id: string
   job_id: string
   storage_path: string
+  signed_url?: string
+  target_id: string | null
+  target_label: string | null
   file_name: string | null
   mime_type: string | null
   size_bytes: number | null
   sort_order: number
   created_at: string
+  updated_at: string
 }
 
 export interface JobWithRelations extends JobRow {

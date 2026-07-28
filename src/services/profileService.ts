@@ -8,7 +8,8 @@ export async function getProfile(): Promise<ProfileRow | null> {
   const userId = await requireUserId()
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle<ProfileRow>()
   if (error) throw error
-  return data
+  if (!data?.avatar_storage_path) return data
+  return { ...data, avatar_url: await createSignedUrl('avatars', data.avatar_storage_path) }
 }
 
 export async function updateProfile(
@@ -33,6 +34,6 @@ export async function uploadAvatar(file: File): Promise<{ storagePath: string; s
   const storagePath = userScopedPath(userId, `avatar.${fileExtension(file)}`)
   await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file })
   const signedUrl = await createSignedUrl('avatars', storagePath)
-  await updateProfile({ avatar_storage_path: storagePath, avatar_url: signedUrl })
+  await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
   return { storagePath, signedUrl }
 }

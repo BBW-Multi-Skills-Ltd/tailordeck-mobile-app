@@ -16,6 +16,7 @@ import { useAppFeedback } from '../components/shared/appFeedbackCore'
 import type { DetailedJobData } from '../data/mockJobDetails'
 import type { MockJob } from '../types/job'
 import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
+import { useDocumentsQuery } from '../hooks/useDocumentQueries'
 import { useFeatureAccess } from '../hooks/useFeatureAccess'
 import { featureKeys } from '../lib/features'
 
@@ -73,7 +74,12 @@ function JobDetailContent({
   const navigate = useNavigate()
   const feedback = useAppFeedback()
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
+  const documentsQuery = useDocumentsQuery(job.id)
   const documentsLocked = documentSendingAccess.data === false
+  const persistedSentDocuments = {
+    invoice: documentsQuery.data?.some((document) => document.type === 'invoice' && Boolean(document.sent_at)) ?? false,
+    receipt: documentsQuery.data?.some((document) => document.type === 'receipt' && Boolean(document.sent_at)) ?? false,
+  }
 
   async function openDocument(type: InvoiceType): Promise<void> {
     if (documentSendingAccess.isLoading) {
@@ -109,9 +115,9 @@ function JobDetailContent({
         <JobReferencePhotos photos={details.referencePhotos} onOpen={interactions.setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
         <JobDocumentActions
-          invoiceSent={interactions.sentDocuments.invoice}
+          invoiceSent={persistedSentDocuments.invoice || interactions.sentDocuments.invoice}
           locked={documentsLocked}
-          receiptSent={interactions.sentDocuments.receipt}
+          receiptSent={persistedSentDocuments.receipt || interactions.sentDocuments.receipt}
           onInvoice={() => void openDocument('invoice')}
           onReceipt={() => void openDocument('receipt')}
         />
