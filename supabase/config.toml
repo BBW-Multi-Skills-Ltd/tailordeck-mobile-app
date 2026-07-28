@@ -388,6 +388,12 @@ deno_version = 2
 [functions.paystack-webhook]
 verify_jwt = false
 
+[functions.paystack-initialize-subscription]
+verify_jwt = false
+
+[functions.paystack-verify-transaction]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
