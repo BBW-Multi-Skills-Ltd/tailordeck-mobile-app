@@ -1,4 +1,5 @@
-﻿import type { TailorSettings } from '../lib/settingsTypes'
+import { AVATAR_PLACEHOLDER } from '../lib/settings'
+import type { TailorSettings } from '../lib/settingsTypes'
 import { getBrandSettings, updateBrandSettings } from './brandService'
 import { getBusinessProfile, getSocialHandles, updateBusinessProfile, updateSocialHandles } from './businessService'
 import { mergeSettingsRows } from './mappers/settingsMapper'
@@ -20,7 +21,8 @@ export async function getSettings(): Promise<TailorSettings> {
 }
 
 export async function saveProfileSettings(settings: TailorSettings) {
-  return updateProfile({ full_name: settings.profile.fullName, email: settings.profile.email, phone: settings.profile.phone, avatar_url: settings.profile.avatarUrl })
+  const avatarUrl = settings.profile.avatarUrl === AVATAR_PLACEHOLDER ? null : settings.profile.avatarUrl
+  return updateProfile({ full_name: settings.profile.fullName, email: settings.profile.email, phone: settings.profile.phone, avatar_url: avatarUrl })
 }
 
 export async function saveBusinessSettings(settings: TailorSettings) {
@@ -43,6 +45,7 @@ export async function savePreferenceSettings(settings: TailorSettings) {
   return updatePreferences({
     measurement_unit: settings.preferences.measurementUnit,
     default_material_quality: settings.preferences.defaultMaterialQuality,
+    dark_mode: settings.preferences.darkMode,
   })
 }
 
@@ -73,3 +76,4 @@ export async function saveBrandSettings(settings: TailorSettings) {
     show_cac: settings.brand.includeBusinessDetails.cac,
   })
 }
+

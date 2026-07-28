@@ -19,6 +19,7 @@ export function normalizeSettings(value: Partial<TailorSettings>): TailorSetting
       measurementUnit: value.preferences?.measurementUnit ?? defaults.preferences.measurementUnit,
       currencySymbol: value.preferences?.currencySymbol ?? defaults.preferences.currencySymbol,
       defaultMaterialQuality: value.preferences?.defaultMaterialQuality ?? defaults.preferences.defaultMaterialQuality,
+      darkMode: value.preferences?.darkMode ?? defaults.preferences.darkMode,
     },
     reminders: {
       pushNotifications: value.reminders?.pushNotifications ?? defaults.reminders.pushNotifications,
@@ -78,7 +79,7 @@ function normalizeProfilePhone(phone: string): string {
         ? normalizedPhoneDigits.slice(1)
         : normalizedPhoneDigits
 
-  if (normalizedPhoneDigits.length === 0) return '+234'
+  if (normalizedPhoneDigits.length === 0 || normalizedPhoneDigits === '234') return ''
   if (normalizedPhoneDigits.startsWith('234')) return `+${normalizedPhoneDigits}`
   return `+234${normalizedPhoneLocal}`
 }
@@ -92,7 +93,7 @@ function normalizeBusinessPhone(phone: string): string {
         ? businessDigits.slice(1)
         : businessDigits
 
-  return businessDigits.length === 0 ? '+234' : `+234${businessLocal}`
+  return businessDigits.length === 0 || businessDigits === '234' ? '' : `+234${businessLocal}`
 }
 
 function normalizeSocialHandles(value: Partial<TailorSettings>, defaults: TailorSettings): TailorSettings['businessInfo']['socialHandles'] {

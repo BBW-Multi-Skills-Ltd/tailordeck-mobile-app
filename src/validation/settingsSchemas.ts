@@ -53,6 +53,7 @@ export const preferencesUpdateSchema = z.object({
   user_id: z.string().uuid().optional(),
   measurement_unit: z.enum(['cm', 'inches']).optional(),
   default_material_quality: z.enum(['Normal', 'Original', 'Fake', 'High Standard']).optional().nullable(),
+  dark_mode: z.boolean().optional(),
   push_notifications: z.boolean().optional(),
   default_reminder: z.enum(['1 day before', '3 days before', '1 week before']).optional(),
   ringtone_enabled: z.boolean().optional(),

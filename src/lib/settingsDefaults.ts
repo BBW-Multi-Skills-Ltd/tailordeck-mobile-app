@@ -44,13 +44,14 @@ export function getDefaultTailorSettings(): TailorSettings {
     profile: {
       fullName: signup.fullName || 'Your Name',
       email: signup.email || 'your@email.com',
-      phone: '+234',
+      phone: '',
       avatarUrl: AVATAR_PLACEHOLDER,
     },
     preferences: {
       measurementUnit: 'inches',
       currencySymbol: '\u20A6',
       defaultMaterialQuality: 'Normal',
+      darkMode: false,
     },
     reminders: {
       pushNotifications: true,
@@ -63,9 +64,9 @@ export function getDefaultTailorSettings(): TailorSettings {
     businessInfo: {
       shopName: signup.shopName || '',
       shopAddress: '',
-      businessPhone: '+234',
+      businessPhone: '',
       businessEmail: '',
-      website: 'https://',
+      website: '',
       cacRegistrationNumber: '',
       socialHandles: [],
     },

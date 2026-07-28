@@ -29,6 +29,7 @@ export function mergeSettingsRows(rows: {
       measurementUnit: rows.preferences?.measurement_unit || fallback.preferences.measurementUnit,
       currencySymbol: '₦',
       defaultMaterialQuality: rows.preferences?.default_material_quality || fallback.preferences.defaultMaterialQuality,
+      darkMode: rows.preferences?.dark_mode ?? fallback.preferences.darkMode,
     },
     reminders: {
       pushNotifications: rows.preferences?.push_notifications ?? fallback.reminders.pushNotifications,

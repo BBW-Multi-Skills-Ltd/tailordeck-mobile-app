@@ -25,6 +25,7 @@ export interface TailorSettings {
     measurementUnit: MeasurementUnit
     currencySymbol: string
     defaultMaterialQuality: MaterialQuality
+    darkMode: boolean
   }
   reminders: {
     pushNotifications: boolean

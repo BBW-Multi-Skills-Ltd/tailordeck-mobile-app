@@ -18,7 +18,11 @@ export function useSettingsTheme() {
   }, [])
 
   return {
-    setTheme: () => setTheme(toggleTheme()),
+    setTheme: () => {
+      const nextTheme = toggleTheme()
+      setTheme(nextTheme)
+      return nextTheme
+    },
     theme,
   }
 }

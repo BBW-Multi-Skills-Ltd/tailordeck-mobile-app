@@ -5,6 +5,7 @@ export interface UserPreferencesRow {
   user_id: string
   measurement_unit: MeasurementUnit
   default_material_quality: MaterialQuality | null
+  dark_mode: boolean
   push_notifications: boolean
   default_reminder: ReminderLead
   ringtone_enabled: boolean

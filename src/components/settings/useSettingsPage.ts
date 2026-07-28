@@ -4,6 +4,7 @@ import {
   loadTailorSettings,
   saveTailorSettings,
 } from '../../lib/settings'
+import { applyTheme } from '../../lib/theme'
 import { useAuth } from '../../context/authContextCore'
 import {
   useSaveBrandSettingsMutation,
@@ -69,7 +70,20 @@ export function useSettingsPage() {
     if (!settingsQuery.data) return
     const next = saveTailorSettings(settingsQuery.data)
     setSettings(next)
+    applyTheme(next.preferences.darkMode ? 'dark' : 'light')
   }, [settingsQuery.data, setSettings])
+
+  async function handleThemeToggle(): Promise<void> {
+    const nextTheme = setTheme()
+    const nextSettings = {
+      ...settings,
+      preferences: {
+        ...settings.preferences,
+        darkMode: nextTheme === 'dark',
+      },
+    }
+    await markSaved('Shop Preferences', nextSettings)
+  }
 
   function handleToggle(next: Exclude<SettingsPanel, null>): void {
     setPanel((prev) => (prev === next ? null : next))
@@ -100,7 +114,7 @@ export function useSettingsPage() {
       setSignOutConfirmOpen,
       setSocialHandleInput,
       setSocialPlatform,
-      setTheme,
+      setTheme: handleThemeToggle,
       uploadSettingsImage,
     },
     derived: {
