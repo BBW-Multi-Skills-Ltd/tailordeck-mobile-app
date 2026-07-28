@@ -1,7 +1,7 @@
-import { ArrowLeft, CheckCircle2, Circle } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { CheckCircle2, Circle } from 'lucide-react'
 import BusinessInfoPanel from '../components/settings/BusinessInfoPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 
 export default function Business() {
@@ -15,11 +15,7 @@ export default function Business() {
       <PageHeader
         title="Business & Shop"
         centered
-        leading={
-          <Link to="/more" className="btn btn-ghost btn-icon" aria-label="Back to more">
-            <ArrowLeft size={18} />
-          </Link>
-        }
+        leading={<HistoryBackButton fallbackTo="/more" />}
       />
 
       <BusinessSetupProgress completeCount={completeCount} items={checklist} progress={progress} />

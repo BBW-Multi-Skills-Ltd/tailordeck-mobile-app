@@ -1,12 +1,10 @@
-import { ArrowLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import RemindersPanel from '../components/settings/RemindersPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import type { ReminderLead } from '../lib/settings'
 
 export default function SettingsReminders() {
-  const navigate = useNavigate()
   const { actions, state } = useSettingsPage()
 
   return (
@@ -14,11 +12,7 @@ export default function SettingsReminders() {
       <PageHeader
         title="Reminders"
         centered
-        leading={(
-          <button type="button" className="btn btn-ghost btn-icon" aria-label="Back to settings" onClick={() => navigate('/settings')}>
-            <ArrowLeft size={20} />
-          </button>
-        )}
+        leading={<HistoryBackButton fallbackTo="/settings" />}
       />
 
       <RemindersPanel

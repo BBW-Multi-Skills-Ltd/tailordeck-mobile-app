@@ -1,6 +1,5 @@
-import { ArrowLeft, BarChart3 } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import BestMonthCard from '../components/dashboard/BestMonthCard'
 import DashboardEmptyGuide from '../components/dashboard/DashboardEmptyGuide'
 import DashboardInsightCard from '../components/dashboard/DashboardInsightCard'
@@ -11,6 +10,7 @@ import { buildDashboardMetricsFromStats } from '../components/dashboard/dashboar
 import JobStatusBreakdown from '../components/dashboard/JobStatusBreakdown'
 import MonthlyPerformanceTable from '../components/dashboard/MonthlyPerformanceTable'
 import EmptyState from '../components/shared/EmptyState'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import { useJobStatusBreakdownQuery, useMonthlyStatsQuery } from '../hooks/useDashboardQueries'
 import { useFeatureAccess } from '../hooks/useFeatureAccess'
@@ -37,11 +37,7 @@ export default function Dashboard() {
       <PageHeader
         title="Dashboard"
         centered
-        leading={
-          <Link to="/more" className="btn btn-ghost btn-icon" aria-label="Back to more">
-            <ArrowLeft size={18} />
-          </Link>
-        }
+        leading={<HistoryBackButton fallbackTo="/more" />}
       />
 
       {analyticsAccess.isLoading ? (

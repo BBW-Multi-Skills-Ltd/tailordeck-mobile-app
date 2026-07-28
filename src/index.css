@@ -4409,11 +4409,30 @@ button.more-row {
 }
 
 .settings-document-progress,
-.settings-document-section {
+.settings-document-section,
+.document-locked-card {
   border: 1px solid var(--clay-border);
   border-radius: var(--clay-radius-md);
   background: var(--clay-surface);
   box-shadow: var(--clay-shadow-rest);
+}
+
+.document-locked-card {
+  padding: 12px;
+}
+
+.document-locked-card h4 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.document-locked-card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .settings-document-progress {

@@ -1,7 +1,8 @@
-﻿import { ArrowLeft, Check } from 'lucide-react'
-import { useState } from 'react'
+﻿import { Check } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
+import { useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../hooks/useFeatureAccess'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { loadTailorSettings } from '../lib/settings'
@@ -15,7 +16,16 @@ export default function SubscriptionPage() {
   const [planFeedback, setPlanFeedback] = useState('')
   const [planError, setPlanError] = useState('')
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
-  const currentPlanCopy = getCurrentPlanCopy(settings.subscription.plan)
+  const subscriptionQuery = useSubscriptionQuery()
+  const currentPlan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
+  const currentPlanCopy = getCurrentPlanCopy(currentPlan)
+  const visiblePlans = useMemo(() => {
+    if (currentPlan === 'starter') return paidSubscriptionPlans.filter((plan) => plan.id === 'pro')
+    if (currentPlan === 'pro') return []
+    return paidSubscriptionPlans
+  }, [currentPlan])
+  const sectionTitle = currentPlan === 'starter' ? 'Ready for the full toolkit?' : "Choose the plan that's right for you"
+  const activeSelectedPlan = visiblePlans.length === 1 ? visiblePlans[0].id : selectedPlan
 
   async function choosePlan(plan: PaidPlan) {
     setPlanError('')
@@ -35,11 +45,7 @@ export default function SubscriptionPage() {
       <PageHeader
         title="Subscription"
         centered
-        leading={(
-          <Link to="/settings" className="btn btn-ghost btn-icon subscription-back-btn" aria-label="Back to settings">
-            <ArrowLeft size={18} />
-          </Link>
-        )}
+        leading={<HistoryBackButton fallbackTo="/settings" />}
       />
 
       <article className="subscription-current-card">
@@ -55,17 +61,20 @@ export default function SubscriptionPage() {
         </Link>
       </article>
 
-      <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
+      {visiblePlans.length > 0 ? <h3 className="subscription-section-title">{sectionTitle}</h3> : null}
 
-      <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+      {visiblePlans.length > 0 ? (
+        <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+      ) : null}
       {planFeedback ? <p className="auth-feedback success" role="status">{planFeedback}</p> : null}
       {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 
-      <div className="subscription-plan-carousel" aria-label="Pricing plans">
-        {paidSubscriptionPlans.map((plan) => (
+      {visiblePlans.length > 0 ? (
+      <div className={`subscription-plan-carousel${visiblePlans.length === 1 ? ' manage-plan-carousel single' : ''}`} aria-label="Pricing plans">
+        {visiblePlans.map((plan) => (
           <article
             key={plan.id}
-            className={`subscription-plan-card subscription-plan-slide${selectedPlan === plan.id ? ' selected' : ''}`}
+            className={`subscription-plan-card subscription-plan-slide${activeSelectedPlan === plan.id ? ' selected' : ''}`}
             onClick={() => setSelectedPlan(plan.id)}
           >
             <div className="subscription-plan-badges">
@@ -88,14 +97,14 @@ export default function SubscriptionPage() {
 
             <button
               type="button"
-              className={`btn btn-full subscription-plan-btn${selectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
+              className={`btn btn-full subscription-plan-btn${activeSelectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
                 onClick={(event) => {
                   event.stopPropagation()
                   void choosePlan(plan.id)
                 }}
                 disabled={checkoutMutation.isPending}
               >
-              {checkoutMutation.isPending && selectedPlan === plan.id ? 'Opening checkout...' : `Upgrade to ${plan.label}`}
+              {checkoutMutation.isPending && activeSelectedPlan === plan.id ? 'Opening checkout...' : `Upgrade to ${plan.label}`}
             </button>
 
             <div className="subscription-plan-divider" />
@@ -114,6 +123,15 @@ export default function SubscriptionPage() {
           </article>
         ))}
       </div>
+      ) : (
+        <article className="subscription-current-card subscription-complete-card">
+          <p className="subscription-current-title">Full plan active</p>
+          <p className="subscription-current-subtitle">You already have Pro. PDF export, sending, analytics, and full document setup are available.</p>
+        </article>
+      )}
     </section>
   )
 }
+
+
+

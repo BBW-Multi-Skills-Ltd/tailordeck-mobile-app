@@ -5,13 +5,31 @@ import { OnboardingSetupProgress } from '../components/onboarding/setup/Onboardi
 import { OnboardingSetupStatusView } from '../components/onboarding/setup/OnboardingSetupStatusView'
 import { onboardingSetupStepCopy, onboardingSetupSteps } from '../components/onboarding/setup/onboardingSetupConfig'
 import { useOnboardingSetupState } from '../components/onboarding/setup/useOnboardingSetupState'
+import { useAuth } from '../context/authContextCore'
+import { loadTailorSettings } from '../lib/settings'
+import { syncPendingOnboardingSettings } from '../services/onboardingService'
 
 export default function OnboardingSetup() {
   const navigate = useNavigate()
+  const auth = useAuth()
   const { actions, state } = useOnboardingSetupState()
 
+  async function handleProceed() {
+    if (!auth.session) {
+      navigate('/auth/signup')
+      return
+    }
+
+    try {
+      await syncPendingOnboardingSettings(loadTailorSettings())
+    } catch (error) {
+      console.warn('Unable to sync onboarding setup before plan selection:', error)
+    }
+    navigate('/onboarding/plan')
+  }
+
   if (state.status !== 'editing') {
-    return <OnboardingSetupStatusView status={state.status} onProceed={() => navigate('/auth/signup')} />
+    return <OnboardingSetupStatusView status={state.status} onProceed={handleProceed} />
   }
 
   return (
@@ -75,7 +93,7 @@ export default function OnboardingSetup() {
         </section>
       </div>
 
-      {state.skipOpen ? <OnboardingSkipDialog onClose={() => actions.setSkipOpen(false)} onSkip={actions.finishSetup} /> : null}
+      {state.skipOpen ? <OnboardingSkipDialog onClose={() => actions.setSkipOpen(false)} onSkip={() => actions.finishSetup(true)} /> : null}
     </main>
   )
 }

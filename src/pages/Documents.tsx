@@ -1,7 +1,7 @@
-import { ArrowLeft } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import InvoiceReceiptPanel from '../components/settings/InvoiceReceiptPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import { useFeatureAccess } from '../hooks/useFeatureAccess'
 import { featureKeys } from '../lib/features'
@@ -17,11 +17,7 @@ export default function Documents() {
       <PageHeader
         title="Invoice & Receipt"
         centered
-        leading={
-          <Link to="/more" className="btn btn-ghost btn-icon" aria-label="Back to more">
-            <ArrowLeft size={18} />
-          </Link>
-        }
+        leading={<HistoryBackButton fallbackTo="/more" />}
       />
 
       <InvoiceReceiptPanel

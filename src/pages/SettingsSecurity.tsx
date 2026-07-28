@@ -1,8 +1,7 @@
-import { ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import AccountSecurityPanel from '../components/settings/AccountSecurityPanel'
 import ProfileSettingsPanel from '../components/settings/ProfileSettingsPanel'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 
 export default function SettingsSecurity() {
@@ -13,11 +12,7 @@ export default function SettingsSecurity() {
       <PageHeader
         title="Account & Security"
         centered
-        leading={(
-          <Link to="/settings" className="btn btn-ghost btn-icon" aria-label="Back to settings">
-            <ArrowLeft size={18} />
-          </Link>
-        )}
+        leading={<HistoryBackButton fallbackTo="/settings" />}
       />
 
       <article className="clay-card settings-standalone-card">

@@ -1,6 +1,7 @@
 import {
   loadTailorSettings,
   saveTailorSettings,
+  TAILOR_ONBOARDING_SETUP_SKIPPED_KEY,
   TAILOR_ONBOARDING_SYNC_PENDING_KEY,
   type SocialHandle,
   type SocialPlatform,
@@ -28,7 +29,7 @@ export function getInitialSocialHandles(): Record<SocialPlatform, string> {
   }
 }
 
-export function persistOnboardingSetup(draft: OnboardingSetupDraft): void {
+export function persistOnboardingSetup(draft: OnboardingSetupDraft, options: { skipped?: boolean } = {}): void {
   const current = loadTailorSettings()
   const normalizedBusinessName = draft.businessName.trim() || current.businessInfo.shopName
   const normalizedSocialHandles = normalizeSocialHandles(draft.socialHandles)
@@ -68,6 +69,7 @@ export function persistOnboardingSetup(draft: OnboardingSetupDraft): void {
   })
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(TAILOR_ONBOARDING_SYNC_PENDING_KEY, 'true')
+    window.localStorage.setItem(TAILOR_ONBOARDING_SETUP_SKIPPED_KEY, options.skipped ? 'true' : 'false')
   }
 }
 

@@ -1,5 +1,6 @@
-import { ArrowLeft, BookOpen, ChevronRight, LifeBuoy, MessageCircle, ShieldCheck } from 'lucide-react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { BookOpen, ChevronRight, LifeBuoy, MessageCircle, ShieldCheck } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 
 const helpItems = [
@@ -30,11 +31,7 @@ export default function Help() {
       <PageHeader
         title="Help & Support"
         centered
-        leading={(
-          <Link to={returnTo} className="btn btn-ghost btn-icon" aria-label={returnLabel}>
-            <ArrowLeft size={18} />
-          </Link>
-        )}
+        leading={<HistoryBackButton fallbackTo={returnTo} label={returnLabel} />}
       />
 
       <article className="clay-card settings-standalone-card stack gap-8">

@@ -48,6 +48,7 @@ export interface JobPersonRow {
   user_id: string
   job_id: string
   client_id: string | null
+  person_name: string
   name: string
   sex: 'Male' | 'Female' | 'Boy' | 'Girl'
   role: 'adult' | 'child'
@@ -56,7 +57,7 @@ export interface JobPersonRow {
   description: string | null
   is_primary: boolean
   measurement_kind: 'body' | 'non_body'
-  quantity: string | null
+  quantity: number | null
   measurements: Record<string, number | string>
   measurement_unit: MeasurementUnit
   sort_order: number

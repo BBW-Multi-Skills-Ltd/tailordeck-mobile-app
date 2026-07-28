@@ -55,7 +55,7 @@ export default function InvoiceReceiptPanel({
     <div className="stack settings-brand-form">
       <InvoiceSetupProgress completeCount={completeCount} items={checklist} progress={progress} />
       {locked ? (
-        <article className="clay-card stack gap-6">
+        <article className="document-locked-card stack gap-8">
           <h4>Pro document setup</h4>
           <p className="text-muted">Upgrade to Pro to add logo, signature, and full business details to PDFs.</p>
           <button type="button" className="btn btn-secondary btn-full" onClick={onUpgrade}>

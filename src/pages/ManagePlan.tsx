@@ -1,10 +1,9 @@
-import { ArrowLeft } from 'lucide-react'
-import { Link } from 'react-router-dom'
 import { BillingSummarySection, CurrentPlanSection } from '../components/subscription/manage/ManagePlanSummarySections'
 import { CancelPlanDialog } from '../components/subscription/manage/CancelPlanDialog'
 import { ChangePlanSection } from '../components/subscription/manage/ChangePlanSection'
 import { ManagePlanSupportSection, PaymentHistorySection, SubscriptionControlSection } from '../components/subscription/manage/ManagePlanControlSections'
 import { useManagePlanState } from '../components/subscription/manage/useManagePlanState'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 
 export default function ManagePlan() {
@@ -15,11 +14,7 @@ export default function ManagePlan() {
       <PageHeader
         title="Manage Plan"
         centered
-        leading={(
-          <Link to="/settings/subscription" className="btn btn-ghost btn-icon" aria-label="Back to subscription">
-            <ArrowLeft size={18} />
-          </Link>
-        )}
+        leading={<HistoryBackButton fallbackTo="/settings/subscription" />}
       />
 
       <CurrentPlanSection

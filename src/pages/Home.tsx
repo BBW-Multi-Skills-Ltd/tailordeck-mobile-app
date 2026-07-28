@@ -6,7 +6,7 @@ import { HomeRecentJobs } from '../components/home/HomeRecentJobs'
 import { HomeSetupGuide } from '../components/home/HomeSetupGuide'
 import { formatHomeProfit, getCurrentMonthStats, getGreeting, getHomeKpiCards } from '../components/home/homeMetrics'
 import { useMonthlyStatsQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
-import { loadTailorSettings } from '../lib/settings'
+import { loadTailorSettings, TAILOR_ONBOARDING_SETUP_SKIPPED_KEY } from '../lib/settings'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -26,6 +26,7 @@ export default function Home() {
     : hasJobs
     ? 'Your workshop activity is ready for today.'
     : 'Start with one job. TailorDeck will organize the client, measurements, and deadline for you.'
+  const setupWasSkipped = typeof window !== 'undefined' && window.localStorage.getItem(TAILOR_ONBOARDING_SETUP_SKIPPED_KEY) === 'true'
 
   useEffect(() => {
     function syncSettings() {
@@ -47,7 +48,7 @@ export default function Home() {
         <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
-      {homeDataReady && !hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
+      {homeDataReady && !hasJobs && setupWasSkipped ? <HomeSetupGuide shopName={settings.businessInfo.shopName} /> : null}
       {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}

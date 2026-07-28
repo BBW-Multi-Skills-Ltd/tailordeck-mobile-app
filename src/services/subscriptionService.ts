@@ -101,6 +101,9 @@ export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
   const subscription = await getSubscription()
   if (!subscription) return false
   if (!isSubscriptionUsable(subscription)) return false
+  if (subscription.plan_name === 'free') return true
+  if (subscription.plan_name === 'pro') return true
+  if (subscription.plan_name === 'starter') return false
 
   const { data, error } = await supabase
     .from('plan_features')

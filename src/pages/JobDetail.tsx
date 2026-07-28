@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
@@ -12,6 +11,7 @@ import { getMeasurementScopeText } from '../components/jobdetail/jobDetailUtils'
 import { useJobDetailData } from '../components/jobdetail/page/useJobDetailData'
 import { useJobDetailInteractions } from '../components/jobdetail/page/useJobDetailInteractions'
 import PageHeader from '../components/shared/PageHeader'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import { useAppFeedback } from '../components/shared/appFeedbackCore'
 import type { DetailedJobData } from '../data/mockJobDetails'
 import type { MockJob } from '../types/job'
@@ -101,7 +101,7 @@ function JobDetailContent({
         <PageHeader
           title="Job Details"
           centered
-          leading={<Link to="/jobs" className="btn btn-ghost btn-icon" aria-label="Back to jobs"><ArrowLeft size={18} /></Link>}
+          leading={<HistoryBackButton fallbackTo="/jobs" />}
         />
         <JobClientCard job={job} />
         <JobInfoSection job={job} details={details} measurementScopeText={measurementScopeText} />

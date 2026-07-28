@@ -33,7 +33,7 @@ export function useOnboardingSetupState() {
     else setSignatureUrl(value)
   }
 
-  function saveSetup(): void {
+  function saveSetup(skipped = false): void {
     persistOnboardingSetup({
       businessAddress,
       businessEmail,
@@ -44,12 +44,12 @@ export function useOnboardingSetupState() {
       signatureUrl,
       socialHandles,
       website,
-    })
+    }, { skipped })
   }
 
-  function finishSetup(): void {
+  function finishSetup(skipped = false): void {
     setSkipOpen(false)
-    saveSetup()
+    saveSetup(skipped)
     setStatus('saving')
     window.setTimeout(() => setStatus('success'), 850)
   }
@@ -60,7 +60,7 @@ export function useOnboardingSetupState() {
       return
     }
 
-    finishSetup()
+    finishSetup(false)
   }
 
   return {

@@ -1,4 +1,4 @@
-import { ArrowLeft, RotateCcw, Trash2 } from 'lucide-react'
+import { RotateCcw, Trash2 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ClientJobHistory from '../components/clientprofile/ClientJobHistory'
@@ -6,6 +6,7 @@ import ClientMeasurementsSection from '../components/clientprofile/ClientMeasure
 import ClientProfileCard from '../components/clientprofile/ClientProfileCard'
 import { useClientMeasurements } from '../components/clientprofile/useClientMeasurements'
 import EmptyState from '../components/shared/EmptyState'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
 import { useAppFeedback } from '../components/shared/appFeedbackCore'
 import PageHeader from '../components/shared/PageHeader'
 import { useClientQuery, useSoftDeleteClientMutation } from '../hooks/useClientQueries'
@@ -75,11 +76,7 @@ export default function ClientProfile() {
       <PageHeader
         title="Client Profile"
         centered
-        leading={(
-          <Link to="/clients" className="btn btn-ghost btn-icon" aria-label="Back to clients">
-            <ArrowLeft size={18} />
-          </Link>
-        )}
+        leading={<HistoryBackButton fallbackTo="/clients" />}
       />
 
       <ClientProfileCard client={client} />
