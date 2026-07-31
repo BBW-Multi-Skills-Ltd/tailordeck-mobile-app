@@ -84,7 +84,7 @@ export const createFullJobSchema = newJobClientStepSchema
   .merge(newJobCostingStepSchema)
   .merge(newJobDeadlineStepSchema)
   .extend({
-    status: z.enum(['Pending', 'In Progress', 'Completed']).optional(),
+    status: z.enum(['Draft', 'Pending', 'In Progress', 'Completed']).optional(),
     persons: z.array(newJobPersonSchema).min(1, 'Add at least one person or item measurement.'),
   })
   .superRefine((input, context) => {

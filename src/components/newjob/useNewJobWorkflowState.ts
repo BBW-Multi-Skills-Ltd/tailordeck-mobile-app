@@ -11,6 +11,7 @@ export function useNewJobWorkflowState() {
   const [deadlineTime, setDeadlineTime] = useState('')
   const [reminder, setReminder] = useState<Reminder>('1 day before')
   const [draftSaved, setDraftSaved] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [stepFourReviewMode, setStepFourReviewMode] = useState(false)
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
@@ -25,6 +26,7 @@ export function useNewJobWorkflowState() {
     deadlineTime,
     draftSaved,
     isFinalizing,
+    isSavingDraft,
     referencePhotoFiles,
     referencePhotoFilesByTarget,
     referencePhotoNames,
@@ -35,6 +37,7 @@ export function useNewJobWorkflowState() {
     setDeadlineTime,
     setDraftSaved,
     setIsFinalizing,
+    setIsSavingDraft,
     setReferencePhotoFiles,
     setReferencePhotoFilesByTarget,
     setReferencePhotoNames,

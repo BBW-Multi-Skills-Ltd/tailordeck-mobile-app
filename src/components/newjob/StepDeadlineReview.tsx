@@ -15,6 +15,7 @@ export default function StepDeadlineReview(props: StepDeadlineReviewProps) {
         jobType={props.jobType}
         makeCategory={props.makeCategory}
         persons={props.persons}
+        referencePhotoFilesByTarget={props.referencePhotoFilesByTarget}
         referencePhotoNamesByTarget={props.referencePhotoNamesByTarget}
         reminder={props.reminder}
         sameItemForAll={props.sameItemForAll}

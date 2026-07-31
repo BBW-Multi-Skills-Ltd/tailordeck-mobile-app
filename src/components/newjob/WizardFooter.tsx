@@ -4,6 +4,8 @@ type WizardFooterProps = {
   step: number
   isReviewMode: boolean
   isFinalizing: boolean
+  isSavingDraft: boolean
+  draftSaved: boolean
   onBack: () => void | Promise<void>
   onNext: () => void
   onProceedToReview: () => void
@@ -15,6 +17,8 @@ export function WizardFooter({
   step,
   isReviewMode,
   isFinalizing,
+  isSavingDraft,
+  draftSaved,
   onBack,
   onNext,
   onProceedToReview,
@@ -44,10 +48,10 @@ export function WizardFooter({
           </>
         ) : (
           <>
-            <button type="button" className="btn btn-secondary flex-1" onClick={onSaveDraft}>
-              Save as Draft
+            <button type="button" className="btn btn-secondary flex-1" onClick={onSaveDraft} disabled={isSavingDraft || draftSaved}>
+              {isSavingDraft ? 'Saving...' : draftSaved ? 'Draft Saved' : 'Save as Draft'}
             </button>
-            <button type="button" className="btn btn-primary flex-1" onClick={onFinalize} disabled={isFinalizing}>
+            <button type="button" className="btn btn-primary flex-1" onClick={onFinalize} disabled={isFinalizing || isSavingDraft}>
               {isFinalizing ? 'Finalizing...' : 'Confirm & Finalize Job'}
             </button>
           </>

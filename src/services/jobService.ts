@@ -17,7 +17,11 @@ export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput, CreateJo
 export async function getJobs(status?: JobStatus): Promise<MockJob[]> {
   const userId = await requireUserId()
   let query = supabase.from('jobs').select('*').eq('user_id', userId).is('deleted_at', null).order('created_at', { ascending: false })
-  if (status) query = query.eq('status', mapJobStatusToDb(status))
+  if (status) {
+    query = query.eq('status', mapJobStatusToDb(status))
+  } else {
+    query = query.neq('status', 'draft')
+  }
   const { data, error } = await query.returns<JobRow[]>()
   if (error) throw error
   return (data ?? []).map(mapJobRow)
@@ -98,7 +102,7 @@ export async function createFullJob(input: CreateFullJobInput): Promise<MockJob>
     ),
   )
 
-  if (clientId) {
+  if (clientId && input.status !== 'Draft') {
     await supabase.from('clients').update({ last_job_date: new Date().toISOString().slice(0, 10), updated_at: new Date().toISOString() }).eq('user_id', userId).eq('id', clientId)
   }
 
@@ -129,9 +133,14 @@ export async function updateJob(id: string, updates: Partial<CreateJobInput>): P
 
 export async function updateJobStatus(id: string, status: JobStatus): Promise<MockJob> {
   const userId = await requireUserId()
+  const dbStatus = mapJobStatusToDb(status)
   const { data, error } = await supabase
     .from('jobs')
-    .update({ status: mapJobStatusToDb(status), updated_at: new Date().toISOString() })
+    .update({
+      status: dbStatus,
+      completed_at: dbStatus === 'completed' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString(),
+    })
     .eq('user_id', userId)
     .eq('id', id)
     .select('*')

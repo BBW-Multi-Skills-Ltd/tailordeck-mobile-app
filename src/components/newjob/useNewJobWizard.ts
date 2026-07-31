@@ -79,6 +79,22 @@ export function useNewJobWizard() {
     }
   }
 
+  async function handleSaveDraft(): Promise<void> {
+    if (state.draftSaved) return
+    state.setIsSavingDraft(true)
+
+    try {
+      const draftJob = await createFullJobMutation.mutateAsync(buildNewJobPayload({ state, derived, repeatClientId, status: 'Draft' }))
+      state.setCreatedJobId(draftJob.id)
+      state.setDraftSaved(true)
+      feedback.toast('Draft saved.', 'success')
+    } catch (error) {
+      feedback.toast(getServiceErrorMessage(error, 'Unable to save this draft.'), 'error')
+    } finally {
+      state.setIsSavingDraft(false)
+    }
+  }
+
   const actions = createNewJobWizardActions({
     confirmDiscard: () =>
       feedback.confirm({
@@ -164,6 +180,7 @@ export function useNewJobWizard() {
         if (!validateCurrentStep()) return
         state.setStepFourReviewMode(true)
       },
+      saveDraft: handleSaveDraft,
       viewCreatedJob: () => navigate(state.createdJobId ? `/jobs/${state.createdJobId}` : '/jobs'),
     },
     derived,

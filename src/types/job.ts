@@ -1,4 +1,4 @@
-export type JobStatus = 'Pending' | 'In Progress' | 'Completed'
+export type JobStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed'
 
 export interface MockJob {
   id: string

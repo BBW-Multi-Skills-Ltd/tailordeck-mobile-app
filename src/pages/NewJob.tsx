@@ -55,6 +55,8 @@ export default function NewJob() {
         step={state.step}
         isReviewMode={state.stepFourReviewMode}
         isFinalizing={state.isFinalizing}
+        isSavingDraft={state.isSavingDraft}
+        draftSaved={state.draftSaved}
         onBack={actions.goBack}
         onNext={actions.goNext}
         onProceedToReview={actions.proceedToReview}
@@ -62,7 +64,7 @@ export default function NewJob() {
         onFinalize={actions.handleFinalizeJob}
       />
 
-      {state.isFinalizing ? <WizardLoadingOverlay /> : null}
+      {state.isFinalizing || state.isSavingDraft ? <WizardLoadingOverlay /> : null}
     </section>
   )
 }

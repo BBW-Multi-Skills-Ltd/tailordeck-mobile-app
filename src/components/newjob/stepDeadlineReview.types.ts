@@ -41,6 +41,7 @@ export type StepDeadlineReviewProps = {
   materialSource: MaterialSource
   charge: number
   deposit: number
+  referencePhotoFilesByTarget: Record<string, File[]>
   referencePhotoNames: string[]
   referencePhotoNamesByTarget: Record<string, string[]>
   fieldErrors: NewJobFieldErrors

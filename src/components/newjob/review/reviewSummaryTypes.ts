@@ -25,6 +25,7 @@ export type ReviewSummaryProps = Pick<
   | 'orderMode'
   | 'persons'
   | 'projectedProfit'
+  | 'referencePhotoFilesByTarget'
   | 'referencePhotoNames'
   | 'sameItemForAll'
   | 'scopeLabel'

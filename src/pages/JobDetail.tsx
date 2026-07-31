@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
 import { JobDeadlineSection } from '../components/jobdetail/JobDeadlineSection'
+import { JobCompletionSection } from '../components/jobdetail/JobCompletionSection'
 import { JobDocumentActions } from '../components/jobdetail/JobDocumentActions'
 import { JobImageViewer } from '../components/jobdetail/JobImageViewer'
 import { JobInfoSection } from '../components/jobdetail/JobInfoSection'
@@ -18,6 +19,7 @@ import type { MockJob } from '../types/job'
 import type { BrandConfig, InvoiceType } from '../components/invoice/documentTypes'
 import { useDocumentsQuery } from '../hooks/useDocumentQueries'
 import { useFeatureAccess } from '../hooks/useFeatureAccess'
+import { useUpdateJobStatusMutation } from '../hooks/useJobQueries'
 import { featureKeys } from '../lib/features'
 
 const JobDocumentDrawer = lazy(() =>
@@ -31,7 +33,7 @@ export default function JobDetail() {
   if (jobQuery.isLoading) return <JobDetailLoading />
   if (!job) return <JobDetailNotFound />
 
-  return <JobDetailContent job={job} brand={brand} details={details} measurementOrderScope={jobRow?.order_scope} />
+  return <JobDetailContent job={job} brand={brand} details={details} measurementOrderScope={jobRow?.order_scope} completedAt={jobRow?.completed_at} />
 }
 
 function JobDetailLoading() {
@@ -59,11 +61,13 @@ function JobDetailContent({
   brand,
   details,
   measurementOrderScope,
+  completedAt,
 }: {
   job: MockJob
   brand: BrandConfig
   details: DetailedJobData
   measurementOrderScope?: string
+  completedAt?: string | null
 }) {
   const totalExpenses = details.expenses.reduce((sum, expense) => sum + expense.cost, 0)
   const balanceToCollect = Math.max(job.chargeAmount - details.depositAmount, 0)
@@ -75,6 +79,7 @@ function JobDetailContent({
   const feedback = useAppFeedback()
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
   const documentsQuery = useDocumentsQuery(job.id)
+  const updateStatusMutation = useUpdateJobStatusMutation()
   const documentsLocked = documentSendingAccess.data === false
   const persistedSentDocuments = {
     invoice: documentsQuery.data?.some((document) => document.type === 'invoice' && Boolean(document.sent_at)) ?? false,
@@ -101,6 +106,23 @@ function JobDetailContent({
     interactions.setOpenDrawer(type)
   }
 
+  async function completeJob(): Promise<void> {
+    const confirmed = await feedback.confirm({
+      title: 'Mark job completed?',
+      message: 'This will move the job to Completed and update your dashboard.',
+      confirmLabel: 'Mark Completed',
+      cancelLabel: 'Not yet',
+    })
+    if (!confirmed) return
+
+    try {
+      await updateStatusMutation.mutateAsync({ id: job.id, status: 'Completed' })
+      feedback.toast('Job marked completed.', 'success')
+    } catch {
+      feedback.toast('Unable to update this job. Please try again.', 'error')
+    }
+  }
+
   return (
     <>
       <section className="section stack gap-16">
@@ -114,6 +136,12 @@ function JobDetailContent({
         <JobPricingSection chargeAmount={job.chargeAmount} depositAmount={details.depositAmount} balanceToCollect={balanceToCollect} totalExpenses={totalExpenses} estimatedProfit={estimatedProfit} expenses={details.expenses} />
         <JobReferencePhotos photos={details.referencePhotos} onOpen={interactions.setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
+        <JobCompletionSection
+          completedAt={completedAt}
+          isUpdating={updateStatusMutation.isPending}
+          status={job.status}
+          onComplete={() => void completeJob()}
+        />
         <JobDocumentActions
           invoiceSent={persistedSentDocuments.invoice || interactions.sentDocuments.invoice}
           locked={documentsLocked}

@@ -1,4 +1,5 @@
 import { ImagePlus, Upload } from 'lucide-react'
+import { ReferencePhotoPreviewGrid, type ReferencePreviewPhoto } from './ReferencePhotoPreview'
 
 export type ReferencePhotoTarget = {
   id: string
@@ -9,22 +10,32 @@ export type ReferencePhotoTarget = {
 
 type ReferencePhotoUploadProps = {
   error?: string
+  filesByTarget: Record<string, File[]>
   namesByTarget: Record<string, string[]>
   targets: ReferencePhotoTarget[]
   onReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles: number) => void
 }
 
-export function ReferencePhotoUpload({ error, namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
+function mapTargetFiles(targetId: string, files: File[], label: string): ReferencePreviewPhoto[] {
+  return files.map((file, index) => ({
+    file,
+    id: `${targetId}-${file.name}-${file.lastModified}-${index}`,
+    label,
+  }))
+}
+
+export function ReferencePhotoUpload({ error, filesByTarget, namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
   return (
     <section className="stack gap-8">
       <div className="stack gap-4">
         <p className="wizard-section-label">Reference photos</p>
-        <p className="text-sm text-muted wizard-helper-inline">Upload inspiration or client style guide if available.</p>
+        <p className="text-sm text-muted wizard-helper-inline">Optional images only. Max 2 per person.</p>
       </div>
 
       <div className="stack gap-8">
         {targets.map((target) => {
           const names = namesByTarget[target.id] ?? []
+          const files = filesByTarget[target.id] ?? []
           return (
             <article key={target.id} className="card wizard-reference-target-card">
               <div className="wizard-reference-target-head">
@@ -55,13 +66,7 @@ export function ReferencePhotoUpload({ error, namesByTarget, onReferencePhotoUpl
               </label>
 
               {names.length > 0 ? (
-                <div className="wizard-reference-name-list">
-                  {names.map((name) => (
-                    <span key={`${target.id}-${name}`} className="wizard-reference-name-chip">
-                      {name}
-                    </span>
-                  ))}
-                </div>
+                <ReferencePhotoPreviewGrid photos={mapTargetFiles(target.id, files, target.label)} />
               ) : null}
             </article>
           )

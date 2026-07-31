@@ -38,6 +38,7 @@ export interface JobRow {
   deadline_time: string | null
   reminder: '1 day before' | '3 days before' | '1 week before' | 'none'
   status: DbJobStatus
+  completed_at: string | null
   deleted_at: string | null
   created_at: string
   updated_at: string

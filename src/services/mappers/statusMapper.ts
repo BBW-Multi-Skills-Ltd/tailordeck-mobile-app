@@ -2,12 +2,14 @@
 import type { DbJobStatus } from '../types'
 
 export function mapJobStatusFromDb(status: DbJobStatus): JobStatus {
+  if (status === 'draft') return 'Draft'
   if (status === 'completed') return 'Completed'
   if (status === 'in_progress') return 'In Progress'
   return 'Pending'
 }
 
 export function mapJobStatusToDb(status: JobStatus): DbJobStatus {
+  if (status === 'Draft') return 'draft'
   if (status === 'Completed') return 'completed'
   if (status === 'In Progress') return 'in_progress'
   return 'pending'

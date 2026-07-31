@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { compressImageFile } from '../lib/imageCompression'
 import type { JobReferencePhotoRow } from './types'
 import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile } from './serviceHelpers'
 
@@ -23,18 +24,19 @@ function safePathPart(value: string): string {
 
 export async function uploadJobPhoto(input: UploadJobPhotoInput): Promise<JobReferencePhotoRow> {
   const userId = await requireUserId()
+  const compressedFile = await compressImageFile(input.file)
   const targetPart = safePathPart(input.targetId ?? 'job')
-  const storagePath = `${userId}/${input.jobId}/${targetPart}-photo-${input.sortOrder}.${fileExtension(input.file)}`
+  const storagePath = `${userId}/${input.jobId}/${targetPart}-photo-${input.sortOrder}.${fileExtension(compressedFile)}`
 
-  await uploadPrivateFile({ bucket: 'job-photos', file: input.file, path: storagePath })
+  await uploadPrivateFile({ bucket: 'job-photos', file: compressedFile, path: storagePath })
 
   const { data, error } = await supabase
     .from('job_reference_photos')
     .insert({
-      file_name: input.file.name,
+      file_name: compressedFile.name,
       job_id: input.jobId,
-      mime_type: input.file.type,
-      size_bytes: input.file.size,
+      mime_type: compressedFile.type,
+      size_bytes: compressedFile.size,
       sort_order: input.sortOrder,
       storage_path: storagePath,
       target_id: input.targetId ?? null,

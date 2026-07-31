@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import { requireUserId, ServiceError } from './serviceHelpers'
-import type { PlanFeatureRow, SubscriptionRow } from './types'
+import type { SubscriptionRow } from './types'
 
 export async function getSubscription(): Promise<SubscriptionRow | null> {
   const userId = await requireUserId()
@@ -63,21 +63,11 @@ export async function setCancelAtPeriodEnd(cancelAtPeriodEnd: boolean): Promise<
 }
 
 export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
-  const subscription = await getSubscription()
-  if (!subscription) return false
-  if (!isSubscriptionUsable(subscription)) return false
-  if (subscription.plan_name === 'free') return true
-  if (subscription.plan_name === 'pro') return true
-  if (subscription.plan_name === 'starter') return false
-
-  const { data, error } = await supabase
-    .from('plan_features')
-    .select('*')
-    .eq('plan_name', subscription.plan_name)
-    .eq('feature_key', featureKey)
-    .maybeSingle<PlanFeatureRow>()
+  const { data, error } = await supabase.rpc('has_feature_access', {
+    feature_key_value: featureKey,
+  })
   if (error) throw error
-  return Boolean(data?.is_enabled)
+  return data === true
 }
 
 export function isSubscriptionUsable(subscription: SubscriptionRow): boolean {

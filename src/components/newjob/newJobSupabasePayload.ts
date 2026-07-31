@@ -1,4 +1,5 @@
 import type { CreateFullJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from '../../services/jobService'
+import type { JobStatus } from '../../types/job'
 import { digitsOnly, numericValue } from './newJobConfig'
 import { getReferencePhotoTargets } from './deadline/referencePhotoTargets'
 import type { NewJobWizardDerivedModel } from './newJobWizardDerived'
@@ -103,8 +104,9 @@ export function buildNewJobPayload(params: {
   state: NewJobWizardStateModel
   derived: NewJobWizardDerivedModel
   repeatClientId?: string | null
+  status?: JobStatus
 }): CreateFullJobInput {
-  const { derived, repeatClientId, state } = params
+  const { derived, repeatClientId, state, status = 'Pending' } = params
   const itemType = derived.effectiveItemType || state.amendmentIssueType || 'Tailoring job'
 
   return {
@@ -124,7 +126,7 @@ export function buildNewJobPayload(params: {
     deadlineDate: state.deadlineDate,
     deadlineTime: state.deadlineTime,
     reminder: state.reminder,
-    status: 'Pending',
+    status,
     measurementUnit: 'inches',
     amendmentIssueType: state.amendmentIssueType,
     amendmentArea: state.amendmentArea,

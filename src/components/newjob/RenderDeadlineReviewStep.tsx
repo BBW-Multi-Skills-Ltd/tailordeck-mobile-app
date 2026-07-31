@@ -40,6 +40,7 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       materialSource={state.materialSource}
       charge={derived.charge}
       deposit={derived.deposit}
+      referencePhotoFilesByTarget={state.referencePhotoFilesByTarget}
       referencePhotoNames={state.referencePhotoNames}
       referencePhotoNamesByTarget={state.referencePhotoNamesByTarget}
       fieldErrors={state.fieldErrors}

@@ -23,6 +23,7 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     expenses: state.expenses,
     fieldErrors: state.fieldErrors,
     isFinalizing: state.isFinalizing,
+    isSavingDraft: state.isSavingDraft,
     itemType: state.itemType,
     jobType: state.jobType,
     makeCategory: state.makeCategory,

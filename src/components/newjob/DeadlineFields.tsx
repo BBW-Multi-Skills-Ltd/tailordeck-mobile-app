@@ -15,6 +15,7 @@ export function DeadlineFields({
   jobType,
   makeCategory,
   persons,
+  referencePhotoFilesByTarget,
   referencePhotoNamesByTarget,
   reminder,
   sameItemForAll,
@@ -45,6 +46,7 @@ export function DeadlineFields({
       <DeadlineReminderSelector reminder={reminder} onReminderChange={onReminderChange} />
       <DeliveryChecklist balance={balance} deadlineDate={deadlineDate} deadlineTime={deadlineTime} reminder={reminder} />
       <ReferencePhotoUpload
+        filesByTarget={referencePhotoFilesByTarget}
         namesByTarget={referencePhotoNamesByTarget}
         error={fieldErrors.referencePhotos}
         targets={referencePhotoTargets}

@@ -10,6 +10,7 @@ export type DeadlineFieldsProps = {
   jobType: JobType
   makeCategory: MakeCategory
   persons: PersonForm[]
+  referencePhotoFilesByTarget: Record<string, File[]>
   referencePhotoNamesByTarget: Record<string, string[]>
   fieldErrors: NewJobFieldErrors
   reminder: Reminder

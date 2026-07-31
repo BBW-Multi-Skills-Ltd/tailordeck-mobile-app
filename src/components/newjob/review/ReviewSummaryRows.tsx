@@ -19,11 +19,24 @@ import {
 } from 'lucide-react'
 import { formatNaira } from '../../../lib/utils'
 import { ReviewRow } from '../NewJobChrome'
+import { ReferencePhotoPreviewGrid, type ReferencePreviewPhoto } from '../ReferencePhotoPreview'
 import { AmendmentReviewRows } from './AmendmentReviewRows'
 import type { ReviewSummaryProps } from './reviewSummaryTypes'
 import { formatExpenses, getMeasurementSummary, getReviewDescription, getReviewItemType } from './reviewSummaryUtils'
 
+function getReviewPhotos(props: ReviewSummaryProps): ReferencePreviewPhoto[] {
+  return Object.entries(props.referencePhotoFilesByTarget).flatMap(([targetId, files]) =>
+    files.map((file, index) => ({
+      file,
+      id: `review-${targetId}-${file.name}-${file.lastModified}-${index}`,
+      label: props.referencePhotoNames[index] ?? file.name,
+    })),
+  )
+}
+
 export function ReviewSummaryRows(props: ReviewSummaryProps) {
+  const reviewPhotos = getReviewPhotos(props)
+
   return (
     <>
       <ReviewRow icon={<UserRound size={15} className="text-primary" />} label="Client name" value={props.clientName || '-'} />
@@ -42,7 +55,8 @@ export function ReviewSummaryRows(props: ReviewSummaryProps) {
       <ReviewRow icon={<Truck size={15} className="text-gold" />} label="Material source" value={props.materialSource === 'Client is Providing Material' ? 'Client Provided' : 'I Am Getting It'} />
       <ReviewRow icon={<Banknote size={15} className="text-primary" />} label="Charged amount" value={formatNaira(props.charge)} />
       <ReviewRow icon={<Coins size={15} className="text-gold" />} label="Deposited collected" value={formatNaira(props.deposit)} />
-      <ReviewRow icon={<Images size={15} className="text-success" />} label="Reference photo" value={props.referencePhotoNames.length ? props.referencePhotoNames.join(', ') : '-'} />
+      <ReviewRow icon={<Images size={15} className="text-success" />} label="Reference photo" value={reviewPhotos.length ? `${reviewPhotos.length} uploaded` : '-'} />
+      {reviewPhotos.length ? <ReferencePhotoPreviewGrid photos={reviewPhotos} /> : null}
       <ReviewRow icon={<ClipboardList size={15} className="text-primary" />} label="Expenses list" value={formatExpenses(props.expenses)} />
       <ReviewRow icon={<Banknote size={15} className="text-danger" />} label="Expenses cost" value={formatNaira(props.totalExpenses)} />
       <ReviewRow
