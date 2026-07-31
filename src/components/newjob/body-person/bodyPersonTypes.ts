@@ -10,6 +10,7 @@ export type BodyPersonMeasurementsCardProps = {
   measurementTitle: string
   itemValue: string
   itemError?: string
+  itemErrorKey?: number
   itemPlaceholder: string
   showNameInput?: boolean
   showItemField?: boolean

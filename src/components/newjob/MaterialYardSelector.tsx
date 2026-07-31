@@ -4,11 +4,12 @@ import { commonMaterialYards, materialYardCategories } from './materialYardOptio
 
 type MaterialYardSelectorProps = {
   error?: string
+  errorKey?: number
   selectedYards: string
   onSelectYards: (value: string) => void
 }
 
-export function MaterialYardSelector({ error, selectedYards, onSelectYards }: MaterialYardSelectorProps) {
+export function MaterialYardSelector({ error, errorKey = 0, selectedYards, onSelectYards }: MaterialYardSelectorProps) {
   const [openCategoryId, setOpenCategoryId] = useState('standard')
   const [showBrowse, setShowBrowse] = useState(false)
   const [showCustom, setShowCustom] = useState(false)
@@ -37,8 +38,9 @@ export function MaterialYardSelector({ error, selectedYards, onSelectYards }: Ma
       </div>
 
       <button
+        key={`yard-browse-${errorKey}`}
         type="button"
-        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
+        className={`wizard-material-browse-toggle${error ? ' input-invalid input-shake' : ''}`}
         onClick={() => setShowBrowse((current) => !current)}
         aria-expanded={showBrowse}
         aria-invalid={Boolean(error)}
@@ -102,7 +104,8 @@ export function MaterialYardSelector({ error, selectedYards, onSelectYards }: Ma
 
       {showCustom ? (
         <input
-          className={`input${error ? ' input-invalid' : ''}`}
+          key={`yard-custom-${errorKey}`}
+          className={`input${error ? ' input-invalid input-shake' : ''}`}
           value={selectedYards}
           onChange={(event) => onSelectYards(event.target.value)}
           placeholder="Type yard amount"

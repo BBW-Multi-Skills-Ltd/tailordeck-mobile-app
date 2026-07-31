@@ -12,6 +12,7 @@ export type DeadlineFieldsProps = {
   persons: PersonForm[]
   referencePhotoFilesByTarget: Record<string, File[]>
   referencePhotoNamesByTarget: Record<string, string[]>
+  fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
   reminder: Reminder
   sameItemForAll: boolean

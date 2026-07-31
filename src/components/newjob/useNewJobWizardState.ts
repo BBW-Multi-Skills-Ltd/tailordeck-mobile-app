@@ -18,6 +18,7 @@ export function useNewJobWizardState() {
   const [amendmentPartName, setAmendmentPartName] = useState('')
   const [amendmentPartQuantity, setAmendmentPartQuantity] = useState('')
   const [fieldErrors, setFieldErrors] = useState<NewJobFieldErrors>({})
+  const [fieldErrorKey, setFieldErrorKey] = useState(0)
 
   return {
     amendmentArea,
@@ -27,6 +28,7 @@ export function useNewJobWizardState() {
     amendmentPartName,
     amendmentPartQuantity,
     amendmentTarget,
+    fieldErrorKey,
     fieldErrors,
     setAmendmentArea,
     setAmendmentDescription,
@@ -36,6 +38,7 @@ export function useNewJobWizardState() {
     setAmendmentPartQuantity,
     setAmendmentTarget,
     setFieldErrors,
+    setFieldErrorKey,
     ...costingState,
     ...materialState,
     ...orderState,

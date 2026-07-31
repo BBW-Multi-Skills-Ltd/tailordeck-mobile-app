@@ -2,11 +2,13 @@ import { bodyWearItems, nonBodyItems } from '../newJobConfig'
 
 export function ItemTypeField({
   error,
+  errorKey = 0,
   itemType,
   makeCategory,
   onSharedItemTypeChange,
 }: {
   error?: string
+  errorKey?: number
   itemType: string
   makeCategory: 'Body Wear' | 'Non-Body Item'
   onSharedItemTypeChange: (value: string) => void
@@ -15,7 +17,8 @@ export function ItemTypeField({
     <label className="input-group">
       <span className="input-label">What are you making?</span>
       <input
-        className={`input${error ? ' input-invalid' : ''}`}
+        key={`item-type-${errorKey}`}
+        className={`input${error ? ' input-invalid input-shake' : ''}`}
         value={itemType}
         onChange={(event) => onSharedItemTypeChange(event.target.value)}
         placeholder={makeCategory === 'Body Wear' ? 'e.g. Wedding gown, Shirt, Agbada' : 'e.g. Bedcover, Pillow case, Face cap'}

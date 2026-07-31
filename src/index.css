@@ -433,6 +433,12 @@ body {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 12%, transparent), var(--clay-shadow-press) !important;
 }
 
+.input-partial {
+  border-color: #d97706 !important;
+  background: color-mix(in srgb, #d97706 7%, var(--clay-surface-muted) 93%) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #d97706 11%, transparent), var(--clay-shadow-press) !important;
+}
+
 .input-shake {
   animation: input-shake 0.34s ease both;
 }
@@ -526,6 +532,39 @@ body {
   box-shadow: var(--clay-shadow-press);
 }
 
+.auth-otp-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.auth-otp-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--clay-surface-muted);
+  color: var(--text-h);
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  outline: none;
+  box-shadow: var(--clay-shadow-press);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+
+.auth-otp-input:focus {
+  border-color: var(--primary);
+  box-shadow: var(--clay-focus);
+}
+
+.auth-inline-success {
+  color: var(--success);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .auth-strength {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -543,10 +582,12 @@ body {
   background: #ef4444;
 }
 
+.auth-strength.medium .auth-strength-bar.fill,
 .auth-strength:has(+ .auth-strength-text.medium) .auth-strength-bar.fill {
   background: #d97706;
 }
 
+.auth-strength.strong .auth-strength-bar.fill,
 .auth-strength:has(+ .auth-strength-text.strong) .auth-strength-bar.fill {
   background: #059669;
 }
@@ -652,10 +693,51 @@ body {
   color: var(--success);
 }
 
+.password-match-hint {
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.password-match-hint.partial {
+  color: #d97706;
+}
+
+.password-match-hint.match {
+  color: var(--success);
+}
+
+.password-match-hint.mismatch {
+  color: var(--danger);
+}
+
 .auth-feedback.error {
   border: 1px solid color-mix(in srgb, var(--danger) 26%, var(--clay-border));
   background: linear-gradient(145deg, color-mix(in srgb, var(--danger) 8%, var(--bg-card) 92%), var(--bg-card));
   color: var(--danger);
+  box-shadow: var(--clay-shadow-press);
+}
+
+.auth-feedback.success {
+  border: 1px solid color-mix(in srgb, var(--success) 24%, var(--clay-border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--success) 8%, var(--bg-card) 92%), var(--bg-card));
+  color: var(--success);
+  box-shadow: var(--clay-shadow-press);
+}
+
+.settings-inline-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  margin: 0 12px 10px;
+  border: 1px solid color-mix(in srgb, var(--success) 22%, var(--clay-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 8%, var(--clay-surface-muted) 92%);
+  color: var(--success);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 700;
   box-shadow: var(--clay-shadow-press);
 }
 
@@ -6789,6 +6871,12 @@ button.more-row {
 }
 
 .job-completion-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.job-draft-card {
   display: grid;
   gap: 12px;
   padding: 14px;

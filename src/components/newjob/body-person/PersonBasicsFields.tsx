@@ -4,6 +4,7 @@ export function PersonBasicsFields({
   disableName,
   itemPlaceholder,
   itemError,
+  itemErrorKey = 0,
   itemValue,
   namePlaceholder,
   onItemChange,
@@ -19,6 +20,7 @@ export function PersonBasicsFields({
   itemValue: string
   itemPlaceholder: string
   itemError?: string
+  itemErrorKey?: number
   showNameInput: boolean
   showItemField: boolean
   namePlaceholder: string
@@ -40,7 +42,8 @@ export function PersonBasicsFields({
         <label className="input-group">
           <span className="input-label">What are you making for this person?</span>
           <input
-            className={`input${itemError ? ' input-invalid' : ''}`}
+            key={`person-item-${person.id}-${itemErrorKey}`}
+            className={`input${itemError ? ' input-invalid input-shake' : ''}`}
             value={itemValue}
             onChange={(event) => onItemChange(event.target.value)}
             placeholder={itemPlaceholder}

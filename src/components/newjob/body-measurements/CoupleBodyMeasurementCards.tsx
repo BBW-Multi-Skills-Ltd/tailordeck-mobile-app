@@ -17,6 +17,7 @@ export function CoupleBodyMeasurementCards(props: BodyMeasurementsSectionProps) 
           measurementTitle="Body Measurements (in)"
           itemValue={props.sameItemForAll ? props.itemType : person.itemType}
           itemError={props.sameItemForAll || index > 0 ? undefined : props.itemTypeError}
+          itemErrorKey={props.fieldErrorKey}
           itemPlaceholder="e.g. Suit, Gown, Kaftan"
           showItemField={!props.sameItemForAll}
           showNameInput

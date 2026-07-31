@@ -89,6 +89,7 @@ export function useOnboardingSetupState() {
     }
 
     const value = await readImagePreview(file)
+    if (errors.image) setErrors((prev) => ({ ...prev, image: undefined }))
     if (field === 'logo') {
       setLogoUrl(value)
       setUploadedLogo(true)

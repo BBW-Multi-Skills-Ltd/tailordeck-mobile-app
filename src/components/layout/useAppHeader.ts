@@ -64,7 +64,6 @@ export function useAppHeader() {
 
     try {
       await clearMutation.mutateAsync()
-      feedback.toast('Notifications cleared.', 'success')
     } catch (error) {
       feedback.toast(getServiceErrorMessage(error, 'Unable to clear notifications.'), 'error')
     }

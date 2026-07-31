@@ -2,6 +2,7 @@ import type { TailorSettings } from './settingsTypes'
 
 export const TAILOR_SETTINGS_KEY = 'tailordeck-settings'
 export const TAILOR_SIGNUP_PREFILL_KEY = 'tailordeck-signup-profile'
+export const TAILOR_PENDING_EMAIL_VERIFICATION_KEY = 'tailordeck-pending-email-verification'
 export const TAILOR_ONBOARDING_SYNC_PENDING_KEY = 'tailordeck-onboarding-sync-pending'
 export const TAILOR_ONBOARDING_SETUP_SKIPPED_KEY = 'tailordeck-onboarding-setup-skipped'
 export const AVATAR_PLACEHOLDER =

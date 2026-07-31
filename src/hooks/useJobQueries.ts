@@ -1,6 +1,6 @@
 ﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { JobStatus } from '../types/job'
-import { createFullJob, createJob, getClientJobs, getJob, getJobs, softDeleteJob, updateJob, updateJobStatus, type CreateFullJobInput, type CreateJobInput } from '../services/jobService'
+import { createFullJob, createJob, getClientJobs, getJob, getJobs, softDeleteJob, updateFullJob, updateJob, updateJobStatus, type CreateFullJobInput, type CreateJobInput } from '../services/jobService'
 import { queryKeys } from './queryKeys'
 
 export function useJobsQuery(status?: JobStatus) {
@@ -30,6 +30,22 @@ export function useCreateFullJobMutation() {
     mutationFn: (input: CreateFullJobInput) => createFullJob(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardMonthly })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardStatus })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
+    },
+  })
+}
+
+export function useUpdateFullJobMutation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: CreateFullJobInput }) => updateFullJob(id, input),
+    onSuccess: (_job, vars) => {
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
       void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardMonthly })
       void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardStatus })

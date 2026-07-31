@@ -10,6 +10,7 @@ export type StepCostingProps = PricingDepositFieldsProps & {
   totalExpenses: number
   projectedProfit: number
   worthIt: 'Yes' | 'No'
+  fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
   onExpenseDraftNameChange: (value: string) => void
   onExpenseDraftCostChange: (value: string) => void

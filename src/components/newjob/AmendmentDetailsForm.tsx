@@ -6,6 +6,7 @@ type AmendmentDetailsFormProps = {
   target: string
   description: string
   issueTypeError?: string
+  errorKey?: number
   onIssueTypeChange: (value: string) => void
   onAreaChange: (value: string) => void
   onTargetChange: (value: string) => void
@@ -17,6 +18,7 @@ export default function AmendmentDetailsForm({
   area,
   target,
   description,
+  errorKey = 0,
   issueTypeError,
   onIssueTypeChange,
   onAreaChange,
@@ -30,7 +32,8 @@ export default function AmendmentDetailsForm({
         <label className="input-group">
           <span className="input-label">Issue Type</span>
           <input
-            className={`input${issueTypeError ? ' input-invalid' : ''}`}
+            key={`amendment-issue-${errorKey}`}
+            className={`input${issueTypeError ? ' input-invalid input-shake' : ''}`}
             value={issueType}
             onChange={(event) => onIssueTypeChange(event.target.value)}
             placeholder="e.g. Zip replacement, Tighten waist"

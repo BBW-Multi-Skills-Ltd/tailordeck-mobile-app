@@ -44,6 +44,7 @@ export default function ManagePlan() {
       />
 
       {state.actionError ? <p className="auth-feedback error" role="alert">{state.actionError}</p> : null}
+      {state.actionNotice ? <p className="auth-feedback success" role="status">{state.actionNotice}</p> : null}
 
       <SubscriptionControlSection
         cancelScheduled={state.cancelScheduled}

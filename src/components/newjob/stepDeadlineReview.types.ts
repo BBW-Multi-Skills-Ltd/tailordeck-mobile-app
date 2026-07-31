@@ -44,6 +44,7 @@ export type StepDeadlineReviewProps = {
   referencePhotoFilesByTarget: Record<string, File[]>
   referencePhotoNames: string[]
   referencePhotoNamesByTarget: Record<string, string[]>
+  fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
   expenses: ExpenseForm[]
   totalExpenses: number

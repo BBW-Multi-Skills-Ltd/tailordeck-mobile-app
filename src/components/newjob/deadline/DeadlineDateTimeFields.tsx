@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react'
 export function DeadlineDateTimeFields({
   deadlineDate,
   deadlineDateError,
+  errorKey = 0,
   deadlineTime,
   deadlineTimeError,
   onDeadlineDateChange,
@@ -10,6 +11,7 @@ export function DeadlineDateTimeFields({
 }: {
   deadlineDate: string
   deadlineDateError?: string
+  errorKey?: number
   deadlineTime: string
   deadlineTimeError?: string
   onDeadlineDateChange: (value: string) => void
@@ -22,7 +24,8 @@ export function DeadlineDateTimeFields({
           <span className="wizard-section-label">Delivery Date *</span>
           <div className="wizard-select-input-wrap">
             <input
-              className={`input wizard-select-input${deadlineDateError ? ' input-invalid' : ''}`}
+              key={`deadline-date-${errorKey}`}
+              className={`input wizard-select-input${deadlineDateError ? ' input-invalid input-shake' : ''}`}
               type="date"
               value={deadlineDate}
               onChange={(event) => onDeadlineDateChange(event.target.value)}
@@ -37,7 +40,8 @@ export function DeadlineDateTimeFields({
           <span className="wizard-section-label">Delivery Time *</span>
           <div className="wizard-select-input-wrap">
             <input
-              className={`input wizard-select-input${deadlineTimeError ? ' input-invalid' : ''}`}
+              key={`deadline-time-${errorKey}`}
+              className={`input wizard-select-input${deadlineTimeError ? ' input-invalid input-shake' : ''}`}
               type="time"
               value={deadlineTime}
               onChange={(event) => onDeadlineTimeChange(event.target.value)}

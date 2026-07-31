@@ -28,6 +28,11 @@ export const passwordResetSchema = z.object({
   email: emailSchema,
 })
 
+export const emailOtpSchema = z.object({
+  email: emailSchema,
+  token: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code.'),
+})
+
 export const emailUpdateSchema = z.object({
   email: emailSchema,
 })

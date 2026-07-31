@@ -64,7 +64,6 @@ export default function ClientProfile() {
 
     try {
       await deleteClientMutation.mutateAsync(client.id)
-      feedback.toast('Client deleted.', 'success')
       navigate('/clients')
     } catch (error) {
       feedback.toast(error instanceof Error ? error.message : 'Unable to delete client.', 'error')

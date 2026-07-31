@@ -32,6 +32,7 @@ export function RenderClientMeasurementStep({ wizard }: StepRendererProps) {
       amendmentArea={state.amendmentArea}
       amendmentTarget={state.amendmentTarget}
       amendmentDescription={state.amendmentDescription}
+      fieldErrorKey={state.fieldErrorKey}
       fieldErrors={state.fieldErrors}
       onClientNameChange={actions.handleClientNameChange}
       onClientPhoneChange={actions.setClientPhone}

@@ -2,6 +2,7 @@ import { normalizeNigerianPhone } from '../lib/phone'
 import { supabase } from '../lib/supabase'
 import {
   emailUpdateSchema,
+  emailOtpSchema,
   parseAuthInput,
   passwordResetSchema,
   passwordUpdateSchema,
@@ -41,6 +42,27 @@ export async function signInWithGoogle() {
     options: {
       redirectTo: `${window.location.origin}/`,
     },
+  })
+  if (error) throw error
+  return data
+}
+
+export async function verifySignUpEmailOtp(input: { email: string; token: string }) {
+  const safeInput = parseAuthInput(emailOtpSchema, input)
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: safeInput.email,
+    token: safeInput.token,
+    type: 'signup',
+  })
+  if (error) throw error
+  return data
+}
+
+export async function resendSignUpEmailOtp(email: string) {
+  const safeInput = parseAuthInput(passwordResetSchema, { email })
+  const { data, error } = await supabase.auth.resend({
+    type: 'signup',
+    email: safeInput.email,
   })
   if (error) throw error
   return data

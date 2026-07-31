@@ -10,6 +10,7 @@ export type ReferencePhotoTarget = {
 
 type ReferencePhotoUploadProps = {
   error?: string
+  errorKey?: number
   filesByTarget: Record<string, File[]>
   namesByTarget: Record<string, string[]>
   targets: ReferencePhotoTarget[]
@@ -24,7 +25,7 @@ function mapTargetFiles(targetId: string, files: File[], label: string): Referen
   }))
 }
 
-export function ReferencePhotoUpload({ error, filesByTarget, namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
+export function ReferencePhotoUpload({ error, errorKey = 0, filesByTarget, namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
   return (
     <section className="stack gap-8">
       <div className="stack gap-4">
@@ -72,7 +73,7 @@ export function ReferencePhotoUpload({ error, filesByTarget, namesByTarget, onRe
           )
         })}
       </div>
-      {error ? <span className="input-error-text">{error}</span> : null}
+      {error ? <span key={`reference-photo-error-${errorKey}`} className="input-error-text input-shake">{error}</span> : null}
     </section>
   )
 }

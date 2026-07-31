@@ -5,6 +5,7 @@ type AmendmentMaterialFieldsProps = Pick<
   StepMaterialPricingProps,
   | 'amendmentPartName'
   | 'amendmentPartQuantity'
+  | 'fieldErrorKey'
   | 'fieldErrors'
   | 'materialColor'
   | 'onAmendmentPartNameChange'
@@ -19,7 +20,8 @@ export function AmendmentMaterialFields(props: AmendmentMaterialFieldsProps) {
       <label className="input-group">
         <span className="input-label">Material / Part Needed</span>
         <input
-          className={`input${props.fieldErrors.amendmentPartName ? ' input-invalid' : ''}`}
+          key={`amendment-part-name-${props.fieldErrorKey}`}
+          className={`input${props.fieldErrors.amendmentPartName ? ' input-invalid input-shake' : ''}`}
           value={props.amendmentPartName}
           onChange={(event) => {
             props.onAmendmentPartNameChange(event.target.value)
@@ -46,7 +48,8 @@ export function AmendmentMaterialFields(props: AmendmentMaterialFieldsProps) {
         <label className="input-group">
           <span className="input-label">Part Quantity</span>
           <input
-            className={`input${props.fieldErrors.amendmentPartQuantity ? ' input-invalid' : ''}`}
+            key={`amendment-part-quantity-${props.fieldErrorKey}`}
+            className={`input${props.fieldErrors.amendmentPartQuantity ? ' input-invalid input-shake' : ''}`}
             value={props.amendmentPartQuantity}
             onChange={(event) => props.onAmendmentPartQuantityChange(event.target.value)}
             placeholder="0"

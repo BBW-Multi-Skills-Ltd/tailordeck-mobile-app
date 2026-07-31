@@ -8,9 +8,9 @@ import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
-type JobFilter = 'All' | Exclude<JobStatus, 'Pending'>
+type JobFilter = 'All' | 'Draft' | 'In Progress' | 'Completed'
 
-const filters: JobFilter[] = ['All', 'In Progress', 'Completed']
+const filters: JobFilter[] = ['All', 'Draft', 'In Progress', 'Completed']
 
 function statusClass(status: JobStatus): string {
   if (status === 'Completed') return 'badge badge-done'

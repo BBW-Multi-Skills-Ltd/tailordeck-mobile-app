@@ -6,7 +6,7 @@ import { updateLoginEmail, updateLoginPassword } from '../../services/authServic
 import { updateProfile } from '../../services/profileService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
-import { getSecurityDangerAlert, getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
+import { getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
 
 type UseSettingsAccountActionsArgs = {
   confirmPasswordDraft: string
@@ -31,17 +31,17 @@ export function useSettingsAccountActions({
 }: UseSettingsAccountActionsArgs) {
   const feedback = useAppFeedback()
 
-  async function clearJobHistory(): Promise<void> {
+  async function clearJobHistory(): Promise<boolean> {
     const confirmed = await feedback.confirm({
       title: 'Clear job history?',
       message: 'This removes locally stored job history from this device.',
       confirmLabel: 'Clear history',
       tone: 'danger',
     })
-    if (!confirmed) return
+    if (!confirmed) return false
     window.localStorage.removeItem('tailordeck-job-history')
     window.localStorage.removeItem('tailordeck-jobs')
-    feedback.toast('Job history cleared.', 'success')
+    return true
   }
 
   async function handleSignOut(): Promise<void> {
@@ -92,7 +92,6 @@ export function useSettingsAccountActions({
           : { account_status: 'deactivated' },
       )
       setSecurityFeedback(getSecurityDangerFeedback(kind))
-      feedback.toast(getSecurityDangerAlert(kind), kind === 'delete' ? 'error' : 'info')
     } catch (error) {
       feedback.toast(getServiceErrorMessage(error, 'Unable to update account status.'), 'error')
     }

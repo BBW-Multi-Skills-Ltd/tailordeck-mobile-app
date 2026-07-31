@@ -4,6 +4,7 @@ export type BodyMeasurementsSectionProps = {
   clientName: string
   itemType: string
   itemTypeError?: string
+  fieldErrorKey: number
   jobType: JobType
   persons: PersonForm[]
   sameItemForAll: boolean

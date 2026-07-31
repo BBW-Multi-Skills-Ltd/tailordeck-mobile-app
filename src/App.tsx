@@ -28,6 +28,7 @@ const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
 const OnboardingPlan = lazy(() => import('./pages/OnboardingPlan'))
 const SignIn = lazy(() => import('./pages/SignIn'))
 const SignUp = lazy(() => import('./pages/SignUp'))
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 
 function RouteLoadingFallback() {
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="/onboarding/setup" element={<OnboardingSetup />} />
         <Route path="/auth/signin" element={<SignIn />} />
         <Route path="/auth/signup" element={<SignUp />} />
+        <Route path="/auth/verify-email" element={<VerifyEmail />} />
         <Route path="/auth/forgot" element={<ForgotPassword />} />
 
         <Route element={<RouteGuard />}>

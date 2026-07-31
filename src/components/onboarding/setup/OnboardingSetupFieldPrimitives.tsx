@@ -8,13 +8,14 @@ type SetupFieldProps = {
   id: string
   label: string
   inputMode?: 'numeric' | 'email' | 'text' | 'url' | 'tel'
+  optional?: boolean
   value: string
   placeholder: string
   onChange: (value: string) => void
   prefix?: string
 }
 
-export function SetupField({ error, errorKey = 0, icon: Icon, id, inputMode = 'text', label, onChange, placeholder, prefix, value }: SetupFieldProps) {
+export function SetupField({ error, errorKey = 0, icon: Icon, id, inputMode = 'text', label, onChange, optional, placeholder, prefix, value }: SetupFieldProps) {
   const input = (
     <input
       key={`${id}-${errorKey}`}
@@ -36,7 +37,7 @@ export function SetupField({ error, errorKey = 0, icon: Icon, id, inputMode = 't
         <Icon size={17} />
       </span>
       <span className="stack gap-5 min-w-0 flex-1">
-        <span className="auth-label">{label}</span>
+        <span className="auth-label">{label}{optional ? <span className="optional-label">Optional</span> : null}</span>
         {prefix ? (
           <span className={`prefix-input-wrap${error ? ' input-invalid-wrap' : ''}`}>
             <span className="fixed-input-prefix">{prefix}</span>

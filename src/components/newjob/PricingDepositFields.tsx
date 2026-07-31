@@ -10,6 +10,7 @@ export type PricingDepositFieldsProps = {
   depositPercent: string
   depositPercentError?: string
   depositPercentValue: number
+  errorKey?: number
   onChargeAmountChange: (value: string) => void
   onDepositPercentChange: (value: string) => void
   onDepositPercentKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void
@@ -28,7 +29,8 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
         <label className="input-group">
           <span className="input-label">Charge amount</span>
           <input
-            className={`input${props.chargeAmountError ? ' input-invalid' : ''}`}
+            key={`charge-amount-${props.errorKey ?? 0}`}
+            className={`input${props.chargeAmountError ? ' input-invalid input-shake' : ''}`}
             value={formatNairaInput(props.chargeAmount)}
             onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))}
             placeholder={formatNairaInput('0')}
@@ -41,7 +43,8 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
         <label className="input-group">
           <span className="input-label">Deposit %</span>
           <input
-            className={`input${props.depositPercentError ? ' input-invalid' : ''}`}
+            key={`deposit-percent-${props.errorKey ?? 0}`}
+            className={`input${props.depositPercentError ? ' input-invalid input-shake' : ''}`}
             value={formatPercentInput(props.depositPercent)}
             onKeyDown={props.onDepositPercentKeyDown}
             onChange={(event) => handleDepositPercentChange(event.target.value)}

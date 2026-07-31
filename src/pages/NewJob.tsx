@@ -64,7 +64,9 @@ export default function NewJob() {
         onFinalize={actions.handleFinalizeJob}
       />
 
-      {state.isFinalizing || state.isSavingDraft ? <WizardLoadingOverlay /> : null}
+      {state.isFinalizing || state.isSavingDraft ? (
+        <WizardLoadingOverlay message={state.isSavingDraft ? 'Saving to draft...' : 'Creating contract...'} />
+      ) : null}
     </section>
   )
 }

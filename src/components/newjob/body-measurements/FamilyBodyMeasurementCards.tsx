@@ -27,6 +27,7 @@ export function FamilyBodyMeasurementCards(props: BodyMeasurementsSectionProps) 
             measurementTitle={person.role === 'child' ? 'Child Measurements (in)' : 'Body Measurements (in)'}
             itemValue={props.sameItemForAll ? props.itemType : person.itemType}
             itemError={props.sameItemForAll || index > 0 ? undefined : props.itemTypeError}
+            itemErrorKey={props.fieldErrorKey}
             itemPlaceholder="e.g. Agbada, Gown, Shirt"
             showItemField={!props.sameItemForAll}
             showNameInput

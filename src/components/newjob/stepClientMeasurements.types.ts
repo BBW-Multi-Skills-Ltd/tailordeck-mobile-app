@@ -24,6 +24,7 @@ export type StepClientMeasurementsProps = {
   amendmentArea: string
   amendmentTarget: string
   amendmentDescription: string
+  fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
   onClientNameChange: (value: string) => void
   onClientPhoneChange: (value: string) => void

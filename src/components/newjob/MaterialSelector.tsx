@@ -5,6 +5,7 @@ import type { MaterialCategory } from './newJobConfig'
 type MaterialSelectorProps = {
   categories: MaterialCategory[]
   error?: string
+  errorKey?: number
   openCategoryId: string
   selectedMaterial: string
   onOpenCategoryChange: (categoryId: string) => void
@@ -14,6 +15,7 @@ type MaterialSelectorProps = {
 export default function MaterialSelector({
   categories,
   error,
+  errorKey = 0,
   openCategoryId,
   selectedMaterial,
   onOpenCategoryChange,
@@ -49,8 +51,9 @@ export default function MaterialSelector({
       </div>
 
       <button
+        key={`material-browse-${errorKey}`}
         type="button"
-        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
+        className={`wizard-material-browse-toggle${error ? ' input-invalid input-shake' : ''}`}
         onClick={() => setShowBrowse((current) => !current)}
         aria-expanded={showBrowse}
         aria-invalid={Boolean(error)}

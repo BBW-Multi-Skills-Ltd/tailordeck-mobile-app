@@ -9,12 +9,18 @@ import {
   passwordStrength,
 } from '../../lib/formValidation'
 import { markOnboardingStage } from '../../lib/auth'
-import { loadTailorSettings, saveTailorSettings, TAILOR_ONBOARDING_SYNC_PENDING_KEY, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
+import {
+  loadTailorSettings,
+  saveTailorSettings,
+  TAILOR_ONBOARDING_SYNC_PENDING_KEY,
+  TAILOR_PENDING_EMAIL_VERIFICATION_KEY,
+  TAILOR_SIGNUP_PREFILL_KEY,
+} from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
 import { syncPendingOnboardingSettings } from '../../services/onboardingService'
 
 type SignUpFieldKey = 'fullName' | 'email' | 'phone' | 'password' | 'confirmPassword' | 'agree' | 'form'
-type ConfirmPasswordState = 'idle' | 'match' | 'mismatch'
+type ConfirmPasswordState = 'idle' | 'partial' | 'match' | 'mismatch'
 
 export function useSignUpForm() {
   const navigate = useNavigate()
@@ -33,9 +39,7 @@ export function useSignUpForm() {
   const strength = useMemo(() => passwordStrength(password), [password])
   const checks = useMemo(() => passwordChecks(password), [password])
   const passwordLabel = strength <= 1 ? 'Weak password' : strength <= 3 ? 'Medium password' : 'Strong password'
-  const confirmState: ConfirmPasswordState = confirmPassword && password
-    ? confirmPassword === password ? 'match' : 'mismatch'
-    : 'idle'
+  const confirmState: ConfirmPasswordState = getConfirmPasswordState(password, confirmPassword)
 
   function clearError(key: SignUpFieldKey): void {
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined, form: undefined }))
@@ -105,7 +109,7 @@ export function useSignUpForm() {
     setLoading(true)
     try {
       const setupWasCompleted = window.localStorage.getItem(TAILOR_ONBOARDING_SYNC_PENDING_KEY) === 'true'
-      await signUpWithEmail({ fullName, email: normalizedEmail, password, phone: normalizedPhone })
+      const authData = await signUpWithEmail({ fullName, email: normalizedEmail, password, phone: normalizedPhone })
       const currentSettings = loadTailorSettings()
       const nextSettings = saveTailorSettings({
         ...currentSettings,
@@ -116,11 +120,23 @@ export function useSignUpForm() {
           phone: normalizedPhone,
         },
       })
+      window.localStorage.setItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY, JSON.stringify({
+        email: normalizedEmail,
+        fullName: nextSettings.profile.fullName,
+        phone: normalizedPhone,
+        setupWasCompleted,
+      }))
       window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({
         email: normalizedEmail,
         fullName: nextSettings.profile.fullName,
         shopName: nextSettings.businessInfo.shopName,
       }))
+
+      if (!authData.session) {
+        navigate('/auth/verify-email')
+        return
+      }
+
       try {
         await syncPendingOnboardingSettings(nextSettings)
       } catch (syncError) {
@@ -165,4 +181,11 @@ export function useSignUpForm() {
     showPassword,
     strength,
   }
+}
+
+function getConfirmPasswordState(password: string, confirmPassword: string): ConfirmPasswordState {
+  if (!password || !confirmPassword) return 'idle'
+  if (confirmPassword === password) return 'match'
+  if (password.startsWith(confirmPassword)) return 'partial'
+  return 'mismatch'
 }

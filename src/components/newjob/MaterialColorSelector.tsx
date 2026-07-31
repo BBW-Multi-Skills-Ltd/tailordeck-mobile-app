@@ -4,11 +4,12 @@ import { commonMaterialColors, materialColorCategories } from './materialColorOp
 
 type MaterialColorSelectorProps = {
   error?: string
+  errorKey?: number
   selectedColor: string
   onSelectColor: (value: string) => void
 }
 
-export function MaterialColorSelector({ error, selectedColor, onSelectColor }: MaterialColorSelectorProps) {
+export function MaterialColorSelector({ error, errorKey = 0, selectedColor, onSelectColor }: MaterialColorSelectorProps) {
   const [openCategoryId, setOpenCategoryId] = useState('neutral')
   const [showBrowse, setShowBrowse] = useState(false)
   const [showCustom, setShowCustom] = useState(false)
@@ -40,8 +41,9 @@ export function MaterialColorSelector({ error, selectedColor, onSelectColor }: M
       </div>
 
       <button
+        key={`color-browse-${errorKey}`}
         type="button"
-        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
+        className={`wizard-material-browse-toggle${error ? ' input-invalid input-shake' : ''}`}
         onClick={() => setShowBrowse((current) => !current)}
         aria-expanded={showBrowse}
         aria-invalid={Boolean(error)}
@@ -107,7 +109,7 @@ export function MaterialColorSelector({ error, selectedColor, onSelectColor }: M
       ) : null}
 
       {showCustom ? (
-        <input className="input" value={selectedColor} onChange={(event) => onSelectColor(event.target.value)} placeholder="Type color name or hex code" />
+        <input key={`color-custom-${errorKey}`} className={`input${error ? ' input-invalid input-shake' : ''}`} value={selectedColor} onChange={(event) => onSelectColor(event.target.value)} placeholder="Type color name or hex code" />
       ) : null}
 
       {error ? <span className="input-error-text">{error}</span> : null}

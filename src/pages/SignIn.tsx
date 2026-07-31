@@ -1,31 +1,11 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
-import { signInWithEmail, signInWithGoogle } from '../services/authService'
+import { useSignInForm } from '../components/auth/useSignInForm'
 
 export default function SignIn() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage('')
-    setLoading(true)
-    try {
-      await signInWithEmail({ email, password })
-      navigate('/')
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to sign in.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const form = useSignInForm()
 
   return (
     <AuthShell
@@ -34,19 +14,24 @@ export default function SignIn() {
       pageClassName="auth-page-signin"
       wrapClassName="auth-wrap-signin"
     >
-      <form className="auth-form auth-form-signin" onSubmit={handleSubmit}>
+      <form className="auth-form auth-form-signin" onSubmit={form.handleSubmit}>
         <div className="input-group">
           <label htmlFor="signin-email" className="auth-label">
             Email
           </label>
           <input
+            key={`signin-email-${form.errorKey}`}
             id="signin-email"
-            type="text"
-            className="auth-input"
+            aria-describedby={form.errors.email ? 'signin-email-error' : undefined}
+            aria-invalid={Boolean(form.errors.email)}
+            type="email"
+            inputMode="email"
+            className={`auth-input${form.errors.email ? ' input-invalid input-shake' : ''}`}
             placeholder="Enter your email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            value={form.email}
+            onChange={(event) => form.setEmail(event.target.value)}
           />
+          {form.errors.email ? <span id="signin-email-error" className="input-error-text">{form.errors.email}</span> : null}
         </div>
 
         <div className="input-group">
@@ -55,31 +40,35 @@ export default function SignIn() {
           </label>
           <div className="auth-password-wrap">
             <input
+              key={`signin-password-${form.errorKey}`}
               id="signin-password"
-              type={showPassword ? 'text' : 'password'}
-              className="auth-input auth-input-password"
+              aria-describedby={form.errors.password ? 'signin-password-error' : undefined}
+              aria-invalid={Boolean(form.errors.password)}
+              type={form.showPassword ? 'text' : 'password'}
+              className={`auth-input auth-input-password${form.errors.password ? ' input-invalid input-shake' : ''}`}
               placeholder="Enter your password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              value={form.password}
+              onChange={(event) => form.setPassword(event.target.value)}
             />
             <button
               type="button"
               className="auth-eye-btn"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              onClick={() => setShowPassword((value) => !value)}
+              aria-label={form.showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => form.setShowPassword((value) => !value)}
             >
-              {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+              {form.showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
+          {form.errors.password ? <span id="signin-password-error" className="input-error-text">{form.errors.password}</span> : null}
         </div>
 
-        <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
-          {loading ? 'Signing in...' : 'Sign In'}
+        <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={form.loading}>
+          {form.loading ? 'Signing in...' : 'Sign In'}
         </button>
 
-        {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
+        {form.errors.form ? <p className="auth-feedback error" role="alert">{form.errors.form}</p> : null}
 
-        <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={() => void signInWithGoogle()}>
+        <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={form.handleGoogleSignIn}>
           <FcGoogle size={16} />
           Sign in with Google
         </button>

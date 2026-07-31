@@ -68,6 +68,8 @@ export default function OnboardingSetup() {
 
           {state.step === 1 ? (
             <BrandStepFields
+              errorKey={state.errorKey}
+              errors={state.errors}
               logoUrl={state.logoUrl}
               signatureUrl={state.signatureUrl}
               uploadedLogo={state.uploadedLogo}

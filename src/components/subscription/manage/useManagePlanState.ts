@@ -15,6 +15,7 @@ export function useManagePlanState() {
   const [cycleOverride, setCycleOverride] = useState<BillingCycle | null>(null)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [actionError, setActionError] = useState('')
+  const [actionNotice, setActionNotice] = useState('')
   const plan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
   const cycle = cycleOverride ?? subscriptionQuery.data?.billing_cycle ?? settings.subscription.billingCycle
   const [selectedPlanState, setSelectedPlanState] = useState(() => ({
@@ -31,6 +32,7 @@ export function useManagePlanState() {
 
   async function choosePlan(nextPlan: PaidPlan) {
     setActionError('')
+    setActionNotice('')
     setSelectedPlanState({ plan: nextPlan, selectedPlan: nextPlan })
 
     try {
@@ -51,6 +53,7 @@ export function useManagePlanState() {
 
   async function confirmCancel() {
     setActionError('')
+    setActionNotice('')
     try {
       await cancelMutation.mutateAsync(true)
       const nextSettings = saveTailorSettings({
@@ -60,7 +63,7 @@ export function useManagePlanState() {
       })
       setSettings(nextSettings)
       setCancelOpen(false)
-      feedback.toast('Cancellation scheduled.', 'success')
+      setActionNotice('Cancellation scheduled. Access stays active until the period ends.')
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to schedule cancellation.')
       setActionError(message)
@@ -70,6 +73,7 @@ export function useManagePlanState() {
 
   async function keepPlanActive() {
     setActionError('')
+    setActionNotice('')
     try {
       await cancelMutation.mutateAsync(false)
       const nextSettings = saveTailorSettings({
@@ -78,7 +82,7 @@ export function useManagePlanState() {
         updatedAt: new Date().toISOString(),
       })
       setSettings(nextSettings)
-      feedback.toast('Plan kept active.', 'success')
+      setActionNotice('Plan kept active.')
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to keep plan active.')
       setActionError(message)
@@ -97,6 +101,7 @@ export function useManagePlanState() {
     },
     state: {
       actionError,
+      actionNotice,
       cancelOpen,
       cancelScheduled,
       changePlanOptions,

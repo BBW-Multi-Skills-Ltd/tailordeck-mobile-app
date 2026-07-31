@@ -63,6 +63,7 @@ export function SignUpForm(props: SignUpFormProps) {
         placeholder="Confirm your password"
         value={props.confirmPassword}
         onChange={props.setConfirmPassword}
+        helper={getConfirmPasswordHelper(props.confirmState)}
       />
 
       <label className={`auth-agree${props.errors.agree ? ' auth-agree-error input-shake' : ''}`}>
@@ -86,6 +87,7 @@ export function SignUpForm(props: SignUpFormProps) {
 function AuthTextField({
   error,
   errorKey = 0,
+  helper,
   id,
   inputMode,
   label,
@@ -97,44 +99,58 @@ function AuthTextField({
 }: {
   error?: string
   errorKey?: number
+  helper?: string
   id: string
   inputMode?: 'email' | 'text'
   label: string
-  matchState?: 'idle' | 'match' | 'mismatch'
+  matchState?: 'idle' | 'partial' | 'match' | 'mismatch'
   onChange: (value: string) => void
   placeholder: string
   type?: string
   value: string
 }) {
+  const inputKey = id === 'signup-confirm'
+    ? `${id}-${errorKey}-${matchState}-${value}`
+    : `${id}-${errorKey}-${matchState}`
+
   return (
     <div className="input-group">
       <label htmlFor={id} className="auth-label">{label}</label>
       <input
-        key={`${id}-${errorKey}-${matchState}`}
+        key={inputKey}
         id={id}
         aria-describedby={error ? `${id}-error` : undefined}
         aria-invalid={Boolean(error) || matchState === 'mismatch'}
         type={type}
         inputMode={inputMode}
-        className={`auth-input${error || matchState === 'mismatch' ? ' input-invalid input-shake' : ''}${matchState === 'match' ? ' input-match' : ''}`}
+        className={`auth-input${error || matchState === 'mismatch' ? ' input-invalid input-shake' : ''}${matchState === 'partial' ? ' input-partial' : ''}${matchState === 'match' ? ' input-match' : ''}`}
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
       {error ? <span id={`${id}-error`} className="input-error-text">{error}</span> : null}
+      {!error && helper ? <span className={`password-match-hint ${matchState}`}>{helper}</span> : null}
     </div>
   )
 }
 
 function PasswordStrength({ label, strength }: { label: string; strength: number }) {
+  const tone = strength <= 1 ? 'weak' : strength <= 3 ? 'medium' : 'strong'
   return (
     <>
-      <div className="auth-strength">
+      <div className={`auth-strength ${tone}`}>
         {[1, 2, 3, 4].map((level) => <div key={level} className={`auth-strength-bar${strength >= level ? ' fill' : ''}`} />)}
       </div>
       <p className={`auth-strength-text${strength >= 2 ? ' medium' : ''}${strength >= 4 ? ' strong' : ''}`}>{label}</p>
     </>
   )
+}
+
+function getConfirmPasswordHelper(matchState: 'idle' | 'partial' | 'match' | 'mismatch'): string {
+  if (matchState === 'partial') return 'Keep typing, it matches so far.'
+  if (matchState === 'match') return 'Passwords match.'
+  if (matchState === 'mismatch') return 'Passwords do not match.'
+  return ''
 }
 
 function PasswordChecklist({ checks }: { checks: readonly { key: string; label: string; passed: boolean }[] }) {

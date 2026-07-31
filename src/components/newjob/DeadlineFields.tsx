@@ -11,6 +11,7 @@ export function DeadlineFields({
   deadlineDate,
   deadlineTime,
   effectiveItemType,
+  fieldErrorKey,
   fieldErrors,
   jobType,
   makeCategory,
@@ -38,6 +39,7 @@ export function DeadlineFields({
       <DeadlineDateTimeFields
         deadlineDate={deadlineDate}
         deadlineDateError={fieldErrors.deadlineDate}
+        errorKey={fieldErrorKey}
         deadlineTime={deadlineTime}
         deadlineTimeError={fieldErrors.deadlineTime}
         onDeadlineDateChange={onDeadlineDateChange}
@@ -49,6 +51,7 @@ export function DeadlineFields({
         filesByTarget={referencePhotoFilesByTarget}
         namesByTarget={referencePhotoNamesByTarget}
         error={fieldErrors.referencePhotos}
+        errorKey={fieldErrorKey}
         targets={referencePhotoTargets}
         onReferencePhotoUpload={onReferencePhotoUpload}
       />

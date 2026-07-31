@@ -1,4 +1,5 @@
-import { BellRing, ChevronRight, CircleHelp, Database, LogOut, Moon, ShieldCheck, Sun, WandSparkles } from 'lucide-react'
+import { BellRing, CheckCircle2, ChevronRight, CircleHelp, Database, LogOut, Moon, ShieldCheck, Sun, WandSparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SignOutConfirmDialog from '../components/layout/SignOutConfirmDialog'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
@@ -46,10 +47,22 @@ function SettingsHubRow({ desc, icon: Icon, onClick, title, to, tone = 'default'
 
 export default function SettingsPage() {
   const { actions, state } = useSettingsPage()
+  const [historyCleared, setHistoryCleared] = useState(false)
   const { settings } = state
   const fullName = settings.profile.fullName || 'TailorDeck User'
   const email = settings.profile.email || 'Complete your profile'
   const initial = fullName.trim().charAt(0).toUpperCase() || 'T'
+
+  useEffect(() => {
+    if (!historyCleared) return
+    const timer = window.setTimeout(() => setHistoryCleared(false), 3200)
+    return () => window.clearTimeout(timer)
+  }, [historyCleared])
+
+  async function handleClearJobHistory(): Promise<void> {
+    const cleared = await actions.clearJobHistory()
+    if (cleared) setHistoryCleared(true)
+  }
 
   return (
     <section className="section stack gap-16">
@@ -97,7 +110,13 @@ export default function SettingsPage() {
         <section className="stack gap-8">
           <p className="more-group-title">Session</p>
           <div className="clay-card more-group-card">
-            <SettingsHubRow icon={Database} title="Clear Job History" desc="Remove local job history from this device." onClick={actions.clearJobHistory} tone="danger" />
+            <SettingsHubRow icon={Database} title="Clear Job History" desc="Remove local job history from this device." onClick={() => void handleClearJobHistory()} tone="danger" />
+            {historyCleared ? (
+              <div className="settings-inline-success" role="status">
+                <CheckCircle2 size={15} />
+                <span>Job history cleared</span>
+              </div>
+            ) : null}
             <span className="more-row-divider settings-hub-divider" aria-hidden />
             <SettingsHubRow icon={LogOut} title="Sign Out" desc="Leave this TailorDeck account on this device." onClick={actions.handleSignOut} />
           </div>

@@ -19,6 +19,8 @@ type BusinessStepFieldsProps = {
 }
 
 type BrandStepFieldsProps = {
+  errors: FieldErrors<OnboardingSetupFieldKey>
+  errorKey: number
   logoUrl: string
   signatureUrl: string
   uploadedLogo: boolean
@@ -58,11 +60,12 @@ export function BusinessStepFields({
   )
 }
 
-export function BrandStepFields({ logoUrl, onImageUpload, signatureUrl, uploadedLogo, uploadedSignature }: BrandStepFieldsProps) {
+export function BrandStepFields({ errorKey, errors, logoUrl, onImageUpload, signatureUrl, uploadedLogo, uploadedSignature }: BrandStepFieldsProps) {
   return (
     <div className="onboarding-setup-fields">
       <UploadBox icon={Image} label="Business Logo" previewUrl={logoUrl} success={uploadedLogo} uploadText={uploadedLogo ? 'Logo uploaded' : 'Upload Logo'} onChange={(event) => onImageUpload('logo', event)} />
       <UploadBox icon={PenLine} label="Business Signature" previewUrl={signatureUrl} success={uploadedSignature} uploadText={uploadedSignature ? 'Signature uploaded' : 'Upload Signature'} onChange={(event) => onImageUpload('signature', event)} />
+      {errors.image ? <span key={`onboarding-image-error-${errorKey}`} className="input-error-text input-shake">{errors.image}</span> : null}
     </div>
   )
 }
@@ -82,8 +85,8 @@ export function ContactStepFields({
   return (
     <div className="onboarding-setup-fields">
       <SetupField error={errors.businessPhone} errorKey={errorKey} icon={Phone} id="business-phone" inputMode="tel" label="Business Phone" prefix="+234" value={businessPhone} placeholder="Business WhatsApp number" onChange={onBusinessPhoneChange} />
-      <SetupField error={errors.businessEmail} errorKey={errorKey} icon={Mail} id="business-email" inputMode="email" label="Business Email" value={businessEmail} placeholder="business@email.com" onChange={onBusinessEmailChange} />
-      <SetupField error={errors.website} errorKey={errorKey} icon={Globe} id="business-website" inputMode="url" label="Business Website" prefix="https://" value={website} placeholder="yourwebsite.com" onChange={onWebsiteChange} />
+      <SetupField error={errors.businessEmail} errorKey={errorKey} icon={Mail} id="business-email" inputMode="email" label="Business Email" optional value={businessEmail} placeholder="business@email.com" onChange={onBusinessEmailChange} />
+      <SetupField error={errors.website} errorKey={errorKey} icon={Globe} id="business-website" inputMode="url" label="Business Website" optional prefix="https://" value={website} placeholder="yourwebsite.com" onChange={onWebsiteChange} />
       <div className="onboarding-social-block">
         <p className="auth-label">Social Handles <span className="optional-label">Optional</span></p>
         {onboardingSocialPlatforms.map((platform) => (

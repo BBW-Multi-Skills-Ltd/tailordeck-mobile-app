@@ -3,6 +3,7 @@ type ClientIdentityFieldsProps = {
   clientPhone: string
   clientNameError?: string
   clientPhoneError?: string
+  errorKey: number
   repeatClient: boolean
   onClientNameChange: (value: string) => void
   onClientPhoneChange: (value: string) => void
@@ -13,6 +14,7 @@ export function ClientIdentityFields({
   clientPhone,
   clientNameError,
   clientPhoneError,
+  errorKey,
   repeatClient,
   onClientNameChange,
   onClientPhoneChange,
@@ -22,7 +24,8 @@ export function ClientIdentityFields({
       <label className="input-group">
         <span className="input-label">Client Full Name *</span>
         <input
-          className={`input${clientNameError ? ' input-invalid' : ''}`}
+          key={`client-name-${errorKey}`}
+          className={`input${clientNameError ? ' input-invalid input-shake' : ''}`}
           value={clientName}
           onChange={(event) => onClientNameChange(event.target.value)}
           placeholder="Client name"
@@ -38,7 +41,8 @@ export function ClientIdentityFields({
         <div className="prefix-input-wrap">
           <span className="fixed-input-prefix">+234</span>
           <input
-            className={`input auth-input-prefixed${clientPhoneError ? ' input-invalid' : ''}`}
+            key={`client-phone-${errorKey}`}
+            className={`input auth-input-prefixed${clientPhoneError ? ' input-invalid input-shake' : ''}`}
             value={clientPhone}
             onChange={(event) => onClientPhoneChange(event.target.value)}
             placeholder="Client WhatsApp contact"

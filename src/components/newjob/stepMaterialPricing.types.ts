@@ -15,6 +15,7 @@ export type StepMaterialPricingProps = {
   materialSource: MaterialSource
   amendmentPartName: string
   amendmentPartQuantity: string
+  fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
   onAmendmentMaterialsToggle: (needsMaterials: boolean) => void
   onOpenMaterialCategoryChange: (categoryId: string) => void

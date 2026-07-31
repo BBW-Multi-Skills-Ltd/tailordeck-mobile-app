@@ -27,7 +27,6 @@ export function JobSuccessView(props: JobSuccessViewProps) {
 
   async function handleOpenInvoice(): Promise<void> {
     if (documentSendingAccess.isLoading) {
-      feedback.toast('Checking your plan...', 'info')
       return
     }
 

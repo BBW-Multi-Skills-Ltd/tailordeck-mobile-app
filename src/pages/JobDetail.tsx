@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { JobClientCard } from '../components/jobdetail/JobClientCard'
 import { JobDeadlineSection } from '../components/jobdetail/JobDeadlineSection'
 import { JobCompletionSection } from '../components/jobdetail/JobCompletionSection'
+import { JobDraftActions } from '../components/jobdetail/JobDraftActions'
 import { JobDocumentActions } from '../components/jobdetail/JobDocumentActions'
 import { JobImageViewer } from '../components/jobdetail/JobImageViewer'
 import { JobInfoSection } from '../components/jobdetail/JobInfoSection'
@@ -88,7 +89,6 @@ function JobDetailContent({
 
   async function openDocument(type: InvoiceType): Promise<void> {
     if (documentSendingAccess.isLoading) {
-      feedback.toast('Checking your plan...', 'info')
       return
     }
 
@@ -117,7 +117,6 @@ function JobDetailContent({
 
     try {
       await updateStatusMutation.mutateAsync({ id: job.id, status: 'Completed' })
-      feedback.toast('Job marked completed.', 'success')
     } catch {
       feedback.toast('Unable to update this job. Please try again.', 'error')
     }
@@ -132,23 +131,28 @@ function JobDetailContent({
           leading={<HistoryBackButton fallbackTo="/jobs" />}
         />
         <JobClientCard job={job} />
+        {job.status === 'Draft' ? <JobDraftActions onResume={() => navigate(`/jobs/new?draftId=${job.id}`)} /> : null}
         <JobInfoSection job={job} details={details} measurementScopeText={measurementScopeText} />
         <JobPricingSection chargeAmount={job.chargeAmount} depositAmount={details.depositAmount} balanceToCollect={balanceToCollect} totalExpenses={totalExpenses} estimatedProfit={estimatedProfit} expenses={details.expenses} />
         <JobReferencePhotos photos={details.referencePhotos} onOpen={interactions.setViewerIndex} />
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
-        <JobCompletionSection
-          completedAt={completedAt}
-          isUpdating={updateStatusMutation.isPending}
-          status={job.status}
-          onComplete={() => void completeJob()}
-        />
-        <JobDocumentActions
-          invoiceSent={persistedSentDocuments.invoice || interactions.sentDocuments.invoice}
-          locked={documentsLocked}
-          receiptSent={persistedSentDocuments.receipt || interactions.sentDocuments.receipt}
-          onInvoice={() => void openDocument('invoice')}
-          onReceipt={() => void openDocument('receipt')}
-        />
+        {job.status === 'Draft' ? null : (
+          <>
+            <JobCompletionSection
+              completedAt={completedAt}
+              isUpdating={updateStatusMutation.isPending}
+              status={job.status}
+              onComplete={() => void completeJob()}
+            />
+            <JobDocumentActions
+              invoiceSent={persistedSentDocuments.invoice || interactions.sentDocuments.invoice}
+              locked={documentsLocked}
+              receiptSent={persistedSentDocuments.receipt || interactions.sentDocuments.receipt}
+              onInvoice={() => void openDocument('invoice')}
+              onReceipt={() => void openDocument('receipt')}
+            />
+          </>
+        )}
       </section>
 
       {interactions.activePhoto ? (
