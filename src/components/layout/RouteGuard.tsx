@@ -11,7 +11,7 @@ function RouteGuardFallback() {
   return (
     <main className="page-full route-guard-loading">
       <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
-      <p>Opening TailorDeck...</p>
+      <p>Getting things ready...</p>
     </main>
   )
 }

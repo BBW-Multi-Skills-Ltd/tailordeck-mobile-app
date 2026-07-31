@@ -58,6 +58,8 @@ export default function OnboardingSetup() {
               businessAddress={state.businessAddress}
               businessName={state.businessName}
               cacRegistrationNumber={state.cacRegistrationNumber}
+              errorKey={state.errorKey}
+              errors={state.errors}
               onBusinessAddressChange={actions.setBusinessAddress}
               onBusinessNameChange={actions.setBusinessName}
               onCacRegistrationNumberChange={actions.setCacRegistrationNumber}
@@ -65,13 +67,21 @@ export default function OnboardingSetup() {
           ) : null}
 
           {state.step === 1 ? (
-            <BrandStepFields logoUrl={state.logoUrl} signatureUrl={state.signatureUrl} onImageUpload={actions.handleImageUpload} />
+            <BrandStepFields
+              logoUrl={state.logoUrl}
+              signatureUrl={state.signatureUrl}
+              uploadedLogo={state.uploadedLogo}
+              uploadedSignature={state.uploadedSignature}
+              onImageUpload={actions.handleImageUpload}
+            />
           ) : null}
 
           {state.step === 2 ? (
             <ContactStepFields
               businessEmail={state.businessEmail}
               businessPhone={state.businessPhone}
+              errorKey={state.errorKey}
+              errors={state.errors}
               socialHandles={state.socialHandles}
               website={state.website}
               onBusinessEmailChange={actions.setBusinessEmail}

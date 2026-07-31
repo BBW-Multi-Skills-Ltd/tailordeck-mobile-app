@@ -1,38 +1,106 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import {
+  type FieldErrors,
+  isValidEmailFormat,
+  isValidNigerianMobileLocal,
+  localNigerianPhone,
+  passwordChecks,
+  passwordStrength,
+} from '../../lib/formValidation'
 import { markOnboardingStage } from '../../lib/auth'
 import { loadTailorSettings, saveTailorSettings, TAILOR_ONBOARDING_SYNC_PENDING_KEY, TAILOR_SIGNUP_PREFILL_KEY } from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
 import { syncPendingOnboardingSettings } from '../../services/onboardingService'
-import { parseAuthInput, signUpFormSchema } from '../../validation/authSchemas'
+
+type SignUpFieldKey = 'fullName' | 'email' | 'phone' | 'password' | 'confirmPassword' | 'agree' | 'form'
+type ConfirmPasswordState = 'idle' | 'match' | 'mismatch'
 
 export function useSignUpForm() {
   const navigate = useNavigate()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [agree, setAgree] = useState(true)
+  const [fullName, setFullNameValue] = useState('')
+  const [email, setEmailValue] = useState('')
+  const [phone, setPhoneValue] = useState('')
+  const [password, setPasswordValue] = useState('')
+  const [confirmPassword, setConfirmPasswordValue] = useState('')
+  const [agree, setAgreeValue] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errors, setErrors] = useState<FieldErrors<SignUpFieldKey>>({})
+  const [errorKey, setErrorKey] = useState(0)
 
-  const strength = useMemo(() => calculatePasswordStrength(password), [password])
+  const strength = useMemo(() => passwordStrength(password), [password])
+  const checks = useMemo(() => passwordChecks(password), [password])
   const passwordLabel = strength <= 1 ? 'Weak password' : strength <= 3 ? 'Medium password' : 'Strong password'
+  const confirmState: ConfirmPasswordState = confirmPassword && password
+    ? confirmPassword === password ? 'match' : 'mismatch'
+    : 'idle'
+
+  function clearError(key: SignUpFieldKey): void {
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined, form: undefined }))
+  }
+
+  function setFullName(value: string): void {
+    setFullNameValue(value)
+    if (value.trim()) clearError('fullName')
+  }
+
+  function setEmail(value: string): void {
+    setEmailValue(value)
+    if (value.trim() && isValidEmailFormat(value)) clearError('email')
+  }
+
+  function setPhone(value: string): void {
+    const next = localNigerianPhone(value)
+    setPhoneValue(next)
+    if (isValidNigerianMobileLocal(next)) clearError('phone')
+  }
+
+  function setPassword(value: string): void {
+    setPasswordValue(value)
+    if (passwordStrength(value) >= 4) clearError('password')
+    if (confirmPassword && confirmPassword !== value) {
+      setErrors((prev) => ({ ...prev, confirmPassword: 'Passwords do not match.' }))
+    }
+  }
+
+  function setConfirmPassword(value: string): void {
+    setConfirmPasswordValue(value)
+    if (value && value === password) clearError('confirmPassword')
+  }
+
+  function setAgree(value: boolean): void {
+    setAgreeValue(value)
+    if (value) clearError('agree')
+  }
+
+  function validate(): boolean {
+    const nextErrors: FieldErrors<SignUpFieldKey> = {}
+    if (!fullName.trim()) nextErrors.fullName = 'Fill this input.'
+    if (!email.trim()) nextErrors.email = 'Fill this input.'
+    else if (!isValidEmailFormat(email)) nextErrors.email = 'Enter a valid email address.'
+    if (!phone.trim()) nextErrors.phone = 'Fill this input.'
+    else if (!isValidNigerianMobileLocal(phone)) nextErrors.phone = 'Enter a valid Nigerian number.'
+    if (!password) nextErrors.password = 'Fill this input.'
+    else if (strength < 4) nextErrors.password = 'Use all password requirements.'
+    if (!confirmPassword) nextErrors.confirmPassword = 'Fill this input.'
+    else if (confirmPassword !== password) nextErrors.confirmPassword = 'Passwords do not match.'
+    if (!agree) nextErrors.agree = 'Accept the terms to continue.'
+
+    setErrors(nextErrors)
+    if (Object.values(nextErrors).some(Boolean)) {
+      setErrorKey((prev) => prev + 1)
+      return false
+    }
+    return true
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setErrorMessage('')
-    try {
-      parseAuthInput(signUpFormSchema, { agree, confirmPassword, email, fullName, password, phone })
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Please review your details.')
-      return
-    }
+    if (!validate()) return
 
     const normalizedEmail = email.trim().toLowerCase()
-    const normalizedPhone = `+234${phone.replace(/\D/g, '')}`
+    const normalizedPhone = `+234${phone}`
     setLoading(true)
     try {
       const setupWasCompleted = window.localStorage.getItem(TAILOR_ONBOARDING_SYNC_PENDING_KEY) === 'true'
@@ -48,8 +116,8 @@ export function useSignUpForm() {
         },
       })
       window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({
-        fullName: nextSettings.profile.fullName,
         email: normalizedEmail,
+        fullName: nextSettings.profile.fullName,
         shopName: nextSettings.businessInfo.shopName,
       }))
       try {
@@ -60,7 +128,8 @@ export function useSignUpForm() {
       markOnboardingStage(setupWasCompleted ? 'plan' : 'setup')
       navigate(setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to create account.')
+      setErrors({ form: error instanceof Error ? error.message : 'Unable to create account.' })
+      setErrorKey((prev) => prev + 1)
     } finally {
       setLoading(false)
     }
@@ -72,9 +141,12 @@ export function useSignUpForm() {
 
   return {
     agree,
+    checks,
     confirmPassword,
+    confirmState,
     email,
-    errorMessage,
+    errorKey,
+    errors,
     fullName,
     handleGoogleSignUp,
     handleSubmit,
@@ -92,14 +164,4 @@ export function useSignUpForm() {
     showPassword,
     strength,
   }
-}
-
-function calculatePasswordStrength(password: string): number {
-  if (!password) return 0
-  let score = 0
-  if (password.length >= 8) score += 1
-  if (/[A-Z]/.test(password)) score += 1
-  if (/[0-9]/.test(password)) score += 1
-  if (/[^A-Za-z0-9]/.test(password)) score += 1
-  return score
 }
