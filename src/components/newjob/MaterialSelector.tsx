@@ -4,6 +4,7 @@ import type { MaterialCategory } from './newJobConfig'
 
 type MaterialSelectorProps = {
   categories: MaterialCategory[]
+  error?: string
   openCategoryId: string
   selectedMaterial: string
   onOpenCategoryChange: (categoryId: string) => void
@@ -12,6 +13,7 @@ type MaterialSelectorProps = {
 
 export default function MaterialSelector({
   categories,
+  error,
   openCategoryId,
   selectedMaterial,
   onOpenCategoryChange,
@@ -48,9 +50,10 @@ export default function MaterialSelector({
 
       <button
         type="button"
-        className="wizard-material-browse-toggle"
+        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
         onClick={() => setShowBrowse((current) => !current)}
         aria-expanded={showBrowse}
+        aria-invalid={Boolean(error)}
       >
         Browse all material categories
         <span>{browseCategories.length} groups</span>
@@ -104,6 +107,8 @@ export default function MaterialSelector({
           </article>
         </div>
       ) : null}
+
+      {error ? <span className="input-error-text">{error}</span> : null}
 
     </div>
   )

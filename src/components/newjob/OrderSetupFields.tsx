@@ -41,7 +41,7 @@ export function OrderSetupFields(props: OrderSetupFieldsProps) {
 
       <section className="wizard-guided-card">
         <GuidedCardHeader step="3" title="Who is this for?" copy="Choose client count and item." />
-        {!(props.showBodyMeasurementFlow && props.jobType === 'Single') ? <ItemTypeField {...props} /> : null}
+        {!(props.showBodyMeasurementFlow && props.jobType === 'Single') ? <ItemTypeField {...props} error={props.fieldErrors.itemType} /> : null}
         {!props.isAmendmentMode ? <OrderScopeField {...props} /> : <p className="wizard-guided-copy">Repair jobs start with one client. You can add notes below.</p>}
         {props.showBodyMeasurementFlow && props.jobType !== 'Single' ? <SameItemToggle {...props} /> : null}
       </section>

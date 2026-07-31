@@ -42,6 +42,7 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       deposit={derived.deposit}
       referencePhotoNames={state.referencePhotoNames}
       referencePhotoNamesByTarget={state.referencePhotoNamesByTarget}
+      fieldErrors={state.fieldErrors}
       expenses={state.expenses}
       totalExpenses={derived.totalExpenses}
       projectedProfit={derived.projectedProfit}

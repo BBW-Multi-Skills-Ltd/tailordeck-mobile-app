@@ -21,6 +21,7 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     expenseDraftCost: state.expenseDraftCost,
     expenseDraftName: state.expenseDraftName,
     expenses: state.expenses,
+    fieldErrors: state.fieldErrors,
     isFinalizing: state.isFinalizing,
     itemType: state.itemType,
     jobType: state.jobType,

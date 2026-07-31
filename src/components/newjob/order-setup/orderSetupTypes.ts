@@ -9,6 +9,7 @@ export type OrderSetupFieldsProps = Pick<
   | 'orderMode'
   | 'sameItemForAll'
   | 'showBodyMeasurementFlow'
+  | 'fieldErrors'
   | 'onJobTypeChange'
   | 'onMakeCategoryChange'
   | 'onOrderModeChange'

@@ -11,6 +11,7 @@ export function DeadlineFields({
   deadlineDate,
   deadlineTime,
   effectiveItemType,
+  fieldErrors,
   jobType,
   makeCategory,
   persons,
@@ -35,7 +36,9 @@ export function DeadlineFields({
     <div className="stack gap-12">
       <DeadlineDateTimeFields
         deadlineDate={deadlineDate}
+        deadlineDateError={fieldErrors.deadlineDate}
         deadlineTime={deadlineTime}
+        deadlineTimeError={fieldErrors.deadlineTime}
         onDeadlineDateChange={onDeadlineDateChange}
         onDeadlineTimeChange={onDeadlineTimeChange}
       />
@@ -43,6 +46,7 @@ export function DeadlineFields({
       <DeliveryChecklist balance={balance} deadlineDate={deadlineDate} deadlineTime={deadlineTime} reminder={reminder} />
       <ReferencePhotoUpload
         namesByTarget={referencePhotoNamesByTarget}
+        error={fieldErrors.referencePhotos}
         targets={referencePhotoTargets}
         onReferencePhotoUpload={onReferencePhotoUpload}
       />

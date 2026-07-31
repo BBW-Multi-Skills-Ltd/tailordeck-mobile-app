@@ -35,6 +35,7 @@ export function getMaterialActionParams(state: NewJobWizardStateModel) {
     setAmendmentPartQuantity: state.setAmendmentPartQuantity,
     setCustomMaterialType: state.setCustomMaterialType,
     setDepositPercent: state.setDepositPercent,
+    setFieldErrors: state.setFieldErrors,
     setMaterialColor: state.setMaterialColor,
     setMaterialType: state.setMaterialType,
     setMaterialYards: state.setMaterialYards,

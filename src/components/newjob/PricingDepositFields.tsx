@@ -5,8 +5,10 @@ import type { KeyboardEvent } from 'react'
 export type PricingDepositFieldsProps = {
   balance: number
   chargeAmount: string
+  chargeAmountError?: string
   deposit: number
   depositPercent: string
+  depositPercentError?: string
   depositPercentValue: number
   onChargeAmountChange: (value: string) => void
   onDepositPercentChange: (value: string) => void
@@ -25,19 +27,29 @@ export function PricingDepositFields(props: PricingDepositFieldsProps) {
         <div className="wizard-pricing-input-grid">
         <label className="input-group">
           <span className="input-label">Charge amount</span>
-          <input className="input" value={formatNairaInput(props.chargeAmount)} onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))} placeholder={formatNairaInput('0')} inputMode="numeric" />
+          <input
+            className={`input${props.chargeAmountError ? ' input-invalid' : ''}`}
+            value={formatNairaInput(props.chargeAmount)}
+            onChange={(event) => props.onChargeAmountChange(digitsOnly(event.target.value))}
+            placeholder={formatNairaInput('0')}
+            inputMode="numeric"
+            aria-invalid={Boolean(props.chargeAmountError)}
+          />
+          {props.chargeAmountError ? <span className="input-error-text">{props.chargeAmountError}</span> : null}
         </label>
 
         <label className="input-group">
           <span className="input-label">Deposit %</span>
           <input
-            className="input"
+            className={`input${props.depositPercentError ? ' input-invalid' : ''}`}
             value={formatPercentInput(props.depositPercent)}
             onKeyDown={props.onDepositPercentKeyDown}
             onChange={(event) => handleDepositPercentChange(event.target.value)}
             placeholder="0%"
             inputMode="numeric"
+            aria-invalid={Boolean(props.depositPercentError)}
           />
+          {props.depositPercentError ? <span className="input-error-text">{props.depositPercentError}</span> : null}
         </label>
         </div>
       </div>

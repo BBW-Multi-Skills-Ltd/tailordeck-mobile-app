@@ -4,6 +4,7 @@ import { useClientQuery } from '../../hooks/useClientQueries'
 import { useCreateFullJobMutation } from '../../hooks/useJobQueries'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
+import { cleanClientPhoneInput, hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
 import { createNewJobWizardActions } from './newJobWizardActions'
 import { getNewJobWizardDerived } from './newJobWizardDerived'
 import { getNewJobWizardStateSnapshot } from './newJobWizardStateSnapshot'
@@ -25,7 +26,20 @@ export function useNewJobWizard() {
   const derived = getNewJobWizardDerived(state)
   const repeatClient = repeatClientQuery.data ?? undefined
 
+  function clearFieldError(field: NewJobFieldKey): void {
+    state.setFieldErrors((current) => {
+      if (!current[field]) return current
+      const next = { ...current }
+      delete next[field]
+      return next
+    })
+  }
+
   function validateCurrentStep(): boolean {
+    const fieldErrors = validateNewJobFields({ derived, state, step: state.step })
+    state.setFieldErrors(fieldErrors)
+    if (hasNewJobErrors(fieldErrors)) return false
+
     const result = validateNewJobStep({ derived, repeatClientId, state, step: state.step })
     if (result.ok) return true
     feedback.toast(result.message, 'error')
@@ -78,9 +92,73 @@ export function useNewJobWizard() {
     validateCurrentStep,
   })
 
+  const fieldAwareActions = {
+    ...actions,
+    handleClientNameChange: (value: string) => {
+      clearFieldError('clientName')
+      actions.handleClientNameChange(value)
+    },
+    setClientPhone: (value: string) => {
+      clearFieldError('clientPhone')
+      actions.setClientPhone(cleanClientPhoneInput(value))
+    },
+    updateSharedItemType: (value: string) => {
+      clearFieldError('itemType')
+      actions.updateSharedItemType(value)
+    },
+    setAmendmentIssueType: (value: string) => {
+      clearFieldError('amendmentIssueType')
+      actions.setAmendmentIssueType(value)
+    },
+    setMaterialType: (value: string) => {
+      clearFieldError('materialType')
+      actions.setMaterialType(value)
+    },
+    setCustomMaterialType: (value: string) => {
+      clearFieldError('customMaterialType')
+      actions.setCustomMaterialType(value)
+    },
+    setMaterialColor: (value: string) => {
+      clearFieldError('materialColor')
+      actions.setMaterialColor(value)
+    },
+    setMaterialYards: (value: string) => {
+      clearFieldError('materialYards')
+      actions.setMaterialYards(value)
+    },
+    setAmendmentPartName: (value: string) => {
+      clearFieldError('amendmentPartName')
+      actions.setAmendmentPartName(value)
+    },
+    setAmendmentPartQuantity: (value: string) => {
+      clearFieldError('amendmentPartQuantity')
+      actions.setAmendmentPartQuantity(value)
+    },
+    setChargeAmount: (value: string) => {
+      clearFieldError('chargeAmount')
+      actions.setChargeAmount(value)
+    },
+    setDepositPercent: (value: string) => {
+      clearFieldError('depositPercent')
+      actions.setDepositPercent(value)
+    },
+    setDeadlineDate: (value: string) => {
+      clearFieldError('deadlineDate')
+      actions.setDeadlineDate(value)
+    },
+    setDeadlineTime: (value: string) => {
+      clearFieldError('deadlineTime')
+      actions.setDeadlineTime(value)
+    },
+    handleReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles?: number) => {
+      clearFieldError('referencePhotos')
+      actions.handleReferencePhotoUpload(targetId, files, maxFiles)
+    },
+  }
+
   return {
     actions: {
-      ...actions,
+      ...fieldAwareActions,
       handleFinalizeJob,
       proceedToReview: () => {
         if (!validateCurrentStep()) return

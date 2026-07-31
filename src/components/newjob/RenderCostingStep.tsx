@@ -29,6 +29,7 @@ export function RenderCostingStep({ wizard }: StepRendererProps) {
       totalExpenses={derived.totalExpenses}
       projectedProfit={derived.projectedProfit}
       worthIt={state.worthIt}
+      fieldErrors={state.fieldErrors}
       onChargeAmountChange={actions.setChargeAmount}
       onDepositPercentChange={actions.setDepositPercent}
       onDepositPercentKeyDown={actions.handleDepositPercentKeyDown}

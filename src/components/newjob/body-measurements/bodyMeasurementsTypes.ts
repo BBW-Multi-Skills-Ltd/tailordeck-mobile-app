@@ -3,6 +3,7 @@ import type { JobType, PersonForm } from '../newJobConfig'
 export type BodyMeasurementsSectionProps = {
   clientName: string
   itemType: string
+  itemTypeError?: string
   jobType: JobType
   persons: PersonForm[]
   sameItemForAll: boolean

@@ -5,6 +5,7 @@ type AmendmentMaterialFieldsProps = Pick<
   StepMaterialPricingProps,
   | 'amendmentPartName'
   | 'amendmentPartQuantity'
+  | 'fieldErrors'
   | 'materialColor'
   | 'onAmendmentPartNameChange'
   | 'onAmendmentPartQuantityChange'
@@ -18,7 +19,7 @@ export function AmendmentMaterialFields(props: AmendmentMaterialFieldsProps) {
       <label className="input-group">
         <span className="input-label">Material / Part Needed</span>
         <input
-          className="input"
+          className={`input${props.fieldErrors.amendmentPartName ? ' input-invalid' : ''}`}
           value={props.amendmentPartName}
           onChange={(event) => {
             props.onAmendmentPartNameChange(event.target.value)
@@ -26,7 +27,9 @@ export function AmendmentMaterialFields(props: AmendmentMaterialFieldsProps) {
           }}
           placeholder="e.g. Zip, Button, Fabric patch"
           list="amendment-part-options"
+          aria-invalid={Boolean(props.fieldErrors.amendmentPartName)}
         />
+        {props.fieldErrors.amendmentPartName ? <span className="input-error-text">{props.fieldErrors.amendmentPartName}</span> : null}
         <datalist id="amendment-part-options">
           {amendmentPartOptions.map((option) => (
             <option key={option} value={option} />
@@ -42,7 +45,15 @@ export function AmendmentMaterialFields(props: AmendmentMaterialFieldsProps) {
 
         <label className="input-group">
           <span className="input-label">Part Quantity</span>
-          <input className="input" value={props.amendmentPartQuantity} onChange={(event) => props.onAmendmentPartQuantityChange(event.target.value)} placeholder="0" inputMode="numeric" />
+          <input
+            className={`input${props.fieldErrors.amendmentPartQuantity ? ' input-invalid' : ''}`}
+            value={props.amendmentPartQuantity}
+            onChange={(event) => props.onAmendmentPartQuantityChange(event.target.value)}
+            placeholder="0"
+            inputMode="numeric"
+            aria-invalid={Boolean(props.fieldErrors.amendmentPartQuantity)}
+          />
+          {props.fieldErrors.amendmentPartQuantity ? <span className="input-error-text">{props.fieldErrors.amendmentPartQuantity}</span> : null}
         </label>
       </div>
     </>

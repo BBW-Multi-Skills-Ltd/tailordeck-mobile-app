@@ -1,4 +1,5 @@
 import type { JobType, MakeCategory, OrderMode, PersonForm } from './newJobConfig'
+import type { NewJobFieldErrors } from './newJobFieldValidation'
 
 export type StepClientMeasurementsProps = {
   repeatClient: boolean
@@ -23,6 +24,7 @@ export type StepClientMeasurementsProps = {
   amendmentArea: string
   amendmentTarget: string
   amendmentDescription: string
+  fieldErrors: NewJobFieldErrors
   onClientNameChange: (value: string) => void
   onClientPhoneChange: (value: string) => void
   onMakeCategoryChange: (value: MakeCategory) => void

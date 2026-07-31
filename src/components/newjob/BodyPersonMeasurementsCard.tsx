@@ -17,6 +17,7 @@ export default function BodyPersonMeasurementsCard({
   measurementTitle,
   itemValue,
   itemPlaceholder,
+  itemError,
   showNameInput = false,
   showItemField = true,
   namePlaceholder = 'Person name',
@@ -62,6 +63,7 @@ export default function BodyPersonMeasurementsCard({
         <PersonBasicsFields
           disableName={disableName}
           itemPlaceholder={itemPlaceholder}
+          itemError={itemError}
           itemValue={itemValue}
           namePlaceholder={namePlaceholder}
           onItemChange={handleItemChange}

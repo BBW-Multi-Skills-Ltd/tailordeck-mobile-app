@@ -1,4 +1,5 @@
 import type { JobType, MakeCategory, PersonForm, Reminder } from '../newJobConfig'
+import type { NewJobFieldErrors } from '../newJobFieldValidation'
 
 export type DeadlineFieldsProps = {
   balance: number
@@ -10,6 +11,7 @@ export type DeadlineFieldsProps = {
   makeCategory: MakeCategory
   persons: PersonForm[]
   referencePhotoNamesByTarget: Record<string, string[]>
+  fieldErrors: NewJobFieldErrors
   reminder: Reminder
   sameItemForAll: boolean
   onDeadlineDateChange: (value: string) => void

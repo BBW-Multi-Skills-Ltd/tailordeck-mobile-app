@@ -19,6 +19,7 @@ export default function StepCosting({
   totalExpenses,
   projectedProfit,
   worthIt,
+  fieldErrors,
   onChargeAmountChange,
   onDepositPercentChange,
   onDepositPercentKeyDown,
@@ -34,8 +35,10 @@ export default function StepCosting({
         <PricingDepositFields
           balance={balance}
           chargeAmount={chargeAmount}
+          chargeAmountError={fieldErrors.chargeAmount}
           deposit={deposit}
           depositPercent={depositPercent}
+          depositPercentError={fieldErrors.depositPercent}
           depositPercentValue={depositPercentValue}
           onChargeAmountChange={onChargeAmountChange}
           onDepositPercentChange={onDepositPercentChange}

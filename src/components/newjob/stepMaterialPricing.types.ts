@@ -1,4 +1,5 @@
 import type { MaterialQuality, MaterialSource } from './newJobConfig'
+import type { NewJobFieldErrors } from './newJobFieldValidation'
 
 export type StepMaterialPricingProps = {
   isAmendmentMode: boolean
@@ -14,6 +15,7 @@ export type StepMaterialPricingProps = {
   materialSource: MaterialSource
   amendmentPartName: string
   amendmentPartQuantity: string
+  fieldErrors: NewJobFieldErrors
   onAmendmentMaterialsToggle: (needsMaterials: boolean) => void
   onOpenMaterialCategoryChange: (categoryId: string) => void
   onMaterialTypeChange: (value: string) => void

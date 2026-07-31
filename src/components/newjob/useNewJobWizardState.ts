@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNewJobCostingState } from './useNewJobCostingState'
+import type { NewJobFieldErrors } from './newJobFieldValidation'
 import { useNewJobMaterialState } from './useNewJobMaterialState'
 import { useNewJobOrderState } from './useNewJobOrderState'
 import { useNewJobWorkflowState } from './useNewJobWorkflowState'
@@ -16,6 +17,7 @@ export function useNewJobWizardState() {
   const [amendmentNeedsMaterials, setAmendmentNeedsMaterials] = useState(false)
   const [amendmentPartName, setAmendmentPartName] = useState('')
   const [amendmentPartQuantity, setAmendmentPartQuantity] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<NewJobFieldErrors>({})
 
   return {
     amendmentArea,
@@ -25,6 +27,7 @@ export function useNewJobWizardState() {
     amendmentPartName,
     amendmentPartQuantity,
     amendmentTarget,
+    fieldErrors,
     setAmendmentArea,
     setAmendmentDescription,
     setAmendmentIssueType,
@@ -32,6 +35,7 @@ export function useNewJobWizardState() {
     setAmendmentPartName,
     setAmendmentPartQuantity,
     setAmendmentTarget,
+    setFieldErrors,
     ...costingState,
     ...materialState,
     ...orderState,

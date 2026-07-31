@@ -1,4 +1,5 @@
 import type { ExpenseForm } from '../newJobConfig'
+import type { NewJobFieldErrors } from '../newJobFieldValidation'
 import type { PricingDepositFieldsProps } from '../PricingDepositFields'
 
 export type StepCostingProps = PricingDepositFieldsProps & {
@@ -9,6 +10,7 @@ export type StepCostingProps = PricingDepositFieldsProps & {
   totalExpenses: number
   projectedProfit: number
   worthIt: 'Yes' | 'No'
+  fieldErrors: NewJobFieldErrors
   onExpenseDraftNameChange: (value: string) => void
   onExpenseDraftCostChange: (value: string) => void
   onAddExpense: () => void

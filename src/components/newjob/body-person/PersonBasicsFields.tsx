@@ -3,6 +3,7 @@ import type { PersonForm, PersonSex } from '../newJobConfig'
 export function PersonBasicsFields({
   disableName,
   itemPlaceholder,
+  itemError,
   itemValue,
   namePlaceholder,
   onItemChange,
@@ -17,6 +18,7 @@ export function PersonBasicsFields({
   sexOptions: readonly PersonSex[]
   itemValue: string
   itemPlaceholder: string
+  itemError?: string
   showNameInput: boolean
   showItemField: boolean
   namePlaceholder: string
@@ -37,7 +39,15 @@ export function PersonBasicsFields({
       {showItemField ? (
         <label className="input-group">
           <span className="input-label">What are you making for this person?</span>
-          <input className="input" value={itemValue} onChange={(event) => onItemChange(event.target.value)} placeholder={itemPlaceholder} list="body-wear-item-options" />
+          <input
+            className={`input${itemError ? ' input-invalid' : ''}`}
+            value={itemValue}
+            onChange={(event) => onItemChange(event.target.value)}
+            placeholder={itemPlaceholder}
+            list="body-wear-item-options"
+            aria-invalid={Boolean(itemError)}
+          />
+          {itemError ? <span className="input-error-text">{itemError}</span> : null}
         </label>
       ) : null}
 

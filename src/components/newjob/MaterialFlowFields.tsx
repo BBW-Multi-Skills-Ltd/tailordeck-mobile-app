@@ -8,6 +8,7 @@ import type { StepMaterialPricingProps } from './stepMaterialPricing.types'
 type MaterialFlowFieldsProps = Pick<
   StepMaterialPricingProps,
   | 'customMaterialType'
+  | 'fieldErrors'
   | 'materialColor'
   | 'materialQuality'
   | 'materialType'
@@ -40,6 +41,7 @@ export function MaterialFlowFields(props: MaterialFlowFieldsProps) {
       <div className="stack gap-8">
         <MaterialSelector
           categories={materialCategories}
+          error={props.fieldErrors.materialType}
           openCategoryId={props.openMaterialCategory}
           selectedMaterial={props.materialType}
           onOpenCategoryChange={props.onOpenMaterialCategoryChange}
@@ -47,7 +49,16 @@ export function MaterialFlowFields(props: MaterialFlowFieldsProps) {
         />
 
         {props.materialType === 'Other Material' ? (
-          <input className="input" value={props.customMaterialType} onChange={(event) => props.onCustomMaterialTypeChange(event.target.value)} placeholder="Type your custom material here..." />
+          <>
+            <input
+              className={`input${props.fieldErrors.customMaterialType ? ' input-invalid' : ''}`}
+              value={props.customMaterialType}
+              onChange={(event) => props.onCustomMaterialTypeChange(event.target.value)}
+              placeholder="Type your custom material here..."
+              aria-invalid={Boolean(props.fieldErrors.customMaterialType)}
+            />
+            {props.fieldErrors.customMaterialType ? <span className="input-error-text">{props.fieldErrors.customMaterialType}</span> : null}
+          </>
         ) : null}
 
         {hasSelectedMaterial ? (
@@ -61,8 +72,8 @@ export function MaterialFlowFields(props: MaterialFlowFieldsProps) {
         ) : null}
       </div>
 
-      <MaterialColorSelector selectedColor={props.materialColor} onSelectColor={props.onMaterialColorChange} />
-      <MaterialYardSelector selectedYards={props.materialYards} onSelectYards={props.onMaterialYardsChange} />
+      <MaterialColorSelector error={props.fieldErrors.materialColor} selectedColor={props.materialColor} onSelectColor={props.onMaterialColorChange} />
+      <MaterialYardSelector error={props.fieldErrors.materialYards} selectedYards={props.materialYards} onSelectYards={props.onMaterialYardsChange} />
 
       <div className="stack gap-8">
         <div className="input-group">

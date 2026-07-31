@@ -1,4 +1,6 @@
 import type { Dispatch, KeyboardEvent, SetStateAction } from 'react'
+import { isImageFile } from '../../lib/formValidation'
+import type { NewJobFieldErrors } from './newJobFieldValidation'
 
 type MaterialActionParams = {
   depositPercent: string
@@ -7,6 +9,7 @@ type MaterialActionParams = {
   setAmendmentPartQuantity: (value: string) => void
   setCustomMaterialType: (value: string) => void
   setDepositPercent: Dispatch<SetStateAction<string>>
+  setFieldErrors: Dispatch<SetStateAction<NewJobFieldErrors>>
   setMaterialColor: (value: string) => void
   setMaterialType: (value: string) => void
   setMaterialYards: (value: string) => void
@@ -23,6 +26,7 @@ export function createMaterialActions({
   setAmendmentPartQuantity,
   setCustomMaterialType,
   setDepositPercent,
+  setFieldErrors,
   setMaterialColor,
   setMaterialType,
   setMaterialYards,
@@ -44,7 +48,15 @@ export function createMaterialActions({
   }
 
   function handleReferencePhotoUpload(targetId: string, files: FileList | null, maxFiles = 2): void {
-    const nextTargetFiles = files ? Array.from(files).slice(0, maxFiles) : []
+    const incomingFiles = files ? Array.from(files) : []
+    const invalidFile = incomingFiles.find((file) => !isImageFile(file))
+
+    if (invalidFile) {
+      setFieldErrors((current) => ({ ...current, referencePhotos: 'Upload image files only.' }))
+      return
+    }
+
+    const nextTargetFiles = incomingFiles.slice(0, maxFiles)
 
     setReferencePhotoFilesByTarget((previous) => {
       const nextByTarget = { ...previous, [targetId]: nextTargetFiles }

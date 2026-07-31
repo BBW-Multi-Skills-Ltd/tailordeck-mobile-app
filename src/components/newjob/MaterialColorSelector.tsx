@@ -3,11 +3,12 @@ import { useMemo, useState } from 'react'
 import { commonMaterialColors, materialColorCategories } from './materialColorOptions'
 
 type MaterialColorSelectorProps = {
+  error?: string
   selectedColor: string
   onSelectColor: (value: string) => void
 }
 
-export function MaterialColorSelector({ selectedColor, onSelectColor }: MaterialColorSelectorProps) {
+export function MaterialColorSelector({ error, selectedColor, onSelectColor }: MaterialColorSelectorProps) {
   const [openCategoryId, setOpenCategoryId] = useState('neutral')
   const [showBrowse, setShowBrowse] = useState(false)
   const [showCustom, setShowCustom] = useState(false)
@@ -38,7 +39,13 @@ export function MaterialColorSelector({ selectedColor, onSelectColor }: Material
         ))}
       </div>
 
-      <button type="button" className="wizard-material-browse-toggle" onClick={() => setShowBrowse((current) => !current)} aria-expanded={showBrowse}>
+      <button
+        type="button"
+        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
+        onClick={() => setShowBrowse((current) => !current)}
+        aria-expanded={showBrowse}
+        aria-invalid={Boolean(error)}
+      >
         Browse all color categories
         <span>{materialColorCategories.length} groups</span>
       </button>
@@ -102,6 +109,8 @@ export function MaterialColorSelector({ selectedColor, onSelectColor }: Material
       {showCustom ? (
         <input className="input" value={selectedColor} onChange={(event) => onSelectColor(event.target.value)} placeholder="Type color name or hex code" />
       ) : null}
+
+      {error ? <span className="input-error-text">{error}</span> : null}
 
       {selectedColor ? (
         <div className="wizard-selected-material">

@@ -11,6 +11,8 @@ export default function StepClientMeasurements(props: StepClientMeasurementsProp
       <ClientIdentityFields
         clientName={props.clientName}
         clientPhone={props.clientPhone}
+        clientNameError={props.fieldErrors.clientName}
+        clientPhoneError={props.fieldErrors.clientPhone}
         repeatClient={props.repeatClient}
         onClientNameChange={props.onClientNameChange}
         onClientPhoneChange={props.onClientPhoneChange}
@@ -21,6 +23,7 @@ export default function StepClientMeasurements(props: StepClientMeasurementsProp
       {props.showBodyMeasurementFlow ? (
         <BodyMeasurementsSection
           clientName={props.clientName}
+          itemTypeError={props.fieldErrors.itemType}
           itemType={props.itemType}
           jobType={props.jobType}
           persons={props.persons}
@@ -54,6 +57,7 @@ export default function StepClientMeasurements(props: StepClientMeasurementsProp
       {props.isAmendmentMode ? (
         <AmendmentDetailsForm
           issueType={props.amendmentIssueType}
+          issueTypeError={props.fieldErrors.amendmentIssueType}
           area={props.amendmentArea}
           target={props.amendmentTarget}
           description={props.amendmentDescription}

@@ -8,12 +8,13 @@ export type ReferencePhotoTarget = {
 }
 
 type ReferencePhotoUploadProps = {
+  error?: string
   namesByTarget: Record<string, string[]>
   targets: ReferencePhotoTarget[]
   onReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles: number) => void
 }
 
-export function ReferencePhotoUpload({ namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
+export function ReferencePhotoUpload({ error, namesByTarget, onReferencePhotoUpload, targets }: ReferencePhotoUploadProps) {
   return (
     <section className="stack gap-8">
       <div className="stack gap-4">
@@ -49,7 +50,7 @@ export function ReferencePhotoUpload({ namesByTarget, onReferencePhotoUpload, ta
                 />
                 <div className="row gap-8">
                   <Upload size={18} className="text-muted" />
-                  <span className="wizard-upload-title">Tap to upload</span>
+                  <span className="wizard-upload-title">Tap to upload images</span>
                 </div>
               </label>
 
@@ -66,6 +67,7 @@ export function ReferencePhotoUpload({ namesByTarget, onReferencePhotoUpload, ta
           )
         })}
       </div>
+      {error ? <span className="input-error-text">{error}</span> : null}
     </section>
   )
 }

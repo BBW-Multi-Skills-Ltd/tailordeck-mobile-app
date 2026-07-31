@@ -23,6 +23,7 @@ export function RenderMaterialPricingStep({ wizard }: StepRendererProps) {
       materialSource={state.materialSource}
       amendmentPartName={state.amendmentPartName}
       amendmentPartQuantity={state.amendmentPartQuantity}
+      fieldErrors={state.fieldErrors}
       onAmendmentMaterialsToggle={actions.handleAmendmentMaterialsToggle}
       onOpenMaterialCategoryChange={actions.setOpenMaterialCategory}
       onMaterialTypeChange={actions.setMaterialType}

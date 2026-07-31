@@ -16,6 +16,7 @@ export function SingleBodyMeasurementCard(props: BodyMeasurementsSectionProps) {
       measurementFields={step1FieldsBySex(person.sex)}
       measurementTitle="Body Measurements (in)"
       itemValue={person.itemType || props.itemType}
+      itemError={props.itemTypeError}
       itemPlaceholder="e.g. Shirt, Gown, Agbada"
       onToggle={() => props.onSingleMeasurementsOpenChange((prev) => !prev)}
       onUpdatePerson={(updater) => props.onUpdatePerson(person.id, updater)}

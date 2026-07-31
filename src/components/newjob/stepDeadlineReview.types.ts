@@ -8,6 +8,7 @@ import type {
   PersonForm,
   Reminder,
 } from './newJobConfig'
+import type { NewJobFieldErrors } from './newJobFieldValidation'
 
 export type StepDeadlineReviewProps = {
   reviewMode: boolean
@@ -42,6 +43,7 @@ export type StepDeadlineReviewProps = {
   deposit: number
   referencePhotoNames: string[]
   referencePhotoNamesByTarget: Record<string, string[]>
+  fieldErrors: NewJobFieldErrors
   expenses: ExpenseForm[]
   totalExpenses: number
   projectedProfit: number

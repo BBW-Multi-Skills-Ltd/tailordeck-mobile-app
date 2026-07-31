@@ -5,6 +5,7 @@ type AmendmentDetailsFormProps = {
   area: string
   target: string
   description: string
+  issueTypeError?: string
   onIssueTypeChange: (value: string) => void
   onAreaChange: (value: string) => void
   onTargetChange: (value: string) => void
@@ -16,6 +17,7 @@ export default function AmendmentDetailsForm({
   area,
   target,
   description,
+  issueTypeError,
   onIssueTypeChange,
   onAreaChange,
   onTargetChange,
@@ -28,12 +30,14 @@ export default function AmendmentDetailsForm({
         <label className="input-group">
           <span className="input-label">Issue Type</span>
           <input
-            className="input"
+            className={`input${issueTypeError ? ' input-invalid' : ''}`}
             value={issueType}
             onChange={(event) => onIssueTypeChange(event.target.value)}
             placeholder="e.g. Zip replacement, Tighten waist"
             list="amendment-issue-options"
+            aria-invalid={Boolean(issueTypeError)}
           />
+          {issueTypeError ? <span className="input-error-text">{issueTypeError}</span> : null}
           <datalist id="amendment-issue-options">
             {amendmentIssueOptions.map((option) => (
               <option key={option} value={option} />

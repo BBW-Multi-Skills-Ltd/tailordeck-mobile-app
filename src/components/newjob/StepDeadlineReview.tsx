@@ -11,6 +11,7 @@ export default function StepDeadlineReview(props: StepDeadlineReviewProps) {
         deadlineDate={props.deadlineDate}
         deadlineTime={props.deadlineTime}
         effectiveItemType={props.effectiveItemType}
+        fieldErrors={props.fieldErrors}
         jobType={props.jobType}
         makeCategory={props.makeCategory}
         persons={props.persons}

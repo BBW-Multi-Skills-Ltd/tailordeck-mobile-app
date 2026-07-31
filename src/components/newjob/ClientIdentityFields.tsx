@@ -1,6 +1,8 @@
 type ClientIdentityFieldsProps = {
   clientName: string
   clientPhone: string
+  clientNameError?: string
+  clientPhoneError?: string
   repeatClient: boolean
   onClientNameChange: (value: string) => void
   onClientPhoneChange: (value: string) => void
@@ -9,6 +11,8 @@ type ClientIdentityFieldsProps = {
 export function ClientIdentityFields({
   clientName,
   clientPhone,
+  clientNameError,
+  clientPhoneError,
   repeatClient,
   onClientNameChange,
   onClientPhoneChange,
@@ -17,12 +21,33 @@ export function ClientIdentityFields({
     <>
       <label className="input-group">
         <span className="input-label">Client Full Name *</span>
-        <input className="input" value={clientName} onChange={(event) => onClientNameChange(event.target.value)} placeholder="e.g. Amina Bello" autoFocus readOnly={repeatClient} />
+        <input
+          className={`input${clientNameError ? ' input-invalid' : ''}`}
+          value={clientName}
+          onChange={(event) => onClientNameChange(event.target.value)}
+          placeholder="Client name"
+          autoFocus
+          readOnly={repeatClient}
+          aria-invalid={Boolean(clientNameError)}
+        />
+        {clientNameError ? <span className="input-error-text">{clientNameError}</span> : null}
       </label>
 
       <label className="input-group">
         <span className="input-label">Phone / WhatsApp *</span>
-        <input className="input" value={clientPhone} onChange={(event) => onClientPhoneChange(event.target.value)} placeholder="e.g. 08012345678" inputMode="tel" readOnly={repeatClient} />
+        <div className="prefix-input-wrap">
+          <span className="fixed-input-prefix">+234</span>
+          <input
+            className={`input auth-input-prefixed${clientPhoneError ? ' input-invalid' : ''}`}
+            value={clientPhone}
+            onChange={(event) => onClientPhoneChange(event.target.value)}
+            placeholder="Client WhatsApp contact"
+            inputMode="tel"
+            readOnly={repeatClient}
+            aria-invalid={Boolean(clientPhoneError)}
+          />
+        </div>
+        {clientPhoneError ? <span className="input-error-text">{clientPhoneError}</span> : null}
       </label>
 
       {repeatClient ? (

@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { commonMaterialYards, materialYardCategories } from './materialYardOptions'
 
 type MaterialYardSelectorProps = {
+  error?: string
   selectedYards: string
   onSelectYards: (value: string) => void
 }
 
-export function MaterialYardSelector({ selectedYards, onSelectYards }: MaterialYardSelectorProps) {
+export function MaterialYardSelector({ error, selectedYards, onSelectYards }: MaterialYardSelectorProps) {
   const [openCategoryId, setOpenCategoryId] = useState('standard')
   const [showBrowse, setShowBrowse] = useState(false)
   const [showCustom, setShowCustom] = useState(false)
@@ -35,7 +36,13 @@ export function MaterialYardSelector({ selectedYards, onSelectYards }: MaterialY
         ))}
       </div>
 
-      <button type="button" className="wizard-material-browse-toggle" onClick={() => setShowBrowse((current) => !current)} aria-expanded={showBrowse}>
+      <button
+        type="button"
+        className={`wizard-material-browse-toggle${error ? ' input-invalid' : ''}`}
+        onClick={() => setShowBrowse((current) => !current)}
+        aria-expanded={showBrowse}
+        aria-invalid={Boolean(error)}
+      >
         Browse yard categories
         <span>{materialYardCategories.length} groups</span>
       </button>
@@ -94,8 +101,17 @@ export function MaterialYardSelector({ selectedYards, onSelectYards }: MaterialY
       ) : null}
 
       {showCustom ? (
-        <input className="input" value={selectedYards} onChange={(event) => onSelectYards(event.target.value)} placeholder="Type yard amount" inputMode="decimal" />
+        <input
+          className={`input${error ? ' input-invalid' : ''}`}
+          value={selectedYards}
+          onChange={(event) => onSelectYards(event.target.value)}
+          placeholder="Type yard amount"
+          inputMode="decimal"
+          aria-invalid={Boolean(error)}
+        />
       ) : null}
+
+      {error ? <span className="input-error-text">{error}</span> : null}
 
       {selectedYards ? (
         <div className="wizard-selected-material">
