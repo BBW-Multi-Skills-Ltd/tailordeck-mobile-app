@@ -112,7 +112,8 @@ export function useOnboardingSetupState() {
 
     if (step === 2) {
       const nextErrors: FieldErrors<OnboardingSetupFieldKey> = {}
-      if (businessPhone && !isValidNigerianMobileLocal(businessPhone)) nextErrors.businessPhone = 'Enter a valid Nigerian number.'
+      if (!businessPhone.trim()) nextErrors.businessPhone = 'Fill this input.'
+      else if (!isValidNigerianMobileLocal(businessPhone)) nextErrors.businessPhone = 'Enter a valid Nigerian number.'
       if (businessEmail.trim() && !isValidEmailFormat(businessEmail)) nextErrors.businessEmail = 'Enter a valid email address.'
       if (website.trim() && !isValidWebsiteFormat(website)) nextErrors.website = 'Enter a valid website.'
       return updateErrors(nextErrors)
