@@ -4,7 +4,7 @@ export interface SubscriptionRow {
   id: string
   user_id: string
   plan_name: SubscriptionPlan
-  status: 'active' | 'trialing' | 'expired' | 'cancelled' | 'past_due'
+  status: 'active' | 'expired' | 'cancelled' | 'past_due'
   trial_ends_at: string | null
   billing_cycle: 'monthly' | 'yearly'
   cancel_at_period_end: boolean
