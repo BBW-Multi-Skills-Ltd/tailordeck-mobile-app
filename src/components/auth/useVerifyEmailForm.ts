@@ -77,6 +77,35 @@ export function useVerifyEmailForm() {
     setError('')
   }
 
+  async function handlePasteFromClipboard(): Promise<void> {
+    setError('')
+    setNotice('')
+
+    if (!navigator.clipboard?.readText) {
+      setError('Paste the code manually.')
+      setErrorKey((current) => current + 1)
+      return
+    }
+
+    try {
+      const pasted = (await navigator.clipboard.readText()).replace(/\D/g, '').slice(0, 6)
+      if (!pasted) {
+        setError('Copy the 6-digit code first.')
+        setErrorKey((current) => current + 1)
+        return
+      }
+
+      setDigits(Array.from({ length: 6 }, (_, index) => pasted[index] ?? ''))
+      if (pasted.length === 6) {
+        const lastInput = document.querySelector<HTMLInputElement>('[data-otp-index="5"]')
+        lastInput?.focus()
+      }
+    } catch {
+      setError('Paste the code manually.')
+      setErrorKey((current) => current + 1)
+    }
+  }
+
   function validate(): boolean {
     if (!email.trim()) {
       setError('Enter your email address.')
@@ -145,6 +174,7 @@ export function useVerifyEmailForm() {
     errorKey,
     handleKeyDown,
     handlePaste,
+    handlePasteFromClipboard,
     handleResend,
     handleSubmit,
     loading,

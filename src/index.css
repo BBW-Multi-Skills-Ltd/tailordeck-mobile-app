@@ -538,6 +538,28 @@ body {
   gap: 7px;
 }
 
+.auth-otp-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auth-otp-copy {
+  min-height: 30px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-pill);
+  background: var(--clay-surface-muted);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: var(--clay-shadow-press);
+}
+
 .auth-otp-input {
   width: 100%;
   height: 44px;

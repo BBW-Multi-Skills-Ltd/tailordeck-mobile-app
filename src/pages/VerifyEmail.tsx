@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Clipboard } from 'lucide-react'
 import AuthShell from '../components/auth/AuthShell'
 import { useVerifyEmailForm } from '../components/auth/useVerifyEmailForm'
 
@@ -22,7 +23,13 @@ export default function VerifyEmail() {
         </div>
 
         <div className="input-group">
-          <span className="auth-label">Verification Code</span>
+          <div className="auth-otp-label-row">
+            <span className="auth-label">Verification Code</span>
+            <button type="button" className="auth-otp-copy" onClick={form.handlePasteFromClipboard}>
+              <Clipboard size={13} />
+              Paste code
+            </button>
+          </div>
           <div className="auth-otp-row" aria-label="Six digit verification code">
             {form.digits.map((digit, index) => (
               <input
