@@ -1,10 +1,10 @@
-﻿import { Check } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../hooks/useFeatureAccess'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
+import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
@@ -70,59 +70,19 @@ export default function SubscriptionPage() {
       {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 
       {visiblePlans.length > 0 ? (
-      <div className={`subscription-plan-carousel${visiblePlans.length === 1 ? ' manage-plan-carousel single' : ''}`} aria-label="Pricing plans">
-        {visiblePlans.map((plan) => (
-          <article
-            key={plan.id}
-            className={`subscription-plan-card subscription-plan-slide${activeSelectedPlan === plan.id ? ' selected' : ''}`}
-            onClick={() => setSelectedPlan(plan.id)}
-          >
-            <div className="subscription-plan-badges">
-              {plan.badge ? <span className={`subscription-plan-badge${plan.id === 'pro' ? ' pro' : ''}`}>{plan.badge}</span> : null}
-              {plan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
-              {cycle === 'yearly' && plan.yearlyDiscountNote ? <span className="subscription-plan-badge save">{plan.yearlyDiscountNote}</span> : null}
-            </div>
-
-            <div className="subscription-plan-top">
-              <h2>{plan.label}</h2>
-              <p>{plan.subtitle}</p>
-            </div>
-
-            <div className="subscription-price-row">
-              <span className="subscription-price">{plan.price[cycle]}</span>
-              <span className="subscription-price-suffix">{plan.suffix[cycle]}</span>
-            </div>
-
-            <div className="subscription-plan-divider" />
-
-            <button
-              type="button"
-              className={`btn btn-full subscription-plan-btn${activeSelectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  void choosePlan(plan.id)
-                }}
-                disabled={checkoutMutation.isPending}
-              >
-              {checkoutMutation.isPending && activeSelectedPlan === plan.id ? 'Opening checkout...' : `Upgrade to ${plan.label}`}
-            </button>
-
-            <div className="subscription-plan-divider" />
-
-            <p className="subscription-highlights-title">Plan highlights:</p>
-            <div className="stack gap-6 subscription-feature-list">
-              {plan.features.map((feature) => (
-                <p key={feature} className="subscription-feature-item">
-                  <span className="subscription-feature-icon">
-                    <Check size={10} />
-                  </span>
-                  <span>{feature}</span>
-                </p>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
+        <SubscriptionPlanCarousel
+          ariaLabel="Pricing plans"
+          busyPlanId={checkoutMutation.isPending ? activeSelectedPlan : null}
+          className="manage-plan-carousel"
+          cycle={cycle}
+          disabled={checkoutMutation.isPending}
+          getBusyLabel={() => 'Opening checkout...'}
+          getCtaLabel={(plan) => `Upgrade to ${plan.label}`}
+          plans={visiblePlans}
+          selectedPlan={activeSelectedPlan}
+          onChoosePlan={(plan) => choosePlan(plan.id)}
+          onSelectedPlanChange={setSelectedPlan}
+        />
       ) : (
         <article className="subscription-current-card subscription-complete-card">
           <p className="subscription-current-title">Full plan active</p>
@@ -132,6 +92,7 @@ export default function SubscriptionPage() {
     </section>
   )
 }
+
 
 
 

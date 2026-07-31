@@ -1,4 +1,3 @@
-﻿import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
@@ -6,6 +5,7 @@ import { queryKeys } from '../hooks/queryKeys'
 import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
+import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
@@ -84,63 +84,20 @@ export default function OnboardingPlan() {
 
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
         {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
-
-        <div className="subscription-plan-carousel onboarding-plan-carousel" aria-label="Onboarding pricing plans">
-          {subscriptionPlans.map((plan) => (
-            <article
-              key={plan.id}
-              className={`subscription-plan-card subscription-plan-slide${selectedPlan === plan.id ? ' selected' : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
-            >
-              <div className="subscription-plan-badges">
-                {plan.badge ? <span className={`subscription-plan-badge${plan.id === 'pro' ? ' pro' : ''}`}>{plan.badge}</span> : null}
-                {plan.recommended ? <span className="subscription-plan-badge recommended">RECOMMENDED</span> : null}
-                {cycle === 'yearly' && plan.yearlyDiscountNote ? <span className="subscription-plan-badge save">{plan.yearlyDiscountNote}</span> : null}
-              </div>
-
-              <div className="subscription-plan-top">
-                <h2>{plan.label}</h2>
-                <p>{plan.subtitle}</p>
-              </div>
-
-              <div className="subscription-price-row">
-                <span className="subscription-price">{plan.price[cycle]}</span>
-                <span className="subscription-price-suffix">{plan.suffix[cycle]}</span>
-              </div>
-
-              {plan.helper ? <p className="subscription-plan-helper">{plan.helper}</p> : null}
-
-              <div className="subscription-plan-divider" />
-
-              <button
-                type="button"
-                className={`btn btn-full subscription-plan-btn${selectedPlan === plan.id ? ' btn-primary' : ' btn-secondary'}`}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  void activatePlan(plan.id)
-                }}
-                disabled={savingPlan !== null}
-              >
-                {savingPlan === plan.id ? 'Saving...' : plan.cta}
-              </button>
-
-              <div className="subscription-plan-divider" />
-
-              <p className="subscription-highlights-title">Plan highlights:</p>
-              <div className="stack gap-6 subscription-feature-list">
-                {plan.features.map((feature) => (
-                  <p key={feature} className="subscription-feature-item">
-                    <span className="subscription-feature-icon">
-                      <Check size={10} />
-                    </span>
-                    <span>{feature}</span>
-                  </p>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
+        <SubscriptionPlanCarousel
+          ariaLabel="Onboarding pricing plans"
+          busyPlanId={savingPlan}
+          className="onboarding-plan-carousel"
+          cycle={cycle}
+          disabled={savingPlan !== null}
+          getCtaLabel={(plan) => plan.cta}
+          plans={subscriptionPlans}
+          selectedPlan={selectedPlan}
+          onChoosePlan={(plan) => activatePlan(plan.id)}
+          onSelectedPlanChange={setSelectedPlan}
+        />
       </section>
     </main>
   )
 }
+
