@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 const emailSchema = z.string().trim().toLowerCase().email('Enter a valid email address.')
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters.')
+export const EMAIL_OTP_LENGTH = 8
 
 export const signInSchema = z.object({
   email: emailSchema,
@@ -30,7 +31,7 @@ export const passwordResetSchema = z.object({
 
 export const emailOtpSchema = z.object({
   email: emailSchema,
-  token: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code.'),
+  token: z.string().trim().regex(new RegExp(`^\\d{${EMAIL_OTP_LENGTH}}$`), `Enter the ${EMAIL_OTP_LENGTH}-digit code.`),
 })
 
 export const emailUpdateSchema = z.object({

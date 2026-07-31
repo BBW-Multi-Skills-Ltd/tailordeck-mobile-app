@@ -7,7 +7,7 @@ export default function VerifyEmail() {
   const form = useVerifyEmailForm()
 
   return (
-    <AuthShell title="Verify Email" subtitle="Enter the 6-digit code sent to your email">
+    <AuthShell title="Verify Email" subtitle={`Enter the ${form.otpLength}-digit code sent to your email`}>
       <form className="auth-form" onSubmit={form.handleSubmit}>
         <div className="input-group">
           <label htmlFor="verify-email" className="auth-label">Email Address</label>
@@ -30,7 +30,7 @@ export default function VerifyEmail() {
               Paste code
             </button>
           </div>
-          <div className="auth-otp-row" aria-label="Six digit verification code">
+          <div className="auth-otp-row" aria-label={`${form.otpLength} digit verification code`}>
             {form.digits.map((digit, index) => (
               <input
                 key={`otp-${index}-${form.errorKey}`}

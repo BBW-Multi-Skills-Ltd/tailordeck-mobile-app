@@ -1,10 +1,11 @@
-import { useMemo, useState, type ClipboardEvent, type FormEvent } from 'react'
+import { useCallback, useMemo, useRef, useState, type ClipboardEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { markOnboardingStage } from '../../lib/auth'
 import { loadTailorSettings, TAILOR_PENDING_EMAIL_VERIFICATION_KEY } from '../../lib/settings'
 import { resendSignUpEmailOtp, verifySignUpEmailOtp } from '../../services/authService'
 import { syncPendingOnboardingSettings } from '../../services/onboardingService'
 import { updateProfile } from '../../services/profileService'
+import { EMAIL_OTP_LENGTH } from '../../validation/authSchemas'
 
 type PendingVerification = {
   email: string
@@ -43,38 +44,132 @@ export function useVerifyEmailForm() {
   const navigate = useNavigate()
   const pending = useMemo(() => loadPendingVerification(), [])
   const [email, setEmail] = useState(pending.email)
-  const [digits, setDigits] = useState<string[]>(Array.from({ length: 6 }, () => ''))
+  const emptyDigits = useMemo(() => Array.from({ length: EMAIL_OTP_LENGTH }, () => ''), [])
+  const [digits, setDigits] = useState<string[]>(emptyDigits)
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [errorKey, setErrorKey] = useState(0)
+  const clearTimerRef = useRef<number | null>(null)
+  const lastSubmittedTokenRef = useRef('')
 
   const token = digits.join('')
 
-  function setDigit(index: number, value: string): void {
-    const nextDigit = value.replace(/\D/g, '').slice(-1)
-    setDigits((current) => current.map((item, itemIndex) => (itemIndex === index ? nextDigit : item)))
+  const focusInput = useCallback((index: number): void => {
+    const input = document.querySelector<HTMLInputElement>(`[data-otp-index="${index}"]`)
+    input?.focus()
+  }, [])
+
+  const clearDigits = useCallback((): void => {
+    setDigits(emptyDigits)
+    focusInput(0)
+  }, [emptyDigits, focusInput])
+
+  const scheduleRejectedCodeClear = useCallback((): void => {
+    if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current)
+    clearTimerRef.current = window.setTimeout(() => {
+      clearDigits()
+      lastSubmittedTokenRef.current = ''
+    }, 1200)
+  }, [clearDigits])
+
+  function validate(nextToken = token): boolean {
+    if (!email.trim()) {
+      setError('Enter your email address.')
+      setErrorKey((current) => current + 1)
+      return false
+    }
+    if (!new RegExp(`^\\d{${EMAIL_OTP_LENGTH}}$`).test(nextToken)) {
+      setError(`Enter the ${EMAIL_OTP_LENGTH}-digit code.`)
+      setErrorKey((current) => current + 1)
+      return false
+    }
+    return true
+  }
+
+  async function submitToken(nextToken = token): Promise<void> {
+    setNotice('')
+    if (loading || lastSubmittedTokenRef.current === nextToken) return
+    if (!validate(nextToken)) return
+
+    lastSubmittedTokenRef.current = nextToken
+    setLoading(true)
+    try {
+      await verifySignUpEmailOtp({ email, token: nextToken })
+      const settings = loadTailorSettings()
+      await updateProfile({
+        email: email.trim().toLowerCase(),
+        full_name: pending.fullName || settings.profile.fullName,
+        phone: pending.phone || settings.profile.phone,
+      })
+      await syncPendingOnboardingSettings(settings)
+      window.localStorage.removeItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY)
+      markOnboardingStage(pending.setupWasCompleted ? 'plan' : 'setup')
+      navigate(pending.setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup', { replace: true })
+    } catch (submitError) {
+      lastSubmittedTokenRef.current = ''
+      setError(submitError instanceof Error ? submitError.message : 'Unable to verify this code.')
+      setErrorKey((current) => current + 1)
+      scheduleRejectedCodeClear()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function applyCode(rawCode: string): void {
+    const code = rawCode.replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH)
+    if (!code) return
+
+    const nextDigits = Array.from({ length: EMAIL_OTP_LENGTH }, (_, index) => code[index] ?? '')
+    const nextToken = nextDigits.join('')
+    setDigits(nextDigits)
     setError('')
+    setNotice('')
+
+    if (nextToken.length === EMAIL_OTP_LENGTH && !nextDigits.includes('')) {
+      focusInput(EMAIL_OTP_LENGTH - 1)
+      void submitToken(nextToken)
+      return
+    }
+
+    focusInput(Math.min(code.length, EMAIL_OTP_LENGTH - 1))
+  }
+
+  function setDigit(index: number, value: string): void {
+    const cleaned = value.replace(/\D/g, '')
+    if (cleaned.length > 1) {
+      applyCode(cleaned)
+      return
+    }
+
+    const nextDigit = cleaned.slice(-1)
+    let nextToken = ''
+    setDigits((current) => {
+      const nextDigits = current.map((item, itemIndex) => (itemIndex === index ? nextDigit : item))
+      nextToken = nextDigits.join('')
+      return nextDigits
+    })
+    setError('')
+    setNotice('')
 
     if (nextDigit) {
-      const nextInput = document.querySelector<HTMLInputElement>(`[data-otp-index="${index + 1}"]`)
-      nextInput?.focus()
+      focusInput(Math.min(index + 1, EMAIL_OTP_LENGTH - 1))
+    }
+
+    if (nextToken.length === EMAIL_OTP_LENGTH && !nextToken.includes('')) {
+      void submitToken(nextToken)
     }
   }
 
   function handleKeyDown(index: number, key: string): void {
     if (key !== 'Backspace' || digits[index]) return
-    const previousInput = document.querySelector<HTMLInputElement>(`[data-otp-index="${index - 1}"]`)
-    previousInput?.focus()
+    focusInput(Math.max(index - 1, 0))
   }
 
   function handlePaste(event: ClipboardEvent<HTMLInputElement>): void {
     event.preventDefault()
-    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-    if (!pasted) return
-    setDigits(Array.from({ length: 6 }, (_, index) => pasted[index] ?? ''))
-    setError('')
+    applyCode(event.clipboardData.getData('text'))
   }
 
   async function handlePasteFromClipboard(): Promise<void> {
@@ -88,67 +183,30 @@ export function useVerifyEmailForm() {
     }
 
     try {
-      const pasted = (await navigator.clipboard.readText()).replace(/\D/g, '').slice(0, 6)
+      const pasted = (await navigator.clipboard.readText()).replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH)
       if (!pasted) {
-        setError('Copy the 6-digit code first.')
+        setError(`Copy the ${EMAIL_OTP_LENGTH}-digit code first.`)
         setErrorKey((current) => current + 1)
         return
       }
 
-      setDigits(Array.from({ length: 6 }, (_, index) => pasted[index] ?? ''))
-      if (pasted.length === 6) {
-        const lastInput = document.querySelector<HTMLInputElement>('[data-otp-index="5"]')
-        lastInput?.focus()
-      }
+      applyCode(pasted)
     } catch {
       setError('Paste the code manually.')
       setErrorKey((current) => current + 1)
     }
   }
 
-  function validate(): boolean {
-    if (!email.trim()) {
-      setError('Enter your email address.')
-      setErrorKey((current) => current + 1)
-      return false
-    }
-    if (!/^\d{6}$/.test(token)) {
-      setError('Enter the 6-digit code.')
-      setErrorKey((current) => current + 1)
-      return false
-    }
-    return true
-  }
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault()
-    setNotice('')
-    if (!validate()) return
-
-    setLoading(true)
-    try {
-      await verifySignUpEmailOtp({ email, token })
-      const settings = loadTailorSettings()
-      await updateProfile({
-        email: email.trim().toLowerCase(),
-        full_name: pending.fullName || settings.profile.fullName,
-        phone: pending.phone || settings.profile.phone,
-      })
-      await syncPendingOnboardingSettings(settings)
-      window.localStorage.removeItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY)
-      markOnboardingStage(pending.setupWasCompleted ? 'plan' : 'setup')
-      navigate(pending.setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup', { replace: true })
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Unable to verify this code.')
-      setErrorKey((current) => current + 1)
-    } finally {
-      setLoading(false)
-    }
+    await submitToken()
   }
 
   async function handleResend(): Promise<void> {
     setError('')
     setNotice('')
+    clearDigits()
+    lastSubmittedTokenRef.current = ''
     if (!email.trim()) {
       setError('Enter your email address.')
       setErrorKey((current) => current + 1)
@@ -172,6 +230,7 @@ export function useVerifyEmailForm() {
     email,
     error,
     errorKey,
+    otpLength: EMAIL_OTP_LENGTH,
     handleKeyDown,
     handlePaste,
     handlePasteFromClipboard,
