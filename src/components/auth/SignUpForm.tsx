@@ -109,15 +109,11 @@ function AuthTextField({
   type?: string
   value: string
 }) {
-  const inputKey = id === 'signup-confirm'
-    ? `${id}-${errorKey}-${matchState}-${value}`
-    : `${id}-${errorKey}-${matchState}`
-
   return (
     <div className="input-group">
       <label htmlFor={id} className="auth-label">{label}</label>
       <input
-        key={inputKey}
+        key={`${id}-${errorKey}`}
         id={id}
         aria-describedby={error ? `${id}-error` : undefined}
         aria-invalid={Boolean(error) || matchState === 'mismatch'}

@@ -25,8 +25,9 @@ type ConfirmPasswordState = 'idle' | 'partial' | 'match' | 'mismatch'
 export function useSignUpForm() {
   const navigate = useNavigate()
   const savedSettings = loadTailorSettings()
+  const savedProfileEmail = savedSettings.profile.email === 'your@email.com' ? '' : savedSettings.profile.email
   const [fullName, setFullNameValue] = useState('')
-  const [email, setEmailValue] = useState('')
+  const [email, setEmailValue] = useState(savedSettings.businessInfo.businessEmail || savedProfileEmail)
   const [phone, setPhoneValue] = useState(localNigerianPhone(savedSettings.businessInfo.businessPhone || savedSettings.profile.phone))
   const [password, setPasswordValue] = useState('')
   const [confirmPassword, setConfirmPasswordValue] = useState('')

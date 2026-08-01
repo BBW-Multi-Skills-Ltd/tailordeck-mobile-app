@@ -84,7 +84,7 @@ export function ContactStepFields({
 }: ContactStepFieldsProps) {
   return (
     <div className="onboarding-setup-fields">
-      <SetupField error={errors.businessPhone} errorKey={errorKey} icon={Phone} id="business-phone" inputMode="tel" label="Business Phone" prefix="+234" value={businessPhone} placeholder="Business WhatsApp number" onChange={onBusinessPhoneChange} />
+      <SetupField error={errors.businessPhone} errorKey={errorKey} icon={Phone} id="business-phone" inputMode="tel" label="Business Phone" prefix="+234" value={businessPhone} placeholder="Your business number" onChange={onBusinessPhoneChange} />
       <SetupField error={errors.businessEmail} errorKey={errorKey} icon={Mail} id="business-email" inputMode="email" label="Business Email" optional value={businessEmail} placeholder="business@email.com" onChange={onBusinessEmailChange} />
       <SetupField error={errors.website} errorKey={errorKey} icon={Globe} id="business-website" inputMode="url" label="Business Website" optional prefix="https://" value={website} placeholder="yourwebsite.com" onChange={onWebsiteChange} />
       <div className="onboarding-social-block">
