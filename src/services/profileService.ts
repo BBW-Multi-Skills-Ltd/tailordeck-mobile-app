@@ -28,6 +28,16 @@ export async function updateProfile(
   return data
 }
 
+export async function activateVerifiedProfile(input: { fullName: string; email: string; phone: string }): Promise<ProfileRow> {
+  const { data, error } = await supabase.rpc('activate_verified_profile', {
+    full_name_value: input.fullName,
+    email_value: input.email,
+    phone_value: input.phone,
+  }).single<ProfileRow>()
+  if (error) throw error
+  return data
+}
+
 export async function uploadAvatar(file: File): Promise<{ storagePath: string; signedUrl: string }> {
   fileUploadSchema.parse(file)
   const userId = await requireUserId()

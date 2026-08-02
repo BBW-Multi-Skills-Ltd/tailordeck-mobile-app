@@ -4,7 +4,7 @@ import { markOnboardingStage } from '../../lib/auth'
 import { loadTailorSettings, TAILOR_PENDING_EMAIL_VERIFICATION_KEY } from '../../lib/settings'
 import { resendSignUpEmailOtp, verifySignUpEmailOtp } from '../../services/authService'
 import { syncPendingOnboardingSettings } from '../../services/onboardingService'
-import { updateProfile } from '../../services/profileService'
+import { activateVerifiedProfile } from '../../services/profileService'
 import { EMAIL_OTP_LENGTH } from '../../validation/authSchemas'
 
 type PendingVerification = {
@@ -179,22 +179,36 @@ export function useVerifyEmailForm() {
     setLoading(true)
     try {
       await verifySignUpEmailOtp({ email, token: nextToken })
+    } catch (verifyError) {
+      lastSubmittedTokenRef.current = ''
+      setError(getFriendlyOtpError(verifyError, secondsUntilExpiry))
+      setErrorKey((current) => current + 1)
+      scheduleRejectedCodeClear()
+      setLoading(false)
+      return
+    }
+
+    try {
       const settings = loadTailorSettings()
-      await updateProfile({
-        account_status: 'active',
+      await activateVerifiedProfile({
         email: email.trim().toLowerCase(),
-        full_name: pending.fullName || settings.profile.fullName,
+        fullName: pending.fullName || settings.profile.fullName,
         phone: pending.phone || settings.profile.phone,
       })
-      await syncPendingOnboardingSettings(settings)
+
+      try {
+        await syncPendingOnboardingSettings(settings)
+      } catch (syncError) {
+        console.warn('Email verified, but onboarding sync will be retried later:', syncError)
+      }
+
       window.localStorage.removeItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY)
       markOnboardingStage(pending.setupWasCompleted ? 'plan' : 'setup')
       navigate(pending.setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup', { replace: true })
-    } catch (submitError) {
-      lastSubmittedTokenRef.current = ''
-      setError(getFriendlyOtpError(submitError, secondsUntilExpiry))
+    } catch (activationError) {
+      console.error('Email verified, but profile activation failed:', activationError)
+      setError('Email verified. Please sign in to finish setup.')
       setErrorKey((current) => current + 1)
-      scheduleRejectedCodeClear()
     } finally {
       setLoading(false)
     }
