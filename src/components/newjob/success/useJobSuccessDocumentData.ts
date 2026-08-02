@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { DetailedJobData } from '../../../data/mockJobDetails'
+import type { DetailedJobData } from '../../../types/jobDetails'
 import type { MockJob } from '../../../types/job'
 import { readBrandConfig } from '../../invoice/documentHelpers'
 import type { JobSuccessViewProps } from './jobSuccessTypes'

@@ -1,4 +1,4 @@
-import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
+import type { JobMeasurementSnapshot } from '../../types/measurements'
 import { blockKey, toTitleCase } from './useClientMeasurements'
 import { MeasurementHeader } from './MeasurementHeader'
 import { MeasurementValue } from './MeasurementValue'

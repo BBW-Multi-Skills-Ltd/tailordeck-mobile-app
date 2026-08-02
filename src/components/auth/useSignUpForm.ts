@@ -8,16 +8,12 @@ import {
   passwordChecks,
   passwordStrength,
 } from '../../lib/formValidation'
-import { markOnboardingStage } from '../../lib/auth'
 import {
   loadTailorSettings,
-  saveTailorSettings,
   TAILOR_ONBOARDING_SYNC_PENDING_KEY,
-  TAILOR_PENDING_EMAIL_VERIFICATION_KEY,
-  TAILOR_SIGNUP_PREFILL_KEY,
 } from '../../lib/settings'
 import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
-import { syncPendingOnboardingSettings } from '../../services/onboardingService'
+import { completeAuthenticatedSignUp, savePendingSignUpHandoff } from './signUpHandoff'
 
 type SignUpFieldKey = 'fullName' | 'email' | 'phone' | 'password' | 'confirmPassword' | 'agree' | 'form'
 type ConfirmPasswordState = 'idle' | 'partial' | 'match' | 'mismatch'
@@ -111,43 +107,14 @@ export function useSignUpForm() {
     try {
       const setupWasCompleted = window.localStorage.getItem(TAILOR_ONBOARDING_SYNC_PENDING_KEY) === 'true'
       const authData = await signUpWithEmail({ fullName, email: normalizedEmail, password, phone: normalizedPhone })
-      const currentSettings = loadTailorSettings()
-      const nextSettings = saveTailorSettings({
-        ...currentSettings,
-        profile: {
-          ...currentSettings.profile,
-          fullName: fullName.trim() || currentSettings.profile.fullName,
-          email: normalizedEmail,
-          phone: normalizedPhone,
-        },
-      })
-      window.localStorage.setItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY, JSON.stringify({
-        codeSentAt: Date.now(),
-        email: normalizedEmail,
-        fullName: nextSettings.profile.fullName,
-        phone: normalizedPhone,
-        resendCount: 0,
-        resendLockedUntil: 0,
-        setupWasCompleted,
-      }))
-      window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({
-        email: normalizedEmail,
-        fullName: nextSettings.profile.fullName,
-        shopName: nextSettings.businessInfo.shopName,
-      }))
+      const nextSettings = savePendingSignUpHandoff({ fullName, normalizedEmail, normalizedPhone, setupWasCompleted })
 
       if (!authData.session) {
         navigate('/auth/verify-email')
         return
       }
 
-      try {
-        await syncPendingOnboardingSettings(nextSettings)
-      } catch (syncError) {
-        console.warn('Unable to sync onboarding settings after signup:', syncError)
-      }
-      markOnboardingStage(setupWasCompleted ? 'plan' : 'setup')
-      navigate(setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup')
+      await completeAuthenticatedSignUp({ navigate, nextSettings, setupWasCompleted })
     } catch (error) {
       setErrors({ form: error instanceof Error ? error.message : 'Unable to create account.' })
       setErrorKey((prev) => prev + 1)

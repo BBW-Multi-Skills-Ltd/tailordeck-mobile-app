@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DetailedJobData } from '../../types/jobDetails'
 import { useCreateDocumentMutation } from '../../hooks/useDocumentQueries'
 import {
   buildDocumentShareText,

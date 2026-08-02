@@ -20,6 +20,14 @@ export type OnboardingSetupDraft = {
   website: string
 }
 
+export function buildOnboardingSetupDraft(draft: OnboardingSetupDraft): OnboardingSetupDraft {
+  return {
+    ...draft,
+    businessPhone: draft.businessPhone ? `+234${draft.businessPhone}` : '',
+    website: draft.website ? `https://${draft.website}` : '',
+  }
+}
+
 export function getInitialSocialHandles(): Record<SocialPlatform, string> {
   const handles = loadTailorSettings().businessInfo.socialHandles
   return {

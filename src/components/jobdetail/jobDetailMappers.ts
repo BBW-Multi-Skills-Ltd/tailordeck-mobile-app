@@ -1,4 +1,4 @@
-import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DetailedJobData } from '../../types/jobDetails'
 import { toNaira } from '../../lib/money'
 import { mapJobRow } from '../../services/mappers/jobMapper'
 import type { JobWithRelations } from '../../services/types'

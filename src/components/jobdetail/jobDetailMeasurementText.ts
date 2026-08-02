@@ -1,4 +1,4 @@
-import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DetailedJobData } from '../../types/jobDetails'
 
 export function getMeasurementScopeText(params: {
   details: DetailedJobData

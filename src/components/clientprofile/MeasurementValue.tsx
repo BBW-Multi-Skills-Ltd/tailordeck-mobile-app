@@ -1,4 +1,4 @@
-import { labelFromField } from '../../data/mockJobMeasurements'
+import { labelFromField } from '../../types/measurements'
 
 type MeasurementValueProps = {
   editing: boolean

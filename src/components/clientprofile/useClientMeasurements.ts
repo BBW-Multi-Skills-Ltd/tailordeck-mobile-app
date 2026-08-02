@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
+import type { JobMeasurementSnapshot } from '../../types/measurements'
 import type { JobWithRelations } from '../../services/types'
 import { buildMeasurementDrafts } from './clientMeasurementMappers'
 export { blockKey, toTitleCase } from './clientMeasurementUtils'

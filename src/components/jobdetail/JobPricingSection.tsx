@@ -1,6 +1,6 @@
 import { CircleDollarSign, HandCoins, List, Receipt, TrendingUp, WalletCards } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { DetailedExpense } from '../../data/mockJobDetails'
+import type { DetailedExpense } from '../../types/jobDetails'
 import { formatNaira } from '../../lib/utils'
 
 function PricingRow({

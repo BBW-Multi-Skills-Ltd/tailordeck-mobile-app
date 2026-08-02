@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DetailedJobData } from '../../types/jobDetails'
 import type { MockJob } from '../../types/job'
 
 function InfoRow({

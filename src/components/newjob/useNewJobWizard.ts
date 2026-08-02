@@ -1,18 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientQuery } from '../../hooks/useClientQueries'
-import { useCreateFullJobMutation, useJobQuery, useUpdateFullJobMutation } from '../../hooks/useJobQueries'
-import { isImageFile } from '../../lib/formValidation'
-import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { useJobQuery } from '../../hooks/useJobQueries'
 import { useAppFeedback } from '../shared/appFeedbackCore'
-import { cleanClientPhoneInput, hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
+import { hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
+import { createFieldAwareNewJobActions } from './newJobFieldAwareActions'
 import { createNewJobWizardActions } from './newJobWizardActions'
 import { applyDraftToNewJobState } from './newJobDraftMapper'
 import { getNewJobWizardDerived } from './newJobWizardDerived'
 import { getNewJobWizardStateSnapshot } from './newJobWizardStateSnapshot'
-import { buildNewJobPayload } from './newJobSupabasePayload'
 import { validateNewJobStep } from './newJobStepValidation'
 import { usePageNoScroll, useSharedItemTypeSync } from './useNewJobEffects'
+import { useNewJobPersistence } from './useNewJobPersistence'
 import { useRepeatClientPrefill } from './useRepeatClientPrefill'
 import { useNewJobWizardState } from './useNewJobWizardState'
 
@@ -27,10 +26,9 @@ export function useNewJobWizard() {
   const draftId = searchParams.get('draftId')
   const repeatClientQuery = useClientQuery(repeatClientId ?? undefined)
   const draftQuery = useJobQuery(draftId ?? undefined)
-  const createFullJobMutation = useCreateFullJobMutation()
-  const updateFullJobMutation = useUpdateFullJobMutation()
   const derived = getNewJobWizardDerived(state)
   const repeatClient = repeatClientQuery.data ?? undefined
+  const { handleFinalizeJob, handleSaveDraft } = useNewJobPersistence({ derived, draftId, repeatClientId, state })
 
   function clearFieldError(field: NewJobFieldKey): void {
     state.setFieldErrors((current) => {
@@ -80,45 +78,6 @@ export function useNewJobWizard() {
     appliedDraftIdRef.current = draftQuery.data.id
   }, [draftQuery.data, state])
 
-  async function handleFinalizeJob(): Promise<void> {
-    state.setIsFinalizing(true)
-    state.setDraftSaved(false)
-
-    try {
-      const payload = buildNewJobPayload({ state, derived, repeatClientId })
-      const existingDraftId = state.createdJobId || draftId
-      const createdJob = existingDraftId
-        ? await updateFullJobMutation.mutateAsync({ id: existingDraftId, input: payload })
-        : await createFullJobMutation.mutateAsync(payload)
-      state.setCreatedJobId(createdJob.id)
-      state.setSuccessOpen(true)
-    } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to finalize this job.'), 'error')
-    } finally {
-      state.setIsFinalizing(false)
-    }
-  }
-
-  async function handleSaveDraft(): Promise<void> {
-    if (state.draftSaved) return
-    state.setIsSavingDraft(true)
-
-    try {
-      const payload = buildNewJobPayload({ state, derived, repeatClientId, status: 'Draft' })
-      const existingDraftId = state.createdJobId || draftId
-      const draftJob = existingDraftId
-        ? await updateFullJobMutation.mutateAsync({ id: existingDraftId, input: payload })
-        : await createFullJobMutation.mutateAsync(payload)
-      state.setCreatedJobId(draftJob.id)
-      state.setDraftSaved(true)
-      navigate(`/jobs/${draftJob.id}`, { replace: true })
-    } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to save this draft.'), 'error')
-    } finally {
-      state.setIsSavingDraft(false)
-    }
-  }
-
   const actions = createNewJobWizardActions({
     confirmDiscard: () =>
       feedback.confirm({
@@ -131,74 +90,7 @@ export function useNewJobWizard() {
     state,
     validateCurrentStep,
   })
-
-  const fieldAwareActions = {
-    ...actions,
-    handleClientNameChange: (value: string) => {
-      clearFieldError('clientName')
-      actions.handleClientNameChange(value)
-    },
-    setClientPhone: (value: string) => {
-      clearFieldError('clientPhone')
-      actions.setClientPhone(cleanClientPhoneInput(value))
-    },
-    updateSharedItemType: (value: string) => {
-      clearFieldError('itemType')
-      actions.updateSharedItemType(value)
-    },
-    setAmendmentIssueType: (value: string) => {
-      clearFieldError('amendmentIssueType')
-      actions.setAmendmentIssueType(value)
-    },
-    setMaterialType: (value: string) => {
-      clearFieldError('materialType')
-      actions.setMaterialType(value)
-    },
-    setCustomMaterialType: (value: string) => {
-      clearFieldError('customMaterialType')
-      actions.setCustomMaterialType(value)
-    },
-    setMaterialColor: (value: string) => {
-      clearFieldError('materialColor')
-      actions.setMaterialColor(value)
-    },
-    setMaterialYards: (value: string) => {
-      clearFieldError('materialYards')
-      actions.setMaterialYards(value)
-    },
-    setAmendmentPartName: (value: string) => {
-      clearFieldError('amendmentPartName')
-      actions.setAmendmentPartName(value)
-    },
-    setAmendmentPartQuantity: (value: string) => {
-      clearFieldError('amendmentPartQuantity')
-      actions.setAmendmentPartQuantity(value)
-    },
-    setChargeAmount: (value: string) => {
-      clearFieldError('chargeAmount')
-      actions.setChargeAmount(value)
-    },
-    setDepositPercent: (value: string) => {
-      clearFieldError('depositPercent')
-      actions.setDepositPercent(value)
-    },
-    setDeadlineDate: (value: string) => {
-      clearFieldError('deadlineDate')
-      actions.setDeadlineDate(value)
-    },
-    setDeadlineTime: (value: string) => {
-      clearFieldError('deadlineTime')
-      actions.setDeadlineTime(value)
-    },
-    handleReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles?: number) => {
-      const incomingFiles = files ? Array.from(files) : []
-      if (incomingFiles.some((file) => !isImageFile(file))) {
-        state.setFieldErrorKey((current) => current + 1)
-      }
-      clearFieldError('referencePhotos')
-      actions.handleReferencePhotoUpload(targetId, files, maxFiles)
-    },
-  }
+  const fieldAwareActions = createFieldAwareNewJobActions({ actions, clearFieldError, state })
 
   return {
     actions: {

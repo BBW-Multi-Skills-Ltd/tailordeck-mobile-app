@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { BrandConfig } from '../../invoice/documentTypes'
 import { readBrandConfig } from '../../invoice/documentHelpers'
-import type { DetailedJobData } from '../../../data/mockJobDetails'
+import type { DetailedJobData } from '../../../types/jobDetails'
 import type { MockJob } from '../../../types/job'
 import { useJobQuery } from '../../../hooks/useJobQueries'
 import { getDefaultJobDetails, getJobDetailsFromRow, getMockJobFromRow } from '../jobDetailUtils'

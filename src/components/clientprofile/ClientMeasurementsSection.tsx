@@ -1,5 +1,5 @@
 import { Ruler } from 'lucide-react'
-import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
+import type { JobMeasurementSnapshot } from '../../types/measurements'
 import type { MockJob } from '../../types/job'
 import { BodyMeasurementCard } from './BodyMeasurementCard'
 import { NonBodyMeasurementCard } from './NonBodyMeasurementCard'

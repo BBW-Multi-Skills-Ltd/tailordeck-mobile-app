@@ -1,4 +1,4 @@
-import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
+import type { JobMeasurementSnapshot } from '../../types/measurements'
 import type { JobPersonRow, JobWithRelations } from '../../services/types'
 
 export function buildMeasurementDrafts(jobs: JobWithRelations[]): Record<string, JobMeasurementSnapshot> {

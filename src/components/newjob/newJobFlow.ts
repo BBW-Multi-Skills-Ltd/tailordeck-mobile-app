@@ -1,5 +1,5 @@
 import { appJobMeasurementById, appJobs } from '../../data/appData'
-import type { JobMeasurementSnapshot } from '../../data/mockJobMeasurements'
+import type { JobMeasurementSnapshot } from '../../types/measurements'
 import type { Client } from '../../types/client'
 import { measurementNumbersToStrings, newPerson, type JobType, type PersonForm } from './newJobConfig'
 

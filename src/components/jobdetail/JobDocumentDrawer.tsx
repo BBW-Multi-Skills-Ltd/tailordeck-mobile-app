@@ -1,7 +1,7 @@
 import { Share2, X } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import type { RefObject } from 'react'
-import type { DetailedJobData } from '../../data/mockJobDetails'
+import type { DetailedJobData } from '../../types/jobDetails'
 import type { DocumentTemplateLineItem } from '../../templates/types'
 import type { MockJob } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'

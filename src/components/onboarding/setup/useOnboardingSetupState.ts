@@ -1,8 +1,7 @@
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import {
   digitsOnly,
   type FieldErrors,
-  isImageFile,
   isValidEmailFormat,
   isValidNigerianMobileLocal,
   isValidWebsiteFormat,
@@ -10,10 +9,11 @@ import {
   websiteLocalPart,
 } from '../../../lib/formValidation'
 import { loadTailorSettings, type SocialPlatform } from '../../../lib/settings'
-import { readImagePreview } from './onboardingImagePreview'
 import { onboardingSetupSteps, type OnboardingSetupStatus } from './onboardingSetupConfig'
 import type { OnboardingSetupFieldKey } from './OnboardingSetupFields'
-import { getInitialSocialHandles, persistOnboardingSetup } from './onboardingSetupPersistence'
+import { buildOnboardingSetupDraft, getInitialSocialHandles, persistOnboardingSetup } from './onboardingSetupPersistence'
+import { validateOnboardingSetupStep } from './onboardingSetupValidation'
+import { useOnboardingSetupImages } from './useOnboardingSetupImages'
 
 export function useOnboardingSetupState() {
   const currentSettings = loadTailorSettings()
@@ -23,16 +23,18 @@ export function useOnboardingSetupState() {
   const [businessName, setBusinessNameValue] = useState(currentSettings.businessInfo.shopName)
   const [businessAddress, setBusinessAddressValue] = useState(currentSettings.businessInfo.shopAddress)
   const [cacRegistrationNumber, setCacRegistrationNumberValue] = useState(currentSettings.businessInfo.cacRegistrationNumber)
-  const [logoUrl, setLogoUrl] = useState(currentSettings.brand.logoUrl)
-  const [signatureUrl, setSignatureUrl] = useState(currentSettings.brand.signatureUrl)
   const [businessPhone, setBusinessPhoneValue] = useState(localNigerianPhone(currentSettings.businessInfo.businessPhone))
   const [businessEmail, setBusinessEmailValue] = useState(currentSettings.businessInfo.businessEmail)
   const [website, setWebsiteValue] = useState(websiteLocalPart(currentSettings.businessInfo.website))
   const [socialHandles, setSocialHandles] = useState<Record<SocialPlatform, string>>(getInitialSocialHandles)
   const [errors, setErrors] = useState<FieldErrors<OnboardingSetupFieldKey>>({})
   const [errorKey, setErrorKey] = useState(0)
-  const [uploadedLogo, setUploadedLogo] = useState(false)
-  const [uploadedSignature, setUploadedSignature] = useState(false)
+  const { handleImageUpload, logoUrl, signatureUrl, uploadedLogo, uploadedSignature } = useOnboardingSetupImages({
+    clearImageError: () => setErrors((prev) => ({ ...prev, image: undefined })),
+    initialLogoUrl: currentSettings.brand.logoUrl,
+    initialSignatureUrl: currentSettings.brand.signatureUrl,
+    showImageError: (message) => updateErrors({ image: message }),
+  })
 
   function setBusinessName(value: string): void {
     setBusinessNameValue(value)
@@ -78,64 +80,23 @@ export function useOnboardingSetupState() {
     return true
   }
 
-  async function handleImageUpload(field: 'logo' | 'signature', event: ChangeEvent<HTMLInputElement>): Promise<void> {
-    const file = event.target.files?.[0]
-    event.target.value = ''
-    if (!file) return
-
-    if (!isImageFile(file)) {
-      updateErrors({ image: 'Upload an image file only.' })
-      return
-    }
-
-    const value = await readImagePreview(file)
-    if (errors.image) setErrors((prev) => ({ ...prev, image: undefined }))
-    if (field === 'logo') {
-      setLogoUrl(value)
-      setUploadedLogo(true)
-      window.setTimeout(() => setUploadedLogo(false), 1800)
-      return
-    }
-
-    setSignatureUrl(value)
-    setUploadedSignature(true)
-    window.setTimeout(() => setUploadedSignature(false), 1800)
-  }
-
   function validateStep(): boolean {
-    if (step === 0) {
-      const nextErrors: FieldErrors<OnboardingSetupFieldKey> = {}
-      if (!businessName.trim()) nextErrors.businessName = 'Fill this input.'
-      if (!businessAddress.trim()) nextErrors.businessAddress = 'Fill this input.'
-      else if (businessAddress.trim().length < 5) nextErrors.businessAddress = 'Enter a clearer address.'
-      return updateErrors(nextErrors)
-    }
-
-    if (step === 2) {
-      const nextErrors: FieldErrors<OnboardingSetupFieldKey> = {}
-      if (!businessPhone.trim()) nextErrors.businessPhone = 'Fill this input.'
-      else if (!isValidNigerianMobileLocal(businessPhone)) nextErrors.businessPhone = 'Enter a valid Nigerian number.'
-      if (businessEmail.trim() && !isValidEmailFormat(businessEmail)) nextErrors.businessEmail = 'Enter a valid email address.'
-      if (website.trim() && !isValidWebsiteFormat(website)) nextErrors.website = 'Enter a valid website.'
-      return updateErrors(nextErrors)
-    }
-
-    setErrors({})
-    return true
+    const nextErrors = validateOnboardingSetupStep({ businessAddress, businessEmail, businessName, businessPhone, step, website })
+    return updateErrors(nextErrors)
   }
 
   function saveSetup(skipped = false): void {
-    persistOnboardingSetup({
+    persistOnboardingSetup(buildOnboardingSetupDraft({
       businessAddress,
       businessEmail,
       businessName,
-      businessPhone: businessPhone ? `+234${businessPhone}` : '',
+      businessPhone,
       cacRegistrationNumber,
       logoUrl,
       signatureUrl,
       socialHandles,
-      website: website ? `https://${website}` : '',
-    }, { skipped })
+      website,
+    }), { skipped })
   }
 
   function finishSetup(skipped = false): void {
