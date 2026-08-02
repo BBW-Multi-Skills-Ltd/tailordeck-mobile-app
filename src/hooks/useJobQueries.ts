@@ -31,7 +31,7 @@ export function useCreateFullJobMutation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardMonthly })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'monthly'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardStatus })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
@@ -47,7 +47,7 @@ export function useUpdateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardMonthly })
+      void queryClient.invalidateQueries({ queryKey: ['dashboard', 'monthly'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.dashboardStatus })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })

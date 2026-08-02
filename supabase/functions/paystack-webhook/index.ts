@@ -59,15 +59,15 @@ Deno.serve(async (request) => {
   if (options) return options
 
   try {
-    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405)
+    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405, request)
 
     const rawBody = await request.text()
     const secret = Deno.env.get('PAYSTACK_SECRET_KEY')
-    if (!secret) return jsonResponse({ error: 'Missing Paystack secret.' }, 500)
+    if (!secret) return jsonResponse({ error: 'Missing Paystack secret.' }, 500, request)
 
     const signature = request.headers.get('x-paystack-signature')
     const signatureIsValid = await isValidPaystackSignature(rawBody, signature, secret)
-    if (!signatureIsValid) return jsonResponse({ error: 'Invalid webhook signature.' }, 401)
+    if (!signatureIsValid) return jsonResponse({ error: 'Invalid webhook signature.' }, 401, request)
 
     const event = JSON.parse(rawBody) as PaystackWebhookEvent
 
@@ -83,8 +83,8 @@ Deno.serve(async (request) => {
       await markSubscriptionDisabled(event.data?.subscription?.subscription_code || event.data?.subscription_code)
     }
 
-    return jsonResponse({ received: true })
+    return jsonResponse({ received: true }, 200, request)
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected webhook error.' }, 500)
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected webhook error.' }, 500, request)
   }
 })

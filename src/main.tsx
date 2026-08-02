@@ -7,8 +7,10 @@ import App from './App.tsx'
 import { ClientsProvider } from './context/ClientsContext'
 import { AuthProvider } from './context/AuthContext'
 import { initializeTheme } from './lib/theme'
+import { initMonitoring } from './lib/monitoring'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
+import AppErrorBoundary from './components/shared/AppErrorBoundary'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +22,7 @@ const queryClient = new QueryClient({
 })
 
 initializeTheme()
+initMonitoring()
 
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -47,7 +50,9 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <ClientsProvider>
             <AppFeedbackProvider>
-              <App />
+              <AppErrorBoundary>
+                <App />
+              </AppErrorBoundary>
             </AppFeedbackProvider>
           </ClientsProvider>
         </AuthProvider>

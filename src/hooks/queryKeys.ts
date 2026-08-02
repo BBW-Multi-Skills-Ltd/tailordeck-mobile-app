@@ -8,7 +8,7 @@
   job: (id: string) => ['job', id] as const,
   jobExpenses: (jobId: string) => ['job-expenses', jobId] as const,
   jobPersons: (jobId: string) => ['job-persons', jobId] as const,
-  dashboardMonthly: ['dashboard', 'monthly'] as const,
+  dashboardMonthly: (monthCount = 6) => ['dashboard', 'monthly', monthCount] as const,
   dashboardStatus: ['dashboard', 'status'] as const,
   recentJobs: (limit = 5) => ['dashboard', 'recent-jobs', limit] as const,
   notifications: ['notifications'] as const,

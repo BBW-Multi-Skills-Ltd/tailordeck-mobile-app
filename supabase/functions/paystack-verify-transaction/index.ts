@@ -15,17 +15,17 @@ Deno.serve(async (request) => {
   if (options) return options
 
   try {
-    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405)
+    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405, request)
 
     const authHeader = request.headers.get('Authorization')
-    if (!authHeader) return jsonResponse({ error: 'Missing Authorization header' }, 401)
+    if (!authHeader) return jsonResponse({ error: 'Missing Authorization header' }, 401, request)
 
     const body = (await request.json()) as VerifyBody
-    if (!body.reference) return jsonResponse({ error: 'Payment reference is required.' }, 400)
+    if (!body.reference) return jsonResponse({ error: 'Payment reference is required.' }, 400, request)
 
     const userClient = createUserClient(authHeader)
     const { data: userData, error: userError } = await userClient.auth.getUser()
-    if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401)
+    if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401, request)
 
     const paystackResponse = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(body.reference)}`, {
       headers: {
@@ -34,20 +34,20 @@ Deno.serve(async (request) => {
     })
     const paystackBody = (await paystackResponse.json()) as PaystackVerifyResponse
     if (!paystackResponse.ok || !paystackBody.status || !paystackBody.data) {
-      return jsonResponse({ error: paystackBody.message || 'Unable to verify Paystack payment.' }, 400)
+      return jsonResponse({ error: paystackBody.message || 'Unable to verify Paystack payment.' }, 400, request)
     }
 
     if (paystackBody.data.status !== 'success') {
-      return jsonResponse({ error: 'Payment has not been completed.' }, 400)
+      return jsonResponse({ error: 'Payment has not been completed.' }, 400, request)
     }
 
     if (paystackBody.data.metadata?.user_id !== userData.user.id) {
-      return jsonResponse({ error: 'Payment does not belong to this account.' }, 403)
+      return jsonResponse({ error: 'Payment does not belong to this account.' }, 403, request)
     }
 
     const subscription = await updateSubscriptionFromCharge(paystackBody.data)
-    return jsonResponse({ subscription })
+    return jsonResponse({ subscription }, 200, request)
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected verification error.' }, 500)
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected verification error.' }, 500, request)
   }
 })

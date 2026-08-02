@@ -4,7 +4,7 @@ import { mapNotificationRow } from './mappers/notificationMapper'
 import type { NotificationRow } from './types'
 import { requireUserId } from './serviceHelpers'
 
-export async function getNotifications(): Promise<AppNotification[]> {
+export async function getNotifications(limit = 50): Promise<AppNotification[]> {
   const userId = await requireUserId()
   const { data, error } = await supabase
     .from('notifications')
@@ -12,6 +12,7 @@ export async function getNotifications(): Promise<AppNotification[]> {
     .eq('user_id', userId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
+    .limit(limit)
     .returns<NotificationRow[]>()
   if (error) throw error
   return (data ?? []).map(mapNotificationRow)

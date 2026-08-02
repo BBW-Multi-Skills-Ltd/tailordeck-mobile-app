@@ -3,7 +3,7 @@ import { clearNotifications, deleteNotification, getNotifications, markAllRead, 
 import { queryKeys } from './queryKeys'
 
 export function useNotificationsQuery() {
-  return useQuery({ queryKey: queryKeys.notifications, queryFn: getNotifications })
+  return useQuery({ queryKey: queryKeys.notifications, queryFn: () => getNotifications() })
 }
 
 export function useMarkNotificationReadMutation() {

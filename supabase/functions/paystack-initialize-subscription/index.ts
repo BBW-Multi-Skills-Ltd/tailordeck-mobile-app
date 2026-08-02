@@ -19,25 +19,25 @@ Deno.serve(async (request) => {
   if (options) return options
 
   try {
-    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405)
+    if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed' }, 405, request)
 
     const authHeader = request.headers.get('Authorization')
-    if (!authHeader) return jsonResponse({ error: 'Missing Authorization header' }, 401)
+    if (!authHeader) return jsonResponse({ error: 'Missing Authorization header' }, 401, request)
 
     const body = (await request.json()) as InitializeBody
     const planName = body.planName
     const billingCycle = body.billingCycle ?? 'monthly'
-    if (planName !== 'starter' && planName !== 'pro') return jsonResponse({ error: 'Invalid plan' }, 400)
-    if (billingCycle !== 'monthly' && billingCycle !== 'yearly') return jsonResponse({ error: 'Invalid billing cycle' }, 400)
+    if (planName !== 'starter' && planName !== 'pro') return jsonResponse({ error: 'Invalid plan' }, 400, request)
+    if (billingCycle !== 'monthly' && billingCycle !== 'yearly') return jsonResponse({ error: 'Invalid billing cycle' }, 400, request)
 
     const userClient = createUserClient(authHeader)
     const { data: userData, error: userError } = await userClient.auth.getUser()
-    if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401)
+    if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401, request)
 
     const admin = createAdminClient()
     const { data: profile } = await admin.from('profiles').select('full_name,email').eq('user_id', userData.user.id).maybeSingle()
     const email = profile?.email || userData.user.email
-    if (!email) return jsonResponse({ error: 'User email is required for Paystack checkout.' }, 400)
+    if (!email) return jsonResponse({ error: 'User email is required for Paystack checkout.' }, 400, request)
 
     const reference = `td_${userData.user.id.replaceAll('-', '').slice(0, 12)}_${Date.now()}`
     const callbackUrl = `${Deno.env.get('APP_URL') || request.headers.get('origin') || 'http://localhost:5173'}/billing/callback`
@@ -69,7 +69,7 @@ Deno.serve(async (request) => {
     const paystackBody = await paystackResponse.json()
 
     if (!paystackResponse.ok || !paystackBody.status) {
-      return jsonResponse({ error: paystackBody.message || 'Unable to initialize Paystack checkout.' }, 400)
+      return jsonResponse({ error: paystackBody.message || 'Unable to initialize Paystack checkout.' }, 400, request)
     }
 
     await admin
@@ -85,8 +85,8 @@ Deno.serve(async (request) => {
     return jsonResponse({
       authorizationUrl: paystackBody.data.authorization_url,
       reference,
-    })
+    }, 200, request)
   } catch (error) {
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected Paystack error.' }, 500)
+    return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected Paystack error.' }, 500, request)
   }
 })

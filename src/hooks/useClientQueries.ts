@@ -3,7 +3,7 @@ import { createClient, getClient, getClients, softDeleteClient, updateClient } f
 import { queryKeys } from './queryKeys'
 
 export function useClientsQuery() {
-  return useQuery({ queryKey: queryKeys.clients, queryFn: getClients })
+  return useQuery({ queryKey: queryKeys.clients, queryFn: () => getClients() })
 }
 
 export function useClientQuery(id: string | undefined) {

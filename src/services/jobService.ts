@@ -13,9 +13,9 @@ import { validateCreateFullJobInput } from '../validation/jobSchemas'
 
 export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from './jobs/jobServiceTypes'
 
-export async function getJobs(status?: JobStatus): Promise<MockJob[]> {
+export async function getJobs(status?: JobStatus, limit = 100): Promise<MockJob[]> {
   const userId = await requireUserId()
-  let query = supabase.from('jobs').select('*').eq('user_id', userId).is('deleted_at', null).order('created_at', { ascending: false })
+  let query = supabase.from('jobs').select('*').eq('user_id', userId).is('deleted_at', null).order('created_at', { ascending: false }).limit(limit)
   if (status) {
     query = query.eq('status', mapJobStatusToDb(status))
   } else {

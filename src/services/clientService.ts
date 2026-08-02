@@ -5,7 +5,7 @@ import { mapClientRow } from './mappers/clientMapper'
 import type { ClientRow } from './types'
 import { requireUserId } from './serviceHelpers'
 
-export async function getClients(): Promise<Client[]> {
+export async function getClients(limit = 100): Promise<Client[]> {
   const userId = await requireUserId()
   const { data, error } = await supabase
     .from('clients')
@@ -13,6 +13,7 @@ export async function getClients(): Promise<Client[]> {
     .eq('user_id', userId)
     .is('deleted_at', null)
     .order('updated_at', { ascending: false })
+    .limit(limit)
     .returns<ClientRow[]>()
   if (error) throw error
   return (data ?? []).map(mapClientRow)
