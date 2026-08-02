@@ -40,7 +40,7 @@ export async function createDocument(input: CreateDocumentInput): Promise<Docume
   return data
 }
 
-export async function getDocuments(jobId: string): Promise<DocumentRow[]> {
+export async function getDocuments(jobId: string, limit = 20): Promise<DocumentRow[]> {
   const userId = await requireUserId()
   const { data, error } = await supabase
     .from('documents')
@@ -48,6 +48,7 @@ export async function getDocuments(jobId: string): Promise<DocumentRow[]> {
     .eq('user_id', userId)
     .eq('job_id', jobId)
     .order('created_at', { ascending: false })
+    .limit(limit)
     .returns<DocumentRow[]>()
 
   if (error) throw error

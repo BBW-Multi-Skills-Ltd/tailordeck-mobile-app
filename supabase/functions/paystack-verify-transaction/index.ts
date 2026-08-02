@@ -1,10 +1,12 @@
 import { handleOptions, jsonResponse } from '../_shared/cors.ts'
 import {
+  createAdminClient,
   createUserClient,
   getRequiredEnv,
   updateSubscriptionFromCharge,
   type PaystackVerifyResponse,
 } from '../_shared/paystack.ts'
+import { enforceRateLimit, isRateLimitError } from '../_shared/rateLimit.ts'
 
 type VerifyBody = {
   reference?: string
@@ -27,6 +29,14 @@ Deno.serve(async (request) => {
     const { data: userData, error: userError } = await userClient.auth.getUser()
     if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401, request)
 
+    await enforceRateLimit({
+      action: 'paystack_verify_transaction',
+      actorId: userData.user.id,
+      admin: createAdminClient(),
+      limit: 20,
+      windowSeconds: 600,
+    })
+
     const paystackResponse = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(body.reference)}`, {
       headers: {
         Authorization: `Bearer ${getRequiredEnv('PAYSTACK_SECRET_KEY')}`,
@@ -48,6 +58,7 @@ Deno.serve(async (request) => {
     const subscription = await updateSubscriptionFromCharge(paystackBody.data)
     return jsonResponse({ subscription }, 200, request)
   } catch (error) {
+    if (isRateLimitError(error)) return jsonResponse({ error: error.message }, error.status, request)
     return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected verification error.' }, 500, request)
   }
 })

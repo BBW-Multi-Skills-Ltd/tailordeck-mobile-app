@@ -8,6 +8,7 @@ import {
   type BillingCycle,
   type PaidPlanName,
 } from '../_shared/paystack.ts'
+import { enforceRateLimit, isRateLimitError } from '../_shared/rateLimit.ts'
 
 type InitializeBody = {
   billingCycle?: BillingCycle
@@ -35,6 +36,14 @@ Deno.serve(async (request) => {
     if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401, request)
 
     const admin = createAdminClient()
+    await enforceRateLimit({
+      action: 'paystack_initialize_subscription',
+      actorId: userData.user.id,
+      admin,
+      limit: 10,
+      windowSeconds: 600,
+    })
+
     const { data: profile } = await admin.from('profiles').select('full_name,email').eq('user_id', userData.user.id).maybeSingle()
     const email = profile?.email || userData.user.email
     if (!email) return jsonResponse({ error: 'User email is required for Paystack checkout.' }, 400, request)
@@ -87,6 +96,7 @@ Deno.serve(async (request) => {
       reference,
     }, 200, request)
   } catch (error) {
+    if (isRateLimitError(error)) return jsonResponse({ error: error.message }, error.status, request)
     return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected Paystack error.' }, 500, request)
   }
 })
