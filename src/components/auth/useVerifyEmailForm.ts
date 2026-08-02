@@ -181,6 +181,7 @@ export function useVerifyEmailForm() {
       await verifySignUpEmailOtp({ email, token: nextToken })
       const settings = loadTailorSettings()
       await updateProfile({
+        account_status: 'active',
         email: email.trim().toLowerCase(),
         full_name: pending.fullName || settings.profile.fullName,
         phone: pending.phone || settings.profile.phone,

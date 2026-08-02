@@ -44,6 +44,10 @@ export function RouteGuard() {
   }
   if ((profile.isLoading || subscription.isLoading) && !dataWaitTimedOut) return <RouteGuardFallback />
 
+  if (!profile.isError && profile.data?.account_status === 'pending_verification') {
+    return <Navigate to="/auth/verify-email" replace />
+  }
+
   const onboardingComplete = profile.data?.onboarding_complete === true
   const isBillingCallback = location.pathname.startsWith('/billing/callback')
   if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding') && !isBillingCallback) {

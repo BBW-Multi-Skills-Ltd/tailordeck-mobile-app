@@ -25,7 +25,7 @@ export const profileUpdateSchema = z.object({
   avatar_url: optionalText,
   avatar_storage_path: optionalText,
   onboarding_complete: z.boolean().optional(),
-  account_status: z.enum(['active', 'deactivated', 'deleted']).optional(),
+  account_status: z.enum(['pending_verification', 'active', 'deactivated', 'deleted']).optional(),
   deleted_at: optionalText,
 }).partial()
 
