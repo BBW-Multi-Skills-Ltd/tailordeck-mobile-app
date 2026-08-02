@@ -122,9 +122,12 @@ export function useSignUpForm() {
         },
       })
       window.localStorage.setItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY, JSON.stringify({
+        codeSentAt: Date.now(),
         email: normalizedEmail,
         fullName: nextSettings.profile.fullName,
         phone: normalizedPhone,
+        resendCount: 0,
+        resendLockedUntil: 0,
         setupWasCompleted,
       }))
       window.localStorage.setItem(TAILOR_SIGNUP_PREFILL_KEY, JSON.stringify({

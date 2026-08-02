@@ -49,6 +49,7 @@ export default function VerifyEmail() {
           </div>
           {form.error ? <span className="input-error-text">{form.error}</span> : null}
           {form.notice ? <span className="auth-inline-success">{form.notice}</span> : null}
+          <span className="auth-otp-expiry">Code expires in {form.expiryLabel}</span>
         </div>
 
         <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={form.loading}>
@@ -56,7 +57,7 @@ export default function VerifyEmail() {
         </button>
 
         <button type="button" className="btn btn-secondary btn-full auth-google-btn" disabled={form.resending} onClick={form.handleResend}>
-          {form.resending ? 'Sending...' : 'Resend Code'}
+          {form.resending ? 'Sending...' : form.resendLabel}
         </button>
       </form>
 

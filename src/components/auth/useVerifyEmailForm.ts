@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, type ClipboardEvent, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { markOnboardingStage } from '../../lib/auth'
 import { loadTailorSettings, TAILOR_PENDING_EMAIL_VERIFICATION_KEY } from '../../lib/settings'
@@ -8,17 +8,30 @@ import { updateProfile } from '../../services/profileService'
 import { EMAIL_OTP_LENGTH } from '../../validation/authSchemas'
 
 type PendingVerification = {
+  codeSentAt: number
   email: string
   fullName: string
   phone: string
+  resendCount: number
+  resendLockedUntil: number
   setupWasCompleted: boolean
 }
 
+const OTP_EXPIRY_SECONDS = 60 * 60
+const RESEND_COOLDOWN_SECONDS = 60
+const MAX_RESENDS_BEFORE_PAUSE = 3
+const RESEND_PAUSE_SECONDS = 2 * 60
+const NOTICE_TIMEOUT_MS = 3500
+const REJECTED_CODE_CLEAR_MS = 1200
+
 function loadPendingVerification(): PendingVerification {
   const fallback: PendingVerification = {
+    codeSentAt: Date.now(),
     email: '',
     fullName: '',
     phone: '',
+    resendCount: 0,
+    resendLockedUntil: 0,
     setupWasCompleted: true,
   }
 
@@ -30,14 +43,45 @@ function loadPendingVerification(): PendingVerification {
   try {
     const parsed = JSON.parse(raw) as Partial<PendingVerification>
     return {
+      codeSentAt: typeof parsed.codeSentAt === 'number' ? parsed.codeSentAt : fallback.codeSentAt,
       email: parsed.email?.trim().toLowerCase() || fallback.email,
       fullName: parsed.fullName?.trim() || fallback.fullName,
       phone: parsed.phone?.trim() || fallback.phone,
+      resendCount: typeof parsed.resendCount === 'number' ? parsed.resendCount : fallback.resendCount,
+      resendLockedUntil: typeof parsed.resendLockedUntil === 'number' ? parsed.resendLockedUntil : fallback.resendLockedUntil,
       setupWasCompleted: parsed.setupWasCompleted ?? fallback.setupWasCompleted,
     }
   } catch {
     return fallback
   }
+}
+
+function persistPendingVerification(next: PendingVerification): void {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(TAILOR_PENDING_EMAIL_VERIFICATION_KEY, JSON.stringify(next))
+}
+
+function formatSeconds(totalSeconds: number): string {
+  const safeSeconds = Math.max(0, totalSeconds)
+  const minutes = Math.floor(safeSeconds / 60)
+  const seconds = safeSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+function getFriendlyOtpError(error: unknown, secondsUntilExpiry: number): string {
+  const rawMessage = error instanceof Error ? error.message : ''
+  const message = rawMessage.toLowerCase()
+
+  if (message.includes('expired') || secondsUntilExpiry <= 0) {
+    return 'This code has expired. Please request a new code.'
+  }
+  if (message.includes('invalid') || message.includes('token')) {
+    return 'This code is incorrect. Please check it and try again.'
+  }
+  if (message.includes('rate') || message.includes('security')) {
+    return 'Please wait before requesting another code.'
+  }
+  return rawMessage || 'Unable to verify this code.'
 }
 
 export function useVerifyEmailForm() {
@@ -51,10 +95,31 @@ export function useVerifyEmailForm() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [errorKey, setErrorKey] = useState(0)
+  const [codeSentAt, setCodeSentAt] = useState(pending.codeSentAt)
+  const [resendCount, setResendCount] = useState(pending.resendCount)
+  const [resendLockedUntil, setResendLockedUntil] = useState(pending.resendLockedUntil)
+  const [now, setNow] = useState(() => Date.now())
   const clearTimerRef = useRef<number | null>(null)
+  const noticeTimerRef = useRef<number | null>(null)
   const lastSubmittedTokenRef = useRef('')
 
   const token = digits.join('')
+  const expiryAt = codeSentAt + OTP_EXPIRY_SECONDS * 1000
+  const resendAvailableAt = Math.max(codeSentAt + RESEND_COOLDOWN_SECONDS * 1000, resendLockedUntil)
+  const secondsUntilExpiry = Math.max(0, Math.ceil((expiryAt - now) / 1000))
+  const secondsUntilResend = Math.max(0, Math.ceil((resendAvailableAt - now) / 1000))
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current)
+      if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
+    }
+  }, [])
 
   const focusInput = useCallback((index: number): void => {
     const input = document.querySelector<HTMLInputElement>(`[data-otp-index="${index}"]`)
@@ -71,8 +136,25 @@ export function useVerifyEmailForm() {
     clearTimerRef.current = window.setTimeout(() => {
       clearDigits()
       lastSubmittedTokenRef.current = ''
-    }, 1200)
+    }, REJECTED_CODE_CLEAR_MS)
   }, [clearDigits])
+
+  function persistCurrentPending(next: Partial<PendingVerification>): void {
+    persistPendingVerification({
+      ...pending,
+      codeSentAt,
+      email: email.trim().toLowerCase(),
+      resendCount,
+      resendLockedUntil,
+      ...next,
+    })
+  }
+
+  function showNotice(message: string): void {
+    setNotice(message)
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
+    noticeTimerRef.current = window.setTimeout(() => setNotice(''), NOTICE_TIMEOUT_MS)
+  }
 
   function validate(nextToken = token): boolean {
     if (!email.trim()) {
@@ -109,7 +191,7 @@ export function useVerifyEmailForm() {
       navigate(pending.setupWasCompleted ? '/onboarding/plan' : '/onboarding/setup', { replace: true })
     } catch (submitError) {
       lastSubmittedTokenRef.current = ''
-      setError(submitError instanceof Error ? submitError.message : 'Unable to verify this code.')
+      setError(getFriendlyOtpError(submitError, secondsUntilExpiry))
       setErrorKey((current) => current + 1)
       scheduleRejectedCodeClear()
     } finally {
@@ -144,12 +226,9 @@ export function useVerifyEmailForm() {
     }
 
     const nextDigit = cleaned.slice(-1)
-    let nextToken = ''
-    setDigits((current) => {
-      const nextDigits = current.map((item, itemIndex) => (itemIndex === index ? nextDigit : item))
-      nextToken = nextDigits.join('')
-      return nextDigits
-    })
+    const nextDigits = digits.map((item, itemIndex) => (itemIndex === index ? nextDigit : item))
+    const nextToken = nextDigits.join('')
+    setDigits(nextDigits)
     setError('')
     setNotice('')
 
@@ -213,12 +292,34 @@ export function useVerifyEmailForm() {
       return
     }
 
+    if (secondsUntilResend > 0) {
+      setError(`Please wait ${formatSeconds(secondsUntilResend)} before requesting another code.`)
+      setErrorKey((current) => current + 1)
+      return
+    }
+
     setResending(true)
     try {
       await resendSignUpEmailOtp(email)
-      setNotice('A new code has been sent.')
+      const nextSentAt = Date.now()
+      const nextCount = resendCount + 1
+      const shouldPause = nextCount >= MAX_RESENDS_BEFORE_PAUSE
+      const nextLockedUntil = shouldPause ? nextSentAt + RESEND_PAUSE_SECONDS * 1000 : 0
+      const nextResendCount = shouldPause ? 0 : nextCount
+
+      setCodeSentAt(nextSentAt)
+      setResendCount(nextResendCount)
+      setResendLockedUntil(nextLockedUntil)
+      setNow(nextSentAt)
+      persistCurrentPending({
+        codeSentAt: nextSentAt,
+        email: email.trim().toLowerCase(),
+        resendCount: nextResendCount,
+        resendLockedUntil: nextLockedUntil,
+      })
+      showNotice('A new code has been sent.')
     } catch (resendError) {
-      setError(resendError instanceof Error ? resendError.message : 'Unable to resend code.')
+      setError(getFriendlyOtpError(resendError, secondsUntilExpiry))
       setErrorKey((current) => current + 1)
     } finally {
       setResending(false)
@@ -230,7 +331,7 @@ export function useVerifyEmailForm() {
     email,
     error,
     errorKey,
-    otpLength: EMAIL_OTP_LENGTH,
+    expiryLabel: formatSeconds(secondsUntilExpiry),
     handleKeyDown,
     handlePaste,
     handlePasteFromClipboard,
@@ -238,6 +339,8 @@ export function useVerifyEmailForm() {
     handleSubmit,
     loading,
     notice,
+    otpLength: EMAIL_OTP_LENGTH,
+    resendLabel: secondsUntilResend > 0 ? `Resend in ${formatSeconds(secondsUntilResend)}` : 'Resend Code',
     resending,
     setDigit,
     setEmail,
