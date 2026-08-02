@@ -340,7 +340,7 @@ export function useVerifyEmailForm() {
     loading,
     notice,
     otpLength: EMAIL_OTP_LENGTH,
-    resendLabel: secondsUntilResend > 0 ? `Resend in ${formatSeconds(secondsUntilResend)}` : 'Resend Code',
+    resendLabel: secondsUntilResend > 0 ? `You can resend in ${formatSeconds(secondsUntilResend)}` : 'Resend Code',
     resending,
     setDigit,
     setEmail,
