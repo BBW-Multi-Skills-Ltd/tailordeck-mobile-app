@@ -7,6 +7,7 @@ import type {
   OrderMode,
   PersonForm,
   Reminder,
+  ReminderSelection,
 } from './newJobConfig'
 import type { NewJobFieldErrors } from './newJobFieldValidation'
 
@@ -15,7 +16,7 @@ export type StepDeadlineReviewProps = {
   detailsOpen: boolean
   draftSaved: boolean
   balance: number
-  reminder: Reminder
+  reminder: ReminderSelection
   deadlineDate: string
   deadlineTime: string
   clientName: string

@@ -155,3 +155,13 @@ export async function softDeleteJob(id: string): Promise<void> {
   if (error) throw error
 }
 
+export async function softDeleteAllJobs(): Promise<void> {
+  const userId = await requireUserId()
+  const { error } = await supabase
+    .from('jobs')
+    .update({ deleted_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+  if (error) throw error
+}
+

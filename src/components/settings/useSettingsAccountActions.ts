@@ -3,6 +3,7 @@ import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
 import { updateLoginEmail, updateLoginPassword } from '../../services/authService'
+import { softDeleteAllJobs } from '../../services/jobService'
 import { updateProfile } from '../../services/profileService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
@@ -34,11 +35,12 @@ export function useSettingsAccountActions({
   async function clearJobHistory(): Promise<boolean> {
     const confirmed = await feedback.confirm({
       title: 'Clear job history?',
-      message: 'This removes locally stored job history from this device.',
+      message: 'This hides all current jobs from your TailorDeck account. Clients and settings stay safe.',
       confirmLabel: 'Clear history',
       tone: 'danger',
     })
     if (!confirmed) return false
+    await softDeleteAllJobs()
     window.localStorage.removeItem('tailordeck-job-history')
     window.localStorage.removeItem('tailordeck-jobs')
     return true

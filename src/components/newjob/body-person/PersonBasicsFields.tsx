@@ -1,4 +1,5 @@
-import type { PersonForm, PersonSex } from '../newJobConfig'
+import { bodyWearItems, type PersonForm, type PersonSex } from '../newJobConfig'
+import { ItemTypeChooser } from '../order-setup/ItemTypeField'
 
 export function PersonBasicsFields({
   disableName,
@@ -39,19 +40,15 @@ export function PersonBasicsFields({
       ) : null}
 
       {showItemField ? (
-        <label className="input-group">
-          <span className="input-label">What are you making for this person?</span>
-          <input
-            key={`person-item-${person.id}-${itemErrorKey}`}
-            className={`input${itemError ? ' input-invalid input-shake' : ''}`}
-            value={itemValue}
-            onChange={(event) => onItemChange(event.target.value)}
-            placeholder={itemPlaceholder}
-            list="body-wear-item-options"
-            aria-invalid={Boolean(itemError)}
-          />
-          {itemError ? <span className="input-error-text">{itemError}</span> : null}
-        </label>
+        <ItemTypeChooser
+          customPlaceholder={itemPlaceholder}
+          error={itemError}
+          errorKey={itemErrorKey}
+          itemType={itemValue}
+          label="What are you making for this person?"
+          options={bodyWearItems}
+          onItemTypeChange={onItemChange}
+        />
       ) : null}
 
       <div className="input-group">

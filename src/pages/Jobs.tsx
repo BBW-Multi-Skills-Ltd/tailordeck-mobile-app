@@ -39,9 +39,19 @@ export default function Jobs() {
   )
 
   function emptyMessage(filter: JobFilter): string {
-    if (jobs.length === 0 && !search.trim()) return 'Tap the center plus button to create your first job with client details, measurements, pricing, and deadline.'
-    if (filter === 'All') return 'No jobs match that search.'
-    return `No ${filter.toLowerCase()} jobs yet.`
+    if (search.trim()) return `No ${filter === 'All' ? 'jobs' : filter.toLowerCase()} match that search.`
+    if (filter === 'Draft') return 'No draft jobs yet. Saved drafts will appear here.'
+    if (filter === 'In Progress') return 'No jobs in progress yet. Finalized jobs you are working on will appear here.'
+    if (filter === 'Completed') return 'No completed jobs yet. Jobs you mark as completed will appear here.'
+    return 'Tap the center plus button to create your first job with client details, measurements, pricing, and deadline.'
+  }
+
+  function emptyTitle(filter: JobFilter): string {
+    if (search.trim()) return 'Nothing found'
+    if (filter === 'Draft') return 'No drafts yet'
+    if (filter === 'In Progress') return 'No jobs in progress'
+    if (filter === 'Completed') return 'No completed jobs yet'
+    return 'No jobs yet'
   }
 
   return (
@@ -73,7 +83,7 @@ export default function Jobs() {
       ) : sortedJobs.length === 0 ? (
         <EmptyState
           icon={Scissors}
-          title={jobs.length === 0 && !search.trim() ? 'No jobs yet' : 'Nothing here yet'}
+          title={emptyTitle(activeFilter)}
           description={emptyMessage(activeFilter)}
         />
       ) : (

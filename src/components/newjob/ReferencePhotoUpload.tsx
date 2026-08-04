@@ -37,6 +37,7 @@ export function ReferencePhotoUpload({ error, errorKey = 0, filesByTarget, names
         {targets.map((target) => {
           const names = namesByTarget[target.id] ?? []
           const files = filesByTarget[target.id] ?? []
+          const canAddMore = files.length < target.maxFiles
           return (
             <article key={target.id} className="card wizard-reference-target-card">
               <div className="wizard-reference-target-head">
@@ -52,19 +53,26 @@ export function ReferencePhotoUpload({ error, errorKey = 0, filesByTarget, names
                 </span>
               </div>
 
-              <label className="wizard-upload-box wizard-reference-upload-box">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="wizard-upload-input"
-                  onChange={(event) => onReferencePhotoUpload(target.id, event.target.files, target.maxFiles)}
-                />
-                <div className="row gap-8">
-                  <Upload size={18} className="text-muted" />
-                  <span className="wizard-upload-title">Tap to upload images</span>
-                </div>
-              </label>
+              {canAddMore ? (
+                <label className="wizard-upload-box wizard-reference-upload-box">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="wizard-upload-input"
+                    onChange={(event) => {
+                      onReferencePhotoUpload(target.id, event.target.files, target.maxFiles)
+                      event.currentTarget.value = ''
+                    }}
+                  />
+                  <div className="row gap-8">
+                    <Upload size={18} className="text-muted" />
+                    <span className="wizard-upload-title">
+                      {files.length ? `Add another photo (${target.maxFiles - files.length} left)` : 'Tap to upload images'}
+                    </span>
+                  </div>
+                </label>
+              ) : null}
 
               {names.length > 0 ? (
                 <ReferencePhotoPreviewGrid photos={mapTargetFiles(target.id, files, target.label)} />

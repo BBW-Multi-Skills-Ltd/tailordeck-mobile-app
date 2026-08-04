@@ -48,11 +48,15 @@ export default function AccountSecurityPanel({
       />
 
       <PasswordSecuritySection
+        checks={state.passwordChecks}
         confirmPasswordDraft={confirmPasswordDraft}
+        confirmState={state.passwordConfirmState}
         passwordDirty={state.passwordDirty}
         passwordDraft={passwordDraft}
+        passwordReady={state.passwordReady}
         passwordSavedFlash={state.passwordSavedFlash}
         passwordSaving={state.passwordSaving}
+        passwordStrength={state.passwordStrength}
         showConfirmPassword={state.showConfirmPassword}
         showNewPassword={state.showNewPassword}
         showPasswordForm={state.showPasswordForm}

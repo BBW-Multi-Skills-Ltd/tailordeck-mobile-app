@@ -55,16 +55,13 @@ export default function AboutTailorDeckPanel() {
       <section className="settings-about-section">
         <h3>Official Links</h3>
         <div className="settings-about-link-grid">
-          <span>tailordeck.com.ng</span>
-          <span>Support</span>
-          <span>Feedback</span>
-          <span>Blog & Updates</span>
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
+          <a href="https://tailordeck.com.ng" target="_blank" rel="noreferrer">tailordeck.com.ng</a>
+          <a href="https://tailordeck.com.ng/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>
+          <a href="https://tailordeck.com.ng/terms-of-service" target="_blank" rel="noreferrer">Terms of Service</a>
         </div>
       </section>
 
-      <p className="settings-about-footer">Built with love for tailors and fashion designers.</p>
+      <p className="settings-about-footer">Built with 💖 for tailors and fashion designers.</p>
     </div>
   )
 }

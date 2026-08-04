@@ -125,7 +125,7 @@ export function buildNewJobPayload(params: {
     depositPercent: derived.depositPercentValue,
     deadlineDate: state.deadlineDate,
     deadlineTime: state.deadlineTime,
-    reminder: state.reminder,
+    reminder: state.reminder || 'none',
     status,
     measurementUnit: 'inches',
     amendmentIssueType: state.amendmentIssueType,

@@ -50,7 +50,7 @@ export default function Home() {
         <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
-      {homeDataReady && !hasJobs ? <HomeSetupGuide shopName={settings.businessInfo.shopName} setupWasSkipped={setupWasSkipped} /> : null}
+      {homeDataReady && !hasJobs ? <HomeSetupGuide settings={settings} setupWasSkipped={setupWasSkipped} /> : null}
       {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}

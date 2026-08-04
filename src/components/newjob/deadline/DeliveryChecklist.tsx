@@ -1,14 +1,14 @@
 import { AlertCircle, CheckCircle2, Clock, WalletCards } from 'lucide-react'
 import { formatNaira } from '../../../lib/utils'
-import type { Reminder } from '../newJobConfig'
+import type { ReminderSelection } from '../newJobConfig'
 
-export function DeliveryChecklist({ balance, deadlineDate, deadlineTime, reminder }: { balance: number; deadlineDate: string; deadlineTime: string; reminder: Reminder }) {
-  const reminderLabel = reminder === 'none' ? 'No reminder' : reminder
+export function DeliveryChecklist({ balance, deadlineDate, deadlineTime, reminder }: { balance: number; deadlineDate: string; deadlineTime: string; reminder: ReminderSelection }) {
+  const reminderLabel = reminder ? (reminder === 'none' ? 'No reminder' : reminder) : 'Choose option'
   const checklistItems = [
     { icon: <WalletCards size={15} />, label: 'Balance due', value: formatNaira(balance), complete: true },
     { icon: <CheckCircle2 size={15} />, label: 'Delivery date', value: deadlineDate || 'Select date', complete: Boolean(deadlineDate) },
     { icon: <Clock size={15} />, label: 'Delivery time', value: deadlineTime || 'Optional', complete: Boolean(deadlineTime) },
-    { icon: <AlertCircle size={15} />, label: 'Reminder', value: reminderLabel, complete: true },
+    { icon: <AlertCircle size={15} />, label: 'Reminder', value: reminderLabel, complete: Boolean(reminder) },
   ]
 
   return (

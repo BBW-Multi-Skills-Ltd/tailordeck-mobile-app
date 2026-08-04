@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { updateBrandSettings } from './brandService'
 import { updateBusinessProfile, updateSocialHandles } from './businessService'
 import type { BusinessSocialHandleRow } from './types'
+import { getDefaultTailorSettings } from '../lib/settingsDefaults'
 
 type SetupHandle = Pick<BusinessSocialHandleRow, 'platform' | 'handle'>
 
@@ -13,6 +14,7 @@ export async function syncOnboardingSettings(settings: TailorSettings): Promise<
 
   const businessInfo = settings.businessInfo
   const includeDetails = settings.brand.includeBusinessDetails
+  const fallbackBrand = getDefaultTailorSettings().brand
 
   await Promise.all([
     updateBusinessProfile({
@@ -24,6 +26,8 @@ export async function syncOnboardingSettings(settings: TailorSettings): Promise<
       cac_registration_number: cleanText(businessInfo.cacRegistrationNumber),
     }),
     updateBrandSettings({
+      logo_url: settings.brand.logoUrl && settings.brand.logoUrl !== fallbackBrand.logoUrl ? settings.brand.logoUrl : null,
+      signature_url: settings.brand.signatureUrl || null,
       show_business_phone: includeDetails.phone,
       show_business_email: includeDetails.email,
       show_website: includeDetails.website,

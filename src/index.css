@@ -9,7 +9,7 @@
 
 :root {
   /* -- Brand Colors -- */
-  --primary: #7B1E37;          /* deep burgundy/wine */
+  --primary:#7B1E37;           /* deep burgundy/wine */
   --primary-light: #9B2647;
   --primary-dark: #5A1528;
   --primary-bg: rgba(123, 30, 55, 0.08);
@@ -457,7 +457,7 @@ body {
 
 .fixed-input-prefix {
   position: absolute;
-  left: 12px;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text);
@@ -468,7 +468,7 @@ body {
 }
 
 .auth-input-prefixed {
-  padding-left: 58px;
+  padding-left: 66px;
 }
 
 @keyframes input-shake {
@@ -1305,9 +1305,17 @@ body {
   display: block;
 }
 
-.onboarding-social-input span {
+.onboarding-social-input > svg {
   position: absolute;
   left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.onboarding-social-input span {
+  position: absolute;
+  left: 37px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
@@ -1317,7 +1325,7 @@ body {
 }
 
 .onboarding-social-input .auth-input {
-  padding-left: 34px;
+  padding-left: 58px;
   padding-right: 40px;
 }
 
@@ -1336,6 +1344,17 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: var(--clay-shadow-press);
+}
+
+.onboarding-social-copy.copied {
+  border-color: color-mix(in srgb, var(--success) 34%, var(--clay-border));
+  color: var(--success);
+  animation: success-pop 0.28s ease both;
+}
+
+.onboarding-social-copy:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .optional-label {
@@ -1772,7 +1791,7 @@ p { margin: 0; }
   max-width: 430px;
   min-height: calc(72px + var(--safe-bottom));
   padding: 0 10px var(--safe-bottom);
-  background: color-mix(in srgb, var(--bg-card) 84%, transparent);
+  background: var(--bg-card);
   border-top: 1px solid var(--clay-border);
   box-shadow: 0 -14px 34px rgba(74, 55, 40, 0.1), inset 0 1px 0 var(--clay-highlight);
   display: flex;
@@ -1782,7 +1801,7 @@ p { margin: 0; }
 }
 
 :root[data-theme='dark'] .bottom-nav {
-  background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+  background: var(--bg-card);
   border-top-color: var(--clay-border);
   box-shadow: 0 -14px 30px rgba(0, 0, 0, 0.44), inset 0 1px 0 var(--clay-highlight);
 }
@@ -4952,6 +4971,7 @@ button.more-row {
 .document-preview-zoom-shell {
   width: 100%;
   min-height: 100%;
+  touch-action: none;
 }
 
 .document-preview-zoom-space {
@@ -5457,6 +5477,12 @@ button.more-row {
   height: 7px;
 }
 
+.settings-detail-active-check {
+  color: var(--success);
+  flex: 0 0 auto;
+  stroke-width: 3;
+}
+
 .settings-detail-setup-notice {
   margin: -1px 0 0;
   color: var(--primary);
@@ -5675,7 +5701,7 @@ button.more-row {
   gap: 8px;
 }
 
-.settings-about-link-grid span {
+.settings-about-link-grid a {
   border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--bg-elevated) 58%, transparent);
@@ -5684,6 +5710,7 @@ button.more-row {
   font-size: 11px;
   line-height: 1;
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .settings-about-bullet-list {
@@ -8839,7 +8866,7 @@ button.more-row {
 .wizard-reference-viewer {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 140;
   display: grid;
   place-items: center;
   gap: 12px;
@@ -8848,7 +8875,13 @@ button.more-row {
   backdrop-filter: blur(14px);
 }
 
-.wizard-reference-viewer img {
+.wizard-reference-viewer-content {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+}
+
+.wizard-reference-viewer-content img {
   width: min(100%, 520px);
   max-height: 72dvh;
   object-fit: contain;
@@ -8857,7 +8890,7 @@ button.more-row {
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
 }
 
-.wizard-reference-viewer p {
+.wizard-reference-viewer-content p {
   max-width: min(100%, 520px);
   margin: 0;
   color: #fff;
@@ -9104,6 +9137,12 @@ button.more-row {
   overflow-y: hidden;
   padding-bottom: 2px;
   scrollbar-width: none;
+}
+
+.wizard-reminder-scroll.input-invalid {
+  padding: 8px;
+  border: 1px solid var(--danger);
+  border-radius: var(--clay-radius-md);
 }
 
 .wizard-reminder-scroll::-webkit-scrollbar {

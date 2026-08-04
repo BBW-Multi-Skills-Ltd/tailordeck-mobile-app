@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { passwordChecks, passwordStrength } from '../../../lib/formValidation'
 import type { AccountDetailsDraft } from './accountSecurityTypes'
+
+type PasswordConfirmState = 'idle' | 'partial' | 'match' | 'mismatch'
 
 type UseAccountSecurityStateArgs = {
   currentDetails: AccountDetailsDraft
@@ -34,6 +37,16 @@ export function useAccountSecurityState({
     currentDetails.email !== savedDetails.email ||
     currentDetails.phone !== savedDetails.phone
   const passwordDirty = passwordDraft.trim().length > 0 || confirmPasswordDraft.trim().length > 0
+  const strength = passwordStrength(passwordDraft)
+  const checks = passwordChecks(passwordDraft)
+  const passwordReady = strength >= 4 && passwordDraft === confirmPasswordDraft
+  const confirmState: PasswordConfirmState = !passwordDraft || !confirmPasswordDraft
+    ? 'idle'
+    : passwordDraft === confirmPasswordDraft
+      ? 'match'
+      : passwordDraft.startsWith(confirmPasswordDraft)
+        ? 'partial'
+        : 'mismatch'
 
   async function handleDetailsAction() {
     if (!isEditingDetails) {
@@ -55,7 +68,7 @@ export function useAccountSecurityState({
   }
 
   async function handlePasswordUpdate() {
-    if (!passwordDirty || passwordSaving || passwordSavedFlash) return
+    if (!passwordDirty || !passwordReady || passwordSaving || passwordSavedFlash) return
 
     setPasswordSaving(true)
     try {
@@ -86,6 +99,10 @@ export function useAccountSecurityState({
       detailsSavedFlash,
       isEditingDetails,
       passwordDirty,
+      passwordReady,
+      passwordStrength: strength,
+      passwordChecks: checks,
+      passwordConfirmState: confirmState,
       passwordSavedFlash,
       passwordSaving,
       showConfirmPassword,

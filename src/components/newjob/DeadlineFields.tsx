@@ -45,7 +45,12 @@ export function DeadlineFields({
         onDeadlineDateChange={onDeadlineDateChange}
         onDeadlineTimeChange={onDeadlineTimeChange}
       />
-      <DeadlineReminderSelector reminder={reminder} onReminderChange={onReminderChange} />
+      <DeadlineReminderSelector
+        reminder={reminder}
+        error={fieldErrors.reminder}
+        errorKey={fieldErrorKey}
+        onReminderChange={onReminderChange}
+      />
       <DeliveryChecklist balance={balance} deadlineDate={deadlineDate} deadlineTime={deadlineTime} reminder={reminder} />
       <ReferencePhotoUpload
         filesByTarget={referencePhotoFilesByTarget}

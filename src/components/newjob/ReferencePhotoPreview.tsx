@@ -40,12 +40,22 @@ export function ReferencePhotoPreviewGrid({ photos }: { photos: ReferencePreview
       </div>
 
       {activePhoto ? (
-        <div className="wizard-reference-viewer" role="dialog" aria-modal="true" aria-label="Reference photo preview">
-          <button type="button" className="wizard-reference-viewer-close" onClick={() => setActivePhotoId(null)} aria-label="Close photo preview">
+        <div className="wizard-reference-viewer" role="dialog" aria-modal="true" aria-label="Reference photo preview" onClick={() => setActivePhotoId(null)}>
+          <button
+            type="button"
+            className="wizard-reference-viewer-close"
+            onClick={(event) => {
+              event.stopPropagation()
+              setActivePhotoId(null)
+            }}
+            aria-label="Close photo preview"
+          >
             <X size={18} />
           </button>
-          <img src={activePhoto.url} alt={activePhoto.label} />
-          <p>{activePhoto.label}</p>
+          <div className="wizard-reference-viewer-content" onClick={(event) => event.stopPropagation()}>
+            <img src={activePhoto.url} alt={activePhoto.label} />
+            <p>{activePhoto.label}</p>
+          </div>
         </div>
       ) : null}
     </>

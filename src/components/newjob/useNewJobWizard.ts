@@ -15,6 +15,14 @@ import { useNewJobPersistence } from './useNewJobPersistence'
 import { useRepeatClientPrefill } from './useRepeatClientPrefill'
 import { useNewJobWizardState } from './useNewJobWizardState'
 
+function scrollFirstWizardErrorIntoView(): void {
+  window.setTimeout(() => {
+    const firstError = document.querySelector('.wizard-page .input-invalid, .wizard-page .input-error-text')
+    if (!firstError) return
+    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, 80)
+}
+
 export function useNewJobWizard() {
   const navigate = useNavigate()
   const feedback = useAppFeedback()
@@ -44,12 +52,14 @@ export function useNewJobWizard() {
     state.setFieldErrors(fieldErrors)
     if (hasNewJobErrors(fieldErrors)) {
       state.setFieldErrorKey((current) => current + 1)
+      scrollFirstWizardErrorIntoView()
       return false
     }
 
     const result = validateNewJobStep({ derived, repeatClientId, state, step: state.step })
     if (result.ok) return true
     state.setFieldErrorKey((current) => current + 1)
+    scrollFirstWizardErrorIntoView()
     feedback.toast(result.message, 'error')
     return false
   }

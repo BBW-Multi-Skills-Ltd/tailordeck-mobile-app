@@ -1,4 +1,4 @@
-import type { JobType, MakeCategory, PersonForm, Reminder } from '../newJobConfig'
+import type { JobType, MakeCategory, PersonForm, Reminder, ReminderSelection } from '../newJobConfig'
 import type { NewJobFieldErrors } from '../newJobFieldValidation'
 
 export type DeadlineFieldsProps = {
@@ -14,7 +14,7 @@ export type DeadlineFieldsProps = {
   referencePhotoNamesByTarget: Record<string, string[]>
   fieldErrorKey: number
   fieldErrors: NewJobFieldErrors
-  reminder: Reminder
+  reminder: ReminderSelection
   sameItemForAll: boolean
   onDeadlineDateChange: (value: string) => void
   onDeadlineTimeChange: (value: string) => void

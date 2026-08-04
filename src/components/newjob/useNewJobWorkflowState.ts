@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Reminder } from './newJobConfig'
+import type { ReminderSelection } from './newJobConfig'
 
 export function useNewJobWorkflowState() {
   const [step, setStep] = useState(0)
@@ -9,7 +9,7 @@ export function useNewJobWorkflowState() {
   const [referencePhotoNamesByTarget, setReferencePhotoNamesByTarget] = useState<Record<string, string[]>>({})
   const [deadlineDate, setDeadlineDate] = useState('')
   const [deadlineTime, setDeadlineTime] = useState('')
-  const [reminder, setReminder] = useState<Reminder>('1 day before')
+  const [reminder, setReminder] = useState<ReminderSelection>('')
   const [draftSaved, setDraftSaved] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [stepFourReviewMode, setStepFourReviewMode] = useState(false)

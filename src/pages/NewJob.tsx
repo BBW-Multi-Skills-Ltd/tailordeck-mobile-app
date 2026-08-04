@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { stepLabels } from '../components/newjob/newJobConfig'
 import {
   JobSuccessView,
@@ -14,6 +15,11 @@ export default function NewJob() {
   const wizard = useNewJobWizard()
   const { actions, derived, sectionRef, state } = wizard
   const hasStepProgress = !state.stepFourReviewMode
+
+  useEffect(() => {
+    const page = document.querySelector('main.page')
+    page?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [state.step, state.stepFourReviewMode])
 
   if (state.successOpen) {
     return (
@@ -32,7 +38,7 @@ export default function NewJob() {
         materialSource={state.materialSource}
         materialType={derived.selectedMaterialValue}
         orderMode={state.orderMode}
-        reminder={state.reminder}
+        reminder={state.reminder || 'none'}
         scopeLabel={derived.scopeLabel}
         charge={derived.charge}
         deadlineDate={state.deadlineDate}

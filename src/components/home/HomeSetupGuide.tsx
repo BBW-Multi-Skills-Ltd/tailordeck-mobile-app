@@ -1,8 +1,11 @@
 import { CheckCircle2, Circle, FileText, Scissors, Store } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import type { TailorSettings } from '../../lib/settingsTypes'
+
+const DEFAULT_BRAND_LOGO = '/branding/TailorDeck app logo for in app.png'
 
 type HomeSetupGuideProps = {
-  shopName: string
+  settings: TailorSettings
   setupWasSkipped: boolean
 }
 
@@ -13,7 +16,19 @@ type SetupItem = {
   icon: typeof Store
 }
 
-export function HomeSetupGuide({ shopName, setupWasSkipped }: HomeSetupGuideProps) {
+export function HomeSetupGuide({ settings, setupWasSkipped }: HomeSetupGuideProps) {
+  const shopName = settings.businessInfo.shopName
+  const hasBusinessDetails = Boolean(
+    settings.businessInfo.businessPhone.trim()
+      || settings.businessInfo.businessEmail.trim()
+      || settings.businessInfo.website.trim()
+      || settings.businessInfo.shopAddress.trim()
+      || settings.businessInfo.cacRegistrationNumber.trim()
+      || settings.businessInfo.socialHandles.length,
+  )
+  const hasCustomLogo = Boolean(settings.brand.logoUrl && settings.brand.logoUrl !== DEFAULT_BRAND_LOGO && !settings.brand.logoUrl.includes('TailorDeck app logo for in app'))
+  const hasInvoiceAssets = hasCustomLogo || Boolean(settings.brand.signatureUrl.trim())
+  const invoiceSetupComplete = hasBusinessDetails && hasInvoiceAssets
   const items: SetupItem[] = [
     {
       label: 'Shop basics',
@@ -22,9 +37,9 @@ export function HomeSetupGuide({ shopName, setupWasSkipped }: HomeSetupGuideProp
       icon: Store,
     },
     {
-      label: 'Invoice setup',
-      description: 'Add logo, signature, and business details.',
-      complete: false,
+      label: 'Invoice details',
+      description: invoiceSetupComplete ? 'Invoice and receipt details are ready.' : 'Choose what appears on invoice & receipt.',
+      complete: invoiceSetupComplete,
       icon: FileText,
     },
     {

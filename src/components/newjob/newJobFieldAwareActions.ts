@@ -70,6 +70,10 @@ export function createFieldAwareNewJobActions({ actions, clearFieldError, state 
       clearFieldError('deadlineTime')
       actions.setDeadlineTime(value)
     },
+    setReminder: (value: Parameters<typeof actions.setReminder>[0]) => {
+      clearFieldError('reminder')
+      actions.setReminder(value)
+    },
     handleReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles?: number) => {
       const incomingFiles = files ? Array.from(files) : []
       if (incomingFiles.some((file) => !isImageFile(file))) {

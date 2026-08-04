@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import type { TailorSettings } from '../../../lib/settings'
 import { detailOptions } from './invoiceReceiptConfig'
 import { SectionHeader } from './InvoiceSetupProgress'
@@ -36,6 +36,7 @@ export function BusinessDetailsSection({
               <span className="settings-radio-indicator" />
               <Icon size={15} className="settings-radio-icon" />
               <span>{item.label}</span>
+              {active ? <Check size={14} className="settings-detail-active-check" /> : null}
               {!available ? <small>Set up first</small> : null}
             </button>
           )

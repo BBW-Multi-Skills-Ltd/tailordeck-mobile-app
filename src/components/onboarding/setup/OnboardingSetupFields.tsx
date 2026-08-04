@@ -1,7 +1,9 @@
 import type { ChangeEvent } from 'react'
-import { Building2, Copy, FileBadge, Globe, Image, Mail, MapPin, PenLine, Phone } from 'lucide-react'
+import { useState } from 'react'
+import { Building2, Check, ClipboardPaste, Copy, FileBadge, Globe, Image, Mail, MapPin, PenLine, Phone } from 'lucide-react'
 import type { SocialPlatform } from '../../../lib/settings'
 import type { FieldErrors } from '../../../lib/formValidation'
+import { socialPlatformColor, socialPlatformIcon } from '../../settings/settingsOptions'
 import { onboardingSocialPlatforms } from './onboardingSetupConfig'
 import { SetupField, SetupTextarea, UploadBox } from './OnboardingSetupFieldPrimitives'
 
@@ -82,6 +84,21 @@ export function ContactStepFields({
   socialHandles,
   website,
 }: ContactStepFieldsProps) {
+  const [copiedHandle, setCopiedHandle] = useState('')
+  const [copiedPlatform, setCopiedPlatform] = useState<SocialPlatform | null>(null)
+
+  function copyHandle(platform: SocialPlatform, handle: string): void {
+    if (!handle) return
+    setCopiedHandle(handle)
+    setCopiedPlatform(platform)
+    void navigator.clipboard?.writeText(handle)
+  }
+
+  function pasteHandle(platform: SocialPlatform): void {
+    if (!copiedHandle) return
+    onSocialHandleChange(platform, copiedHandle)
+  }
+
   return (
     <div className="onboarding-setup-fields">
       <SetupField error={errors.businessPhone} errorKey={errorKey} icon={Phone} id="business-phone" inputMode="tel" label="Business Phone" prefix="+234" value={businessPhone} placeholder="Your business number" onChange={onBusinessPhoneChange} />
@@ -89,24 +106,39 @@ export function ContactStepFields({
       <SetupField error={errors.website} errorKey={errorKey} icon={Globe} id="business-website" inputMode="url" label="Business Website" optional prefix="https://" value={website} placeholder="yourwebsite.com" onChange={onWebsiteChange} />
       <div className="onboarding-social-block">
         <p className="auth-label">Social Handles <span className="optional-label">Optional</span></p>
-        {onboardingSocialPlatforms.map((platform) => (
-          <label key={platform} className="onboarding-social-input">
-            <span>@</span>
-            <input
-              className="auth-input"
-              type="text"
-              placeholder={`${platform} handle`}
-              value={socialHandles[platform].replace(/^@+/, '')}
-              onChange={(event) => onSocialHandleChange(platform, event.target.value.replace(/^@+/, ''))}
-            />
-            <button type="button" className="onboarding-social-copy" aria-label={`Copy ${platform} handle`} onClick={(event) => {
-              event.preventDefault()
-              void navigator.clipboard?.writeText(socialHandles[platform].replace(/^@+/, ''))
-            }}>
-              <Copy size={14} />
-            </button>
-          </label>
-        ))}
+        {onboardingSocialPlatforms.map((platform) => {
+          const Icon = socialPlatformIcon[platform]
+          const handle = socialHandles[platform].replace(/^@+/, '')
+          const copied = copiedPlatform === platform && copiedHandle === handle && Boolean(handle)
+          const canPaste = Boolean(copiedHandle) && !handle
+
+          return (
+            <label key={platform} className="onboarding-social-input">
+              <Icon size={15} style={{ color: socialPlatformColor[platform] }} />
+              <span>@</span>
+              <input
+                className="auth-input"
+                type="text"
+                placeholder={`${platform} handle`}
+                value={handle}
+                onChange={(event) => onSocialHandleChange(platform, event.target.value.replace(/^@+/, ''))}
+              />
+              <button
+                type="button"
+                className={`onboarding-social-copy${copied ? ' copied' : ''}`}
+                aria-label={canPaste ? `Paste copied handle into ${platform}` : `Copy ${platform} handle`}
+                disabled={!handle && !canPaste}
+                onClick={(event) => {
+                  event.preventDefault()
+                  if (canPaste) pasteHandle(platform)
+                  else copyHandle(platform, handle)
+                }}
+              >
+                {copied ? <Check size={14} /> : canPaste ? <ClipboardPaste size={14} /> : <Copy size={14} />}
+              </button>
+            </label>
+          )
+        })}
       </div>
     </div>
   )

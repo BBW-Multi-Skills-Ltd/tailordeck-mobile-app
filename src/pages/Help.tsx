@@ -1,4 +1,4 @@
-import { BookOpen, ChevronRight, LifeBuoy, MessageCircle, ShieldCheck } from 'lucide-react'
+import { BookOpen, ChevronRight, MessageCircle, ShieldCheck } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
@@ -12,7 +12,7 @@ const helpItems = [
   {
     icon: MessageCircle,
     label: 'Contact Support',
-    desc: 'Send a message when you need help with TailorDeck.',
+    desc: 'Send us a message.',
   },
   {
     icon: ShieldCheck,
@@ -36,7 +36,7 @@ export default function Help() {
 
       <article className="clay-card settings-standalone-card stack gap-8">
         <p className="settings-help-page-title">How can we help?</p>
-        <p className="settings-help-page-copy">Support content is being prepared. These shortcuts keep the page ready for backend support wiring.</p>
+        <p className="settings-help-page-copy">Choose the topic closest to what you need.</p>
       </article>
 
       <div className="clay-card more-group-card">
@@ -57,16 +57,6 @@ export default function Help() {
           )
         })}
       </div>
-
-      <article className="clay-card settings-standalone-card row gap-10">
-        <span className="more-row-icon clay-inset">
-          <LifeBuoy size={18} />
-        </span>
-        <div className="stack gap-2">
-          <p className="more-row-label">TailorDeck Support</p>
-          <p className="more-row-desc">Email and WhatsApp support will be connected when support backend is ready.</p>
-        </div>
-      </article>
     </section>
   )
 }

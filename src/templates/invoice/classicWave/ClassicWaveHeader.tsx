@@ -13,7 +13,7 @@ export function DecorativeStrip({ accent, primary, reverse = false }: { accent: 
 }
 
 export function BrandBlock({ accent, payload, primary }: { accent: string; payload: DocumentTemplatePayload; primary: string }) {
-  const shopName = payload.brand.shopName || 'TailorDeck Shop'
+  const shopName = payload.brand.shopName || 'Business Name Here'
 
   return (
     <div style={styles.brandBlock}>
@@ -21,7 +21,7 @@ export function BrandBlock({ accent, payload, primary }: { accent: string; paylo
         {payload.brand.logoUrl ? (
           <img src={payload.brand.logoUrl} alt={`${shopName} logo`} style={styles.logoImage} />
         ) : (
-          <span style={styles.logoText}>LOGO</span>
+          <span style={styles.logoText}>YOUR LOGO</span>
         )}
       </div>
       <p style={styles.logoTagline(accent)}>Professional tailoring</p>
@@ -33,19 +33,16 @@ export function TitleBlock({
   accent,
   details,
   docTitle,
-  payload,
 }: {
   accent: string
   details: ReturnType<typeof getClassicWaveBusinessDetails>
   docTitle: string
-  payload: DocumentTemplatePayload
 }) {
   const contacts = [
-    details.details.phone ? details.businessPhone : '',
-    payload.clientPhone ? `WhatsApp ${payload.clientPhone}` : '',
-    details.details.email ? details.businessEmail : '',
+    details.details.phone ? `Phone: ${details.businessPhone}` : '',
+    details.details.email ? `Email: ${details.businessEmail}` : '',
     details.details.cac && details.cacRegistrationNumber ? `RC ${details.cacRegistrationNumber}` : '',
-    details.details.website ? details.website : '',
+    details.details.website ? `Web: ${details.website}` : '',
   ].filter(Boolean)
 
   return (
@@ -66,7 +63,7 @@ export function TitleBlock({
 export function CompanyBlock({ details, payload }: { details: ReturnType<typeof getClassicWaveBusinessDetails>; payload: DocumentTemplatePayload }) {
   return (
     <div style={styles.companyBlock}>
-      <p style={styles.companyName}>{payload.brand.shopName || 'TailorDeck Shop'}</p>
+      <p style={styles.companyName}>{payload.brand.shopName || 'Business Name Here'}</p>
       {details.details.address ? <p style={styles.companyAddress}>{details.businessAddress}</p> : null}
     </div>
   )

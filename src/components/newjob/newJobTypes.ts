@@ -3,6 +3,7 @@ export type PersonSex = 'Male' | 'Female' | 'Boy' | 'Girl'
 export type MakeCategory = 'Body Wear' | 'Non-Body Item'
 export type OrderMode = 'New Stitch' | 'Amendment / Repair'
 export type Reminder = '1 day before' | '3 days before' | '1 week before' | 'none'
+export type ReminderSelection = Reminder | ''
 export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 export type MaterialSource = 'Client is Providing Material' | 'I Am Getting It'
 

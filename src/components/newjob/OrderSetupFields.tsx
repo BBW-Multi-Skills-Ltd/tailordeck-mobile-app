@@ -1,5 +1,5 @@
 import { makeCategories, orderModes, type OrderMode } from './newJobConfig'
-import { ItemTypeField, ItemTypeOptions } from './order-setup/ItemTypeField'
+import { ItemTypeField } from './order-setup/ItemTypeField'
 import { ChoiceCard, GuidedCardHeader } from './order-setup/OrderSetupPrimitives'
 import type { OrderSetupFieldsProps } from './order-setup/orderSetupTypes'
 import { OrderScopeField, SameItemToggle } from './order-setup/ScopeFields'
@@ -45,8 +45,6 @@ export function OrderSetupFields(props: OrderSetupFieldsProps) {
         {!props.isAmendmentMode ? <OrderScopeField {...props} /> : <p className="wizard-guided-copy">Repair jobs start with one client. You can add notes below.</p>}
         {props.showBodyMeasurementFlow && props.jobType !== 'Single' ? <SameItemToggle {...props} /> : null}
       </section>
-
-      <ItemTypeOptions />
     </>
   )
 }

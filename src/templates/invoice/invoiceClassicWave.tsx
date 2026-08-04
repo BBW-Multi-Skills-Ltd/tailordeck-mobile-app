@@ -18,14 +18,18 @@ export function InvoiceClassicWaveTemplate(payload: DocumentTemplatePayload) {
   const accent = payload.brand.accentColor || '#C9A84C'
   const lines = getClassicWaveLineItems(payload)
   const details = getClassicWaveBusinessDetails(payload)
-  const social = details.socialHandles.map((item) => `${item.platform}: ${item.handle}`).join('  |  ')
+  const social = details.details.social
+    ? details.socialHandles.length
+      ? details.socialHandles.map((item) => `${item.platform}: ${item.handle}`).join('  |  ')
+      : 'Social handles here'
+    : ''
 
   return (
     <article className="doc-landscape-root" style={styles.page(primary, secondary)}>
       <DecorativeStrip primary={primary} accent={accent} />
       <header style={styles.header}>
         <BrandBlock payload={payload} primary={primary} accent={accent} />
-        <TitleBlock accent={accent} details={details} docTitle={docTitle} payload={payload} />
+        <TitleBlock accent={accent} details={details} docTitle={docTitle} />
         <CompanyBlock details={details} payload={payload} />
       </header>
       <div style={styles.headerRule(primary)} />

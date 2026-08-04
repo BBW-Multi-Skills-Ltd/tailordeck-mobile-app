@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import type { PointerEvent, ReactNode } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { DOCUMENT_PREVIEW_HEIGHT, DOCUMENT_PREVIEW_WIDTH } from './invoiceReceiptConfig'
 
@@ -35,17 +35,53 @@ export function FullDocumentPreviewModal({
           </div>
         </header>
         <div className="document-preview-modal-body">
-          <ZoomableDocumentPreview zoom={zoom}>{children}</ZoomableDocumentPreview>
+          <ZoomableDocumentPreview zoom={zoom} onZoomChange={setZoom}>{children}</ZoomableDocumentPreview>
         </div>
       </div>
     </div>
   )
 }
 
-function ZoomableDocumentPreview({ children, zoom }: { children: ReactNode; zoom: number }) {
+function clampZoom(value: number): number {
+  return Math.min(1.8, Math.max(0.75, value))
+}
+
+function pointerDistance(points: Array<{ x: number; y: number }>): number {
+  const [first, second] = points
+  if (!first || !second) return 0
+  return Math.hypot(first.x - second.x, first.y - second.y)
+}
+
+function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: ReactNode; zoom: number; onZoomChange: (value: number) => void }) {
   const shellRef = useRef<HTMLDivElement | null>(null)
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>())
+  const pinchStartRef = useRef<{ distance: number; zoom: number } | null>(null)
   const [baseScale, setBaseScale] = useState(1)
   const scale = baseScale * zoom
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>): void {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    const points = Array.from(pointersRef.current.values())
+    if (points.length === 2) {
+      pinchStartRef.current = { distance: pointerDistance(points), zoom }
+    }
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>): void {
+    if (!pointersRef.current.has(event.pointerId)) return
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    const points = Array.from(pointersRef.current.values())
+    if (points.length !== 2 || !pinchStartRef.current) return
+    const nextDistance = pointerDistance(points)
+    if (!nextDistance || !pinchStartRef.current.distance) return
+    onZoomChange(clampZoom(pinchStartRef.current.zoom * (nextDistance / pinchStartRef.current.distance)))
+  }
+
+  function handlePointerEnd(event: PointerEvent<HTMLDivElement>): void {
+    pointersRef.current.delete(event.pointerId)
+    if (pointersRef.current.size < 2) pinchStartRef.current = null
+  }
 
   useEffect(() => {
     const node = shellRef.current
@@ -70,7 +106,14 @@ function ZoomableDocumentPreview({ children, zoom }: { children: ReactNode; zoom
   }, [])
 
   return (
-    <div ref={shellRef} className="document-preview-zoom-shell">
+    <div
+      ref={shellRef}
+      className="document-preview-zoom-shell"
+      onPointerCancel={handlePointerEnd}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+    >
       <div
         className="document-preview-zoom-space"
         style={{

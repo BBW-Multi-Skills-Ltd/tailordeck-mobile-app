@@ -12,13 +12,13 @@ export function getClassicWaveLabels(kind: DocumentTemplatePayload['kind']) {
 
 export function getClassicWaveBusinessDetails(payload: DocumentTemplatePayload) {
   return {
-    businessAddress: payload.brand.shopAddress || 'Lagos, Nigeria',
-    cacRegistrationNumber: payload.brand.cacRegistrationNumber,
-    businessEmail: payload.brand.businessEmail || 'hello@tailordeck.app',
-    businessPhone: payload.brand.businessPhone || '+234 000 000 0000',
+    businessAddress: payload.brand.shopAddress || 'Business address here',
+    cacRegistrationNumber: payload.brand.cacRegistrationNumber || 'RC number here',
+    businessEmail: payload.brand.businessEmail || 'Email here',
+    businessPhone: payload.brand.businessPhone || 'Phone number here',
     details: payload.brand.includeBusinessDetails,
     socialHandles: payload.brand.includeBusinessDetails.social ? payload.brand.socialHandles : [],
-    website: payload.brand.website || 'www.tailordeck.app',
+    website: payload.brand.website || 'Website here',
   }
 }
 

@@ -15,7 +15,7 @@ export default function DashboardRevenueChart({ months }: DashboardRevenueChartP
 
   return (
     <article className="card stack gap-12">
-      <h3 className="dashboard-section-title">Last 6 Months</h3>
+      <h3 className="dashboard-section-title">Monthly Trend</h3>
       <div className="dashboard-chart-wrap">
         <div className="dashboard-chart-layout">
           <div className="dashboard-y-ticks" aria-hidden="true">

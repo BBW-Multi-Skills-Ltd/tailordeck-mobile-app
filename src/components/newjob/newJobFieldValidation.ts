@@ -17,6 +17,7 @@ export type NewJobFieldKey =
   | 'depositPercent'
   | 'deadlineDate'
   | 'deadlineTime'
+  | 'reminder'
   | 'referencePhotos'
 
 export type NewJobFieldErrors = FieldErrors<NewJobFieldKey>
@@ -73,6 +74,7 @@ function validateDeadlineStep(state: NewJobWizardStateModel): NewJobFieldErrors 
 
   if (!hasText(state.deadlineDate)) errors.deadlineDate = 'Select delivery date.'
   if (!hasText(state.deadlineTime)) errors.deadlineTime = 'Select delivery time.'
+  if (!state.reminder) errors.reminder = 'Choose reminder option.'
 
   const invalidPhoto = state.referencePhotoFiles.find((file) => !isImageFile(file))
   if (invalidPhoto) errors.referencePhotos = 'Upload image files only.'

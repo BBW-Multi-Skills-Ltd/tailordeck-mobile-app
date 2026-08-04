@@ -27,10 +27,13 @@ export default function Dashboard() {
     () => statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 },
     [statusQuery.data],
   )
-  const metrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts), [monthlyStats, statusCounts])
   const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)
-  const visibleMonth = new Date(metrics.latestDate.getFullYear(), metrics.latestDate.getMonth() + monthOffset, 1)
+  const baseMetrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts), [monthlyStats, statusCounts])
+  const visibleMonth = new Date(baseMetrics.latestDate.getFullYear(), baseMetrics.latestDate.getMonth() + monthOffset, 1)
+  const selectedMonthKey = `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, '0')}`
+  const metrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts, selectedMonthKey), [monthlyStats, selectedMonthKey, statusCounts])
   const visibleMonthLabel = visibleMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
+  const canGoPrevious = visibleMonth > baseMetrics.firstDate
 
   return (
     <section className="section stack dashboard-page">
@@ -74,6 +77,7 @@ export default function Dashboard() {
         <>
           <DashboardMonthNav
             label={visibleMonthLabel}
+            canGoPrevious={canGoPrevious}
             monthOffset={monthOffset}
             onPrevious={() => setMonthOffset((prev) => prev - 1)}
             onNext={() => setMonthOffset((prev) => Math.min(prev + 1, 0))}

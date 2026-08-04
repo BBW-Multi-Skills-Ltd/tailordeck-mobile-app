@@ -13,6 +13,7 @@ export type MonthStat = {
 
 export type DashboardMetrics = {
   bestMonth: MonthStat | null
+  firstDate: Date
   latestDate: Date
   months: MonthStat[]
   statusCounts: {
@@ -35,22 +36,26 @@ export function monthLabel(key: string, format: 'short' | 'long' = 'short'): str
 export function buildDashboardMetricsFromStats(
   stats: ServiceMonthlyStat[] = [],
   statusCounts: JobStatusBreakdown = { completed: 0, inProgress: 0, pending: 0 },
+  selectedMonthKey?: string,
 ): DashboardMetrics {
-  const latestDate = getLatestDate(stats)
-  const monthKeys = getRecentMonthKeys(latestDate, 6)
+  const activeStats = stats.filter((stat) => stat.jobs > 0)
+  const latestDate = getLatestDate(activeStats)
+  const firstDate = getFirstDate(activeStats, latestDate)
+  const monthKeys = getMonthKeysBetween(firstDate, latestDate).slice(-6)
   const statsByMonth = new Map(stats.map((stat) => [stat.month, stat]))
   const months = monthKeys.map((key) => mapMonthStat(key, statsByMonth.get(key)))
-  const currentMonth = months[months.length - 1]
+  const selectedMonth = months.find((month) => month.key === selectedMonthKey) ?? months[months.length - 1] ?? mapMonthStat(formatMonthKey(latestDate))
 
   return {
-    bestMonth: months.reduce<MonthStat | null>((best, month) => (!best || month.profit > best.profit ? month : best), null),
+    bestMonth: months.reduce<MonthStat | null>((best, month) => (month.jobs > 0 && (!best || month.profit > best.profit) ? month : best), null),
+    firstDate,
     latestDate,
     months,
     statusCounts,
-    totalExpenses: currentMonth.expenses,
-    totalJobs: currentMonth.jobs,
-    totalProfit: currentMonth.profit,
-    totalRevenue: currentMonth.revenue,
+    totalExpenses: selectedMonth.expenses,
+    totalJobs: selectedMonth.jobs,
+    totalProfit: selectedMonth.profit,
+    totalRevenue: selectedMonth.revenue,
   }
 }
 
@@ -73,10 +78,26 @@ function getLatestDate(stats: ServiceMonthlyStat[]): Date {
   return new Date(year, month - 1, 1)
 }
 
-function getRecentMonthKeys(latestDate: Date, count: number): string[] {
-  return Array.from({ length: count }, (_, index) => {
-    const offset = count - 1 - index
-    const date = new Date(latestDate.getFullYear(), latestDate.getMonth() - offset, 1)
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-  })
+function getFirstDate(stats: ServiceMonthlyStat[], fallback: Date): Date {
+  const firstMonth = [...stats].sort((a, b) => a.month.localeCompare(b.month)).at(0)?.month
+  if (!firstMonth) return fallback
+  const [year, month] = firstMonth.split('-').map(Number)
+  return new Date(year, month - 1, 1)
+}
+
+function getMonthKeysBetween(firstDate: Date, latestDate: Date): string[] {
+  const keys: string[] = []
+  const cursor = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1)
+  const end = new Date(latestDate.getFullYear(), latestDate.getMonth(), 1)
+
+  while (cursor <= end) {
+    keys.push(formatMonthKey(cursor))
+    cursor.setMonth(cursor.getMonth() + 1)
+  }
+
+  return keys.length ? keys : [formatMonthKey(latestDate)]
+}
+
+function formatMonthKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }

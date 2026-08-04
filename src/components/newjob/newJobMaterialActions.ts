@@ -56,17 +56,18 @@ export function createMaterialActions({
       return
     }
 
-    const nextTargetFiles = incomingFiles.slice(0, maxFiles)
-
     setReferencePhotoFilesByTarget((previous) => {
+      const currentFiles = previous[targetId] ?? []
+      const nextTargetFiles = [...currentFiles, ...incomingFiles].slice(0, maxFiles)
       const nextByTarget = { ...previous, [targetId]: nextTargetFiles }
       setReferencePhotoFiles(Object.values(nextByTarget).flat())
-      return nextByTarget
-    })
 
-    setReferencePhotoNamesByTarget((previous) => {
-      const nextByTarget = { ...previous, [targetId]: nextTargetFiles.map((file) => file.name) }
-      setReferencePhotoNames(Object.values(nextByTarget).flat())
+      setReferencePhotoNamesByTarget((previousNames) => {
+        const nextNamesByTarget = { ...previousNames, [targetId]: nextTargetFiles.map((file) => file.name) }
+        setReferencePhotoNames(Object.values(nextNamesByTarget).flat())
+        return nextNamesByTarget
+      })
+
       return nextByTarget
     })
   }
