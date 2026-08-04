@@ -1,7 +1,7 @@
 import { loadTailorSettings, TAILOR_ONBOARDING_SYNC_PENDING_KEY } from '../lib/settings'
 import type { SocialPlatform, TailorSettings } from '../lib/settingsTypes'
 import { supabase } from '../lib/supabase'
-import { updateBrandSettings } from './brandService'
+import { updateBrandSettings, uploadLogo, uploadSignature } from './brandService'
 import { updateBusinessProfile, updateSocialHandles } from './businessService'
 import type { BusinessSocialHandleRow } from './types'
 import { getDefaultTailorSettings } from '../lib/settingsDefaults'
@@ -16,6 +16,8 @@ export async function syncOnboardingSettings(settings: TailorSettings): Promise<
   const includeDetails = settings.brand.includeBusinessDetails
   const fallbackBrand = getDefaultTailorSettings().brand
 
+  await syncBrandAssets(settings, fallbackBrand.logoUrl)
+
   await Promise.all([
     updateBusinessProfile({
       shop_name: cleanText(businessInfo.shopName),
@@ -26,8 +28,6 @@ export async function syncOnboardingSettings(settings: TailorSettings): Promise<
       cac_registration_number: cleanText(businessInfo.cacRegistrationNumber),
     }),
     updateBrandSettings({
-      logo_url: settings.brand.logoUrl && settings.brand.logoUrl !== fallbackBrand.logoUrl ? settings.brand.logoUrl : null,
-      signature_url: settings.brand.signatureUrl || null,
       show_business_phone: includeDetails.phone,
       show_business_email: includeDetails.email,
       show_website: includeDetails.website,
@@ -71,4 +71,34 @@ function toSetupHandles(settings: TailorSettings): SetupHandle[] {
 function cleanText(value: string, placeholders: string[] = []): string {
   const trimmed = value.trim()
   return placeholders.includes(trimmed) ? '' : trimmed
+}
+
+async function syncBrandAssets(settings: TailorSettings, fallbackLogoUrl: string): Promise<void> {
+  const uploads: Array<Promise<unknown>> = []
+
+  if (isDataImageUrl(settings.brand.logoUrl) && settings.brand.logoUrl !== fallbackLogoUrl) {
+    const logoFile = dataImageUrlToFile(settings.brand.logoUrl, 'onboarding-logo')
+    if (logoFile) uploads.push(uploadLogo(logoFile))
+  }
+
+  if (isDataImageUrl(settings.brand.signatureUrl)) {
+    const signatureFile = dataImageUrlToFile(settings.brand.signatureUrl, 'onboarding-signature')
+    if (signatureFile) uploads.push(uploadSignature(signatureFile))
+  }
+
+  await Promise.all(uploads)
+}
+
+function isDataImageUrl(value: string): boolean {
+  return /^data:image\/[a-z0-9.+-]+;base64,/i.test(value)
+}
+
+function dataImageUrlToFile(dataUrl: string, baseName: string): File | null {
+  const match = dataUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,(.*)$/i)
+  if (!match) return null
+
+  const [, mimeType, base64] = match
+  const extension = mimeType.split('/')[1] || 'png'
+  const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))
+  return new File([bytes], `${baseName}.${extension}`, { type: mimeType })
 }

@@ -4,12 +4,14 @@ import type { ProfileRow } from './types'
 import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
 import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
 
+const AVATAR_SIGNED_URL_TTL = 60 * 60 * 24 * 7
+
 export async function getProfile(): Promise<ProfileRow | null> {
   const userId = await requireUserId()
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle<ProfileRow>()
   if (error) throw error
   if (!data?.avatar_storage_path) return data
-  return { ...data, avatar_url: await createSignedUrl('avatars', data.avatar_storage_path) }
+  return { ...data, avatar_url: await createSignedUrl('avatars', data.avatar_storage_path, AVATAR_SIGNED_URL_TTL) }
 }
 
 export async function updateProfile(
@@ -43,7 +45,7 @@ export async function uploadAvatar(file: File): Promise<{ storagePath: string; s
   const userId = await requireUserId()
   const storagePath = userScopedPath(userId, `avatar.${fileExtension(file)}`)
   await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file })
-  const signedUrl = await createSignedUrl('avatars', storagePath)
+  const signedUrl = await createSignedUrl('avatars', storagePath, AVATAR_SIGNED_URL_TTL)
   await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
   return { storagePath, signedUrl }
 }
