@@ -1,4 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { FcGoogle } from 'react-icons/fc'
 import { AuthTextField } from './AuthTextField'
 import { PasswordChecklist, PasswordStrength } from './PasswordStrength'
@@ -71,7 +72,7 @@ export function SignUpForm(props: SignUpFormProps) {
       <label className={`auth-agree${props.errors.agree ? ' auth-agree-error input-shake' : ''}`}>
         <input type="checkbox" checked={props.agree} onChange={(event) => props.setAgree(event.target.checked)} />
         <span>
-          I agree to the <button type="button">Terms of Service</button> and <button type="button">Privacy Policy</button>
+          I agree to the <Link to="/terms-of-service">Terms of Service</Link> and <Link to="/privacy-policy">Privacy Policy</Link>
         </span>
       </label>
       {props.errors.agree ? <span className="input-error-text">{props.errors.agree}</span> : null}

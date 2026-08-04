@@ -84,6 +84,11 @@ export default function SignIn() {
           Sign up
         </Link>
       </p>
+      <p className="auth-legal-line">
+        <Link to="/privacy-policy">Privacy Policy</Link>
+        <span aria-hidden>·</span>
+        <Link to="/terms-of-service">Terms of Service</Link>
+      </p>
     </AuthShell>
   )
 }

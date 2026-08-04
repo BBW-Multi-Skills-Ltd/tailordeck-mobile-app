@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { Heart } from 'lucide-react'
+
 export default function AboutTailorDeckPanel() {
   return (
     <div className="settings-about-content">
@@ -56,12 +59,15 @@ export default function AboutTailorDeckPanel() {
         <h3>Official Links</h3>
         <div className="settings-about-link-grid">
           <a href="https://tailordeck.com.ng" target="_blank" rel="noreferrer">tailordeck.com.ng</a>
-          <a href="https://tailordeck.com.ng/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>
-          <a href="https://tailordeck.com.ng/terms-of-service" target="_blank" rel="noreferrer">Terms of Service</a>
+          <Link to="/privacy-policy">Privacy Policy</Link>
+          <Link to="/terms-of-service">Terms of Service</Link>
         </div>
       </section>
 
-      <p className="settings-about-footer">Built with 💖 for tailors and fashion designers.</p>
+      <p className="settings-about-footer">
+        Built with <Heart size={13} fill="currentColor" strokeWidth={0} aria-label="love" /> for tailors and fashion designers.
+      </p>
     </div>
   )
 }
+
