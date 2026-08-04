@@ -7,6 +7,8 @@ export type ConfirmOptions = {
   message: string
   confirmLabel?: string
   cancelLabel?: string
+  requiredText?: string
+  requiredTextLabel?: string
   tone?: 'default' | 'danger'
 }
 

@@ -48,6 +48,11 @@ export function RouteGuard() {
     return <Navigate to="/auth/verify-email" replace />
   }
 
+  const accountLocked = profile.data?.account_status === 'deactivated' || profile.data?.account_status === 'pending_deletion'
+  if (!profile.isError && accountLocked && location.pathname !== '/account-status') {
+    return <Navigate to="/account-status" replace />
+  }
+
   const onboardingComplete = profile.data?.onboarding_complete === true
   const isBillingCallback = location.pathname.startsWith('/billing/callback')
   if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding') && !isBillingCallback) {

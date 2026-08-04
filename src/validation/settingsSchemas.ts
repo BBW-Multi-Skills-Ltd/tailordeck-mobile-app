@@ -25,8 +25,13 @@ export const profileUpdateSchema = z.object({
   avatar_url: optionalText,
   avatar_storage_path: optionalText,
   onboarding_complete: z.boolean().optional(),
-  account_status: z.enum(['pending_verification', 'active', 'deactivated', 'deleted']).optional(),
+  account_status: z.enum(['pending_verification', 'active', 'deactivated', 'pending_deletion', 'deleted']).optional(),
   deleted_at: optionalText,
+  deactivation_reason: optionalText,
+  deactivated_at: optionalText,
+  deletion_requested_at: optionalText,
+  deletion_scheduled_at: optionalText,
+  reactivated_at: optionalText,
 }).partial()
 
 export const businessProfileUpdateSchema = z.object({

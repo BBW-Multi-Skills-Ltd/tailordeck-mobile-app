@@ -1,13 +1,5 @@
 export function getSecurityDangerMessage(kind: 'deactivate' | 'delete'): string {
   return kind === 'deactivate'
-    ? 'Deactivate account?\nYour account will be marked inactive.'
-    : 'Delete account permanently?\nThis action marks your account for removal.'
-}
-
-export function getSecurityDangerFeedback(kind: 'deactivate' | 'delete'): string {
-  return kind === 'deactivate' ? 'Account deactivated.' : 'Account marked for deletion.'
-}
-
-export function getSecurityDangerAlert(kind: 'deactivate' | 'delete'): string {
-  return kind === 'deactivate' ? 'Account deactivated.' : 'Account marked for deletion.'
+    ? 'Your account will be paused and you will be signed out. Your shop data stays stored, and you can reactivate by signing in again.'
+    : 'Your account will be locked immediately and scheduled for permanent deletion in 14 days. During that time, you can sign in and restore it. After 14 days, your shop, clients, jobs, measurements, documents, photos, logo, signature, and settings may be permanently removed.'
 }

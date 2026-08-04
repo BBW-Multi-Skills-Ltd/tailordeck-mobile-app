@@ -49,3 +49,25 @@ export async function uploadAvatar(file: File): Promise<{ storagePath: string; s
   await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
   return { storagePath, signedUrl }
 }
+
+export async function deactivateAccount(reason?: string): Promise<ProfileRow> {
+  const { data, error } = await supabase.rpc('deactivate_account', {
+    reason_value: reason?.trim() || null,
+  }).single<ProfileRow>()
+  if (error) throw error
+  return data
+}
+
+export async function requestAccountDeletion(reason?: string): Promise<ProfileRow> {
+  const { data, error } = await supabase.rpc('request_account_deletion', {
+    reason_value: reason?.trim() || null,
+  }).single<ProfileRow>()
+  if (error) throw error
+  return data
+}
+
+export async function restoreAccount(): Promise<ProfileRow> {
+  const { data, error } = await supabase.rpc('restore_account').single<ProfileRow>()
+  if (error) throw error
+  return data
+}

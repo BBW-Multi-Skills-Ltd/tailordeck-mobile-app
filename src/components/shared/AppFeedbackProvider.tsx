@@ -12,6 +12,8 @@ type ConfirmState = {
   message: string
   confirmLabel: string
   cancelLabel: string
+  requiredText?: string
+  requiredTextLabel?: string
   tone: 'default' | 'danger'
   resolve: (confirmed: boolean) => void
 } | null
@@ -21,6 +23,7 @@ const TOAST_TIMEOUT_MS = 2600
 export function AppFeedbackProvider({ children }: { children: ReactNode }) {
   const [toastState, setToastState] = useState<ToastState>(null)
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [confirmInput, setConfirmInput] = useState('')
 
   const toast = useCallback((message: string, tone: ToastTone = 'info') => {
     const id = Date.now()
@@ -36,10 +39,13 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
         cancelLabel: options.cancelLabel ?? 'Cancel',
         confirmLabel: options.confirmLabel ?? 'Confirm',
         message: options.message,
+        requiredText: options.requiredText,
+        requiredTextLabel: options.requiredTextLabel,
         resolve,
         title: options.title,
         tone: options.tone ?? 'default',
       })
+      setConfirmInput('')
     })
   }, [])
 
@@ -49,7 +55,10 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
     if (!confirmState) return
     confirmState.resolve(confirmed)
     setConfirmState(null)
+    setConfirmInput('')
   }
+
+  const confirmInputMatches = !confirmState?.requiredText || confirmInput.trim() === confirmState.requiredText
 
   return (
     <AppFeedbackContext.Provider value={value}>
@@ -66,6 +75,18 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
           <div className="confirm-modal" onClick={(event) => event.stopPropagation()}>
             <h3>{confirmState.title}</h3>
             <p>{confirmState.message}</p>
+            {confirmState.requiredText ? (
+              <label className="confirm-required-input-wrap">
+                <span>{confirmState.requiredTextLabel ?? `Type ${confirmState.requiredText} to continue.`}</span>
+                <input
+                  type="text"
+                  className="auth-input confirm-required-input"
+                  value={confirmInput}
+                  onChange={(event) => setConfirmInput(event.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+            ) : null}
             <div className="confirm-actions">
               <button type="button" className="btn btn-secondary" onClick={() => closeConfirm(false)}>
                 {confirmState.cancelLabel}
@@ -73,6 +94,7 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 className={`btn ${confirmState.tone === 'danger' ? 'btn-danger' : 'btn-primary'}`}
+                disabled={!confirmInputMatches}
                 onClick={() => closeConfirm(true)}
               >
                 {confirmState.confirmLabel}

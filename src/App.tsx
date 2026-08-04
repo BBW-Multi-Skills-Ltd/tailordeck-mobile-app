@@ -19,6 +19,7 @@ const SettingsAbout = lazy(() => import('./pages/SettingsAbout'))
 const SubscriptionPage = lazy(() => import('./pages/Subscription'))
 const ManagePlan = lazy(() => import('./pages/ManagePlan'))
 const BillingCallback = lazy(() => import('./pages/BillingCallback'))
+const AccountStatus = lazy(() => import('./pages/AccountStatus'))
 const More = lazy(() => import('./pages/More'))
 const Business = lazy(() => import('./pages/Business'))
 const Documents = lazy(() => import('./pages/Documents'))
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
 
         <Route element={<RouteGuard />}>
+          <Route path="/account-status" element={<AccountStatus />} />
           <Route path="/onboarding/plan" element={<OnboardingPlan />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />

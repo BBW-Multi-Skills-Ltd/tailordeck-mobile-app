@@ -5985,6 +5985,70 @@ button.more-row {
   gap: 10px;
 }
 
+.account-status-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: calc(22px + var(--safe-top)) 16px calc(22px + var(--safe-bottom));
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--primary) 10%, transparent), transparent 34%),
+    linear-gradient(180deg, var(--bg), var(--bg-muted));
+}
+
+.account-status-card {
+  width: min(100%, 420px);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.account-status-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger-bg) 68%, var(--bg-card));
+  box-shadow: var(--clay-shadow-press);
+}
+
+.account-status-kicker {
+  margin: 0;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.account-status-card h1 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 25px;
+  line-height: 1.1;
+  letter-spacing: -0.6px;
+}
+
+.account-status-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.account-status-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 .subscription-card-active {
   border-color: color-mix(in srgb, var(--success) 40%, var(--clay-border) 60%);
   background: linear-gradient(145deg, color-mix(in srgb, var(--success) 7%, var(--bg-card) 93%), var(--bg-card));
@@ -6628,6 +6692,23 @@ button.more-row {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.confirm-required-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+}
+
+.confirm-required-input-wrap span {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.confirm-required-input {
+  min-height: 42px;
 }
 
 .confirm-actions {

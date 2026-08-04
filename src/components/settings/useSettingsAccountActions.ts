@@ -2,12 +2,12 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
+import { useDeactivateAccountMutation, useRequestAccountDeletionMutation } from '../../hooks/useProfileQueries'
 import { updateLoginEmail, updateLoginPassword } from '../../services/authService'
 import { softDeleteAllJobs } from '../../services/jobService'
-import { updateProfile } from '../../services/profileService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
-import { getSecurityDangerFeedback, getSecurityDangerMessage } from './settingsSecurityActions'
+import { getSecurityDangerMessage } from './settingsSecurityActions'
 
 type UseSettingsAccountActionsArgs = {
   confirmPasswordDraft: string
@@ -31,6 +31,8 @@ export function useSettingsAccountActions({
   signOut,
 }: UseSettingsAccountActionsArgs) {
   const feedback = useAppFeedback()
+  const deactivateAccountMutation = useDeactivateAccountMutation()
+  const requestDeletionMutation = useRequestAccountDeletionMutation()
 
   async function clearJobHistory(): Promise<boolean> {
     const confirmed = await feedback.confirm({
@@ -82,18 +84,23 @@ export function useSettingsAccountActions({
     const confirmed = await feedback.confirm({
       title: kind === 'delete' ? 'Delete account?' : 'Deactivate account?',
       message: getSecurityDangerMessage(kind),
-      confirmLabel: kind === 'delete' ? 'Delete account' : 'Deactivate',
+      confirmLabel: kind === 'delete' ? 'Request deletion' : 'Deactivate',
+      requiredText: kind === 'delete' ? 'DELETE' : undefined,
+      requiredTextLabel: 'Type DELETE to request permanent account deletion.',
       tone: 'danger',
     })
     if (!confirmed) return
 
     try {
-      await updateProfile(
-        kind === 'delete'
-          ? { account_status: 'deleted', deleted_at: new Date().toISOString() }
-          : { account_status: 'deactivated' },
-      )
-      setSecurityFeedback(getSecurityDangerFeedback(kind))
+      if (kind === 'delete') {
+        await requestDeletionMutation.mutateAsync(undefined)
+      } else {
+        await deactivateAccountMutation.mutateAsync(undefined)
+      }
+      clearPreviewSession()
+      setSecurityFeedback('')
+      await signOut()
+      navigate('/auth/signin', { replace: true })
     } catch (error) {
       feedback.toast(getServiceErrorMessage(error, 'Unable to update account status.'), 'error')
     }
