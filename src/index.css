@@ -6049,6 +6049,18 @@ button.more-row {
   margin-top: 4px;
 }
 
+.account-control-feedback {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--danger-bg) 58%, transparent);
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 10px 12px;
+}
+
 .subscription-card-active {
   border-color: color-mix(in srgb, var(--success) 40%, var(--clay-border) 60%);
   background: linear-gradient(145deg, color-mix(in srgb, var(--success) 7%, var(--bg-card) 93%), var(--bg-card));
@@ -6705,6 +6717,11 @@ button.more-row {
   color: var(--text);
   font-size: 12px;
   font-weight: 650;
+}
+
+.confirm-required-token {
+  color: var(--danger);
+  font-weight: 850;
 }
 
 .confirm-required-input {

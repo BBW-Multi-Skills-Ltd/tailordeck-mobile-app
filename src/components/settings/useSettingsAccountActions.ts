@@ -86,7 +86,7 @@ export function useSettingsAccountActions({
       message: getSecurityDangerMessage(kind),
       confirmLabel: kind === 'delete' ? 'Request deletion' : 'Deactivate',
       requiredText: kind === 'delete' ? 'DELETE' : undefined,
-      requiredTextLabel: 'Type DELETE to request permanent account deletion.',
+      requiredTextLabel: 'Type',
       tone: 'danger',
     })
     if (!confirmed) return
@@ -102,7 +102,7 @@ export function useSettingsAccountActions({
       await signOut()
       navigate('/auth/signin', { replace: true })
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to update account status.'), 'error')
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update account status.'))
     }
   }
 

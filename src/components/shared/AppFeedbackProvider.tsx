@@ -77,7 +77,11 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
             <p>{confirmState.message}</p>
             {confirmState.requiredText ? (
               <label className="confirm-required-input-wrap">
-                <span>{confirmState.requiredTextLabel ?? `Type ${confirmState.requiredText} to continue.`}</span>
+                <span>
+                  {confirmState.requiredTextLabel ?? 'Type'}{' '}
+                  <strong className="confirm-required-token">&quot;{confirmState.requiredText}&quot;</strong>
+                  {' '}to continue.
+                </span>
                 <input
                   type="text"
                   className="auth-input confirm-required-input"

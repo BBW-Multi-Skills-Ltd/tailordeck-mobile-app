@@ -7,6 +7,7 @@ export type AccountSecurityPanelProps = {
   profilePhoneLocalPart: string
   passwordDraft: string
   confirmPasswordDraft: string
+  securityFeedback?: string
   onFullNameChange: (value: string) => void
   onEmailChange: (value: string) => void
   onPhoneChange: (value: string) => void

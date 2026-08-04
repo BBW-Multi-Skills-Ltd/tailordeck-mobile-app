@@ -2,10 +2,11 @@ import { ShieldAlert, Trash2 } from 'lucide-react'
 import type { AccountDangerAction } from './accountSecurityTypes'
 
 type AccountControlsSectionProps = {
+  feedback?: string
   onDanger: (kind: AccountDangerAction) => void
 }
 
-export function AccountControlsSection({ onDanger }: AccountControlsSectionProps) {
+export function AccountControlsSection({ feedback, onDanger }: AccountControlsSectionProps) {
   return (
     <section className="stack gap-8">
       <p className="more-group-title">Account Controls</p>
@@ -24,6 +25,7 @@ export function AccountControlsSection({ onDanger }: AccountControlsSectionProps
           <span className="more-row-label">Delete Account Permanently</span>
         </button>
       </div>
+      {feedback ? <p className="account-control-feedback" role="alert">{feedback}</p> : null}
     </section>
   )
 }

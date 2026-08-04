@@ -29,6 +29,7 @@ export default function SettingsSecurity() {
         profilePhoneLocalPart={derived.profilePhoneLocalPart}
         passwordDraft={state.passwordDraft}
         confirmPasswordDraft={state.confirmPasswordDraft}
+        securityFeedback={state.securityFeedback}
         onFullNameChange={(fullName) => actions.setSettings((prev) => ({ ...prev, profile: { ...prev.profile, fullName } }))}
         onEmailChange={(email) => actions.setSettings((prev) => ({ ...prev, profile: { ...prev.profile, email } }))}
         onPhoneChange={actions.handleProfilePhoneChange}

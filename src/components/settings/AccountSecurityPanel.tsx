@@ -16,6 +16,7 @@ export default function AccountSecurityPanel({
   onUpdatePassword,
   passwordDraft,
   profilePhoneLocalPart,
+  securityFeedback,
   settings,
 }: AccountSecurityPanelProps) {
   const currentDetails = {
@@ -68,7 +69,7 @@ export default function AccountSecurityPanel({
         onShowPasswordFormChange={actions.setShowPasswordForm}
       />
 
-      <AccountControlsSection onDanger={onDanger} />
+      <AccountControlsSection feedback={securityFeedback} onDanger={onDanger} />
     </div>
   )
 }
