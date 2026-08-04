@@ -12,6 +12,7 @@
   dashboardStatus: ['dashboard', 'status'] as const,
   recentJobs: (limit = 5) => ['dashboard', 'recent-jobs', limit] as const,
   notifications: ['notifications'] as const,
+  supportTickets: ['support-tickets'] as const,
   subscription: ['subscription'] as const,
   feature: (featureKey: string) => ['feature-access', featureKey] as const,
   documents: (jobId: string) => ['documents', jobId] as const,
