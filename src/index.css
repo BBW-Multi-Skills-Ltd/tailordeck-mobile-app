@@ -1666,6 +1666,10 @@ p { margin: 0; }
   appearance: none;
 }
 
+.prefix-input-wrap .auth-input-prefixed {
+  padding-left: 72px;
+}
+
 .input::placeholder {
   color: var(--text-placeholder);
 }
