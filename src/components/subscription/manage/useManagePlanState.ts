@@ -1,16 +1,15 @@
-﻿import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCancelAtPeriodEndMutation, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../../../hooks/useFeatureAccess'
 import { loadTailorSettings, saveTailorSettings } from '../../../lib/settings'
 import { subscriptionPlans, type BillingCycle, type PaidPlan } from '../../../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../../../services/serviceHelpers'
-import { useAppFeedback } from '../../shared/appFeedbackCore'
 import { formatIsoDate, formatRelativeDate, getDefaultManagePlan, getManagePlanOptions } from './managePlanUtils'
 
 export function useManagePlanState() {
-  const feedback = useAppFeedback()
   const subscriptionQuery = useSubscriptionQuery()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const cancelMutation = useCancelAtPeriodEndMutation()
+  const noticeTimerRef = useRef<number | null>(null)
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycleOverride, setCycleOverride] = useState<BillingCycle | null>(null)
   const [cancelOpen, setCancelOpen] = useState(false)
@@ -30,6 +29,19 @@ export function useManagePlanState() {
   const renewalDate = formatIsoDate(subscriptionQuery.data?.current_period_ends_at) || formatRelativeDate(cycle === 'yearly' ? 365 : 30)
   const selectedPlan = selectedPlanState.plan === plan ? selectedPlanState.selectedPlan : getDefaultManagePlan(plan)
 
+  useEffect(() => () => {
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
+  }, [])
+
+  function showNotice(message: string) {
+    if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
+    setActionNotice(message)
+    noticeTimerRef.current = window.setTimeout(() => {
+      setActionNotice('')
+      noticeTimerRef.current = null
+    }, 5000)
+  }
+
   async function choosePlan(nextPlan: PaidPlan) {
     setActionError('')
     setActionNotice('')
@@ -47,7 +59,6 @@ export function useManagePlanState() {
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to start checkout.')
       setActionError(message)
-      feedback.toast(message, 'error')
     }
   }
 
@@ -63,11 +74,10 @@ export function useManagePlanState() {
       })
       setSettings(nextSettings)
       setCancelOpen(false)
-      setActionNotice('Cancellation scheduled. Access stays active until the period ends.')
+      showNotice('Cancellation scheduled. Access stays active until the period ends.')
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to schedule cancellation.')
       setActionError(message)
-      feedback.toast(message, 'error')
     }
   }
 
@@ -82,11 +92,10 @@ export function useManagePlanState() {
         updatedAt: new Date().toISOString(),
       })
       setSettings(nextSettings)
-      setActionNotice('Plan kept active.')
+      showNotice('Plan kept active.')
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to keep plan active.')
       setActionError(message)
-      feedback.toast(message, 'error')
     }
   }
 
@@ -116,3 +125,4 @@ export function useManagePlanState() {
     },
   }
 }
+

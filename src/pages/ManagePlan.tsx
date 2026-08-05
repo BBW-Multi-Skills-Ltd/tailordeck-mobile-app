@@ -1,7 +1,7 @@
 import { BillingSummarySection, CurrentPlanSection } from '../components/subscription/manage/ManagePlanSummarySections'
 import { CancelPlanDialog } from '../components/subscription/manage/CancelPlanDialog'
 import { ChangePlanSection } from '../components/subscription/manage/ChangePlanSection'
-import { ManagePlanSupportSection, PaymentHistorySection, SubscriptionControlSection } from '../components/subscription/manage/ManagePlanControlSections'
+import { ManagePlanSupportSection, SubscriptionControlSection } from '../components/subscription/manage/ManagePlanControlSections'
 import { useManagePlanState } from '../components/subscription/manage/useManagePlanState'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
@@ -54,7 +54,6 @@ export default function ManagePlan() {
         onKeepActive={actions.keepPlanActive}
       />
 
-      <PaymentHistorySection />
       <ManagePlanSupportSection />
 
       {state.cancelOpen ? (

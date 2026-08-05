@@ -1,6 +1,5 @@
-import { ChevronRight, CircleHelp, ReceiptText, ShieldAlert, Sparkles } from 'lucide-react'
+import { ChevronRight, CircleHelp, ShieldAlert, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { ManagePlanRow } from './ManagePlanRow'
 
 type SubscriptionControlSectionProps = {
   cancelScheduled: boolean
@@ -38,17 +37,6 @@ export function SubscriptionControlSection({ cancelScheduled, isBusy = false, is
             <ChevronRight size={17} className="more-row-chevron" />
           </button>
         )}
-      </div>
-    </section>
-  )
-}
-
-export function PaymentHistorySection() {
-  return (
-    <section className="stack gap-8">
-      <p className="more-group-title">Payment History</p>
-      <div className="clay-card more-group-card">
-        <ManagePlanRow icon={ReceiptText} title="No payment receipts yet" desc="Receipts will appear here after your first payment." />
       </div>
     </section>
   )
