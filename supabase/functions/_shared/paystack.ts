@@ -60,6 +60,13 @@ export function getPaystackPlanCode(planName: PaidPlanName, billingCycle: Billin
   return Deno.env.get(key) || undefined
 }
 
+export function getRequiredPaystackPlanCode(planName: PaidPlanName, billingCycle: BillingCycle): string {
+  const key = `PAYSTACK_${planName.toUpperCase()}_${billingCycle.toUpperCase()}_PLAN_CODE`
+  const value = Deno.env.get(key)
+  if (!value) throw new Error(`Missing ${key}`)
+  return value
+}
+
 export function getPeriodEndIso(billingCycle: BillingCycle, from = new Date()): string {
   const next = new Date(from)
   next.setDate(next.getDate() + (billingCycle === 'yearly' ? 365 : 30))

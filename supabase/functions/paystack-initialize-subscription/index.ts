@@ -2,7 +2,7 @@ import { handleOptions, jsonResponse } from '../_shared/cors.ts'
 import {
   createAdminClient,
   createUserClient,
-  getPaystackPlanCode,
+  getRequiredPaystackPlanCode,
   getRequiredEnv,
   paidPlanPricesKobo,
   type BillingCycle,
@@ -50,7 +50,7 @@ Deno.serve(async (request) => {
 
     const reference = `td_${userData.user.id.replaceAll('-', '').slice(0, 12)}_${Date.now()}`
     const callbackUrl = `${Deno.env.get('APP_URL') || request.headers.get('origin') || 'http://localhost:5173'}/billing/callback`
-    const planCode = getPaystackPlanCode(planName, billingCycle)
+    const planCode = getRequiredPaystackPlanCode(planName, billingCycle)
     const payload: Record<string, unknown> = {
       amount: paidPlanPricesKobo[planName][billingCycle],
       callback_url: callbackUrl,
@@ -64,9 +64,8 @@ Deno.serve(async (request) => {
         user_id: userData.user.id,
       },
       reference,
+      plan: planCode,
     }
-
-    if (planCode) payload.plan = planCode
 
     const paystackResponse = await fetch('https://api.paystack.co/transaction/initialize', {
       body: JSON.stringify(payload),
