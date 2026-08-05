@@ -1,11 +1,17 @@
 ﻿import { handleOptions, jsonResponse } from '../_shared/cors.ts'
-import { createAdminClient, updateSubscriptionFromCharge, type PaystackVerifyResponse } from '../_shared/paystack.ts'
+import {
+  createAdminClient,
+  updateSubscriptionFromCharge,
+  updateSubscriptionFromPaystackSubscriptionEvent,
+  type PaystackSubscriptionEventData,
+  type PaystackVerifyResponse,
+} from '../_shared/paystack.ts'
 
 type PaystackWebhookEvent = {
   event?: string
   data?: PaystackVerifyResponse['data'] & {
     subscription_code?: string
-  }
+  } & PaystackSubscriptionEventData
 }
 
 function bytesToHex(buffer: ArrayBuffer): string {
@@ -77,6 +83,10 @@ Deno.serve(async (request) => {
 
     if (event.event === 'charge.failed') {
       await markPaymentFailed(event.data?.reference)
+    }
+
+    if (event.event === 'subscription.create' && event.data) {
+      await updateSubscriptionFromPaystackSubscriptionEvent(event.data)
     }
 
     if (event.event === 'subscription.disable') {

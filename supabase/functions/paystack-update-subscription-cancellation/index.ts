@@ -1,5 +1,5 @@
 import { handleOptions, jsonResponse } from '../_shared/cors.ts'
-import { createAdminClient, createUserClient, getRequiredEnv } from '../_shared/paystack.ts'
+import { createAdminClient, createUserClient, findPaystackSubscriptionForCustomerPlan, getRequiredEnv } from '../_shared/paystack.ts'
 import { enforceRateLimit, isRateLimitError } from '../_shared/rateLimit.ts'
 
 type CancellationBody = {
@@ -14,6 +14,8 @@ type SubscriptionRow = {
   billing_cycle: string
   cancel_at_period_end: boolean
   current_period_ends_at: string | null
+  paystack_customer_code: string | null
+  paystack_plan_code: string | null
   paystack_subscription_code: string | null
   paystack_email_token: string | null
 }
@@ -94,12 +96,26 @@ Deno.serve(async (request) => {
     if (!subscription) return jsonResponse({ error: 'Subscription not found.' }, 404, request)
 
     let paystackEmailToken = subscription.paystack_email_token
+    let paystackSubscriptionCode = subscription.paystack_subscription_code
 
-    if (subscription.plan_name !== 'free' && subscription.paystack_subscription_code) {
-      paystackEmailToken = paystackEmailToken || await fetchPaystackEmailToken(subscription.paystack_subscription_code)
+    if (subscription.plan_name !== 'free' && (!paystackSubscriptionCode || !paystackEmailToken)) {
+      const paystackSubscription = await findPaystackSubscriptionForCustomerPlan({
+        customerCode: subscription.paystack_customer_code,
+        planCode: subscription.paystack_plan_code,
+      })
+      paystackSubscriptionCode = paystackSubscriptionCode || paystackSubscription?.subscription_code || null
+      paystackEmailToken = paystackEmailToken || paystackSubscription?.email_token || null
+    }
+
+    if (subscription.plan_name !== 'free' && !paystackSubscriptionCode) {
+      return jsonResponse({ error: 'Paystack subscription was not found for this plan.' }, 409, request)
+    }
+
+    if (subscription.plan_name !== 'free' && paystackSubscriptionCode) {
+      paystackEmailToken = paystackEmailToken || await fetchPaystackEmailToken(paystackSubscriptionCode)
       await updatePaystackSubscription({
         cancelAtPeriodEnd: body.cancelAtPeriodEnd,
-        code: subscription.paystack_subscription_code,
+        code: paystackSubscriptionCode,
         token: paystackEmailToken,
       })
     }
@@ -109,6 +125,7 @@ Deno.serve(async (request) => {
       .update({
         cancel_at_period_end: body.cancelAtPeriodEnd,
         paystack_email_token: paystackEmailToken,
+        paystack_subscription_code: paystackSubscriptionCode,
         status: body.cancelAtPeriodEnd && subscription.plan_name === 'free' ? 'cancelled' : 'active',
         updated_at: new Date().toISOString(),
       })
