@@ -74,7 +74,7 @@ export function useManagePlanState() {
       })
       setSettings(nextSettings)
       setCancelOpen(false)
-      showNotice('Cancellation scheduled. Access stays active until the period ends.')
+      showNotice('Cancellation successful')
     } catch (error) {
       const message = getServiceErrorMessage(error, 'Unable to schedule cancellation.')
       setActionError(message)
