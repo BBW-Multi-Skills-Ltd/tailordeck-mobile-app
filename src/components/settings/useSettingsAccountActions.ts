@@ -81,17 +81,19 @@ export function useSettingsAccountActions({
   }
 
   async function handleSecurityDanger(kind: 'deactivate' | 'delete'): Promise<void> {
+    const requiredText = kind === 'delete' ? 'DELETE' : 'DEACTIVATE'
     const confirmed = await feedback.confirm({
       title: kind === 'delete' ? 'Delete account?' : 'Deactivate account?',
       message: getSecurityDangerMessage(kind),
       confirmLabel: kind === 'delete' ? 'Request deletion' : 'Deactivate',
-      requiredText: kind === 'delete' ? 'DELETE' : undefined,
+      requiredText,
       requiredTextLabel: 'Type',
       tone: 'danger',
     })
     if (!confirmed) return
 
     try {
+      window.sessionStorage.setItem('tailordeck-account-action-signing-out', 'true')
       if (kind === 'delete') {
         await requestDeletionMutation.mutateAsync(undefined)
       } else {
@@ -100,8 +102,10 @@ export function useSettingsAccountActions({
       clearPreviewSession()
       setSecurityFeedback('')
       await signOut()
+      window.sessionStorage.removeItem('tailordeck-account-action-signing-out')
       navigate('/auth/signin', { replace: true })
     } catch (error) {
+      window.sessionStorage.removeItem('tailordeck-account-action-signing-out')
       setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update account status.'))
     }
   }

@@ -6,6 +6,7 @@ import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
 import { hasStartedDeviceOnboarding } from '../../lib/auth'
 
 const ROUTE_GUARD_DATA_TIMEOUT_MS = 6000
+const ACCOUNT_ACTION_SIGNING_OUT_KEY = 'tailordeck-account-action-signing-out'
 
 function RouteGuardFallback() {
   return (
@@ -49,6 +50,8 @@ export function RouteGuard() {
   }
 
   const accountLocked = profile.data?.account_status === 'deactivated' || profile.data?.account_status === 'pending_deletion'
+  const accountActionSigningOut = window.sessionStorage.getItem(ACCOUNT_ACTION_SIGNING_OUT_KEY) === 'true'
+  if (!profile.isError && accountLocked && accountActionSigningOut) return <RouteGuardFallback />
   if (!profile.isError && accountLocked && location.pathname !== '/account-status') {
     return <Navigate to="/account-status" replace />
   }
