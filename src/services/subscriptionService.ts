@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
-import { requireUserId, ServiceError } from './serviceHelpers'
+import { getFunctionInvokeErrorMessage, requireUserId, ServiceError } from './serviceHelpers'
 import type { SubscriptionRow } from './types'
 
 export async function getSubscription(): Promise<SubscriptionRow | null> {
@@ -32,7 +32,7 @@ export async function startSubscriptionCheckout(params: {
     body: params,
   })
 
-  if (error) throw error
+  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to start Paystack checkout.'))
 
   const authorizationUrl = typeof data?.authorizationUrl === 'string' ? data.authorizationUrl : ''
   const reference = typeof data?.reference === 'string' ? data.reference : ''
@@ -46,7 +46,7 @@ export async function verifySubscriptionPayment(reference: string): Promise<Subs
     body: { reference },
   })
 
-  if (error) throw error
+  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to verify subscription payment.'))
 
   const subscription = data?.subscription as SubscriptionRow | undefined
   if (!subscription?.id) throw new ServiceError('Unable to verify subscription payment.')
@@ -58,7 +58,7 @@ export async function setCancelAtPeriodEnd(cancelAtPeriodEnd: boolean): Promise<
   const { data, error } = await supabase.functions.invoke('paystack-update-subscription-cancellation', {
     body: { cancelAtPeriodEnd },
   })
-  if (error) throw error
+  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to update subscription cancellation.'))
   const subscription = data?.subscription as SubscriptionRow | undefined
   if (!subscription?.id) throw new ServiceError('Unable to update subscription cancellation.')
   return subscription

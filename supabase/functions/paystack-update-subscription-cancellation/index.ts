@@ -120,6 +120,7 @@ Deno.serve(async (request) => {
 
     return jsonResponse({ subscription: updatedSubscription }, 200, request)
   } catch (error) {
+    console.error('paystack-update-subscription-cancellation failed', error)
     if (isRateLimitError(error)) return jsonResponse({ error: error.message }, error.status, request)
     return jsonResponse({ error: error instanceof Error ? error.message : 'Unexpected Paystack cancellation error.' }, 500, request)
   }

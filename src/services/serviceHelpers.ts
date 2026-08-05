@@ -16,6 +16,63 @@ export function getServiceErrorMessage(error: unknown, fallback: string): string
   return fallback
 }
 
+type FunctionInvokeError = {
+  context?: {
+    clone?: () => {
+      json?: () => Promise<unknown>
+      text?: () => Promise<string>
+    }
+    json?: () => Promise<unknown>
+    text?: () => Promise<string>
+  }
+  message?: unknown
+}
+
+function isFunctionInvokeError(error: unknown): error is FunctionInvokeError {
+  return typeof error === 'object' && error !== null && 'context' in error
+}
+
+function getErrorMessageFromBody(body: unknown): string {
+  if (typeof body === 'object' && body !== null && 'error' in body) {
+    const message = (body as { error?: unknown }).error
+    if (typeof message === 'string' && message.trim()) return message
+  }
+
+  if (typeof body === 'object' && body !== null && 'message' in body) {
+    const message = (body as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) return message
+  }
+
+  return ''
+}
+
+export async function getFunctionInvokeErrorMessage(error: unknown, fallback: string): Promise<string> {
+  if (!isFunctionInvokeError(error)) return getServiceErrorMessage(error, fallback)
+
+  const context = error.context
+  const readableContext = typeof context?.clone === 'function' ? context.clone() : context
+
+  try {
+    if (typeof readableContext?.json === 'function') {
+      const message = getErrorMessageFromBody(await readableContext.json())
+      if (message) return message
+    }
+  } catch {
+    // Some Supabase errors expose a consumed response body. Fall back to text/message.
+  }
+
+  try {
+    if (typeof readableContext?.text === 'function') {
+      const text = await readableContext.text()
+      if (text.trim()) return text
+    }
+  } catch {
+    // Fall through to the generic error parser.
+  }
+
+  return getServiceErrorMessage(error, fallback)
+}
+
 export async function requireUserId(): Promise<string> {
   const { data: sessionData } = await supabase.auth.getSession()
   const sessionUserId = sessionData.session?.user.id
