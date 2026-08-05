@@ -5,6 +5,7 @@ import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPriv
 import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
 
 const AVATAR_SIGNED_URL_TTL = 60 * 60 * 24 * 7
+type AccountLifecycleEvent = 'account_deactivated' | 'account_deletion_requested' | 'account_restored'
 
 export async function getProfile(): Promise<ProfileRow | null> {
   const userId = await requireUserId()
@@ -55,6 +56,7 @@ export async function deactivateAccount(reason?: string): Promise<ProfileRow> {
     reason_value: reason?.trim() || null,
   }).single<ProfileRow>()
   if (error) throw error
+  await notifyAccountLifecycle('account_deactivated')
   return data
 }
 
@@ -63,11 +65,24 @@ export async function requestAccountDeletion(reason?: string): Promise<ProfileRo
     reason_value: reason?.trim() || null,
   }).single<ProfileRow>()
   if (error) throw error
+  await notifyAccountLifecycle('account_deletion_requested')
   return data
 }
 
 export async function restoreAccount(): Promise<ProfileRow> {
   const { data, error } = await supabase.rpc('restore_account').single<ProfileRow>()
   if (error) throw error
+  await notifyAccountLifecycle('account_restored')
   return data
+}
+
+async function notifyAccountLifecycle(eventType: AccountLifecycleEvent): Promise<void> {
+  try {
+    const { error } = await supabase.functions.invoke('account-lifecycle-notify', {
+      body: { eventType },
+    })
+    if (error) throw error
+  } catch (error) {
+    console.warn('Account lifecycle email notification failed:', error)
+  }
 }
