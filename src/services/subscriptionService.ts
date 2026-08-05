@@ -55,11 +55,13 @@ export async function verifySubscriptionPayment(reference: string): Promise<Subs
 }
 
 export async function setCancelAtPeriodEnd(cancelAtPeriodEnd: boolean): Promise<SubscriptionRow> {
-  const { data, error } = await supabase.rpc('set_subscription_cancel_at_period_end', {
-    cancel_at_period_end_value: cancelAtPeriodEnd,
-  }).single<SubscriptionRow>()
+  const { data, error } = await supabase.functions.invoke('paystack-update-subscription-cancellation', {
+    body: { cancelAtPeriodEnd },
+  })
   if (error) throw error
-  return data
+  const subscription = data?.subscription as SubscriptionRow | undefined
+  if (!subscription?.id) throw new ServiceError('Unable to update subscription cancellation.')
+  return subscription
 }
 
 export async function checkFeatureAccess(featureKey: string): Promise<boolean> {

@@ -25,10 +25,12 @@ export type PaystackVerifyResponse = {
     }
     subscription?: {
       subscription_code?: string
+      email_token?: string
     }
     plan?: {
       plan_code?: string
     }
+    email_token?: string
   }
 }
 
@@ -92,6 +94,7 @@ export async function updateSubscriptionFromCharge(data: NonNullable<PaystackVer
         last_payment_at: paidAt,
         paystack_customer_code: data.customer?.customer_code ?? null,
         paystack_subscription_code: data.subscription?.subscription_code ?? null,
+        paystack_email_token: data.subscription?.email_token ?? data.email_token ?? null,
         paystack_plan_code: data.plan?.plan_code ?? getPaystackPlanCode(planName, billingCycle) ?? null,
         updated_at: new Date().toISOString(),
       },

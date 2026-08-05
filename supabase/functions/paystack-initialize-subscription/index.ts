@@ -54,6 +54,7 @@ Deno.serve(async (request) => {
     const payload: Record<string, unknown> = {
       amount: paidPlanPricesKobo[planName][billingCycle],
       callback_url: callbackUrl,
+      channels: ['card'],
       currency: 'NGN',
       email,
       metadata: {

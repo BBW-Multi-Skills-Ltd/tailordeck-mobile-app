@@ -15,6 +15,7 @@ export interface SubscriptionRow {
   last_payment_at: string | null
   paystack_customer_code: string | null
   paystack_subscription_code: string | null
+  paystack_email_token: string | null
   paystack_plan_code: string | null
   is_tester: boolean | null
   tester_trial_ends_at: string | null
