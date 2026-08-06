@@ -141,6 +141,7 @@ Deno.serve(async (request) => {
         <h2 style="color:#7B1E37;margin:0 0 12px;">${htmlEscape(content.title)}</h2>
         <p>${htmlEscape(content.body)}</p>
         ${actionMarkup}
+        <p style="font-size:12px;color:#8B7A70;margin-top:20px;">TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.</p>
         <p style="font-size:12px;color:#8B7A70;margin-top:24px;">If you did not make this change, contact TailorDeck support immediately.</p>
       </div>
     `

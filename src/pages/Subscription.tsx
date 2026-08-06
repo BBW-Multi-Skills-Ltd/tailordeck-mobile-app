@@ -4,6 +4,7 @@ import { useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../h
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
+import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
@@ -66,6 +67,7 @@ export default function SubscriptionPage() {
       {visiblePlans.length > 0 ? (
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
       ) : null}
+      {visiblePlans.length > 0 ? <PaymentTrustNote /> : null}
       {planFeedback ? <p className="auth-feedback success" role="status">{planFeedback}</p> : null}
       {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 

@@ -6229,6 +6229,29 @@ button.more-row {
   margin: 0 auto;
 }
 
+.payment-trust-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: -2px auto 0;
+  padding: 9px 12px;
+  width: min(100%, 430px);
+  border: 1px solid color-mix(in srgb, var(--success) 22%, var(--clay-border));
+  border-radius: var(--clay-radius-pill);
+  background: color-mix(in srgb, var(--success) 7%, var(--clay-surface-muted) 93%);
+  color: color-mix(in srgb, var(--success) 72%, var(--text-primary));
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: var(--clay-shadow-press);
+}
+
+.payment-trust-note svg {
+  flex: 0 0 auto;
+}
+
 .subscription-plan-carousel {
   display: flex;
   gap: 12px;

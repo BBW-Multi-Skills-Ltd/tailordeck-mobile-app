@@ -38,7 +38,7 @@ export default function AboutTailorDeckPanel() {
 
       <section className="settings-about-section">
         <h3>Ownership</h3>
-        <p>TailorDeck is a product of BBW Tech-Innovation, a technology subsidiary of BBW Multi-Skills Ltd.</p>
+        <p>TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.</p>
         <p>BBW Multi-Skills Ltd builds practical solutions across technology, construction, maintenance, lifestyle, and business innovation.</p>
       </section>
 

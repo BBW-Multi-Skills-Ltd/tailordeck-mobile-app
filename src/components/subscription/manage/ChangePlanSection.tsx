@@ -1,6 +1,7 @@
 import type { SubscriptionPlan } from '../../../lib/settings'
 import { billingCycles, type BillingCycle, type PaidPlan, type SubscriptionPlanCard } from '../../../lib/subscriptionPlans'
 import SegmentedControl from '../../shared/SegmentedControl'
+import PaymentTrustNote from '../PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../SubscriptionPlanCarousel'
 import { getManagePlanCta } from './managePlanUtils'
 
@@ -29,6 +30,7 @@ export function ChangePlanSection({
     <section className="stack gap-8">
       <p className="more-group-title">Change Plan</p>
       <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={onCycleChange} className="subscription-billing-toggle" />
+      <PaymentTrustNote />
       <SubscriptionPlanCarousel
         ariaLabel="Available plans"
         busyPlanId={isBusy ? selectedPlan : null}

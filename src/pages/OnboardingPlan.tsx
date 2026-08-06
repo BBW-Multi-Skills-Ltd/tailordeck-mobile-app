@@ -5,6 +5,7 @@ import { queryKeys } from '../hooks/queryKeys'
 import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
+import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
@@ -83,6 +84,7 @@ export default function OnboardingPlan() {
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
+        <PaymentTrustNote />
         {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
         <SubscriptionPlanCarousel
           ariaLabel="Onboarding pricing plans"

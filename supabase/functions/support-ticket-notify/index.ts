@@ -102,6 +102,8 @@ Deno.serve(async (request) => {
       <p>${htmlEscape(ticket.message).replace(/\n/g, '<br />')}</p>
       <hr />
       <pre>${htmlEscape(JSON.stringify(ticket.device_info ?? {}, null, 2))}</pre>
+      <hr />
+      <p style="font-size:12px;color:#8B7A70;">TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.</p>
     `
 
     const resendResponse = await fetch('https://api.resend.com/emails', {

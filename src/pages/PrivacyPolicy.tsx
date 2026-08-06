@@ -6,6 +6,12 @@ const effectiveDate = 'August 4, 2026'
 
 const sections = [
   {
+    title: 'Product Ownership',
+    body: [
+      'TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.',
+    ],
+  },
+  {
     title: 'Information We Collect',
     body: [
       'Account details such as your name, email address, phone number, password authentication data, and profile photo.',
@@ -36,7 +42,7 @@ const sections = [
     title: 'Third-Party Services',
     body: [
       'Supabase provides authentication, database, storage, and backend infrastructure.',
-      'Paystack processes subscription payments and billing verification.',
+      'Paystack processes subscription payments and billing verification. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
       'Vercel hosts the TailorDeck web application.',
       'Resend may be used to deliver email verification and account messages.',
       'Google may be used if you choose Google sign-in.',
@@ -57,7 +63,7 @@ const sections = [
     body: [
       'We do not sell your personal, business, or client data.',
       'We share data only with service providers needed to run TailorDeck, comply with law, prevent fraud, process payments, deliver emails, or support features you request.',
-      'When you share an invoice, receipt, or client message through WhatsApp or another app, that sharing is controlled by the receiving platform’s own terms and privacy practices.',
+      "When you share an invoice, receipt, or client message through WhatsApp or another app, that sharing is controlled by the receiving platform's own terms and privacy practices.",
     ],
   },
   {
@@ -134,3 +140,4 @@ export default function PrivacyPolicy() {
     </main>
   )
 }
+
