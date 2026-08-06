@@ -29,7 +29,7 @@ export function useFeatureAccess(featureKey: string) {
       subscription?.updated_at ?? null,
     ],
     queryFn: () => (subscription ? checkFeatureAccess(featureKey) : false),
-    enabled: Boolean(featureKey) && !subscriptionQuery.isLoading,
+    enabled: Boolean(featureKey) && subscriptionQuery.isSuccess,
   })
 }
 
@@ -53,6 +53,7 @@ export function useCancelAtPeriodEndMutation() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
     },
   })
 }
