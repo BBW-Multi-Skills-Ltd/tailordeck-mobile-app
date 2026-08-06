@@ -40,6 +40,7 @@ export default function AppHeader() {
 
       {state.drawerOpen ? (
         <NotificationDrawer
+          errorMessage={state.notificationError}
           filter={state.filter}
           notifications={state.notifications}
           onClearAll={actions.handleClearAll}

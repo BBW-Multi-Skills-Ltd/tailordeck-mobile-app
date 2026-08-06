@@ -65,7 +65,7 @@ export function useSettingsAccountActions({
       await markSaved('Account & Security')
       setSecurityFeedback('')
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to save account details.'), 'error')
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to save account details.'))
       throw error
     }
   }
@@ -75,7 +75,7 @@ export function useSettingsAccountActions({
       await updateLoginPassword({ password: passwordDraft, confirmPassword: confirmPasswordDraft })
       setSecurityFeedback('')
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to update password.'), 'error')
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update password.'))
       throw error
     }
   }

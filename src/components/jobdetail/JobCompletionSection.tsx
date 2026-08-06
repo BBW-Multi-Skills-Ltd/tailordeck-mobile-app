@@ -3,6 +3,7 @@ import type { JobStatus } from '../../types/job'
 
 type JobCompletionSectionProps = {
   completedAt?: string | null
+  errorMessage?: string
   isUpdating?: boolean
   status: JobStatus
   onComplete: () => void
@@ -17,7 +18,7 @@ function formatCompletedAt(value?: string | null): string {
   }).format(new Date(value))
 }
 
-export function JobCompletionSection({ completedAt, isUpdating = false, onComplete, status }: JobCompletionSectionProps) {
+export function JobCompletionSection({ completedAt, errorMessage, isUpdating = false, onComplete, status }: JobCompletionSectionProps) {
   const completed = status === 'Completed'
 
   return (
@@ -37,6 +38,7 @@ export function JobCompletionSection({ completedAt, isUpdating = false, onComple
           {isUpdating ? 'Updating...' : 'Mark Completed'}
         </button>
       )}
+      {errorMessage ? <p className="inline-feedback-error job-completion-error" role="alert">{errorMessage}</p> : null}
     </article>
   )
 }

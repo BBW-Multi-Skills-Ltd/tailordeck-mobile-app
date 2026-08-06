@@ -1,7 +1,5 @@
 import { createContext, useContext } from 'react'
 
-export type ToastTone = 'success' | 'error' | 'info'
-
 export type ConfirmOptions = {
   title: string
   message: string
@@ -14,7 +12,6 @@ export type ConfirmOptions = {
 
 export type AppFeedbackValue = {
   confirm: (options: ConfirmOptions) => Promise<boolean>
-  toast: (message: string, tone?: ToastTone) => void
 }
 
 export const AppFeedbackContext = createContext<AppFeedbackValue | undefined>(undefined)

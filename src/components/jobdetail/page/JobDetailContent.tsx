@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { BrandConfig, InvoiceType } from '../../invoice/documentTypes'
 import HistoryBackButton from '../../shared/HistoryBackButton'
@@ -8,6 +8,7 @@ import { useDocumentsQuery } from '../../../hooks/useDocumentQueries'
 import { useFeatureAccess } from '../../../hooks/useFeatureAccess'
 import { useUpdateJobStatusMutation } from '../../../hooks/useJobQueries'
 import { featureKeys } from '../../../lib/features'
+import { getServiceErrorMessage } from '../../../services/serviceHelpers'
 import type { MockJob } from '../../../types/job'
 import type { DetailedJobData } from '../../../types/jobDetails'
 import { JobClientCard } from '../JobClientCard'
@@ -44,6 +45,7 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
   const navigate = useNavigate()
   const feedback = useAppFeedback()
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
+  const [statusError, setStatusError] = useState('')
   const documentsQuery = useDocumentsQuery(job.id)
   const updateStatusMutation = useUpdateJobStatusMutation()
   const documentsLocked = documentSendingAccess.data === false
@@ -79,9 +81,10 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
     if (!confirmed) return
 
     try {
+      setStatusError('')
       await updateStatusMutation.mutateAsync({ id: job.id, status: 'Completed' })
-    } catch {
-      feedback.toast('Unable to update this job. Please try again.', 'error')
+    } catch (error) {
+      setStatusError(getServiceErrorMessage(error, 'Unable to update this job. Please try again.'))
     }
   }
 
@@ -97,7 +100,7 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
         <JobDeadlineSection deadlineDate={job.deadlineDate} deliveryTime={details.deliveryTime} reminder={details.reminder} />
         {job.status === 'Draft' ? null : (
           <>
-            <JobCompletionSection completedAt={completedAt} isUpdating={updateStatusMutation.isPending} status={job.status} onComplete={() => void completeJob()} />
+            <JobCompletionSection completedAt={completedAt} errorMessage={statusError} isUpdating={updateStatusMutation.isPending} status={job.status} onComplete={() => void completeJob()} />
             <JobDocumentActions
               invoiceSent={persistedSentDocuments.invoice || interactions.sentDocuments.invoice}
               locked={documentsLocked}

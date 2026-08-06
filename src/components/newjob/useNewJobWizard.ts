@@ -39,6 +39,7 @@ export function useNewJobWizard() {
   const { handleFinalizeJob, handleSaveDraft } = useNewJobPersistence({ derived, draftId, repeatClientId, state })
 
   function clearFieldError(field: NewJobFieldKey): void {
+    state.setWizardError('')
     state.setFieldErrors((current) => {
       if (!current[field]) return current
       const next = { ...current }
@@ -48,6 +49,7 @@ export function useNewJobWizard() {
   }
 
   function validateCurrentStep(): boolean {
+    state.setWizardError('')
     const fieldErrors = validateNewJobFields({ derived, state, step: state.step })
     state.setFieldErrors(fieldErrors)
     if (hasNewJobErrors(fieldErrors)) {
@@ -60,7 +62,7 @@ export function useNewJobWizard() {
     if (result.ok) return true
     state.setFieldErrorKey((current) => current + 1)
     scrollFirstWizardErrorIntoView()
-    feedback.toast(result.message, 'error')
+    state.setWizardError(result.message)
     return false
   }
 

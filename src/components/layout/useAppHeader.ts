@@ -21,6 +21,7 @@ export function useAppHeader() {
   const feedback = useAppFeedback()
   const [menuOpen, setMenuOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [notificationError, setNotificationError] = useState('')
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false)
   const [filter, setFilter] = useState<NotificationFilter>('all')
   const menuRef = useRef<HTMLDivElement | null>(null)
@@ -45,10 +46,12 @@ export function useAppHeader() {
   function closeNotificationDrawer(): void {
     setDrawerOpen(false)
     setFilter('all')
+    setNotificationError('')
   }
 
   function handleBellClick(): void {
     setMenuOpen(false)
+    setNotificationError('')
     setDrawerOpen(true)
   }
 
@@ -63,17 +66,20 @@ export function useAppHeader() {
     if (!confirmed) return
 
     try {
+      setNotificationError('')
       await clearMutation.mutateAsync()
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to clear notifications.'), 'error')
+      setNotificationError(getServiceErrorMessage(error, 'Unable to clear notifications.'))
     }
   }
 
   async function handleItemOpen(item: AppNotification): Promise<void> {
     try {
+      setNotificationError('')
       if (!item.read) await markReadMutation.mutateAsync(item.id)
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notification as read.'), 'error')
+      setNotificationError(getServiceErrorMessage(error, 'Unable to mark notification as read.'))
+      return
     }
     closeNotificationDrawer()
     navigate(item.href)
@@ -81,25 +87,28 @@ export function useAppHeader() {
 
   async function handleDeleteItem(id: string): Promise<void> {
     try {
+      setNotificationError('')
       await deleteMutation.mutateAsync(id)
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to delete notification.'), 'error')
+      setNotificationError(getServiceErrorMessage(error, 'Unable to delete notification.'))
     }
   }
 
   async function handleMarkRead(id: string): Promise<void> {
     try {
+      setNotificationError('')
       await markReadMutation.mutateAsync(id)
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notification as read.'), 'error')
+      setNotificationError(getServiceErrorMessage(error, 'Unable to mark notification as read.'))
     }
   }
 
   async function handleMarkAllRead(): Promise<void> {
     try {
+      setNotificationError('')
       await markAllReadMutation.mutateAsync()
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to mark notifications as read.'), 'error')
+      setNotificationError(getServiceErrorMessage(error, 'Unable to mark notifications as read.'))
     }
   }
 
@@ -137,6 +146,7 @@ export function useAppHeader() {
       filter,
       menuOpen,
       notifications,
+      notificationError,
       notificationsLoading: notificationsQuery.isLoading,
       signOutConfirmOpen,
       settings,

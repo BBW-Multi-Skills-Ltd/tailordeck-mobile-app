@@ -55,6 +55,7 @@ export default function NewJob() {
         {hasStepProgress ? <StepProgress step={state.step} labels={stepLabels} /> : <ReviewProgressHeader />}
       </div>
 
+      {state.wizardError ? <p className="inline-feedback-error wizard-inline-error" role="alert">{state.wizardError}</p> : null}
       <NewJobStepContent wizard={wizard} />
 
       <WizardFooter

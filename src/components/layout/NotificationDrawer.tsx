@@ -4,6 +4,7 @@ import { NotificationList } from './NotificationList'
 import type { NotificationDrawerProps, NotificationFilter } from './notificationDrawer.types'
 
 export default function NotificationDrawer({
+  errorMessage,
   filter,
   notifications,
   onClearAll,
@@ -40,6 +41,7 @@ export default function NotificationDrawer({
           </div>
 
           <NotificationFilters activeFilter={filter} onChange={onFilterChange} />
+          {errorMessage ? <p className="inline-feedback-error notification-panel-error" role="alert">{errorMessage}</p> : null}
           <NotificationList filter={filter} notifications={visibleNotifications} onDelete={onDelete} onItemOpen={onItemOpen} onMarkRead={onMarkRead} />
         </div>
       </aside>

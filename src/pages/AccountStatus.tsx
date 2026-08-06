@@ -1,10 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { RotateCcw, ShieldAlert } from 'lucide-react'
 import { useAuth } from '../context/authContextCore'
 import { useProfileQuery, useRestoreAccountMutation } from '../hooks/useProfileQueries'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
-import { useAppFeedback } from '../components/shared/appFeedbackCore'
 
 function daysUntil(value: string | null | undefined): number | null {
   if (!value) return null
@@ -16,7 +15,7 @@ function daysUntil(value: string | null | undefined): number | null {
 export default function AccountStatus() {
   const navigate = useNavigate()
   const auth = useAuth()
-  const feedback = useAppFeedback()
+  const [restoreError, setRestoreError] = useState('')
   const profileQuery = useProfileQuery(Boolean(auth.session))
   const restoreMutation = useRestoreAccountMutation()
   const profile = profileQuery.data
@@ -36,10 +35,11 @@ export default function AccountStatus() {
 
   async function handleRestore(): Promise<void> {
     try {
+      setRestoreError('')
       await restoreMutation.mutateAsync()
       navigate('/', { replace: true })
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to restore account.'), 'error')
+      setRestoreError(getServiceErrorMessage(error, 'Unable to restore account.'))
     }
   }
 
@@ -68,6 +68,7 @@ export default function AccountStatus() {
             Restoring now keeps your shop, clients, jobs, measurements, documents, photos, logo, signature, and settings accessible.
           </p>
         ) : null}
+        {restoreError ? <p className="inline-feedback-error" role="alert">{restoreError}</p> : null}
         <div className="account-status-actions">
           <button type="button" className="btn btn-primary btn-full" disabled={restoreMutation.isPending} onClick={() => void handleRestore()}>
             <RotateCcw size={16} />

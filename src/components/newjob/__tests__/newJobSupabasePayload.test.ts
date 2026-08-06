@@ -108,6 +108,7 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     setStepFourReviewMode: vi.fn(),
     setStepOneMeasurementsOpen: vi.fn(),
     setSuccessOpen: vi.fn(),
+    setWizardError: vi.fn(),
     setWorthIt: vi.fn(),
     singleMeasurementsOpen: true,
     step: 0,
@@ -115,6 +116,7 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     stepFourReviewMode: false,
     stepOneMeasurementsOpen: {},
     successOpen: false,
+    wizardError: '',
     worthIt: 'Yes',
     ...overrides,
   }

@@ -37,12 +37,12 @@ export function useSettingsPage() {
   const draft = useSettingsDraftState(loadTailorSettings())
   const {
     confirmPasswordDraft, generatedPreviewKind, invoicePreviewGenerated, openBrandPreviewSheet, openColorPicker, panel,
-    passwordDraft, savedSection, savedTick, securityFeedback, setConfirmPasswordDraft, setGeneratedPreviewKind,
+    passwordDraft, savedSection, savedTick, securityFeedback, settingsError, setConfirmPasswordDraft, setGeneratedPreviewKind,
     setInvoicePreviewGenerated, setOpenBrandPreviewSheet, setOpenColorPicker, setPanel, setPasswordDraft,
-    setSavedSection, setSavedTick, setSecurityFeedback, setSettings, setSignOutConfirmOpen, setSocialHandleInput,
+    setSavedSection, setSavedTick, setSecurityFeedback, setSettings, setSettingsError, setSignOutConfirmOpen, setSocialHandleInput,
     setSocialPlatform, settings, signOutConfirmOpen, socialHandleInput, socialPlatform,
   } = draft
-  const { uploadSettingsImage } = useSettingsImageUpload({ setSettings })
+  const { uploadSettingsImage } = useSettingsImageUpload({ setSettings, setSettingsError })
   const { markSaved } = useSettingsSaveAction({
     saveBrandMutation,
     saveBusinessMutation,
@@ -51,6 +51,7 @@ export function useSettingsPage() {
     saveReminderMutation,
     settings,
     setSettings,
+    setSettingsError,
     setSavedSection,
     setSavedTick,
   })
@@ -131,6 +132,7 @@ export function useSettingsPage() {
       savedSection,
       savedTick,
       securityFeedback,
+      settingsError,
       signOutConfirmOpen,
       settings,
       socialHandleInput,

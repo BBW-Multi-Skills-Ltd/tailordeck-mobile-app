@@ -7,6 +7,7 @@ export function useSettingsDraftState(initialSettings: TailorSettings) {
   const [panel, setPanel] = useState<SettingsPanel>(null)
   const [savedTick, setSavedTick] = useState(0)
   const [savedSection, setSavedSection] = useState('')
+  const [settingsError, setSettingsError] = useState('')
   const [securityFeedback, setSecurityFeedback] = useState('')
   const [invoicePreviewGenerated, setInvoicePreviewGenerated] = useState(false)
   const [generatedPreviewKind, setGeneratedPreviewKind] = useState<'invoice' | 'receipt'>('invoice')
@@ -28,6 +29,7 @@ export function useSettingsDraftState(initialSettings: TailorSettings) {
     passwordDraft,
     savedSection,
     savedTick,
+    settingsError,
     securityFeedback,
     setConfirmPasswordDraft,
     setGeneratedPreviewKind,
@@ -38,6 +40,7 @@ export function useSettingsDraftState(initialSettings: TailorSettings) {
     setPasswordDraft,
     setSavedSection,
     setSavedTick,
+    setSettingsError,
     setSecurityFeedback,
     setSettings,
     setSignOutConfirmOpen,

@@ -19,6 +19,7 @@ export default function Business() {
       />
 
       <BusinessSetupProgress completeCount={completeCount} items={checklist} progress={progress} />
+      {state.settingsError ? <p className="inline-feedback-error" role="alert">{state.settingsError}</p> : null}
 
       <div className="stack gap-8">
         <p className="more-group-title">Business Info</p>

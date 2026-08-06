@@ -76,6 +76,7 @@ export default function SettingsPage() {
           </button>
         )}
       />
+      {state.settingsError ? <p className="inline-feedback-error" role="alert">{state.settingsError}</p> : null}
 
       <Link to="/settings/security" className="clay-card more-profile-card settings-profile-top-card">
         <div className="more-avatar clay-inset" aria-hidden>

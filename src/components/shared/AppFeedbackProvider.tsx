@@ -1,11 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import { AppFeedbackContext, type ConfirmOptions, type ToastTone } from './appFeedbackCore'
-
-type ToastState = {
-  id: number
-  message: string
-  tone: ToastTone
-} | null
+import { AppFeedbackContext, type ConfirmOptions } from './appFeedbackCore'
 
 type ConfirmState = {
   title: string
@@ -18,20 +12,9 @@ type ConfirmState = {
   resolve: (confirmed: boolean) => void
 } | null
 
-const TOAST_TIMEOUT_MS = 2600
-
 export function AppFeedbackProvider({ children }: { children: ReactNode }) {
-  const [toastState, setToastState] = useState<ToastState>(null)
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
   const [confirmInput, setConfirmInput] = useState('')
-
-  const toast = useCallback((message: string, tone: ToastTone = 'info') => {
-    const id = Date.now()
-    setToastState({ id, message, tone })
-    window.setTimeout(() => {
-      setToastState((current) => (current?.id === id ? null : current))
-    }, TOAST_TIMEOUT_MS)
-  }, [])
 
   const confirm = useCallback((options: ConfirmOptions) => {
     return new Promise<boolean>((resolve) => {
@@ -49,7 +32,7 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const value = useMemo(() => ({ confirm, toast }), [confirm, toast])
+  const value = useMemo(() => ({ confirm }), [confirm])
 
   function closeConfirm(confirmed: boolean): void {
     if (!confirmState) return
@@ -63,12 +46,6 @@ export function AppFeedbackProvider({ children }: { children: ReactNode }) {
   return (
     <AppFeedbackContext.Provider value={value}>
       {children}
-
-      {toastState ? (
-        <div className={`app-toast app-toast-${toastState.tone}`} role={toastState.tone === 'error' ? 'alert' : 'status'}>
-          {toastState.message}
-        </div>
-      ) : null}
 
       {confirmState ? (
         <div className="confirm-overlay" role="dialog" aria-modal="true" aria-label={confirmState.title} onClick={() => closeConfirm(false)}>

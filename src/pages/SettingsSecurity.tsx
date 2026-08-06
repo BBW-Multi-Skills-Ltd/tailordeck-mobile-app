@@ -14,6 +14,7 @@ export default function SettingsSecurity() {
         centered
         leading={<HistoryBackButton fallbackTo="/settings" />}
       />
+      {state.settingsError ? <p className="inline-feedback-error" role="alert">{state.settingsError}</p> : null}
 
       <article className="clay-card settings-standalone-card">
         <ProfileSettingsPanel

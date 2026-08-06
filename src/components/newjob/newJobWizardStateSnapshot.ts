@@ -51,6 +51,7 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     stepFourReviewMode: state.stepFourReviewMode,
     stepOneMeasurementsOpen: state.stepOneMeasurementsOpen,
     successOpen: state.successOpen,
+    wizardError: state.wizardError,
     worthIt: state.worthIt,
   }
 }

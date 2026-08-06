@@ -3,16 +3,15 @@ import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
 import { useUploadAvatarMutation } from '../../hooks/useProfileQueries'
 import { useUploadLogoMutation, useUploadSignatureMutation } from '../../hooks/useSettingsQueries'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
-import { useAppFeedback } from '../shared/appFeedbackCore'
 
 export type SettingsImageField = 'avatarUrl' | 'logoUrl' | 'signatureUrl'
 
 type UseSettingsImageUploadArgs = {
+  setSettingsError: Dispatch<SetStateAction<string>>
   setSettings: Dispatch<SetStateAction<TailorSettings>>
 }
 
-export function useSettingsImageUpload({ setSettings }: UseSettingsImageUploadArgs) {
-  const feedback = useAppFeedback()
+export function useSettingsImageUpload({ setSettings, setSettingsError }: UseSettingsImageUploadArgs) {
   const uploadAvatarMutation = useUploadAvatarMutation()
   const uploadLogoMutation = useUploadLogoMutation()
   const uploadSignatureMutation = useUploadSignatureMutation()
@@ -31,6 +30,7 @@ export function useSettingsImageUpload({ setSettings }: UseSettingsImageUploadAr
     if (!file) return
 
     try {
+      setSettingsError('')
       const preview = await readImagePreview(file)
       if (preview) setLocalImagePreview(field, preview)
 
@@ -51,7 +51,7 @@ export function useSettingsImageUpload({ setSettings }: UseSettingsImageUploadAr
         return next
       })
     } catch (error) {
-      feedback.toast(getServiceErrorMessage(error, 'Unable to upload image.'), 'error')
+      setSettingsError(getServiceErrorMessage(error, 'Unable to upload image.'))
     }
   }
 

@@ -19,6 +19,7 @@ export default function Documents() {
         centered
         leading={<HistoryBackButton fallbackTo="/more" />}
       />
+      {state.settingsError ? <p className="inline-feedback-error" role="alert">{state.settingsError}</p> : null}
 
       <InvoiceReceiptPanel
         locked={locked}

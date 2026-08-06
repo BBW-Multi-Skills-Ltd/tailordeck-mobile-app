@@ -3,6 +3,7 @@ import type { AppNotification, NotificationType } from '../../lib/notifications'
 export type NotificationFilter = 'all' | 'unread' | NotificationType
 
 export type NotificationDrawerProps = {
+  errorMessage?: string
   filter: NotificationFilter
   notifications: AppNotification[]
   onClearAll: () => void

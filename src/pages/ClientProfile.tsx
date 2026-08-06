@@ -1,5 +1,5 @@
 import { RotateCcw, Trash2 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import ClientJobHistory from '../components/clientprofile/ClientJobHistory'
 import ClientMeasurementsSection from '../components/clientprofile/ClientMeasurementsSection'
@@ -12,11 +12,13 @@ import PageHeader from '../components/shared/PageHeader'
 import { useClientQuery, useSoftDeleteClientMutation } from '../hooks/useClientQueries'
 import { useClientJobsQuery } from '../hooks/useJobQueries'
 import { mapJobRow } from '../services/mappers/jobMapper'
+import { getServiceErrorMessage } from '../services/serviceHelpers'
 
 export default function ClientProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const feedback = useAppFeedback()
+  const [deleteError, setDeleteError] = useState('')
   const clientQuery = useClientQuery(id)
   const client = clientQuery.data
   const clientJobsQuery = useClientJobsQuery(client?.id)
@@ -63,10 +65,11 @@ export default function ClientProfile() {
     if (!confirmed) return
 
     try {
+      setDeleteError('')
       await deleteClientMutation.mutateAsync(client.id)
       navigate('/clients')
     } catch (error) {
-      feedback.toast(error instanceof Error ? error.message : 'Unable to delete client.', 'error')
+      setDeleteError(getServiceErrorMessage(error, 'Unable to delete client.'))
     }
   }
 
@@ -94,6 +97,7 @@ export default function ClientProfile() {
       />
 
       <ClientJobHistory jobs={completedJobs} />
+      {deleteError ? <p className="inline-feedback-error" role="alert">{deleteError}</p> : null}
 
       <article className="client-repeat-card card">
         <div className="client-repeat-icon">

@@ -14,6 +14,7 @@ export default function SettingsReminders() {
         centered
         leading={<HistoryBackButton fallbackTo="/settings" />}
       />
+      {state.settingsError ? <p className="inline-feedback-error" role="alert">{state.settingsError}</p> : null}
 
       <RemindersPanel
         settings={state.settings}
