@@ -59,9 +59,11 @@ export async function getMonthlyStats(monthCount = 6): Promise<MonthlyStat[]> {
   }))
 }
 
-export async function getJobStatusBreakdown(): Promise<JobStatusBreakdown> {
+export async function getJobStatusBreakdown(monthKey?: string): Promise<JobStatusBreakdown> {
   await requireUserId()
-  const { data, error } = await supabase.rpc('get_dashboard_status_breakdown').maybeSingle<StatusBreakdownRpcRow>()
+  const { data, error } = await supabase
+    .rpc('get_dashboard_status_breakdown', { month_key: monthKey ?? null })
+    .maybeSingle<StatusBreakdownRpcRow>()
   if (error) throw error
   return {
     completed: data?.completed ?? 0,

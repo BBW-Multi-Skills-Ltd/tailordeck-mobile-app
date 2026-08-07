@@ -14,7 +14,8 @@ export type AccountSecurityPanelProps = {
   onPasswordChange: (value: string) => void
   onConfirmPasswordChange: (value: string) => void
   onSaveDetails: () => void | Promise<void>
-  onUpdatePassword: () => void | Promise<void>
+  onRequestPasswordCode: () => void | Promise<void>
+  onUpdatePassword: (securityCode?: string) => void | Promise<void>
   onDanger: (kind: AccountDangerAction) => void
 }
 

@@ -8,6 +8,10 @@ type PasswordSecuritySectionProps = {
   passwordDirty: boolean
   passwordDraft: string
   passwordReady: boolean
+  passwordCode: string
+  passwordCodeFeedback: string
+  passwordCodeRequested: boolean
+  passwordCodeRequesting: boolean
   passwordSavedFlash: boolean
   passwordSaving: boolean
   passwordStrength: number
@@ -16,6 +20,8 @@ type PasswordSecuritySectionProps = {
   showPasswordForm: boolean
   onConfirmPasswordChange: (value: string) => void
   onPasswordChange: (value: string) => void
+  onPasswordCodeChange: (value: string) => void
+  onRequestPasswordCode: () => void
   onPasswordUpdate: () => void
   onShowConfirmPasswordChange: (updater: (value: boolean) => boolean) => void
   onShowNewPasswordChange: (updater: (value: boolean) => boolean) => void
@@ -28,6 +34,8 @@ export function PasswordSecuritySection({
   confirmState,
   onConfirmPasswordChange,
   onPasswordChange,
+  onPasswordCodeChange,
+  onRequestPasswordCode,
   onPasswordUpdate,
   onShowConfirmPasswordChange,
   onShowNewPasswordChange,
@@ -35,6 +43,10 @@ export function PasswordSecuritySection({
   passwordDirty,
   passwordDraft,
   passwordReady,
+  passwordCode,
+  passwordCodeFeedback,
+  passwordCodeRequested,
+  passwordCodeRequesting,
   passwordSavedFlash,
   passwordSaving,
   passwordStrength,
@@ -86,10 +98,35 @@ export function PasswordSecuritySection({
               onToggle={() => onShowConfirmPasswordChange((value) => !value)}
             />
 
+            {passwordCodeRequested ? (
+              <div className="input-group settings-profile-field">
+                <label className="settings-profile-label">Security Code</label>
+                <input
+                  className="input settings-profile-input"
+                  inputMode="numeric"
+                  placeholder="Enter email code"
+                  value={passwordCode}
+                  onChange={(event) => onPasswordCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
+                />
+                {passwordCodeFeedback ? <span className="password-match-hint match">{passwordCodeFeedback}</span> : null}
+              </div>
+            ) : null}
+
+            {!passwordCodeRequested ? (
+              <button
+                type="button"
+                className="btn btn-secondary settings-panel-save-btn profile-settings-save-btn"
+                disabled={!passwordDirty || !passwordReady || passwordCodeRequesting}
+                onClick={onRequestPasswordCode}
+              >
+                {passwordCodeRequesting ? 'Sending...' : 'Send Security Code'}
+              </button>
+            ) : null}
+
             <button
               type="button"
               className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn profile-settings-update-btn${passwordSavedFlash ? ' profile-settings-action-saved' : ''}`}
-              disabled={!passwordDirty || !passwordReady || passwordSaving || passwordSavedFlash}
+              disabled={!passwordDirty || !passwordReady || !passwordCodeRequested || passwordCode.trim().length < 6 || passwordSaving || passwordSavedFlash}
               onClick={onPasswordUpdate}
             >
               {passwordSaving ? (

@@ -12,6 +12,7 @@ export default function AccountSecurityPanel({
   onFullNameChange,
   onPasswordChange,
   onPhoneChange,
+  onRequestPasswordCode,
   onSaveDetails,
   onUpdatePassword,
   passwordDraft,
@@ -29,6 +30,7 @@ export default function AccountSecurityPanel({
     currentDetails,
     onConfirmPasswordChange,
     onPasswordChange,
+    onRequestPasswordCode,
     onSaveDetails,
     onUpdatePassword,
     passwordDraft,
@@ -57,12 +59,18 @@ export default function AccountSecurityPanel({
         passwordReady={state.passwordReady}
         passwordSavedFlash={state.passwordSavedFlash}
         passwordSaving={state.passwordSaving}
+        passwordCode={state.passwordCode}
+        passwordCodeRequested={state.passwordCodeRequested}
+        passwordCodeFeedback={state.passwordCodeFeedback}
+        passwordCodeRequesting={state.passwordCodeRequesting}
         passwordStrength={state.passwordStrength}
         showConfirmPassword={state.showConfirmPassword}
         showNewPassword={state.showNewPassword}
         showPasswordForm={state.showPasswordForm}
         onConfirmPasswordChange={onConfirmPasswordChange}
         onPasswordChange={onPasswordChange}
+        onPasswordCodeChange={actions.setPasswordCode}
+        onRequestPasswordCode={actions.handleRequestPasswordCode}
         onPasswordUpdate={actions.handlePasswordUpdate}
         onShowConfirmPasswordChange={actions.setShowConfirmPassword}
         onShowNewPasswordChange={actions.setShowNewPassword}

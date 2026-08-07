@@ -276,10 +276,15 @@ body {
   text-align: center;
 }
 
-.route-guard-loading img {
+.route-guard-loading > img {
   width: 74px;
   height: auto;
   margin: 0 auto;
+}
+
+.route-guard-loading .onboarding-brand-logo {
+  width: 100%;
+  height: 100%;
 }
 
 .route-guard-loading p {
@@ -1570,6 +1575,29 @@ p { margin: 0; }
   opacity: 0.45;
   cursor: not-allowed;
   transform: none;
+}
+
+@media (max-width: 360px) {
+  .btn {
+    gap: 6px;
+    font-size: 13px;
+    min-height: 44px;
+    padding-inline: 12px;
+  }
+
+  .wizard-footer-inner,
+  .wizard-success-action-row,
+  .settings-security-action,
+  .home-setup-actions {
+    gap: 8px;
+  }
+
+  .wizard-success-action-row .btn-full,
+  .settings-security-action .btn,
+  .home-setup-actions .btn {
+    font-size: 12px;
+    padding-inline: 8px;
+  }
 }
 
 /* Primary button — burgundy */

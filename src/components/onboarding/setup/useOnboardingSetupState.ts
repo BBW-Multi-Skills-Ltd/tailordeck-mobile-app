@@ -8,6 +8,7 @@ import {
   localNigerianPhone,
   websiteLocalPart,
 } from '../../../lib/formValidation'
+import { scrollAppToTop, scrollFirstFormErrorIntoView } from '../../../lib/scroll'
 import { loadTailorSettings, type SocialPlatform } from '../../../lib/settings'
 import { onboardingSetupSteps, type OnboardingSetupStatus } from './onboardingSetupConfig'
 import type { OnboardingSetupFieldKey } from './OnboardingSetupFields'
@@ -75,6 +76,7 @@ export function useOnboardingSetupState() {
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) {
       setErrorKey((prev) => prev + 1)
+      scrollFirstFormErrorIntoView('.onboarding-page')
       return false
     }
     return true
@@ -110,6 +112,7 @@ export function useOnboardingSetupState() {
     if (!validateStep()) return
     if (step < onboardingSetupSteps.length - 1) {
       setStep((prev) => prev + 1)
+      scrollAppToTop('auto')
       return
     }
 

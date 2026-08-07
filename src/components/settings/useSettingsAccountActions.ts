@@ -3,7 +3,7 @@ import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
 import { useDeactivateAccountMutation, useRequestAccountDeletionMutation } from '../../hooks/useProfileQueries'
-import { updateLoginEmail, updateLoginPassword } from '../../services/authService'
+import { requestPasswordSecurityCode, updateLoginEmail, updateLoginPassword } from '../../services/authService'
 import { softDeleteAllJobs } from '../../services/jobService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
@@ -70,9 +70,23 @@ export function useSettingsAccountActions({
     }
   }
 
-  async function handleUpdatePassword(): Promise<void> {
+  async function handleRequestPasswordCode(): Promise<void> {
     try {
-      await updateLoginPassword({ password: passwordDraft, confirmPassword: confirmPasswordDraft })
+      await requestPasswordSecurityCode()
+      setSecurityFeedback('')
+    } catch (error) {
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to send security code.'))
+      throw error
+    }
+  }
+
+  async function handleUpdatePasswordWithCode(securityCode?: string): Promise<void> {
+    try {
+      await updateLoginPassword({
+        password: passwordDraft,
+        confirmPassword: confirmPasswordDraft,
+        nonce: securityCode?.trim() || undefined,
+      })
       setSecurityFeedback('')
     } catch (error) {
       setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update password.'))
@@ -116,6 +130,7 @@ export function useSettingsAccountActions({
     handleSaveLoginDetails,
     handleSecurityDanger,
     handleSignOut,
-    handleUpdatePassword,
+    handleRequestPasswordCode,
+    handleUpdatePasswordWithCode,
   }
 }

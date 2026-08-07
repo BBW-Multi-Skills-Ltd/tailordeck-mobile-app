@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientQuery } from '../../hooks/useClientQueries'
 import { useJobQuery } from '../../hooks/useJobQueries'
+import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import { hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
 import { createFieldAwareNewJobActions } from './newJobFieldAwareActions'
@@ -14,14 +15,6 @@ import { usePageNoScroll, useSharedItemTypeSync } from './useNewJobEffects'
 import { useNewJobPersistence } from './useNewJobPersistence'
 import { useRepeatClientPrefill } from './useRepeatClientPrefill'
 import { useNewJobWizardState } from './useNewJobWizardState'
-
-function scrollFirstWizardErrorIntoView(): void {
-  window.setTimeout(() => {
-    const firstError = document.querySelector('.wizard-page .input-invalid, .wizard-page .input-error-text')
-    if (!firstError) return
-    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  }, 80)
-}
 
 export function useNewJobWizard() {
   const navigate = useNavigate()
@@ -54,14 +47,14 @@ export function useNewJobWizard() {
     state.setFieldErrors(fieldErrors)
     if (hasNewJobErrors(fieldErrors)) {
       state.setFieldErrorKey((current) => current + 1)
-      scrollFirstWizardErrorIntoView()
+      scrollFirstFormErrorIntoView('.wizard-page')
       return false
     }
 
     const result = validateNewJobStep({ derived, repeatClientId, state, step: state.step })
     if (result.ok) return true
     state.setFieldErrorKey((current) => current + 1)
-    scrollFirstWizardErrorIntoView()
+    scrollFirstFormErrorIntoView('.wizard-page')
     state.setWizardError(result.message)
     return false
   }

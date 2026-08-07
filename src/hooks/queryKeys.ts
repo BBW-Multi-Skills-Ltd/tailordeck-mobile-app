@@ -9,7 +9,7 @@
   jobExpenses: (jobId: string) => ['job-expenses', jobId] as const,
   jobPersons: (jobId: string) => ['job-persons', jobId] as const,
   dashboardMonthly: (monthCount = 6) => ['dashboard', 'monthly', monthCount] as const,
-  dashboardStatus: ['dashboard', 'status'] as const,
+  dashboardStatus: (monthKey?: string) => ['dashboard', 'status', monthKey ?? 'all'] as const,
   recentJobs: (limit = 5) => ['dashboard', 'recent-jobs', limit] as const,
   notifications: ['notifications'] as const,
   supportTickets: ['support-tickets'] as const,

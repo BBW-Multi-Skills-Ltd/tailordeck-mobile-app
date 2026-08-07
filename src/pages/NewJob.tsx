@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { stepLabels } from '../components/newjob/newJobConfig'
 import {
   JobSuccessView,
@@ -10,15 +10,15 @@ import {
 } from '../components/newjob/NewJobChrome'
 import NewJobStepContent from '../components/newjob/NewJobStepContent'
 import { useNewJobWizard } from '../components/newjob/useNewJobWizard'
+import { scrollAppToTop } from '../lib/scroll'
 
 export default function NewJob() {
   const wizard = useNewJobWizard()
   const { actions, derived, sectionRef, state } = wizard
   const hasStepProgress = !state.stepFourReviewMode
 
-  useEffect(() => {
-    const page = document.querySelector('main.page')
-    page?.scrollTo({ top: 0, behavior: 'smooth' })
+  useLayoutEffect(() => {
+    scrollAppToTop('auto')
   }, [state.step, state.stepFourReviewMode])
 
   if (state.successOpen) {

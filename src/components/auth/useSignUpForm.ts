@@ -8,6 +8,7 @@ import {
   passwordChecks,
   passwordStrength,
 } from '../../lib/formValidation'
+import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import {
   loadTailorSettings,
   TAILOR_ONBOARDING_SYNC_PENDING_KEY,
@@ -92,6 +93,7 @@ export function useSignUpForm() {
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) {
       setErrorKey((prev) => prev + 1)
+      scrollFirstFormErrorIntoView('.auth-form')
       return false
     }
     return true

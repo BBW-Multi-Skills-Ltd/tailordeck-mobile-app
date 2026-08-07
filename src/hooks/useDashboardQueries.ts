@@ -6,8 +6,8 @@ export function useMonthlyStatsQuery(enabled = true, monthCount = 6) {
   return useQuery({ queryKey: queryKeys.dashboardMonthly(monthCount), queryFn: () => getMonthlyStats(monthCount), enabled })
 }
 
-export function useJobStatusBreakdownQuery(enabled = true) {
-  return useQuery({ queryKey: queryKeys.dashboardStatus, queryFn: getJobStatusBreakdown, enabled })
+export function useJobStatusBreakdownQuery(enabled = true, monthKey?: string) {
+  return useQuery({ queryKey: queryKeys.dashboardStatus(monthKey), queryFn: () => getJobStatusBreakdown(monthKey), enabled })
 }
 
 export function useRecentJobsQuery(limit = 5) {

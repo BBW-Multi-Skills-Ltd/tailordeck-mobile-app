@@ -11,7 +11,9 @@ const ACCOUNT_ACTION_SIGNING_OUT_KEY = 'tailordeck-account-action-signing-out'
 function RouteGuardFallback() {
   return (
     <main className="page-full route-guard-loading">
-      <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
+      <span className="onboarding-brand-icon" aria-hidden>
+        <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="" className="onboarding-brand-logo" />
+      </span>
       <p>Getting things ready...</p>
     </main>
   )

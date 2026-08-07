@@ -21,16 +21,16 @@ export default function Dashboard() {
   const analyticsAccess = useFeatureAccess(featureKeys.dashboardAnalytics)
   const analyticsUnlocked = analyticsAccess.data !== false
   const monthlyStatsQuery = useMonthlyStatsQuery(analyticsUnlocked)
-  const statusQuery = useJobStatusBreakdownQuery(analyticsUnlocked)
   const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
+  const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)
+  const baseMetrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats), [monthlyStats])
+  const visibleMonth = new Date(baseMetrics.latestDate.getFullYear(), baseMetrics.latestDate.getMonth() + monthOffset, 1)
+  const selectedMonthKey = `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, '0')}`
+  const statusQuery = useJobStatusBreakdownQuery(analyticsUnlocked && hasAnalytics, selectedMonthKey)
   const statusCounts = useMemo(
     () => statusQuery.data ?? { completed: 0, inProgress: 0, pending: 0 },
     [statusQuery.data],
   )
-  const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)
-  const baseMetrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts), [monthlyStats, statusCounts])
-  const visibleMonth = new Date(baseMetrics.latestDate.getFullYear(), baseMetrics.latestDate.getMonth() + monthOffset, 1)
-  const selectedMonthKey = `${visibleMonth.getFullYear()}-${String(visibleMonth.getMonth() + 1).padStart(2, '0')}`
   const metrics = useMemo(() => buildDashboardMetricsFromStats(monthlyStats, statusCounts, selectedMonthKey), [monthlyStats, selectedMonthKey, statusCounts])
   const visibleMonthLabel = visibleMonth.toLocaleDateString('en-NG', { month: 'long', year: 'numeric' })
   const canGoPrevious = visibleMonth > baseMetrics.firstDate

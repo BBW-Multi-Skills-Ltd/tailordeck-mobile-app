@@ -9,8 +9,9 @@ type UseAccountSecurityStateArgs = {
   confirmPasswordDraft: string
   onConfirmPasswordChange: (value: string) => void
   onPasswordChange: (value: string) => void
+  onRequestPasswordCode: () => void | Promise<void>
   onSaveDetails: () => void | Promise<void>
-  onUpdatePassword: () => void | Promise<void>
+  onUpdatePassword: (securityCode?: string) => void | Promise<void>
   passwordDraft: string
 }
 
@@ -19,6 +20,7 @@ export function useAccountSecurityState({
   currentDetails,
   onConfirmPasswordChange,
   onPasswordChange,
+  onRequestPasswordCode,
   onSaveDetails,
   onUpdatePassword,
   passwordDraft,
@@ -29,6 +31,10 @@ export function useAccountSecurityState({
   const [passwordSavedFlash, setPasswordSavedFlash] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordCode, setPasswordCode] = useState('')
+  const [passwordCodeRequested, setPasswordCodeRequested] = useState(false)
+  const [passwordCodeFeedback, setPasswordCodeFeedback] = useState('')
+  const [passwordCodeRequesting, setPasswordCodeRequesting] = useState(false)
   const [savedDetails, setSavedDetails] = useState(currentDetails)
   const [isEditingDetails, setIsEditingDetails] = useState(false)
 
@@ -40,6 +46,7 @@ export function useAccountSecurityState({
   const strength = passwordStrength(passwordDraft)
   const checks = passwordChecks(passwordDraft)
   const passwordReady = strength >= 4 && passwordDraft === confirmPasswordDraft
+  const passwordCodeReady = passwordCode.trim().length >= 6
   const confirmState: PasswordConfirmState = !passwordDraft || !confirmPasswordDraft
     ? 'idle'
     : passwordDraft === confirmPasswordDraft
@@ -67,18 +74,35 @@ export function useAccountSecurityState({
     window.setTimeout(() => setDetailsSavedFlash(false), 1200)
   }
 
+  async function handleRequestPasswordCode() {
+    if (!passwordReady || passwordCodeRequesting) return
+
+    setPasswordCodeRequesting(true)
+    try {
+      await onRequestPasswordCode()
+      setPasswordCode('')
+      setPasswordCodeRequested(true)
+      setPasswordCodeFeedback('Security code sent to your email.')
+    } finally {
+      setPasswordCodeRequesting(false)
+    }
+  }
+
   async function handlePasswordUpdate() {
-    if (!passwordDirty || !passwordReady || passwordSaving || passwordSavedFlash) return
+    if (!passwordDirty || !passwordReady || !passwordCodeRequested || !passwordCodeReady || passwordSaving || passwordSavedFlash) return
 
     setPasswordSaving(true)
     try {
-      await onUpdatePassword()
+      await onUpdatePassword(passwordCode)
       setPasswordSavedFlash(true)
       window.setTimeout(() => {
         setPasswordSavedFlash(false)
         setShowPasswordForm(false)
         onPasswordChange('')
         onConfirmPasswordChange('')
+        setPasswordCode('')
+        setPasswordCodeFeedback('')
+        setPasswordCodeRequested(false)
         setShowNewPassword(false)
         setShowConfirmPassword(false)
       }, 1100)
@@ -91,6 +115,8 @@ export function useAccountSecurityState({
     actions: {
       handleDetailsAction,
       handlePasswordUpdate,
+      handleRequestPasswordCode,
+      setPasswordCode,
       setShowConfirmPassword,
       setShowNewPassword,
       setShowPasswordForm,
@@ -100,6 +126,11 @@ export function useAccountSecurityState({
       isEditingDetails,
       passwordDirty,
       passwordReady,
+      passwordCode,
+      passwordCodeFeedback,
+      passwordCodeReady,
+      passwordCodeRequested,
+      passwordCodeRequesting,
       passwordStrength: strength,
       passwordChecks: checks,
       passwordConfirmState: confirmState,

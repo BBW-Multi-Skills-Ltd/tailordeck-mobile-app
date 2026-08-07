@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { type FieldErrors, isValidEmailFormat } from '../../lib/formValidation'
+import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import { signInWithEmail, signInWithGoogle } from '../../services/authService'
 
 type SignInFieldKey = 'email' | 'password' | 'form'
@@ -37,6 +38,7 @@ export function useSignInForm() {
     setErrors(nextErrors)
     if (Object.values(nextErrors).some(Boolean)) {
       setErrorKey((prev) => prev + 1)
+      scrollFirstFormErrorIntoView('.auth-form')
       return false
     }
     return true

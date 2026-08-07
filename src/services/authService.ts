@@ -90,9 +90,18 @@ export async function updateLoginEmail(email: string): Promise<boolean> {
   return true
 }
 
-export async function updateLoginPassword(input: { password: string; confirmPassword: string }) {
+export async function requestPasswordSecurityCode() {
+  const { data, error } = await supabase.auth.reauthenticate()
+  if (error) throw error
+  return data
+}
+
+export async function updateLoginPassword(input: { password: string; confirmPassword: string; nonce?: string }) {
   const safeInput = parseAuthInput(passwordUpdateSchema, input)
-  const { data, error } = await supabase.auth.updateUser({ password: safeInput.password })
+  const { data, error } = await supabase.auth.updateUser({
+    password: safeInput.password,
+    ...(safeInput.nonce ? { nonce: safeInput.nonce } : {}),
+  })
   if (error) throw error
   return data
 }

@@ -38,7 +38,7 @@ export function HomeSetupGuide({ settings, setupWasSkipped }: HomeSetupGuideProp
     },
     {
       label: 'Invoice details',
-      description: invoiceSetupComplete ? 'Invoice and receipt details are ready.' : 'Choose what appears on invoice & receipt.',
+      description: invoiceSetupComplete ? 'Invoice and receipt details are ready.' : 'Add info you want on invoice & receipt.',
       complete: invoiceSetupComplete,
       icon: FileText,
     },

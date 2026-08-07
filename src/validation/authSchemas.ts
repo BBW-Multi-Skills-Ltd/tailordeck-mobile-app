@@ -41,6 +41,7 @@ export const emailUpdateSchema = z.object({
 export const passwordUpdateSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string().min(1, 'Confirm your password.'),
+  nonce: z.string().trim().optional(),
 }).superRefine((input, context) => {
   if (input.password !== input.confirmPassword) {
     context.addIssue({ code: 'custom', path: ['confirmPassword'], message: 'Passwords do not match.' })
