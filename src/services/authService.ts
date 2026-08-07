@@ -71,7 +71,7 @@ export async function resendSignUpEmailOtp(email: string) {
 export async function sendPasswordReset(email: string) {
   const safeInput = parseAuthInput(passwordResetSchema, { email })
   const { data, error } = await supabase.auth.resetPasswordForEmail(safeInput.email, {
-    redirectTo: `${window.location.origin}/auth/signin`,
+    redirectTo: `${window.location.origin}/auth/reset-password`,
   })
   if (error) throw error
   return data
