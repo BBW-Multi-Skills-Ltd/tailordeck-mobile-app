@@ -59,9 +59,12 @@ export function useSettingsAccountActions({
     navigate('/auth/signin')
   }
 
-  async function handleSaveLoginDetails(): Promise<void> {
+  async function handleSaveLoginDetails(securityCode?: string): Promise<void> {
     try {
-      await updateLoginEmail(settings.profile.email)
+      await updateLoginEmail({
+        email: settings.profile.email,
+        nonce: securityCode?.trim() || undefined,
+      })
       await markSaved('Account & Security')
       setSecurityFeedback('')
     } catch (error) {
@@ -71,6 +74,16 @@ export function useSettingsAccountActions({
   }
 
   async function handleRequestPasswordCode(): Promise<void> {
+    try {
+      await requestPasswordSecurityCode()
+      setSecurityFeedback('')
+    } catch (error) {
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to send security code.'))
+      throw error
+    }
+  }
+
+  async function handleRequestDetailsCode(): Promise<void> {
     try {
       await requestPasswordSecurityCode()
       setSecurityFeedback('')
@@ -131,6 +144,7 @@ export function useSettingsAccountActions({
     handleSecurityDanger,
     handleSignOut,
     handleRequestPasswordCode,
+    handleRequestDetailsCode,
     handleUpdatePasswordWithCode,
   }
 }

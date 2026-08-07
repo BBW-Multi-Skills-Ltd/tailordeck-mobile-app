@@ -9,8 +9,9 @@ type UseAccountSecurityStateArgs = {
   confirmPasswordDraft: string
   onConfirmPasswordChange: (value: string) => void
   onPasswordChange: (value: string) => void
+  onRequestDetailsCode: () => void | Promise<void>
   onRequestPasswordCode: () => void | Promise<void>
-  onSaveDetails: () => void | Promise<void>
+  onSaveDetails: (securityCode?: string) => void | Promise<void>
   onUpdatePassword: (securityCode?: string) => void | Promise<void>
   passwordDraft: string
 }
@@ -20,6 +21,7 @@ export function useAccountSecurityState({
   currentDetails,
   onConfirmPasswordChange,
   onPasswordChange,
+  onRequestDetailsCode,
   onRequestPasswordCode,
   onSaveDetails,
   onUpdatePassword,
@@ -35,9 +37,15 @@ export function useAccountSecurityState({
   const [passwordCodeRequested, setPasswordCodeRequested] = useState(false)
   const [passwordCodeFeedback, setPasswordCodeFeedback] = useState('')
   const [passwordCodeRequesting, setPasswordCodeRequesting] = useState(false)
+  const [detailsCode, setDetailsCode] = useState('')
+  const [detailsCodeRequested, setDetailsCodeRequested] = useState(false)
+  const [detailsCodeFeedback, setDetailsCodeFeedback] = useState('')
+  const [detailsCodeRequesting, setDetailsCodeRequesting] = useState(false)
+  const [detailsSaving, setDetailsSaving] = useState(false)
   const [savedDetails, setSavedDetails] = useState(currentDetails)
   const [isEditingDetails, setIsEditingDetails] = useState(false)
 
+  const emailChanged = currentDetails.email.trim().toLowerCase() !== savedDetails.email.trim().toLowerCase()
   const detailsDirty =
     currentDetails.fullName !== savedDetails.fullName ||
     currentDetails.email !== savedDetails.email ||
@@ -58,6 +66,9 @@ export function useAccountSecurityState({
   async function handleDetailsAction() {
     if (!isEditingDetails) {
       setSavedDetails(currentDetails)
+      setDetailsCode('')
+      setDetailsCodeFeedback('')
+      setDetailsCodeRequested(false)
       setIsEditingDetails(true)
       return
     }
@@ -67,11 +78,40 @@ export function useAccountSecurityState({
       return
     }
 
-    await onSaveDetails()
-    setSavedDetails(currentDetails)
-    setIsEditingDetails(false)
-    setDetailsSavedFlash(true)
-    window.setTimeout(() => setDetailsSavedFlash(false), 1200)
+    if (emailChanged && !detailsCodeRequested) {
+      await handleRequestDetailsCode()
+      return
+    }
+
+    if (emailChanged && detailsCode.trim().length < 6) return
+
+    setDetailsSaving(true)
+    try {
+      await onSaveDetails(emailChanged ? detailsCode : undefined)
+      setSavedDetails(currentDetails)
+      setIsEditingDetails(false)
+      setDetailsCode('')
+      setDetailsCodeFeedback('')
+      setDetailsCodeRequested(false)
+      setDetailsSavedFlash(true)
+      window.setTimeout(() => setDetailsSavedFlash(false), 1200)
+    } finally {
+      setDetailsSaving(false)
+    }
+  }
+
+  async function handleRequestDetailsCode() {
+    if (!emailChanged || detailsCodeRequesting) return
+
+    setDetailsCodeRequesting(true)
+    try {
+      await onRequestDetailsCode()
+      setDetailsCode('')
+      setDetailsCodeRequested(true)
+      setDetailsCodeFeedback('Security code sent to your current email.')
+    } finally {
+      setDetailsCodeRequesting(false)
+    }
   }
 
   async function handleRequestPasswordCode() {
@@ -115,7 +155,9 @@ export function useAccountSecurityState({
     actions: {
       handleDetailsAction,
       handlePasswordUpdate,
+      handleRequestDetailsCode,
       handleRequestPasswordCode,
+      setDetailsCode,
       setPasswordCode,
       setShowConfirmPassword,
       setShowNewPassword,
@@ -123,6 +165,12 @@ export function useAccountSecurityState({
     },
     state: {
       detailsSavedFlash,
+      detailsCode,
+      detailsCodeFeedback,
+      detailsCodeRequested,
+      detailsCodeRequesting,
+      detailsSaving,
+      emailChanged,
       isEditingDetails,
       passwordDirty,
       passwordReady,

@@ -2,11 +2,18 @@ import { CheckCircle2, Mail, Phone, UserRound } from 'lucide-react'
 
 type LoginDetailsSectionProps = {
   detailsSavedFlash: boolean
+  detailsCode: string
+  detailsCodeFeedback: string
+  detailsCodeRequested: boolean
+  detailsCodeRequesting: boolean
+  detailsSaving: boolean
   email: string
+  emailChanged: boolean
   fullName: string
   isEditingDetails: boolean
   phoneLocalPart: string
   onDetailsAction: () => void | Promise<void>
+  onDetailsCodeChange: (value: string) => void
   onEmailChange: (value: string) => void
   onFullNameChange: (value: string) => void
   onPhoneChange: (value: string) => void
@@ -14,15 +21,26 @@ type LoginDetailsSectionProps = {
 
 export function LoginDetailsSection({
   detailsSavedFlash,
+  detailsCode,
+  detailsCodeFeedback,
+  detailsCodeRequested,
+  detailsCodeRequesting,
+  detailsSaving,
   email,
+  emailChanged,
   fullName,
   isEditingDetails,
   onDetailsAction,
+  onDetailsCodeChange,
   onEmailChange,
   onFullNameChange,
   onPhoneChange,
   phoneLocalPart,
 }: LoginDetailsSectionProps) {
+  const needsEmailCode = isEditingDetails && emailChanged
+  const canSaveEmailChange = !needsEmailCode || (detailsCodeRequested && detailsCode.trim().length >= 6)
+  const actionLabel = getActionLabel({ detailsCodeRequested, detailsCodeRequesting, detailsSavedFlash, detailsSaving, isEditingDetails, needsEmailCode })
+
   return (
     <section className="stack gap-8">
       <p className="more-group-title">Login Details</p>
@@ -57,18 +75,56 @@ export function LoginDetailsSection({
         </div>
       </div>
 
-      <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} onClick={() => void onDetailsAction()}>
+      {needsEmailCode ? (
+        <div className="clay-card more-group-card profile-settings-form-card profile-settings-code-card">
+          <div className="input-group settings-profile-field">
+            <label className="settings-profile-label">Security Code</label>
+            <input
+              className="input settings-profile-input"
+              inputMode="numeric"
+              placeholder="Enter email code"
+              value={detailsCode}
+              disabled={!detailsCodeRequested}
+              onChange={(event) => onDetailsCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
+            />
+            {detailsCodeFeedback ? <span className="password-match-hint match">{detailsCodeFeedback}</span> : null}
+            {!detailsCodeRequested ? <span className="password-match-hint partial">Email changes require a security code.</span> : null}
+          </div>
+        </div>
+      ) : null}
+
+      <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} disabled={detailsSaving || detailsSavedFlash || detailsCodeRequesting || (needsEmailCode && detailsCodeRequested && !canSaveEmailChange)} onClick={() => void onDetailsAction()}>
         {detailsSavedFlash ? (
           <>
             <CheckCircle2 size={15} />
             Saved
           </>
-        ) : isEditingDetails ? (
-          'Save Changes'
         ) : (
-          'Edit Details'
+          actionLabel
         )}
       </button>
     </section>
   )
+}
+
+function getActionLabel({
+  detailsCodeRequested,
+  detailsCodeRequesting,
+  detailsSavedFlash,
+  detailsSaving,
+  isEditingDetails,
+  needsEmailCode,
+}: {
+  detailsCodeRequested: boolean
+  detailsCodeRequesting: boolean
+  detailsSavedFlash: boolean
+  detailsSaving: boolean
+  isEditingDetails: boolean
+  needsEmailCode: boolean
+}) {
+  if (detailsSavedFlash) return 'Saved'
+  if (detailsSaving) return 'Saving...'
+  if (!isEditingDetails) return 'Edit Details'
+  if (needsEmailCode && !detailsCodeRequested) return detailsCodeRequesting ? 'Sending...' : 'Send Security Code'
+  return 'Save Changes'
 }

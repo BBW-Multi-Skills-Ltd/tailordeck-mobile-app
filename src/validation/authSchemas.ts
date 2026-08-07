@@ -36,6 +36,7 @@ export const emailOtpSchema = z.object({
 
 export const emailUpdateSchema = z.object({
   email: emailSchema,
+  nonce: z.string().trim().optional(),
 })
 
 export const passwordUpdateSchema = z.object({

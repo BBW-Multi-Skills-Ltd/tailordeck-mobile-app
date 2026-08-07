@@ -77,15 +77,18 @@ export async function sendPasswordReset(email: string) {
   return data
 }
 
-export async function updateLoginEmail(email: string): Promise<boolean> {
-  const safeInput = parseAuthInput(emailUpdateSchema, { email })
+export async function updateLoginEmail(input: { email: string; nonce?: string }): Promise<boolean> {
+  const safeInput = parseAuthInput(emailUpdateSchema, input)
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError) throw userError
 
   const currentEmail = userData.user?.email?.trim().toLowerCase()
   if (currentEmail === safeInput.email) return false
 
-  const { error } = await supabase.auth.updateUser({ email: safeInput.email })
+  const { error } = await supabase.auth.updateUser({
+    email: safeInput.email,
+    ...(safeInput.nonce ? { nonce: safeInput.nonce } : {}),
+  })
   if (error) throw error
   return true
 }

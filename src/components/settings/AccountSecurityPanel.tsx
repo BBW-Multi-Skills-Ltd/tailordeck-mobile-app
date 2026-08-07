@@ -12,6 +12,7 @@ export default function AccountSecurityPanel({
   onFullNameChange,
   onPasswordChange,
   onPhoneChange,
+  onRequestDetailsCode,
   onRequestPasswordCode,
   onSaveDetails,
   onUpdatePassword,
@@ -30,6 +31,7 @@ export default function AccountSecurityPanel({
     currentDetails,
     onConfirmPasswordChange,
     onPasswordChange,
+    onRequestDetailsCode,
     onRequestPasswordCode,
     onSaveDetails,
     onUpdatePassword,
@@ -40,11 +42,18 @@ export default function AccountSecurityPanel({
     <div className="stack gap-7 settings-profile-grouped-form">
       <LoginDetailsSection
         detailsSavedFlash={state.detailsSavedFlash}
+        detailsCode={state.detailsCode}
+        detailsCodeFeedback={state.detailsCodeFeedback}
+        detailsCodeRequested={state.detailsCodeRequested}
+        detailsCodeRequesting={state.detailsCodeRequesting}
+        detailsSaving={state.detailsSaving}
         email={settings.profile.email}
+        emailChanged={state.emailChanged}
         fullName={settings.profile.fullName}
         isEditingDetails={state.isEditingDetails}
         phoneLocalPart={profilePhoneLocalPart}
         onDetailsAction={actions.handleDetailsAction}
+        onDetailsCodeChange={actions.setDetailsCode}
         onEmailChange={onEmailChange}
         onFullNameChange={onFullNameChange}
         onPhoneChange={onPhoneChange}
