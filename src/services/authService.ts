@@ -93,6 +93,17 @@ export async function updateLoginEmail(input: { email: string; nonce?: string })
   return true
 }
 
+export async function verifyLoginEmailChangeOtp(input: { email: string; token: string }) {
+  const safeInput = parseAuthInput(emailOtpSchema, input)
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: safeInput.email,
+    token: safeInput.token,
+    type: 'email_change',
+  })
+  if (error) throw error
+  return data
+}
+
 export async function requestPasswordSecurityCode() {
   const { data, error } = await supabase.auth.reauthenticate()
   if (error) throw error

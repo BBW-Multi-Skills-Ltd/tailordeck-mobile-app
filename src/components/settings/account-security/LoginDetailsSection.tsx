@@ -7,6 +7,9 @@ type LoginDetailsSectionProps = {
   detailsCodeRequested: boolean
   detailsCodeRequesting: boolean
   detailsSaving: boolean
+  emailConfirmCode: string
+  emailConfirming: boolean
+  emailChangePendingEmail: string
   email: string
   emailChanged: boolean
   fullName: string
@@ -14,6 +17,8 @@ type LoginDetailsSectionProps = {
   phoneLocalPart: string
   onDetailsAction: () => void | Promise<void>
   onDetailsCodeChange: (value: string) => void
+  onEmailConfirmAction: () => void | Promise<void>
+  onEmailConfirmCodeChange: (value: string) => void
   onEmailChange: (value: string) => void
   onFullNameChange: (value: string) => void
   onPhoneChange: (value: string) => void
@@ -26,18 +31,24 @@ export function LoginDetailsSection({
   detailsCodeRequested,
   detailsCodeRequesting,
   detailsSaving,
+  emailConfirmCode,
+  emailConfirming,
+  emailChangePendingEmail,
   email,
   emailChanged,
   fullName,
   isEditingDetails,
   onDetailsAction,
   onDetailsCodeChange,
+  onEmailConfirmAction,
+  onEmailConfirmCodeChange,
   onEmailChange,
   onFullNameChange,
   onPhoneChange,
   phoneLocalPart,
 }: LoginDetailsSectionProps) {
   const needsEmailCode = isEditingDetails && emailChanged
+  const hasPendingEmailConfirmation = Boolean(emailChangePendingEmail)
   const canSaveEmailChange = !needsEmailCode || (detailsCodeRequested && detailsCode.trim().length >= 6)
   const actionLabel = getActionLabel({ detailsCodeRequested, detailsCodeRequesting, detailsSavedFlash, detailsSaving, isEditingDetails, needsEmailCode })
 
@@ -93,16 +104,37 @@ export function LoginDetailsSection({
         </div>
       ) : null}
 
-      <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} disabled={detailsSaving || detailsSavedFlash || detailsCodeRequesting || (needsEmailCode && detailsCodeRequested && !canSaveEmailChange)} onClick={() => void onDetailsAction()}>
-        {detailsSavedFlash ? (
-          <>
-            <CheckCircle2 size={15} />
-            Saved
-          </>
-        ) : (
-          actionLabel
-        )}
-      </button>
+      {hasPendingEmailConfirmation ? (
+        <div className="clay-card more-group-card profile-settings-form-card profile-settings-code-card">
+          <div className="input-group settings-profile-field">
+            <label className="settings-profile-label">Confirm New Email</label>
+            <input
+              className="input settings-profile-input"
+              inputMode="numeric"
+              placeholder="Enter new email code"
+              value={emailConfirmCode}
+              onChange={(event) => onEmailConfirmCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
+            />
+            <span className="password-match-hint partial">Code sent to {emailChangePendingEmail}.</span>
+          </div>
+          <button type="button" className="btn btn-primary settings-panel-save-btn profile-settings-save-btn" disabled={emailConfirming || emailConfirmCode.trim().length < 6} onClick={() => void onEmailConfirmAction()}>
+            {emailConfirming ? 'Confirming...' : 'Confirm Email'}
+          </button>
+        </div>
+      ) : null}
+
+      {!hasPendingEmailConfirmation ? (
+        <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} disabled={detailsSaving || detailsSavedFlash || detailsCodeRequesting || (needsEmailCode && detailsCodeRequested && !canSaveEmailChange)} onClick={() => void onDetailsAction()}>
+          {detailsSavedFlash ? (
+            <>
+              <CheckCircle2 size={15} />
+              Saved
+            </>
+          ) : (
+            actionLabel
+          )}
+        </button>
+      ) : null}
     </section>
   )
 }

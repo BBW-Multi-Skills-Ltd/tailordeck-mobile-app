@@ -9,6 +9,7 @@ export default function AccountSecurityPanel({
   onConfirmPasswordChange,
   onDanger,
   onEmailChange,
+  onConfirmEmailChange,
   onFullNameChange,
   onPasswordChange,
   onPhoneChange,
@@ -30,6 +31,7 @@ export default function AccountSecurityPanel({
     confirmPasswordDraft,
     currentDetails,
     onConfirmPasswordChange,
+    onConfirmEmailChange,
     onPasswordChange,
     onRequestDetailsCode,
     onRequestPasswordCode,
@@ -47,6 +49,9 @@ export default function AccountSecurityPanel({
         detailsCodeRequested={state.detailsCodeRequested}
         detailsCodeRequesting={state.detailsCodeRequesting}
         detailsSaving={state.detailsSaving}
+        emailConfirmCode={state.emailConfirmCode}
+        emailConfirming={state.emailConfirming}
+        emailChangePendingEmail={state.emailChangePendingEmail}
         email={settings.profile.email}
         emailChanged={state.emailChanged}
         fullName={settings.profile.fullName}
@@ -54,6 +59,8 @@ export default function AccountSecurityPanel({
         phoneLocalPart={profilePhoneLocalPart}
         onDetailsAction={actions.handleDetailsAction}
         onDetailsCodeChange={actions.setDetailsCode}
+        onEmailConfirmAction={actions.handleConfirmEmailChange}
+        onEmailConfirmCodeChange={actions.setEmailConfirmCode}
         onEmailChange={onEmailChange}
         onFullNameChange={onFullNameChange}
         onPhoneChange={onPhoneChange}

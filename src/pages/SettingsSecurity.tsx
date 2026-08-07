@@ -37,6 +37,7 @@ export default function SettingsSecurity() {
         onPasswordChange={actions.setPasswordDraft}
         onConfirmPasswordChange={actions.setConfirmPasswordDraft}
         onSaveDetails={actions.handleSaveLoginDetails}
+        onConfirmEmailChange={actions.handleConfirmEmailChange}
         onRequestDetailsCode={actions.handleRequestDetailsCode}
         onRequestPasswordCode={actions.handleRequestPasswordCode}
         onUpdatePassword={actions.handleUpdatePasswordWithCode}

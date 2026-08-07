@@ -3,7 +3,9 @@ import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
 import { useDeactivateAccountMutation, useRequestAccountDeletionMutation } from '../../hooks/useProfileQueries'
-import { requestPasswordSecurityCode, updateLoginEmail, updateLoginPassword } from '../../services/authService'
+import { requestPasswordSecurityCode, updateLoginEmail, updateLoginPassword, verifyLoginEmailChangeOtp } from '../../services/authService'
+import { supabase } from '../../lib/supabase'
+import { syncProfileEmailFromAuth } from '../../services/profileService'
 import { softDeleteAllJobs } from '../../services/jobService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
@@ -59,16 +61,48 @@ export function useSettingsAccountActions({
     navigate('/auth/signin')
   }
 
-  async function handleSaveLoginDetails(securityCode?: string): Promise<void> {
+  async function handleSaveLoginDetails(securityCode?: string): Promise<{ emailChangePending: boolean; pendingEmail?: string }> {
     try {
-      await updateLoginEmail({
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError) throw authError
+      const currentAuthEmail = authData.user?.email?.trim().toLowerCase() || settings.profile.email
+      const nextEmail = settings.profile.email.trim().toLowerCase()
+      const emailChanged = nextEmail !== currentAuthEmail
+
+      const emailChangePending = await updateLoginEmail({
         email: settings.profile.email,
         nonce: securityCode?.trim() || undefined,
       })
-      await markSaved('Account & Security')
+
+      await markSaved('Account & Security', {
+        ...settings,
+        profile: {
+          ...settings.profile,
+          email: emailChangePending ? currentAuthEmail : settings.profile.email,
+        },
+      })
       setSecurityFeedback('')
+      return { emailChangePending, pendingEmail: emailChanged ? nextEmail : undefined }
     } catch (error) {
       setSecurityFeedback(getServiceErrorMessage(error, 'Unable to save account details.'))
+      throw error
+    }
+  }
+
+  async function handleConfirmEmailChange(email: string, token: string): Promise<void> {
+    try {
+      await verifyLoginEmailChangeOtp({ email, token })
+      await syncProfileEmailFromAuth()
+      await markSaved('Account & Security', {
+        ...settings,
+        profile: {
+          ...settings.profile,
+          email: email.trim().toLowerCase(),
+        },
+      })
+      setSecurityFeedback('')
+    } catch (error) {
+      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to confirm email change.'))
       throw error
     }
   }
@@ -145,6 +179,7 @@ export function useSettingsAccountActions({
     handleSignOut,
     handleRequestPasswordCode,
     handleRequestDetailsCode,
+    handleConfirmEmailChange,
     handleUpdatePasswordWithCode,
   }
 }

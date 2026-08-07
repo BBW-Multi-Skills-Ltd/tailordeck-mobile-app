@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue } from './authContextCore'
 import { syncPendingOnboardingSettings } from '../services/onboardingService'
+import { syncProfileEmailFromAuth } from '../services/profileService'
 
 const AUTH_BOOT_TIMEOUT_MS = 5000
 
@@ -54,7 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     syncPendingOnboardingSettings().catch((error) => {
       console.warn('Unable to sync pending onboarding settings:', error)
     })
-  }, [session?.user.id])
+    syncProfileEmailFromAuth().catch((error) => {
+      console.warn('Unable to sync profile email from auth:', error)
+    })
+  }, [session?.user.email, session?.user.id])
 
   const value = useMemo<AuthContextValue>(
     () => ({

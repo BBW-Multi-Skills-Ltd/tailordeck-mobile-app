@@ -31,6 +31,31 @@ export async function updateProfile(
   return data
 }
 
+export async function syncProfileEmailFromAuth(): Promise<ProfileRow | null> {
+  const { data: authData, error: authError } = await supabase.auth.getUser()
+  if (authError) throw authError
+  const authEmail = authData.user?.email?.trim().toLowerCase()
+  const userId = authData.user?.id
+  if (!authEmail || !userId) return null
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle<ProfileRow>()
+  if (profileError) throw profileError
+  if (!profile || profile.email?.trim().toLowerCase() === authEmail) return profile
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ email: authEmail, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .select('*')
+    .maybeSingle<ProfileRow>()
+  if (error) throw error
+  return data
+}
+
 export async function activateVerifiedProfile(input: { fullName: string; email: string; phone: string }): Promise<ProfileRow> {
   const { data, error } = await supabase.rpc('activate_verified_profile', {
     full_name_value: input.fullName,
