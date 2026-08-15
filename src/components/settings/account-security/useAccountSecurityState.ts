@@ -45,8 +45,11 @@ export function useAccountSecurityState({
   const [detailsCodeRequesting, setDetailsCodeRequesting] = useState(false)
   const [detailsSaving, setDetailsSaving] = useState(false)
   const [emailConfirmCode, setEmailConfirmCode] = useState('')
+  const [emailCurrentCode, setEmailCurrentCode] = useState('')
+  const [emailCurrentConfirmed, setEmailCurrentConfirmed] = useState(false)
   const [emailConfirming, setEmailConfirming] = useState(false)
   const [emailChangePendingEmail, setEmailChangePendingEmail] = useState('')
+  const [emailChangeCurrentEmail, setEmailChangeCurrentEmail] = useState('')
   const [savedDetails, setSavedDetails] = useState(currentDetails)
   const [isEditingDetails, setIsEditingDetails] = useState(false)
 
@@ -83,21 +86,17 @@ export function useAccountSecurityState({
       return
     }
 
-    if (emailChanged && !detailsCodeRequested) {
-      await handleRequestDetailsCode()
-      return
-    }
-
-    if (emailChanged && detailsCode.trim().length < 6) return
-
     setDetailsSaving(true)
     try {
-      const result = await onSaveDetails(emailChanged ? detailsCode : undefined)
+      const result = await onSaveDetails()
       if (result.emailChangePending && result.pendingEmail) {
         setEmailChangePendingEmail(result.pendingEmail)
+        setEmailChangeCurrentEmail(savedDetails.email.trim().toLowerCase())
         setEmailConfirmCode('')
+        setEmailCurrentCode('')
+        setEmailCurrentConfirmed(false)
         setDetailsCode('')
-        setDetailsCodeFeedback('Code sent to your new email.')
+        setDetailsCodeFeedback('Check both email addresses for confirmation codes.')
         setDetailsCodeRequested(false)
         setDetailsSaving(false)
         return
@@ -116,19 +115,31 @@ export function useAccountSecurityState({
 
   async function handleConfirmEmailChange() {
     const pendingEmail = emailChangePendingEmail.trim().toLowerCase()
-    if (!pendingEmail || emailConfirmCode.trim().length < 6 || emailConfirming) return
+    const currentEmail = emailChangeCurrentEmail.trim().toLowerCase()
+    if (!pendingEmail || !currentEmail || emailConfirmCode.trim().length < 6 || (!emailCurrentConfirmed && emailCurrentCode.trim().length < 6) || emailConfirming) return
 
     setEmailConfirming(true)
     try {
+      setDetailsCodeFeedback('')
+      if (!emailCurrentConfirmed) {
+        await onConfirmEmailChange(currentEmail, emailCurrentCode)
+        setEmailCurrentConfirmed(true)
+      }
       await onConfirmEmailChange(pendingEmail, emailConfirmCode)
       const nextDetails = { ...currentDetails, email: pendingEmail }
       setSavedDetails(nextDetails)
       setEmailChangePendingEmail('')
+      setEmailChangeCurrentEmail('')
       setEmailConfirmCode('')
+      setEmailCurrentCode('')
+      setEmailCurrentConfirmed(false)
       setDetailsCodeFeedback('')
       setIsEditingDetails(false)
       setDetailsSavedFlash(true)
       window.setTimeout(() => setDetailsSavedFlash(false), 1200)
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : 'Unable to confirm email change.'
+      setDetailsCodeFeedback(message)
     } finally {
       setEmailConfirming(false)
     }
@@ -194,6 +205,7 @@ export function useAccountSecurityState({
       handleRequestPasswordCode,
       setDetailsCode,
       setEmailConfirmCode,
+      setEmailCurrentCode,
       setPasswordCode,
       setShowConfirmPassword,
       setShowNewPassword,
@@ -207,8 +219,11 @@ export function useAccountSecurityState({
       detailsCodeRequesting,
       detailsSaving,
       emailConfirmCode,
+      emailCurrentCode,
+      emailCurrentConfirmed,
       emailConfirming,
       emailChangePendingEmail,
+      emailChangeCurrentEmail,
       emailChanged,
       isEditingDetails,
       passwordDirty,

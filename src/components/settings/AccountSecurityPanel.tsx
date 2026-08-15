@@ -44,13 +44,13 @@ export default function AccountSecurityPanel({
     <div className="stack gap-7 settings-profile-grouped-form">
       <LoginDetailsSection
         detailsSavedFlash={state.detailsSavedFlash}
-        detailsCode={state.detailsCode}
         detailsCodeFeedback={state.detailsCodeFeedback}
-        detailsCodeRequested={state.detailsCodeRequested}
-        detailsCodeRequesting={state.detailsCodeRequesting}
         detailsSaving={state.detailsSaving}
         emailConfirmCode={state.emailConfirmCode}
+        emailCurrentCode={state.emailCurrentCode}
+        emailCurrentConfirmed={state.emailCurrentConfirmed}
         emailConfirming={state.emailConfirming}
+        emailChangeCurrentEmail={state.emailChangeCurrentEmail}
         emailChangePendingEmail={state.emailChangePendingEmail}
         email={settings.profile.email}
         emailChanged={state.emailChanged}
@@ -58,9 +58,9 @@ export default function AccountSecurityPanel({
         isEditingDetails={state.isEditingDetails}
         phoneLocalPart={profilePhoneLocalPart}
         onDetailsAction={actions.handleDetailsAction}
-        onDetailsCodeChange={actions.setDetailsCode}
         onEmailConfirmAction={actions.handleConfirmEmailChange}
         onEmailConfirmCodeChange={actions.setEmailConfirmCode}
+        onEmailCurrentCodeChange={actions.setEmailCurrentCode}
         onEmailChange={onEmailChange}
         onFullNameChange={onFullNameChange}
         onPhoneChange={onPhoneChange}

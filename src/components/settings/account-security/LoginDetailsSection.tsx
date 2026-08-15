@@ -2,13 +2,13 @@ import { CheckCircle2, Mail, Phone, UserRound } from 'lucide-react'
 
 type LoginDetailsSectionProps = {
   detailsSavedFlash: boolean
-  detailsCode: string
   detailsCodeFeedback: string
-  detailsCodeRequested: boolean
-  detailsCodeRequesting: boolean
   detailsSaving: boolean
   emailConfirmCode: string
+  emailCurrentCode: string
+  emailCurrentConfirmed: boolean
   emailConfirming: boolean
+  emailChangeCurrentEmail: string
   emailChangePendingEmail: string
   email: string
   emailChanged: boolean
@@ -16,9 +16,9 @@ type LoginDetailsSectionProps = {
   isEditingDetails: boolean
   phoneLocalPart: string
   onDetailsAction: () => void | Promise<void>
-  onDetailsCodeChange: (value: string) => void
   onEmailConfirmAction: () => void | Promise<void>
   onEmailConfirmCodeChange: (value: string) => void
+  onEmailCurrentCodeChange: (value: string) => void
   onEmailChange: (value: string) => void
   onFullNameChange: (value: string) => void
   onPhoneChange: (value: string) => void
@@ -26,22 +26,22 @@ type LoginDetailsSectionProps = {
 
 export function LoginDetailsSection({
   detailsSavedFlash,
-  detailsCode,
   detailsCodeFeedback,
-  detailsCodeRequested,
-  detailsCodeRequesting,
   detailsSaving,
   emailConfirmCode,
+  emailCurrentCode,
+  emailCurrentConfirmed,
   emailConfirming,
+  emailChangeCurrentEmail,
   emailChangePendingEmail,
   email,
   emailChanged,
   fullName,
   isEditingDetails,
   onDetailsAction,
-  onDetailsCodeChange,
   onEmailConfirmAction,
   onEmailConfirmCodeChange,
+  onEmailCurrentCodeChange,
   onEmailChange,
   onFullNameChange,
   onPhoneChange,
@@ -49,8 +49,8 @@ export function LoginDetailsSection({
 }: LoginDetailsSectionProps) {
   const needsEmailCode = isEditingDetails && emailChanged
   const hasPendingEmailConfirmation = Boolean(emailChangePendingEmail)
-  const canSaveEmailChange = !needsEmailCode || (detailsCodeRequested && detailsCode.trim().length >= 6)
-  const actionLabel = getActionLabel({ detailsCodeRequested, detailsCodeRequesting, detailsSavedFlash, detailsSaving, isEditingDetails, needsEmailCode })
+  const emailConfirmationFailed = /unable|invalid|expired|failed|error/i.test(detailsCodeFeedback)
+  const actionLabel = getActionLabel({ detailsSavedFlash, detailsSaving, isEditingDetails, needsEmailCode })
 
   return (
     <section className="stack gap-8">
@@ -86,26 +86,20 @@ export function LoginDetailsSection({
         </div>
       </div>
 
-      {needsEmailCode ? (
+      {hasPendingEmailConfirmation ? (
         <div className="clay-card more-group-card profile-settings-form-card profile-settings-code-card">
           <div className="input-group settings-profile-field">
-            <label className="settings-profile-label">Security Code</label>
+            <label className="settings-profile-label">Current Email Code</label>
             <input
               className="input settings-profile-input"
               inputMode="numeric"
-              placeholder="Enter email code"
-              value={detailsCode}
-              disabled={!detailsCodeRequested}
-              onChange={(event) => onDetailsCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
+              placeholder="Code from current email"
+              value={emailCurrentCode}
+              disabled={emailCurrentConfirmed}
+              onChange={(event) => onEmailCurrentCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
             />
-            {detailsCodeFeedback ? <span className="password-match-hint match">{detailsCodeFeedback}</span> : null}
-            {!detailsCodeRequested ? <span className="password-match-hint partial">Email changes require a security code.</span> : null}
+            <span className={`password-match-hint ${emailCurrentConfirmed ? 'match' : 'partial'}`}>{emailCurrentConfirmed ? 'Current email confirmed.' : `Sent to ${emailChangeCurrentEmail}.`}</span>
           </div>
-        </div>
-      ) : null}
-
-      {hasPendingEmailConfirmation ? (
-        <div className="clay-card more-group-card profile-settings-form-card profile-settings-code-card">
           <div className="input-group settings-profile-field">
             <label className="settings-profile-label">Confirm New Email</label>
             <input
@@ -117,14 +111,15 @@ export function LoginDetailsSection({
             />
             <span className="password-match-hint partial">Code sent to {emailChangePendingEmail}.</span>
           </div>
-          <button type="button" className="btn btn-primary settings-panel-save-btn profile-settings-save-btn" disabled={emailConfirming || emailConfirmCode.trim().length < 6} onClick={() => void onEmailConfirmAction()}>
+          {detailsCodeFeedback ? <span className={emailConfirmationFailed ? 'input-error-text' : 'password-match-hint match'}>{detailsCodeFeedback}</span> : null}
+          <button type="button" className="btn btn-primary settings-panel-save-btn profile-settings-save-btn" disabled={emailConfirming || emailConfirmCode.trim().length < 6 || (!emailCurrentConfirmed && emailCurrentCode.trim().length < 6)} onClick={() => void onEmailConfirmAction()}>
             {emailConfirming ? 'Confirming...' : 'Confirm Email'}
           </button>
         </div>
       ) : null}
 
       {!hasPendingEmailConfirmation ? (
-        <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} disabled={detailsSaving || detailsSavedFlash || detailsCodeRequesting || (needsEmailCode && detailsCodeRequested && !canSaveEmailChange)} onClick={() => void onDetailsAction()}>
+        <button type="button" className={`btn btn-primary settings-panel-save-btn profile-settings-save-btn${detailsSavedFlash ? ' profile-settings-action-saved' : ''}`} disabled={detailsSaving || detailsSavedFlash} onClick={() => void onDetailsAction()}>
           {detailsSavedFlash ? (
             <>
               <CheckCircle2 size={15} />
@@ -140,15 +135,11 @@ export function LoginDetailsSection({
 }
 
 function getActionLabel({
-  detailsCodeRequested,
-  detailsCodeRequesting,
   detailsSavedFlash,
   detailsSaving,
   isEditingDetails,
   needsEmailCode,
 }: {
-  detailsCodeRequested: boolean
-  detailsCodeRequesting: boolean
   detailsSavedFlash: boolean
   detailsSaving: boolean
   isEditingDetails: boolean
@@ -157,6 +148,6 @@ function getActionLabel({
   if (detailsSavedFlash) return 'Saved'
   if (detailsSaving) return 'Saving...'
   if (!isEditingDetails) return 'Edit Details'
-  if (needsEmailCode && !detailsCodeRequested) return detailsCodeRequesting ? 'Sending...' : 'Send Security Code'
+  if (needsEmailCode) return detailsSaving ? 'Sending...' : 'Send Confirmation Codes'
   return 'Save Changes'
 }
