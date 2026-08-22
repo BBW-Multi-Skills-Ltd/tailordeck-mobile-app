@@ -30,9 +30,13 @@ export function readBrandConfig(): BrandConfig {
     socialHandles: settings.businessInfo.socialHandles,
     includeBusinessDetails: settings.brand.includeBusinessDetails,
     documentTemplate: settings.brand.documentTemplate,
-    logoUrl: settings.brand.logoUrl,
+    logoUrl: isDefaultTailorDeckLogo(settings.brand.logoUrl) ? '' : settings.brand.logoUrl,
     signatureUrl: settings.brand.signatureUrl,
   }
+}
+
+function isDefaultTailorDeckLogo(logoUrl: string): boolean {
+  return logoUrl.includes('/branding/TailorDeck app logo for in app.png')
 }
 
 export function buildDocumentShareText(params: {
@@ -57,7 +61,7 @@ export function buildDocumentShareText(params: {
     `Service: ${service}`,
     `Charge: ${formatNaira(charge)}`,
     `Deposit: ${formatNaira(deposit)}`,
-    type === 'invoice' ? `Balance to Pay: ${formatNaira(balance)}` : `Amount Received: ${formatNaira(charge)}`,
+    type === 'invoice' ? `Balance to Pay: ${formatNaira(balance)}` : `Amount Received: ${formatNaira(deposit)}`,
     `Delivery Date: ${formatDateShort(deadlineDate)}`,
   ].join('\n')
 }

@@ -28,7 +28,7 @@ export default function Documents() {
         onFileUpload={(field, event) => actions.uploadSettingsImage(field, event)}
         onUpgrade={() => navigate('/settings/subscription')}
         onToggleBrandDetail={actions.toggleBrandDetail}
-        onSave={() => actions.markSaved('Invoice & Receipt Setup')}
+        onAutoSave={(nextSettings) => void actions.markSaved('Invoice & Receipt Setup', nextSettings)}
       />
     </section>
   )

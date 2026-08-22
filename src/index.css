@@ -5188,6 +5188,8 @@ button.more-row {
   height: calc(100svh - 90px);
   padding: 8px;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background:
     radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--primary) 7%, transparent) 0 24%, transparent 45%),
     radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--gold) 9%, transparent) 0 24%, transparent 42%),
@@ -5197,7 +5199,13 @@ button.more-row {
 .document-preview-zoom-shell {
   width: 100%;
   min-height: 100%;
+  cursor: grab;
   touch-action: none;
+  user-select: none;
+}
+
+.document-preview-zoom-shell:active {
+  cursor: grabbing;
 }
 
 .document-preview-zoom-space {
@@ -7681,6 +7689,53 @@ button.more-row {
 
 .side-sheet-doc-preview {
   margin-bottom: 10px;
+  overflow: auto hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+
+.side-sheet-doc-zoom-space {
+  min-width: 100%;
+  transform-origin: top left;
+  transition: width var(--transition-fast);
+}
+
+.side-sheet-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--clay-border);
+  border-radius: 999px;
+  background: var(--clay-surface-muted);
+  box-shadow: var(--clay-shadow-press);
+}
+
+.side-sheet-preview-toolbar span {
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.side-sheet-preview-toolbar div {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.side-sheet-preview-toolbar button {
+  min-width: 30px;
+  height: 28px;
+  border: 1px solid color-mix(in srgb, var(--primary) 12%, var(--clay-border));
+  border-radius: 999px;
+  background: var(--clay-surface);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: var(--clay-shadow-press);
 }
 
 .side-sheet-actions {

@@ -1,6 +1,6 @@
-import { Share2, X } from 'lucide-react'
+import { Share2, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { useState, type RefObject } from 'react'
 import { FaWhatsapp } from 'react-icons/fa6'
-import type { RefObject } from 'react'
 import type { DetailedJobData } from '../../types/jobDetails'
 import type { DocumentTemplateLineItem } from '../../templates/types'
 import type { MockJob } from '../../types/job'
@@ -17,7 +17,6 @@ export function JobDocumentDrawer({
   onClose,
   onShare,
   onWhatsApp,
-  onDownload,
 }: {
   type: InvoiceType
   brand: BrandConfig
@@ -28,9 +27,10 @@ export function JobDocumentDrawer({
   onClose: () => void
   onShare: (type: InvoiceType) => void
   onWhatsApp: (type: InvoiceType) => void
-  onDownload: (type: InvoiceType) => void
 }) {
   const lineItems = buildClientFacingLineItems({ details, job })
+  const [zoom, setZoom] = useState(1)
+  const zoomPercent = Math.round(zoom * 100)
 
   return (
     <div
@@ -49,19 +49,36 @@ export function JobDocumentDrawer({
         </header>
 
         <div className="side-sheet-body">
-          <div ref={docPreviewRef} className="job-doc-fullbleed side-sheet-doc-preview">
-            <DocumentPreview
-              type={type}
-              brand={brand}
-              clientName={job.clientName}
-              clientPhone={job.clientPhone}
-              service={details.itemType}
-              lineItems={lineItems}
-              charge={job.chargeAmount}
-              deposit={details.depositAmount}
-              balance={balanceToCollect}
-              deadlineDate={job.deadlineDate}
-            />
+          <div className="side-sheet-preview-toolbar" aria-label="Document preview zoom controls">
+            <span>Preview</span>
+            <div>
+              <button type="button" onClick={() => setZoom((value) => Math.max(1, value - 0.15))} aria-label="Zoom out">
+                <ZoomOut size={14} />
+              </button>
+              <button type="button" onClick={() => setZoom(1)} aria-label="Reset zoom">
+                {zoomPercent}%
+              </button>
+              <button type="button" onClick={() => setZoom((value) => Math.min(1.8, value + 0.15))} aria-label="Zoom in">
+                <ZoomIn size={14} />
+              </button>
+            </div>
+          </div>
+
+          <div className="job-doc-fullbleed side-sheet-doc-preview">
+            <div ref={docPreviewRef} className="side-sheet-doc-zoom-space" style={{ width: `${zoom * 100}%` }}>
+              <DocumentPreview
+                type={type}
+                brand={brand}
+                clientName={job.clientName}
+                clientPhone={job.clientPhone}
+                service={details.itemType}
+                lineItems={lineItems}
+                charge={job.chargeAmount}
+                deposit={details.depositAmount}
+                balance={balanceToCollect}
+                deadlineDate={job.deadlineDate}
+              />
+            </div>
           </div>
 
           <div className="stack gap-8 side-sheet-actions">
@@ -72,9 +89,6 @@ export function JobDocumentDrawer({
             <button type="button" className="btn btn-full whatsapp-send-btn" onClick={() => onWhatsApp(type)}>
               <FaWhatsapp size={18} />
               Send PDF to Client
-            </button>
-            <button type="button" className="btn btn-secondary btn-full" onClick={() => onDownload(type)}>
-              Download PDF
             </button>
           </div>
         </div>

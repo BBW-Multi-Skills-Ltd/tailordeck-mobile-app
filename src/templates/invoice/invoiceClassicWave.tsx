@@ -21,7 +21,9 @@ export function InvoiceClassicWaveTemplate(payload: DocumentTemplatePayload) {
   const social = details.details.social
     ? details.socialHandles.length
       ? details.socialHandles.map((item) => `${item.platform}: ${item.handle}`).join('  |  ')
-      : 'Social handles here'
+      : details.previewPlaceholders
+        ? 'Instagram here  |  TikTok here  |  Facebook here'
+        : ''
     : ''
 
   return (
@@ -41,13 +43,15 @@ export function InvoiceClassicWaveTemplate(payload: DocumentTemplatePayload) {
         id={payload.documentId}
         primary={primary}
       />
-      <main style={styles.body}>
-        {isInvoice ? <InvoiceBody accent={accent} lines={lines} payload={payload} /> : <ReceiptBody accent={accent} payload={payload} />}
-      </main>
-      <SignatureSection isInvoice={isInvoice} payload={payload} primary={primary} />
+      <section style={styles.contentArea}>
+        <main style={styles.body}>
+          {isInvoice ? <InvoiceBody accent={accent} lines={lines} payload={payload} /> : <ReceiptBody accent={accent} payload={payload} />}
+        </main>
+        <SignatureSection isInvoice={isInvoice} payload={payload} primary={primary} />
+      </section>
       <footer style={styles.footer(primary)}>
         <span>Thank you for your patronage.</span>
-        <span>{social || 'Computer-generated document from TailorDeck'}</span>
+        <span>{social || 'TailorDeck document'}</span>
       </footer>
       <DecorativeStrip primary={primary} accent={accent} reverse />
     </article>

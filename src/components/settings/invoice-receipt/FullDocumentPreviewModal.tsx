@@ -56,6 +56,7 @@ function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: R
   const shellRef = useRef<HTMLDivElement | null>(null)
   const pointersRef = useRef(new Map<number, { x: number; y: number }>())
   const pinchStartRef = useRef<{ distance: number; zoom: number } | null>(null)
+  const dragStartRef = useRef<{ x: number; y: number; scrollLeft: number; scrollTop: number } | null>(null)
   const [baseScale, setBaseScale] = useState(1)
   const scale = baseScale * zoom
 
@@ -65,6 +66,17 @@ function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: R
     const points = Array.from(pointersRef.current.values())
     if (points.length === 2) {
       pinchStartRef.current = { distance: pointerDistance(points), zoom }
+      dragStartRef.current = null
+      return
+    }
+
+    if (points.length === 1 && zoom > 1) {
+      dragStartRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        scrollLeft: getScrollContainer(event.currentTarget)?.scrollLeft ?? 0,
+        scrollTop: getScrollContainer(event.currentTarget)?.scrollTop ?? 0,
+      }
     }
   }
 
@@ -72,6 +84,15 @@ function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: R
     if (!pointersRef.current.has(event.pointerId)) return
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
     const points = Array.from(pointersRef.current.values())
+    if (points.length === 1 && dragStartRef.current) {
+      const scrollContainer = getScrollContainer(event.currentTarget)
+      if (!scrollContainer) return
+      event.preventDefault()
+      scrollContainer.scrollLeft = dragStartRef.current.scrollLeft + (dragStartRef.current.x - event.clientX)
+      scrollContainer.scrollTop = dragStartRef.current.scrollTop + (dragStartRef.current.y - event.clientY)
+      return
+    }
+
     if (points.length !== 2 || !pinchStartRef.current) return
     const nextDistance = pointerDistance(points)
     if (!nextDistance || !pinchStartRef.current.distance) return
@@ -81,6 +102,7 @@ function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: R
   function handlePointerEnd(event: PointerEvent<HTMLDivElement>): void {
     pointersRef.current.delete(event.pointerId)
     if (pointersRef.current.size < 2) pinchStartRef.current = null
+    if (pointersRef.current.size === 0) dragStartRef.current = null
   }
 
   useEffect(() => {
@@ -135,4 +157,8 @@ function ZoomableDocumentPreview({ children, onZoomChange, zoom }: { children: R
       </div>
     </div>
   )
+}
+
+function getScrollContainer(node: HTMLElement): HTMLElement | null {
+  return node.closest('.document-preview-modal-body')
 }

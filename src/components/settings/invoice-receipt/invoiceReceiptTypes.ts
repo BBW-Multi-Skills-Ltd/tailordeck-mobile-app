@@ -10,7 +10,7 @@ export type InvoiceReceiptPanelProps = {
   onFileUpload: (field: 'logoUrl' | 'signatureUrl', event: ChangeEvent<HTMLInputElement>) => void
   onUpgrade?: () => void
   onToggleBrandDetail: (key: BrandDetailKey) => void
-  onSave: () => void
+  onAutoSave: (settings: TailorSettings) => void
 }
 
 export type InvoiceSetupChecklistItem = {

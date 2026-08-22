@@ -13,7 +13,7 @@ export function DecorativeStrip({ accent, primary, reverse = false }: { accent: 
 }
 
 export function BrandBlock({ accent, payload, primary }: { accent: string; payload: DocumentTemplatePayload; primary: string }) {
-  const shopName = payload.brand.shopName || 'Business Name Here'
+  const shopName = payload.brand.shopName || 'Business Name'
 
   return (
     <div style={styles.brandBlock}>
@@ -21,7 +21,7 @@ export function BrandBlock({ accent, payload, primary }: { accent: string; paylo
         {payload.brand.logoUrl ? (
           <img src={payload.brand.logoUrl} alt={`${shopName} logo`} style={styles.logoImage} />
         ) : (
-          <span style={styles.logoText}>YOUR LOGO</span>
+          <span style={styles.logoPlaceholderText}>YOUR LOGO</span>
         )}
       </div>
       <p style={styles.logoTagline(accent)}>Professional tailoring</p>
@@ -38,11 +38,12 @@ export function TitleBlock({
   details: ReturnType<typeof getClassicWaveBusinessDetails>
   docTitle: string
 }) {
+  const showPlaceholders = details.previewPlaceholders
   const contacts = [
-    details.details.phone ? `Phone: ${details.businessPhone}` : '',
-    details.details.email ? `Email: ${details.businessEmail}` : '',
-    details.details.cac && details.cacRegistrationNumber ? `RC ${details.cacRegistrationNumber}` : '',
-    details.details.website ? `Web: ${details.website}` : '',
+    getContactLabel(details.details.phone, details.businessPhone, 'Phone', 'Phone here', showPlaceholders),
+    getContactLabel(details.details.email, details.businessEmail, 'Email', 'Email here', showPlaceholders),
+    getContactLabel(details.details.cac, details.cacRegistrationNumber, 'RC', 'RC number here', showPlaceholders),
+    getContactLabel(details.details.website, details.website, 'Web', 'Website here', showPlaceholders),
   ].filter(Boolean)
 
   return (
@@ -61,10 +62,12 @@ export function TitleBlock({
 }
 
 export function CompanyBlock({ details, payload }: { details: ReturnType<typeof getClassicWaveBusinessDetails>; payload: DocumentTemplatePayload }) {
+  const address = details.details.address ? details.businessAddress || (details.previewPlaceholders ? 'Business address here' : '') : ''
+
   return (
     <div style={styles.companyBlock}>
-      <p style={styles.companyName}>{payload.brand.shopName || 'Business Name Here'}</p>
-      {details.details.address ? <p style={styles.companyAddress}>{details.businessAddress}</p> : null}
+      <p style={styles.companyName}>{payload.brand.shopName || 'Business Name'}</p>
+      {address ? <p style={styles.companyAddress}>{address}</p> : null}
     </div>
   )
 }
@@ -94,10 +97,22 @@ export function MetaBar({
 }
 
 function MetaPair({ label, value }: { label: string; value: string }) {
+  const displayValue = value ? formatDateIfNeeded(value) : '-'
   return (
     <p style={styles.metaPair}>
       <span>{label}</span>
-      <strong>{value}</strong>
+      <strong>{displayValue}</strong>
     </p>
   )
+}
+
+function formatDateIfNeeded(value: string): string {
+  if (!/[0-9]{4}-[0-9]{2}-[0-9]{2}/.test(value)) return value
+  return formatDateShort(value)
+}
+
+function getContactLabel(enabled: boolean, value: string, label: string, placeholder: string, showPlaceholder: boolean): string {
+  if (!enabled) return ''
+  if (value) return `${label}: ${value}`
+  return showPlaceholder ? placeholder : ''
 }

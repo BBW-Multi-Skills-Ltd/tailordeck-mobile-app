@@ -2,6 +2,7 @@ import type { ChangeEvent, ReactNode } from 'react'
 import { Image as ImageIcon, Upload } from 'lucide-react'
 import type { TailorSettings } from '../../../lib/settings'
 import { SectionHeader } from './InvoiceSetupProgress'
+import { hasCustomDocumentLogo } from './invoiceReceiptConfig'
 
 export function BusinessAssetSection({
   locked = false,
@@ -20,7 +21,7 @@ export function BusinessAssetSection({
           label="Business Logo"
           locked={locked}
           helper="PNG or JPG, max 2MB."
-          preview={settings.brand.logoUrl ? <img src={settings.brand.logoUrl} alt="Logo preview" /> : <ImageIcon size={18} />}
+          preview={hasCustomDocumentLogo(settings.brand.logoUrl) ? <img src={settings.brand.logoUrl} alt="Logo preview" /> : <ImageIcon size={18} />}
           onChange={(event) => onFileUpload('logoUrl', event)}
         />
         <UploadBox

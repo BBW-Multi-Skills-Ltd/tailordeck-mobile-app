@@ -15,13 +15,15 @@ export default function InvoiceReceiptPanel({
   saved,
   onFileUpload,
   onUpgrade,
+  onAutoSave,
   onToggleBrandDetail,
-  onSave,
 }: InvoiceReceiptPanelProps) {
   const navigate = useNavigate()
   const [openPreview, setOpenPreview] = useState<'invoice' | 'receipt' | null>(null)
   const [setupNotice, setSetupNotice] = useState('')
   const redirectTimerRef = useRef<number | null>(null)
+  const autosaveTimerRef = useRef<number | null>(null)
+  const initialAutosaveSignatureRef = useRef('')
   const checklist = buildInvoiceSetupChecklist(settings)
   const completeCount = checklist.filter((item) => item.complete).length
   const progress = Math.round((completeCount / checklist.length) * 100)
@@ -35,8 +37,37 @@ export default function InvoiceReceiptPanel({
       if (redirectTimerRef.current) {
         window.clearTimeout(redirectTimerRef.current)
       }
+      if (autosaveTimerRef.current) {
+        window.clearTimeout(autosaveTimerRef.current)
+      }
     }
   }, [])
+
+  const autosaveSignature = useMemo(() => JSON.stringify({
+    colors: settings.brand.colors,
+    documentTemplate: settings.brand.documentTemplate,
+    includeBusinessDetails: settings.brand.includeBusinessDetails,
+  }), [settings.brand.colors, settings.brand.documentTemplate, settings.brand.includeBusinessDetails])
+
+  useEffect(() => {
+    if (locked) return
+
+    if (!initialAutosaveSignatureRef.current) {
+      initialAutosaveSignatureRef.current = autosaveSignature
+      return
+    }
+
+    if (initialAutosaveSignatureRef.current === autosaveSignature) return
+
+    if (autosaveTimerRef.current) {
+      window.clearTimeout(autosaveTimerRef.current)
+    }
+
+    autosaveTimerRef.current = window.setTimeout(() => {
+      initialAutosaveSignatureRef.current = autosaveSignature
+      onAutoSave(settings)
+    }, 650)
+  }, [autosaveSignature, locked, onAutoSave, settings])
 
   function handleBusinessDetailClick(item: { key: BrandDetailKey; label: string }): void {
     if (availableBusinessDetails[item.key]) {
@@ -73,11 +104,7 @@ export default function InvoiceReceiptPanel({
       />
       <LiveDocumentPreviewSection invoicePreview={invoicePreview} receiptPreview={receiptPreview} onOpen={setOpenPreview} />
 
-      {saved ? <p className="text-sm text-success">Invoice & Receipt Setup saved.</p> : null}
-
-      <button type="button" className="btn btn-primary settings-panel-save-btn" disabled={locked} onClick={onSave}>
-        Save Invoice & Receipt Setup
-      </button>
+      {saved ? <p className="text-sm text-success">Invoice & Receipt setup auto-saved.</p> : null}
 
       {openPreview ? (
         <FullDocumentPreviewModal label={openPreview === 'invoice' ? 'Invoice' : 'Receipt'} onClose={() => setOpenPreview(null)}>

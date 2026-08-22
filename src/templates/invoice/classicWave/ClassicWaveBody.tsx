@@ -3,67 +3,37 @@ import type { DocumentTemplateLineItem, DocumentTemplatePayload } from '../../ty
 import { styles } from './invoiceClassicWaveStyles'
 
 export function InvoiceBody({ accent, lines, payload }: { accent: string; lines: DocumentTemplateLineItem[]; payload: DocumentTemplatePayload }) {
-  const visibleLines = lines.slice(0, 5)
-  const emptyRows = Array.from({ length: Math.max(3 - visibleLines.length, 0) })
+  const primaryLine = lines[0]
+  const description = primaryLine?.details || primaryLine?.description || payload.service || ''
 
   return (
     <div style={styles.invoiceGrid}>
-      <Field label="Invoice To" value={payload.clientName || 'Client Name'} />
-      <Field label="Service" value={payload.service || 'Tailoring service'} />
-      <div style={styles.tableWrap}>
-        <div style={styles.tableHead(accent)}>
-          <span>Description</span>
-          <span>Qty</span>
-          <span>Unit</span>
-          <span>Total</span>
-        </div>
-        {visibleLines.map((item, index) => (
-          <div key={`${item.description}-${index}`} style={styles.tableRow}>
-            <span>
-              <strong>{item.description}</strong>
-              {item.details ? <small>{item.details}</small> : null}
-            </span>
-            <span>{item.qty}</span>
-            <span>{formatNaira(item.unitPrice)}</span>
-            <span>{formatNaira(item.total)}</span>
-          </div>
-        ))}
-        {emptyRows.map((_, index) => (
-          <div key={`empty-row-${index}`} style={styles.tableEmptyRow}>
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
-        ))}
-      </div>
-      <TotalsGrid
-        accent={accent}
-        layout="horizontal"
-        rows={[
-          ['Total Charge', payload.charge],
-          ['Deposit To Be Made', payload.deposit],
-          ['Balance After Job', payload.balance],
-        ]}
-      />
+      <InvoiceInfoFields payload={payload} />
+      <InvoiceDescriptionBlock description={description} />
+      <InvoicePaymentSummary accent={accent} payload={payload} />
     </div>
   )
 }
 
 export function ReceiptBody({ accent, payload }: { accent: string; payload: DocumentTemplatePayload }) {
+  const isSettingsPreview = payload.previewMode === 'settings'
+  const amountInWords = isSettingsPreview && !payload.deposit
+    ? 'Amount in words here'
+    : `${numberToNairaWords(payload.deposit)} only`
+
   return (
     <div style={styles.receiptGrid}>
-      <Field label="Received With Thanks From" value={payload.clientName || 'Client Name'} underline />
-      <Field label="The Sum Of" value={formatNaira(payload.deposit)} underline />
-      <Field label="Amount In Words" value={`${numberToSimpleWords(payload.deposit)} naira only`} underline wide />
-      <Field label="Being Payment For" value={payload.service || 'Tailoring service'} underline wide />
+      <Field label="Received With Thanks From" value={getPreviewText(payload.clientName, 'Client name here', isSettingsPreview)} underline />
+      <Field label="The Sum Of" value={formatMoneyOrText(getPreviewMoney(payload.deposit, 'Amount paid here', isSettingsPreview))} underline />
+      <Field label="Amount In Words" value={amountInWords} underline wide />
+      <Field label="Being Payment For" value={getPreviewText(payload.service, 'Payment purpose here', isSettingsPreview)} underline wide />
       <TotalsGrid
         accent={accent}
         layout="horizontal"
         rows={[
-          ['Total Amount', payload.charge],
-          ['Amount Paid', payload.deposit],
-          ['Balance', payload.balance],
+          ['Total Amount', getPreviewMoney(payload.charge, 'Total amount here', isSettingsPreview)],
+          ['Amount Paid', getPreviewMoney(payload.deposit, 'Amount paid here', isSettingsPreview)],
+          ['Balance', getPreviewMoney(payload.balance, 'Balance here', isSettingsPreview)],
         ]}
       />
     </div>
@@ -84,8 +54,40 @@ function Field({
   return (
     <div style={{ ...(underline ? styles.underlineField : styles.field), ...(wide ? styles.fieldWide : {}) }}>
       <span style={styles.fieldLabel}>{label}</span>
-      <strong style={styles.fieldValue}>{value}</strong>
+      <strong style={styles.fieldValue}>{value || '-'}</strong>
     </div>
+  )
+}
+
+function InvoiceInfoFields({ payload }: { payload: DocumentTemplatePayload }) {
+  return (
+    <>
+      <Field label="Invoice To" value={payload.clientName} />
+      <Field label="Service" value={payload.service} />
+    </>
+  )
+}
+
+function InvoiceDescriptionBlock({ description }: { description: string }) {
+  return (
+    <div style={styles.invoiceDescriptionBlock}>
+      <span style={styles.fieldLabel}>Description</span>
+      <strong style={styles.invoiceDescriptionValue}>{description || '-'}</strong>
+    </div>
+  )
+}
+
+function InvoicePaymentSummary({ accent, payload }: { accent: string; payload: DocumentTemplatePayload }) {
+  return (
+    <TotalsGrid
+      accent={accent}
+      layout="horizontal"
+      rows={[
+        ['Total Charge', payload.charge],
+        ['Deposit To Be Made', payload.deposit],
+        ['Balance After Job', payload.balance],
+      ]}
+    />
   )
 }
 
@@ -96,7 +98,7 @@ function TotalsGrid({
 }: {
   accent: string
   layout: 'horizontal' | 'vertical'
-  rows: Array<[string, number]>
+  rows: Array<[string, number | string]>
 }) {
   if (layout === 'horizontal') {
     return (
@@ -104,7 +106,7 @@ function TotalsGrid({
         {rows.map(([label, value], index) => (
           <div key={label} style={styles.receiptTotalBox(index, accent)}>
             <span style={styles.receiptTotalLabel}>{label}</span>
-            <strong style={styles.receiptTotalValue}>{formatNaira(value)}</strong>
+            <strong style={styles.receiptTotalValue}>{formatMoneyOrText(value)}</strong>
           </div>
         ))}
       </div>
@@ -116,15 +118,70 @@ function TotalsGrid({
       {rows.map(([label, value], index) => (
         <div key={label} style={styles.totalLine(index === rows.length - 1)}>
           <span>{label}</span>
-          <strong>{formatNaira(value)}</strong>
+          <strong>{formatMoneyOrText(value)}</strong>
         </div>
       ))}
     </div>
   )
 }
 
-function numberToSimpleWords(amount: number): string {
-  if (!amount) return 'Zero'
-  const rounded = Math.round(amount)
-  return rounded.toLocaleString('en-NG')
+function getPreviewText(value: string, placeholder: string, isSettingsPreview: boolean): string {
+  if (value) return value
+  return isSettingsPreview ? placeholder : ''
+}
+
+function getPreviewMoney(value: number, placeholder: string, isSettingsPreview: boolean): number | string {
+  if (value) return value
+  return isSettingsPreview ? placeholder : value
+}
+
+function formatMoneyOrText(value: number | string): string {
+  return typeof value === 'number' ? formatNaira(value) : value
+}
+
+function numberToNairaWords(amount: number): string {
+  const rounded = Math.max(0, Math.round(amount))
+  if (!rounded) return 'Zero naira'
+  return `${numberToWords(rounded)} naira`
+}
+
+function numberToWords(value: number): string {
+  const units = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
+  const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+
+  function underThousand(input: number): string {
+    const parts: string[] = []
+    const hundred = Math.floor(input / 100)
+    const remainder = input % 100
+    if (hundred) parts.push(`${units[hundred]} hundred`)
+    if (remainder >= 20) {
+      const ten = Math.floor(remainder / 10)
+      const unit = remainder % 10
+      parts.push(unit ? `${tens[ten]} ${units[unit]}` : tens[ten])
+    } else if (remainder >= 10) {
+      parts.push(teens[remainder - 10])
+    } else if (remainder > 0) {
+      parts.push(units[remainder])
+    }
+    return parts.join(' and ')
+  }
+
+  const groups: Array<[number, string]> = [
+    [1_000_000_000, 'billion'],
+    [1_000_000, 'million'],
+    [1_000, 'thousand'],
+  ]
+  const parts: string[] = []
+  let remainder = value
+
+  groups.forEach(([size, label]) => {
+    const count = Math.floor(remainder / size)
+    if (!count) return
+    parts.push(`${underThousand(count)} ${label}`)
+    remainder %= size
+  })
+
+  if (remainder) parts.push(underThousand(remainder))
+  return parts.join(', ').replace(/\b\w/g, (char) => char.toUpperCase())
 }

@@ -38,6 +38,7 @@ export interface DocumentTemplateBrand {
 
 export interface DocumentTemplatePayload {
   kind: DocumentTemplateKind
+  previewMode?: 'settings'
   templateId: DocumentTemplateId
   documentId: string
   issuedDate: string

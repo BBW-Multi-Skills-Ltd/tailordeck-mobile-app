@@ -4,6 +4,7 @@ import type { BrandDetailKey, InvoiceSetupChecklistItem } from './invoiceReceipt
 
 export const DOCUMENT_PREVIEW_WIDTH = 1120
 export const DOCUMENT_PREVIEW_HEIGHT = 792
+export const DEFAULT_TAILORDECK_LOGO_PATH = '/branding/TailorDeck app logo for in app.png'
 
 export const detailOptions: Array<{ key: BrandDetailKey; label: string; icon: LucideIcon }> = [
   { key: 'phone', label: 'Phone', icon: Phone },
@@ -16,7 +17,7 @@ export const detailOptions: Array<{ key: BrandDetailKey; label: string; icon: Lu
 
 export function buildInvoiceSetupChecklist(settings: TailorSettings): InvoiceSetupChecklistItem[] {
   return [
-    { label: 'Logo', complete: Boolean(settings.brand.logoUrl) },
+    { label: 'Logo', complete: hasCustomDocumentLogo(settings.brand.logoUrl) },
     { label: 'Signature', complete: Boolean(settings.brand.signatureUrl) },
     { label: 'CAC / RC number', complete: Boolean(settings.businessInfo.cacRegistrationNumber.trim()) },
     { label: 'Business phone', complete: Boolean(settings.businessInfo.businessPhone.replace(/\D/g, '').length > 3) },
@@ -36,4 +37,8 @@ export function getAvailableBusinessDetails(settings: TailorSettings): Record<Br
     social: settings.businessInfo.socialHandles.length > 0,
     website: Boolean(settings.businessInfo.website.replace(/^https?:\/\//, '').trim()),
   }
+}
+
+export function hasCustomDocumentLogo(logoUrl: string): boolean {
+  return Boolean(logoUrl && logoUrl !== DEFAULT_TAILORDECK_LOGO_PATH && !logoUrl.includes('TailorDeck app logo for in app'))
 }
