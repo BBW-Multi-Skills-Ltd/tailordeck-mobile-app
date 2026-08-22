@@ -8,6 +8,7 @@ import { ClientsProvider } from './context/ClientsContext'
 import { AuthProvider } from './context/AuthContext'
 import { initializeTheme } from './lib/theme'
 import { initMonitoring } from './lib/monitoring'
+import { installAppRecoveryHandlers } from './lib/appRecovery'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
 import AppErrorBoundary from './components/shared/AppErrorBoundary'
@@ -23,6 +24,7 @@ const queryClient = new QueryClient({
 
 initializeTheme()
 initMonitoring()
+installAppRecoveryHandlers()
 
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {

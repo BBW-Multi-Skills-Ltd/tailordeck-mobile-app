@@ -7,7 +7,7 @@ import {
 } from '../invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import type { MockJob } from '../../types/job'
-import { canSharePdfFile, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
+import { buildDocumentNumber, canSharePdfFile, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
 import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
 export function useJobDocumentActions({
@@ -136,11 +136,6 @@ export function useJobDocumentActions({
     handleSystemShare,
     handleWhatsAppToClient,
   }
-}
-
-function buildDocumentNumber(type: InvoiceType, jobId: string): string {
-  const prefix = type === 'invoice' ? 'INV' : 'RCT'
-  return `${prefix}-${jobId.slice(0, 8).toUpperCase()}`
 }
 
 function isUuid(value: string): boolean {

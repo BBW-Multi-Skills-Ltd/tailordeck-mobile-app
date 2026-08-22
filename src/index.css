@@ -10913,5 +10913,139 @@ button.more-row {
   color: #5d667a !important;
 }
 
+/* ============================================
+   NARROW DEVICE PRODUCTION SAFETY PASS
+============================================ */
+
+@media (max-width: 380px) {
+  .document-preview-modal-overlay {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  .document-preview-modal {
+    max-height: calc(100svh - 16px);
+    border-radius: 22px;
+  }
+
+  .document-preview-modal-head {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .document-preview-modal-head p {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .document-preview-modal-actions {
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .document-preview-zoom-btn,
+  .document-preview-zoom-value {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+  }
+
+  .document-preview-zoom-value {
+    min-width: 48px;
+  }
+
+  .document-preview-modal-body {
+    height: calc(100svh - 74px);
+    padding: 6px;
+  }
+
+  .side-sheet {
+    width: 100vw;
+    margin-right: 0;
+    border-left: none;
+  }
+
+  .side-sheet-header {
+    padding: calc(8px + var(--safe-top)) 10px 8px;
+  }
+
+  .side-sheet-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .side-sheet-body {
+    padding: 10px 10px calc(14px + var(--safe-bottom));
+  }
+
+  .side-sheet-preview-toolbar {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .side-sheet-preview-toolbar button {
+    min-width: 28px;
+    height: 28px;
+  }
+
+  .wizard-fixed-top {
+    padding-inline: 10px;
+  }
+
+  .wizard-page-has-progress {
+    padding-top: 158px;
+  }
+
+  .wizard-footer-inner {
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .wizard-footer-inner .btn {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
+  .wizard-expense-entry-row {
+    grid-template-columns: minmax(0, 1fr) 58px;
+  }
+
+  .wizard-expense-name-input {
+    grid-column: 1 / -1;
+  }
+
+  .wizard-expense-cost-input,
+  .wizard-expense-add-btn {
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 340px) {
+  .wizard-jobtype-group,
+  .wizard-source-grid,
+  .wizard-color-option-grid,
+  .wizard-yard-option-grid,
+  .wizard-actions-grid,
+  .wizard-success-actions-row {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-progress-card {
+    padding: 8px;
+  }
+
+  .wizard-progress-step {
+    font-size: 13px;
+  }
+
+  .wizard-progress-percent {
+    font-size: 12px;
+  }
+}
+
 
 

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Sentry } from '../../lib/monitoring'
+import { isRecoverableChunkError, recoverFromStaleAppShell } from '../../lib/appRecovery'
 
 function AppErrorFallback() {
   return (
@@ -28,5 +29,14 @@ function AppErrorFallback() {
 }
 
 export default function AppErrorBoundary({ children }: { children: ReactNode }) {
-  return <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>{children}</Sentry.ErrorBoundary>
+  return (
+    <Sentry.ErrorBoundary
+      fallback={<AppErrorFallback />}
+      onError={(error) => {
+        if (isRecoverableChunkError(error)) void recoverFromStaleAppShell(error)
+      }}
+    >
+      {children}
+    </Sentry.ErrorBoundary>
+  )
 }

@@ -1,7 +1,17 @@
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 
+export function buildDocumentNumber(type: InvoiceType, jobId: string): string {
+  const prefix = type === 'invoice' ? 'INV' : 'RCT'
+  return `${prefix}-${jobId.slice(0, 8).toUpperCase()}`
+}
+
 export function documentFileName(brand: BrandConfig, type: InvoiceType, jobId: string): string {
-  return `${brand.shopName.replace(/\s+/g, '-').toLowerCase()}-${type}-${jobId}.pdf`
+  const shopSlug = (brand.shopName || 'tailordeck')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase()
+  const jobSlug = jobId.replace(/[^a-z0-9-]+/gi, '').slice(0, 36) || 'job'
+  return `${shopSlug || 'tailordeck'}-${type}-${jobSlug}.pdf`
 }
 
 export function createPdfFile(blob: Blob, brand: BrandConfig, type: InvoiceType, jobId: string): File {
@@ -19,5 +29,5 @@ export function triggerPdfDownload(blob: Blob, brand: BrandConfig, type: Invoice
   link.href = objectUrl
   link.download = documentFileName(brand, type, jobId)
   link.click()
-  URL.revokeObjectURL(objectUrl)
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 }

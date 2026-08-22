@@ -6,6 +6,7 @@ import type { DocumentTemplateLineItem } from '../../templates/types'
 import type { MockJob } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
+import { buildDocumentNumber } from './jobDocumentHelpers'
 
 export function JobDocumentDrawer({
   type,
@@ -77,6 +78,7 @@ export function JobDocumentDrawer({
                 deposit={details.depositAmount}
                 balance={balanceToCollect}
                 deadlineDate={job.deadlineDate}
+                documentNumber={buildDocumentNumber(type, job.id)}
               />
             </div>
           </div>

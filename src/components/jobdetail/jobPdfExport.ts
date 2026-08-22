@@ -15,6 +15,7 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
   try {
     if (fitStage) fitStage.style.transform = 'none'
     if (fitShell) fitShell.style.height = `${documentNode.offsetHeight}px`
+    await waitForDocumentAssets(documentNode)
 
     const canvas = await html2canvas(documentNode, {
       scale: 2,
@@ -41,4 +42,25 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
     if (fitStage && previousStageTransform !== undefined) fitStage.style.transform = previousStageTransform
     if (fitShell && previousShellHeight !== undefined) fitShell.style.height = previousShellHeight
   }
+}
+
+async function waitForDocumentAssets(documentNode: HTMLElement): Promise<void> {
+  const imagePromises = Array.from(documentNode.querySelectorAll('img')).map((image) => waitForImage(image))
+  const fontReady = 'fonts' in document ? document.fonts.ready.catch(() => undefined) : Promise.resolve()
+  await Promise.race([
+    Promise.all([...imagePromises, fontReady]),
+    new Promise((resolve) => window.setTimeout(resolve, 1800)),
+  ])
+}
+
+function waitForImage(image: HTMLImageElement): Promise<void> {
+  if (image.complete && image.naturalWidth > 0) return Promise.resolve()
+  if (typeof image.decode === 'function') {
+    return image.decode().catch(() => undefined)
+  }
+  return new Promise((resolve) => {
+    const finish = () => resolve()
+    image.addEventListener('load', finish, { once: true })
+    image.addEventListener('error', finish, { once: true })
+  })
 }

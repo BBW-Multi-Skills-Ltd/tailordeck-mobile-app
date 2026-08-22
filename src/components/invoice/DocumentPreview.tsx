@@ -17,6 +17,7 @@ export function DocumentPreview({
   deposit,
   balance,
   deadlineDate,
+  documentNumber,
 }: {
   type: InvoiceType
   brand: BrandConfig
@@ -28,8 +29,9 @@ export function DocumentPreview({
   deposit: number
   balance: number
   deadlineDate: string
+  documentNumber?: string
 }): ReactElement {
-  const documentId = `${type}-${Math.abs((service + deadlineDate).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)).toString(16).slice(0, 6)}`
+  const documentId = documentNumber || `${type}-${Math.abs((service + deadlineDate).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)).toString(16).slice(0, 6)}`
   const templatePayload: DocumentTemplatePayload = {
     kind: type,
     templateId: brand.documentTemplate,
