@@ -10,7 +10,6 @@ type UseAccountSecurityStateArgs = {
   onConfirmPasswordChange: (value: string) => void
   onConfirmEmailChange: (email: string, token: string) => void | Promise<void>
   onPasswordChange: (value: string) => void
-  onRequestDetailsCode: () => void | Promise<void>
   onRequestPasswordCode: () => void | Promise<void>
   onSaveDetails: (securityCode?: string) => { emailChangePending: boolean; pendingEmail?: string } | Promise<{ emailChangePending: boolean; pendingEmail?: string }>
   onUpdatePassword: (securityCode?: string) => void | Promise<void>
@@ -23,7 +22,6 @@ export function useAccountSecurityState({
   onConfirmEmailChange,
   onConfirmPasswordChange,
   onPasswordChange,
-  onRequestDetailsCode,
   onRequestPasswordCode,
   onSaveDetails,
   onUpdatePassword,
@@ -39,17 +37,11 @@ export function useAccountSecurityState({
   const [passwordCodeRequested, setPasswordCodeRequested] = useState(false)
   const [passwordCodeFeedback, setPasswordCodeFeedback] = useState('')
   const [passwordCodeRequesting, setPasswordCodeRequesting] = useState(false)
-  const [detailsCode, setDetailsCode] = useState('')
-  const [detailsCodeRequested, setDetailsCodeRequested] = useState(false)
   const [detailsCodeFeedback, setDetailsCodeFeedback] = useState('')
-  const [detailsCodeRequesting, setDetailsCodeRequesting] = useState(false)
   const [detailsSaving, setDetailsSaving] = useState(false)
   const [emailConfirmCode, setEmailConfirmCode] = useState('')
-  const [emailCurrentCode, setEmailCurrentCode] = useState('')
-  const [emailCurrentConfirmed, setEmailCurrentConfirmed] = useState(false)
   const [emailConfirming, setEmailConfirming] = useState(false)
   const [emailChangePendingEmail, setEmailChangePendingEmail] = useState('')
-  const [emailChangeCurrentEmail, setEmailChangeCurrentEmail] = useState('')
   const [savedDetails, setSavedDetails] = useState(currentDetails)
   const [isEditingDetails, setIsEditingDetails] = useState(false)
 
@@ -74,9 +66,7 @@ export function useAccountSecurityState({
   async function handleDetailsAction() {
     if (!isEditingDetails) {
       setSavedDetails(currentDetails)
-      setDetailsCode('')
       setDetailsCodeFeedback('')
-      setDetailsCodeRequested(false)
       setIsEditingDetails(true)
       return
     }
@@ -91,21 +81,14 @@ export function useAccountSecurityState({
       const result = await onSaveDetails()
       if (result.emailChangePending && result.pendingEmail) {
         setEmailChangePendingEmail(result.pendingEmail)
-        setEmailChangeCurrentEmail(savedDetails.email.trim().toLowerCase())
         setEmailConfirmCode('')
-        setEmailCurrentCode('')
-        setEmailCurrentConfirmed(false)
-        setDetailsCode('')
-        setDetailsCodeFeedback('Check both email addresses for confirmation codes.')
-        setDetailsCodeRequested(false)
+        setDetailsCodeFeedback(`Enter the code sent to ${result.pendingEmail}.`)
         setDetailsSaving(false)
         return
       }
       setSavedDetails(currentDetails)
       setIsEditingDetails(false)
-      setDetailsCode('')
       setDetailsCodeFeedback('')
-      setDetailsCodeRequested(false)
       setDetailsSavedFlash(true)
       window.setTimeout(() => setDetailsSavedFlash(false), 1200)
     } finally {
@@ -115,24 +98,16 @@ export function useAccountSecurityState({
 
   async function handleConfirmEmailChange() {
     const pendingEmail = emailChangePendingEmail.trim().toLowerCase()
-    const currentEmail = emailChangeCurrentEmail.trim().toLowerCase()
-    if (!pendingEmail || !currentEmail || emailConfirmCode.trim().length < 6 || (!emailCurrentConfirmed && emailCurrentCode.trim().length < 6) || emailConfirming) return
+    if (!pendingEmail || emailConfirmCode.trim().length < 6 || emailConfirming) return
 
     setEmailConfirming(true)
     try {
       setDetailsCodeFeedback('')
-      if (!emailCurrentConfirmed) {
-        await onConfirmEmailChange(currentEmail, emailCurrentCode)
-        setEmailCurrentConfirmed(true)
-      }
       await onConfirmEmailChange(pendingEmail, emailConfirmCode)
       const nextDetails = { ...currentDetails, email: pendingEmail }
       setSavedDetails(nextDetails)
       setEmailChangePendingEmail('')
-      setEmailChangeCurrentEmail('')
       setEmailConfirmCode('')
-      setEmailCurrentCode('')
-      setEmailCurrentConfirmed(false)
       setDetailsCodeFeedback('')
       setIsEditingDetails(false)
       setDetailsSavedFlash(true)
@@ -142,20 +117,6 @@ export function useAccountSecurityState({
       setDetailsCodeFeedback(message)
     } finally {
       setEmailConfirming(false)
-    }
-  }
-
-  async function handleRequestDetailsCode() {
-    if (!emailChanged || detailsCodeRequesting) return
-
-    setDetailsCodeRequesting(true)
-    try {
-      await onRequestDetailsCode()
-      setDetailsCode('')
-      setDetailsCodeRequested(true)
-      setDetailsCodeFeedback('Security code sent to your current email.')
-    } finally {
-      setDetailsCodeRequesting(false)
     }
   }
 
@@ -201,11 +162,8 @@ export function useAccountSecurityState({
       handleDetailsAction,
       handleConfirmEmailChange,
       handlePasswordUpdate,
-      handleRequestDetailsCode,
       handleRequestPasswordCode,
-      setDetailsCode,
       setEmailConfirmCode,
-      setEmailCurrentCode,
       setPasswordCode,
       setShowConfirmPassword,
       setShowNewPassword,
@@ -213,17 +171,11 @@ export function useAccountSecurityState({
     },
     state: {
       detailsSavedFlash,
-      detailsCode,
       detailsCodeFeedback,
-      detailsCodeRequested,
-      detailsCodeRequesting,
       detailsSaving,
       emailConfirmCode,
-      emailCurrentCode,
-      emailCurrentConfirmed,
       emailConfirming,
       emailChangePendingEmail,
-      emailChangeCurrentEmail,
       emailChanged,
       isEditingDetails,
       passwordDirty,

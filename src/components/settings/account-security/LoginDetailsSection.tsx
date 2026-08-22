@@ -5,10 +5,7 @@ type LoginDetailsSectionProps = {
   detailsCodeFeedback: string
   detailsSaving: boolean
   emailConfirmCode: string
-  emailCurrentCode: string
-  emailCurrentConfirmed: boolean
   emailConfirming: boolean
-  emailChangeCurrentEmail: string
   emailChangePendingEmail: string
   email: string
   emailChanged: boolean
@@ -18,7 +15,6 @@ type LoginDetailsSectionProps = {
   onDetailsAction: () => void | Promise<void>
   onEmailConfirmAction: () => void | Promise<void>
   onEmailConfirmCodeChange: (value: string) => void
-  onEmailCurrentCodeChange: (value: string) => void
   onEmailChange: (value: string) => void
   onFullNameChange: (value: string) => void
   onPhoneChange: (value: string) => void
@@ -29,10 +25,7 @@ export function LoginDetailsSection({
   detailsCodeFeedback,
   detailsSaving,
   emailConfirmCode,
-  emailCurrentCode,
-  emailCurrentConfirmed,
   emailConfirming,
-  emailChangeCurrentEmail,
   emailChangePendingEmail,
   email,
   emailChanged,
@@ -41,7 +34,6 @@ export function LoginDetailsSection({
   onDetailsAction,
   onEmailConfirmAction,
   onEmailConfirmCodeChange,
-  onEmailCurrentCodeChange,
   onEmailChange,
   onFullNameChange,
   onPhoneChange,
@@ -88,31 +80,21 @@ export function LoginDetailsSection({
 
       {hasPendingEmailConfirmation ? (
         <div className="clay-card more-group-card profile-settings-form-card profile-settings-code-card">
-          <div className="input-group settings-profile-field">
-            <label className="settings-profile-label">Current Email Code</label>
-            <input
-              className="input settings-profile-input"
-              inputMode="numeric"
-              placeholder="Code from current email"
-              value={emailCurrentCode}
-              disabled={emailCurrentConfirmed}
-              onChange={(event) => onEmailCurrentCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
-            />
-            <span className={`password-match-hint ${emailCurrentConfirmed ? 'match' : 'partial'}`}>{emailCurrentConfirmed ? 'Current email confirmed.' : `Sent to ${emailChangeCurrentEmail}.`}</span>
+          <div className="profile-settings-code-heading">
+            <p>Confirm New Email</p>
+            <span>Code sent to {emailChangePendingEmail}.</span>
           </div>
           <div className="input-group settings-profile-field">
-            <label className="settings-profile-label">Confirm New Email</label>
             <input
               className="input settings-profile-input"
               inputMode="numeric"
-              placeholder="Enter new email code"
+              placeholder="Enter email code"
               value={emailConfirmCode}
               onChange={(event) => onEmailConfirmCodeChange(event.target.value.replace(/\D/g, '').slice(0, 8))}
             />
-            <span className="password-match-hint partial">Code sent to {emailChangePendingEmail}.</span>
           </div>
           {detailsCodeFeedback ? <span className={emailConfirmationFailed ? 'input-error-text' : 'password-match-hint match'}>{detailsCodeFeedback}</span> : null}
-          <button type="button" className="btn btn-primary settings-panel-save-btn profile-settings-save-btn" disabled={emailConfirming || emailConfirmCode.trim().length < 6 || (!emailCurrentConfirmed && emailCurrentCode.trim().length < 6)} onClick={() => void onEmailConfirmAction()}>
+          <button type="button" className="btn btn-primary settings-panel-save-btn profile-settings-save-btn" disabled={emailConfirming || emailConfirmCode.trim().length < 6} onClick={() => void onEmailConfirmAction()}>
             {emailConfirming ? 'Confirming...' : 'Confirm Email'}
           </button>
         </div>
@@ -148,6 +130,6 @@ function getActionLabel({
   if (detailsSavedFlash) return 'Saved'
   if (detailsSaving) return 'Saving...'
   if (!isEditingDetails) return 'Edit Details'
-  if (needsEmailCode) return detailsSaving ? 'Sending...' : 'Send Confirmation Codes'
+  if (needsEmailCode) return detailsSaving ? 'Sending...' : 'Send Confirmation Code'
   return 'Save Changes'
 }

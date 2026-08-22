@@ -15,7 +15,6 @@ export type AccountSecurityPanelProps = {
   onConfirmPasswordChange: (value: string) => void
   onSaveDetails: (securityCode?: string) => { emailChangePending: boolean; pendingEmail?: string } | Promise<{ emailChangePending: boolean; pendingEmail?: string }>
   onConfirmEmailChange: (email: string, token: string) => void | Promise<void>
-  onRequestDetailsCode: () => void | Promise<void>
   onRequestPasswordCode: () => void | Promise<void>
   onUpdatePassword: (securityCode?: string) => void | Promise<void>
   onDanger: (kind: AccountDangerAction) => void
