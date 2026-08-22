@@ -16,7 +16,7 @@ npx supabase secrets set PAYSTACK_PRO_YEARLY_PLAN_CODE=PLN_xxx
 Existing required secrets:
 
 ```powershell
-npx supabase secrets set PAYSTACK_SECRET_KEY=sk_test_or_live_xxx
+npx supabase secrets set PAYSTACK_SECRET_KEY=<your_paystack_secret_key>
 npx supabase secrets set APP_URL=https://tailor-deck.vercel.app
 ```
 

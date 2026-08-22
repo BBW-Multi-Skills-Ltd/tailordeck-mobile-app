@@ -1,17 +1,29 @@
-const fallbackLocalOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173']
+const productionOrigins = [
+  'https://tailordeck.com.ng',
+  'https://www.tailordeck.com.ng',
+  'https://tailor-deck.vercel.app',
+]
+
+const localDevelopmentOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173']
 
 function normalizeOrigin(origin: string): string {
   return origin.replace(/\/$/, '')
 }
 
 function getAllowedOrigins(): string[] {
+  const allowLocalhost =
+    Deno.env.get('ALLOW_LOCALHOST_CORS') === 'true' ||
+    Deno.env.get('APP_ENV') === 'development' ||
+    Deno.env.get('ENVIRONMENT') === 'development'
+
   const configuredOrigins = [
     Deno.env.get('APP_URL'),
     ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(','),
-    ...fallbackLocalOrigins,
+    ...productionOrigins,
+    ...(allowLocalhost ? localDevelopmentOrigins : []),
   ]
 
-  return configuredOrigins.map((origin) => normalizeOrigin(origin.trim())).filter(Boolean)
+  return [...new Set(configuredOrigins.map((origin) => normalizeOrigin(origin.trim())).filter(Boolean))]
 }
 
 export function corsHeadersForRequest(request?: Request): HeadersInit {
@@ -19,7 +31,7 @@ export function corsHeadersForRequest(request?: Request): HeadersInit {
   const normalizedRequestOrigin = requestOrigin ? normalizeOrigin(requestOrigin) : null
   const allowedOrigins = getAllowedOrigins()
   const responseOrigin =
-    normalizedRequestOrigin && allowedOrigins.includes(normalizedRequestOrigin) ? normalizedRequestOrigin : allowedOrigins[0] ?? fallbackLocalOrigins[0]
+    normalizedRequestOrigin && allowedOrigins.includes(normalizedRequestOrigin) ? normalizedRequestOrigin : allowedOrigins[0] ?? productionOrigins[0]
 
   return {
     ...baseCorsHeaders,
