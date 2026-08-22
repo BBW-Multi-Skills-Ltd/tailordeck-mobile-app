@@ -5,9 +5,10 @@ import { useSearchParams } from 'react-router-dom'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import { useSettingsQuery } from '../hooks/useSettingsQueries'
-import { useCreateSupportTicketMutation } from '../hooks/useSupportQueries'
+import { useCreateSupportTicketMutation, useSupportCooldownQuery } from '../hooks/useSupportQueries'
 import type { SupportTicketCategory, SupportTicketPriority } from '../services/types'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
+import { formatSupportCooldown } from '../services/supportService'
 
 type SupportCategoryConfig = {
   id: SupportTicketCategory
@@ -75,6 +76,7 @@ export default function Help() {
   const returnLabel = searchParams.get('from') === 'subscription' ? 'Back to manage plan' : 'Back to more'
   const settingsQuery = useSettingsQuery()
   const createTicket = useCreateSupportTicketMutation()
+  const supportCooldownQuery = useSupportCooldownQuery()
   const settings = settingsQuery.data
   const [selectedCategory, setSelectedCategory] = useState<SupportTicketCategory>('billing')
   const [message, setMessage] = useState('')
@@ -82,6 +84,7 @@ export default function Help() {
   const [urgentError, setUrgentError] = useState('')
   const [error, setError] = useState('')
   const [submittedTicketId, setSubmittedTicketId] = useState('')
+  const [nowMs, setNowMs] = useState(() => Date.now())
 
   const selected = useMemo(
     () => supportCategories.find((item) => item.id === selectedCategory) ?? supportCategories[0],
@@ -97,6 +100,14 @@ export default function Help() {
     const timer = window.setTimeout(() => setSubmittedTicketId(''), 6000)
     return () => window.clearTimeout(timer)
   }, [submittedTicketId])
+
+  useEffect(() => {
+    if (!supportCooldownQuery.data?.limited) return undefined
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now())
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [supportCooldownQuery.data?.limited, supportCooldownQuery.data?.nextAvailableAt])
 
   function openWhatsAppSupport(): void {
     const cleanUrgentMessage = urgentMessage.trim()
@@ -125,6 +136,11 @@ export default function Help() {
     setSubmittedTicketId('')
 
     const cleanMessage = message.trim()
+    if (cooldownSeconds > 0) {
+      setError(`Please wait ${formatSupportCooldown(cooldownSeconds)} before sending another request.`)
+      return
+    }
+
     if (cleanMessage.length < 10) {
       setError('Please add a short message so support can understand the issue.')
       return
@@ -145,10 +161,23 @@ export default function Help() {
       })
       setSubmittedTicketId(ticket.id)
       setMessage('')
+      void supportCooldownQuery.refetch()
     } catch (submitError) {
       setError(getServiceErrorMessage(submitError, 'Unable to send support request.'))
+      void supportCooldownQuery.refetch()
     }
   }
+
+  const nextAvailableMs = supportCooldownQuery.data?.nextAvailableAt ? Date.parse(supportCooldownQuery.data.nextAvailableAt) : 0
+  const cooldownSeconds = nextAvailableMs > nowMs ? Math.ceil((nextAvailableMs - nowMs) / 1000) : 0
+  const cooldownActive = cooldownSeconds > 0
+  const cooldownText = cooldownActive
+    ? `You can send another request in ${formatSupportCooldown(cooldownSeconds)}.`
+    : supportCooldownQuery.data?.limited
+      ? 'You can send another request now.'
+      : supportCooldownQuery.data
+      ? `${supportCooldownQuery.data.remaining} support request${supportCooldownQuery.data.remaining === 1 ? '' : 's'} left this hour.`
+      : ''
 
   return (
     <section className="section stack gap-12">
@@ -244,9 +273,15 @@ export default function Help() {
             {error ? <span className="input-error-text">{error}</span> : null}
           </label>
 
-          <button type="submit" className="btn btn-primary btn-full" disabled={createTicket.isPending}>
+          <button type="submit" className="btn btn-primary btn-full" disabled={createTicket.isPending || cooldownActive}>
             {createTicket.isPending ? 'Sending...' : 'Send Request'}
           </button>
+
+          {cooldownText ? (
+            <p className={`support-limit-text${cooldownActive ? ' active' : ''}`} role={cooldownActive ? 'alert' : 'status'}>
+              {cooldownText}
+            </p>
+          ) : null}
 
           {submittedTicketId ? (
             <p className="support-success-text" role="status">

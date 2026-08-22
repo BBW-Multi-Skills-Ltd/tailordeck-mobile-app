@@ -4109,6 +4109,40 @@ button.more-row {
   line-height: 1.35;
   padding: 10px 12px;
   text-align: center;
+  animation: support-success-auto-hide 6s ease forwards;
+}
+
+@keyframes support-success-auto-hide {
+  0%,
+  78% {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 80px;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+    max-height: 0;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+}
+
+.support-limit-text {
+  margin: -2px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.support-limit-text.active {
+  color: var(--warning);
 }
 
 .settings-profile-form {
