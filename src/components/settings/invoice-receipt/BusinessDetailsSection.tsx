@@ -33,10 +33,11 @@ export function BusinessDetailsSection({
               disabled={locked}
               onClick={() => onDetailClick(item)}
             >
-              <span className="settings-radio-indicator" />
+              <span className="settings-radio-indicator">
+                {active ? <Check size={11} className="settings-detail-active-check" /> : null}
+              </span>
               <Icon size={15} className="settings-radio-icon" />
               <span>{item.label}</span>
-              {active ? <Check size={14} className="settings-detail-active-check" /> : null}
               {!available ? <small>Set up first</small> : null}
             </button>
           )

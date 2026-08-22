@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Building2, Check, ClipboardPaste, Copy, FileBadge, Globe, Image, Mail, MapPin, PenLine, Phone } from 'lucide-react'
 import type { SocialPlatform } from '../../../lib/settings'
 import type { FieldErrors } from '../../../lib/formValidation'
@@ -85,12 +85,18 @@ export function ContactStepFields({
   website,
 }: ContactStepFieldsProps) {
   const [copiedHandle, setCopiedHandle] = useState('')
-  const [copiedPlatform, setCopiedPlatform] = useState<SocialPlatform | null>(null)
+  const [copiedFeedbackPlatform, setCopiedFeedbackPlatform] = useState<SocialPlatform | null>(null)
+
+  useEffect(() => {
+    if (!copiedFeedbackPlatform) return undefined
+    const timer = window.setTimeout(() => setCopiedFeedbackPlatform(null), 1600)
+    return () => window.clearTimeout(timer)
+  }, [copiedFeedbackPlatform])
 
   function copyHandle(platform: SocialPlatform, handle: string): void {
     if (!handle) return
     setCopiedHandle(handle)
-    setCopiedPlatform(platform)
+    setCopiedFeedbackPlatform(platform)
     void navigator.clipboard?.writeText(handle)
   }
 
@@ -109,7 +115,7 @@ export function ContactStepFields({
         {onboardingSocialPlatforms.map((platform) => {
           const Icon = socialPlatformIcon[platform]
           const handle = socialHandles[platform].replace(/^@+/, '')
-          const copied = copiedPlatform === platform && copiedHandle === handle && Boolean(handle)
+          const copied = copiedFeedbackPlatform === platform && copiedHandle === handle && Boolean(handle)
           const canPaste = Boolean(copiedHandle) && !handle
 
           return (

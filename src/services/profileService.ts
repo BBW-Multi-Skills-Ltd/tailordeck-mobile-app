@@ -1,5 +1,6 @@
-﻿import { normalizeNigerianPhone } from '../lib/phone'
+import { normalizeNigerianPhone } from '../lib/phone'
 import { supabase } from '../lib/supabase'
+import { compressImageFile } from '../lib/imageCompression'
 import type { ProfileRow } from './types'
 import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
 import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
@@ -69,8 +70,9 @@ export async function activateVerifiedProfile(input: { fullName: string; email: 
 export async function uploadAvatar(file: File): Promise<{ storagePath: string; signedUrl: string }> {
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
-  const storagePath = userScopedPath(userId, `avatar.${fileExtension(file)}`)
-  await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file })
+  const uploadFile = await compressImageFile(file, { maxDimension: 520, maxBytes: 180_000, initialQuality: 0.82, minQuality: 0.58 })
+  const storagePath = userScopedPath(userId, `avatar.${fileExtension(uploadFile)}`)
+  await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('avatars', storagePath, AVATAR_SIGNED_URL_TTL)
   await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
   return { storagePath, signedUrl }

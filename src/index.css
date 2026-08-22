@@ -1367,7 +1367,7 @@ body {
 .onboarding-social-copy.copied {
   border-color: color-mix(in srgb, var(--success) 34%, var(--clay-border));
   color: var(--success);
-  animation: success-pop 0.28s ease both;
+  animation: onboarding-social-copy-pop 0.28s ease both;
 }
 
 .onboarding-social-copy:disabled {
@@ -1385,6 +1385,11 @@ body {
 @keyframes success-pop {
   0% { transform: scale(0.7); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes onboarding-social-copy-pop {
+  0% { transform: translateY(-50%) scale(0.72); opacity: 0; }
+  100% { transform: translateY(-50%) scale(1); opacity: 1; }
 }
 
 .onboarding-wizard-actions {
@@ -5734,20 +5739,29 @@ button.more-row {
 }
 
 .settings-business-detail-chip .settings-radio-indicator {
-  width: 14px;
-  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
   border-color: currentColor;
   background: color-mix(in srgb, var(--bg-card) 80%, transparent);
 }
 
 .settings-business-detail-chip .settings-radio-indicator::after {
-  width: 7px;
-  height: 7px;
+  display: none;
+}
+
+.settings-business-detail-chip.active .settings-radio-indicator {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--bg-card) 88%);
+  color: var(--success);
 }
 
 .settings-detail-active-check {
-  color: var(--success);
-  flex: 0 0 auto;
+  color: currentColor;
+  flex: 0 0 11px;
   stroke-width: 3;
 }
 

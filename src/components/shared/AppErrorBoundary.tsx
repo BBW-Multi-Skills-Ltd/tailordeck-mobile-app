@@ -3,16 +3,21 @@ import { Sentry } from '../../lib/monitoring'
 
 function AppErrorFallback() {
   return (
-    <main className="min-h-dvh bg-[var(--color-background)] px-6 py-12 text-[var(--color-text)]">
-      <section className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-[2rem] border border-[var(--color-border)] bg-white/85 p-6 text-center shadow-[var(--clay-shadow-rest)]">
-        <img className="h-16 w-16 rounded-2xl" src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
+    <main className="min-h-dvh bg-[var(--bg)] px-6 py-12 text-[var(--text)]">
+      <section className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 text-center shadow-[var(--clay-shadow-rest)]">
+        <img
+          className="h-14 w-14 rounded-2xl"
+          src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
+          alt="TailorDeck"
+          decoding="async"
+        />
         <div className="space-y-2">
           <h1 className="text-2xl font-black">Something went wrong</h1>
-          <p className="text-sm font-semibold text-[var(--color-text-muted)]">Reload TailorDeck. If it repeats, contact support from the Help page.</p>
+          <p className="text-sm font-semibold text-[var(--text-muted)]">Reload TailorDeck. If it repeats, contact support from the Help page.</p>
         </div>
         <button
           type="button"
-          className="h-12 w-full rounded-full bg-[var(--color-primary)] px-5 text-sm font-black text-white shadow-[var(--clay-shadow-primary)]"
+          className="h-12 w-full rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white shadow-[var(--clay-shadow-primary)]"
           onClick={() => window.location.reload()}
         >
           Reload app

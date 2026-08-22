@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { compressImageFile } from '../lib/imageCompression'
 import { brandSettingsUpdateSchema, fileUploadSchema, parseSettingsUpdate } from '../validation/settingsSchemas'
 import type { BrandSettingsRow } from './types'
 import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile } from './serviceHelpers'
@@ -32,8 +33,9 @@ export async function updateBrandSettings(updates: Partial<BrandSettingsRow>): P
 export async function uploadLogo(file: File): Promise<{ storagePath: string; signedUrl: string }> {
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
-  const storagePath = `${userId}/logo.${fileExtension(file)}`
-  await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })
+  const uploadFile = await compressImageFile(file, { maxDimension: 720, maxBytes: 260_000, initialQuality: 0.82, minQuality: 0.58 })
+  const storagePath = `${userId}/logo.${fileExtension(uploadFile)}`
+  await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ logo_storage_path: storagePath, logo_url: null })
   return { storagePath, signedUrl }
@@ -42,8 +44,9 @@ export async function uploadLogo(file: File): Promise<{ storagePath: string; sig
 export async function uploadSignature(file: File): Promise<{ storagePath: string; signedUrl: string }> {
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
-  const storagePath = `${userId}/signature.${fileExtension(file)}`
-  await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file })
+  const uploadFile = await compressImageFile(file, { maxDimension: 900, maxBytes: 280_000, initialQuality: 0.82, minQuality: 0.58 })
+  const storagePath = `${userId}/signature.${fileExtension(uploadFile)}`
+  await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ signature_storage_path: storagePath, signature_url: null })
   return { storagePath, signedUrl }
