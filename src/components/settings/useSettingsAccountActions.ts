@@ -117,16 +117,6 @@ export function useSettingsAccountActions({
     }
   }
 
-  async function handleRequestDetailsCode(): Promise<void> {
-    try {
-      await requestPasswordSecurityCode()
-      setSecurityFeedback('')
-    } catch (error) {
-      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to send security code.'))
-      throw error
-    }
-  }
-
   async function handleUpdatePasswordWithCode(securityCode?: string): Promise<void> {
     try {
       await updateLoginPassword({
@@ -178,7 +168,6 @@ export function useSettingsAccountActions({
     handleSecurityDanger,
     handleSignOut,
     handleRequestPasswordCode,
-    handleRequestDetailsCode,
     handleConfirmEmailChange,
     handleUpdatePasswordWithCode,
   }

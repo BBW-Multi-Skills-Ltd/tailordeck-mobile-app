@@ -101,6 +101,18 @@ export async function verifyLoginEmailChangeOtp(input: { email: string; token: s
     type: 'email_change',
   })
   if (error) throw error
+
+  const responseEmail = data.user?.email?.trim().toLowerCase() || data.session?.user.email?.trim().toLowerCase()
+  if (responseEmail === safeInput.email) return data
+
+  const { data: authData, error: authError } = await supabase.auth.getUser()
+  if (authError) throw authError
+
+  const activeEmail = authData.user?.email?.trim().toLowerCase()
+  if (activeEmail !== safeInput.email) {
+    throw new Error('Email code was accepted, but Supabase has not switched the login email yet. Turn off Secure email change in Supabase Email provider settings, then try again.')
+  }
+
   return data
 }
 
