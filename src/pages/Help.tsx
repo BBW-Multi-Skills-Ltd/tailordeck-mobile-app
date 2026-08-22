@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bug, ChevronRight, CreditCard, Lightbulb, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
@@ -91,6 +91,12 @@ export default function Help() {
   const contactName = settings?.profile.fullName || settings?.businessInfo.shopName || 'TailorDeck user'
   const contactEmail = settings?.profile.email || settings?.businessInfo.businessEmail || ''
   const contactPhone = settings?.profile.phone || settings?.businessInfo.businessPhone || ''
+
+  useEffect(() => {
+    if (!submittedTicketId) return undefined
+    const timer = window.setTimeout(() => setSubmittedTicketId(''), 6000)
+    return () => window.clearTimeout(timer)
+  }, [submittedTicketId])
 
   function openWhatsAppSupport(): void {
     const cleanUrgentMessage = urgentMessage.trim()
@@ -243,8 +249,8 @@ export default function Help() {
           </button>
 
           {submittedTicketId ? (
-            <p className="support-success-text">
-              Request sent. Ticket #{submittedTicketId.slice(0, 8).toUpperCase()} has been saved.
+            <p className="support-success-text" role="status">
+              Request sent. Ticket #{submittedTicketId.slice(0, 8).toUpperCase()}.
             </p>
           ) : null}
         </motion.form>
