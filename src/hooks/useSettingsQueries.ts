@@ -3,8 +3,16 @@ import { getSettings, saveBrandSettings, saveBusinessSettings, savePreferenceSet
 import { uploadLogo, uploadSignature } from '../services/brandService'
 import { queryKeys } from './queryKeys'
 
+const SETTINGS_STALE_TIME_MS = 1000 * 60 * 15
+const SETTINGS_GC_TIME_MS = 1000 * 60 * 60
+
 export function useSettingsQuery() {
-  return useQuery({ queryKey: queryKeys.settings, queryFn: getSettings })
+  return useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: getSettings,
+    staleTime: SETTINGS_STALE_TIME_MS,
+    gcTime: SETTINGS_GC_TIME_MS,
+  })
 }
 
 function useSettingsInvalidation() {

@@ -156,6 +156,7 @@ export const styles = {
   },
   receiptTotalLabel: { display: 'block', marginBottom: 5, fontSize: 10.5, fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left' } satisfies CSSProperties,
   receiptTotalValue: { display: 'block', fontSize: 20, fontWeight: 950, lineHeight: 1.05 } satisfies CSSProperties,
+  receiptTotalPlaceholderValue: { fontSize: 14.5, lineHeight: 1.1 } satisfies CSSProperties,
   signatureSection: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 82, marginTop: 'auto', padding: '20px 38px 0', alignItems: 'end' } satisfies CSSProperties,
   invoiceSignatureSection: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 82, marginTop: 'auto', padding: '20px 38px 0', alignItems: 'end' } satisfies CSSProperties,
   signatureBlock: { textAlign: 'center' } satisfies CSSProperties,

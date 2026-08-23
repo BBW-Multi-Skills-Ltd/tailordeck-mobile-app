@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { loadTailorSettings, saveTailorSettings } from '../../lib/settings'
 import { useSettingsQuery } from '../../hooks/useSettingsQueries'
+import { preloadImages } from '../../lib/imagePreload'
 
 export function useSyncedHeaderSettings() {
   const [settings, setSettings] = useState(() => loadTailorSettings())
@@ -21,7 +22,12 @@ export function useSyncedHeaderSettings() {
 
   useEffect(() => {
     if (!settingsQuery.data) return
-    saveTailorSettings(settingsQuery.data)
+    const nextSettings = saveTailorSettings(settingsQuery.data)
+    preloadImages([
+      nextSettings.profile.avatarUrl,
+      nextSettings.brand.logoUrl,
+      nextSettings.brand.signatureUrl,
+    ])
   }, [settingsQuery.data])
 
   return settings

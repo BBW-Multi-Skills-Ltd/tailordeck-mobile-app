@@ -12,7 +12,13 @@ export default function AppHeader() {
       <header className="app-shell-header">
         <div className="app-shell-left">
           <span className="app-shell-logo-wrap">
-            <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck logo" className="app-shell-logo" />
+            <img
+              src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
+              alt="TailorDeck logo"
+              className="app-shell-logo"
+              decoding="async"
+              loading="eager"
+            />
           </span>
           <p className="app-shell-logo-text">TailorDeck</p>
         </div>

@@ -40,7 +40,13 @@ export default function OnboardingSetup() {
       <div className="onboarding-shell onboarding-shell-step">
         <div className="onboarding-brand compact">
           <div className="onboarding-brand-icon" aria-hidden>
-            <img src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png" alt="" className="onboarding-brand-logo" />
+            <img
+              src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png"
+              alt=""
+              className="onboarding-brand-logo"
+              decoding="async"
+              loading="eager"
+            />
           </div>
           <h2 className="onboarding-section-title">Set Up Your Shop</h2>
         </div>

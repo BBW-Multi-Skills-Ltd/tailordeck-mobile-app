@@ -19,6 +19,8 @@ export default function AuthShell({ title, subtitle, children, footer, pageClass
               src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png"
               alt=""
               className="auth-brand-logo"
+              decoding="async"
+              loading="eager"
             />
           </div>
           <h1 className="auth-title">{title}</h1>

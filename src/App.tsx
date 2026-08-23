@@ -38,7 +38,12 @@ const TermsOfService = lazy(() => import('./pages/TermsOfService'))
 function RouteLoadingFallback() {
   return (
     <main className="page-full route-guard-loading">
-      <img src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png" alt="TailorDeck" />
+      <img
+        src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
+        alt="TailorDeck"
+        decoding="async"
+        loading="eager"
+      />
       <p>Getting things ready...</p>
     </main>
   )

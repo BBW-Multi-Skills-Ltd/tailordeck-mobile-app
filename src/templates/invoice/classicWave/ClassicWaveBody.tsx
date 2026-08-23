@@ -5,12 +5,13 @@ import { styles } from './invoiceClassicWaveStyles'
 export function InvoiceBody({ accent, lines, payload }: { accent: string; lines: DocumentTemplateLineItem[]; payload: DocumentTemplatePayload }) {
   const primaryLine = lines[0]
   const description = primaryLine?.details || primaryLine?.description || payload.service || ''
+  const isSettingsPreview = payload.previewMode === 'settings'
 
   return (
     <div style={styles.invoiceGrid}>
-      <InvoiceInfoFields payload={payload} />
-      <InvoiceDescriptionBlock description={description} />
-      <InvoicePaymentSummary accent={accent} payload={payload} />
+      <InvoiceInfoFields isSettingsPreview={isSettingsPreview} payload={payload} />
+      <InvoiceDescriptionBlock description={getPreviewText(description, 'Job description here', isSettingsPreview)} />
+      <InvoicePaymentSummary accent={accent} isSettingsPreview={isSettingsPreview} payload={payload} />
     </div>
   )
 }
@@ -59,11 +60,11 @@ function Field({
   )
 }
 
-function InvoiceInfoFields({ payload }: { payload: DocumentTemplatePayload }) {
+function InvoiceInfoFields({ isSettingsPreview, payload }: { isSettingsPreview: boolean; payload: DocumentTemplatePayload }) {
   return (
     <>
-      <Field label="Invoice To" value={payload.clientName} />
-      <Field label="Service" value={payload.service} />
+      <Field label="Invoice To" value={getPreviewText(payload.clientName, 'Client name here', isSettingsPreview)} />
+      <Field label="Service" value={getPreviewText(payload.service, 'Service name here', isSettingsPreview)} />
     </>
   )
 }
@@ -77,15 +78,15 @@ function InvoiceDescriptionBlock({ description }: { description: string }) {
   )
 }
 
-function InvoicePaymentSummary({ accent, payload }: { accent: string; payload: DocumentTemplatePayload }) {
+function InvoicePaymentSummary({ accent, isSettingsPreview, payload }: { accent: string; isSettingsPreview: boolean; payload: DocumentTemplatePayload }) {
   return (
     <TotalsGrid
       accent={accent}
       layout="horizontal"
       rows={[
-        ['Total Charge', payload.charge],
-        ['Deposit To Be Made', payload.deposit],
-        ['Balance After Job', payload.balance],
+        ['Total Charge', getPreviewMoney(payload.charge, 'Total charge here', isSettingsPreview)],
+        ['Deposit To Be Made', getPreviewMoney(payload.deposit, 'Deposit here', isSettingsPreview)],
+        ['Balance After Job', getPreviewMoney(payload.balance, 'Balance here', isSettingsPreview)],
       ]}
     />
   )
@@ -106,7 +107,9 @@ function TotalsGrid({
         {rows.map(([label, value], index) => (
           <div key={label} style={styles.receiptTotalBox(index, accent)}>
             <span style={styles.receiptTotalLabel}>{label}</span>
-            <strong style={styles.receiptTotalValue}>{formatMoneyOrText(value)}</strong>
+            <strong style={{ ...styles.receiptTotalValue, ...(typeof value === 'string' ? styles.receiptTotalPlaceholderValue : {}) }}>
+              {formatMoneyOrText(value)}
+            </strong>
           </div>
         ))}
       </div>

@@ -3,6 +3,7 @@ import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
 import { useUploadAvatarMutation } from '../../hooks/useProfileQueries'
 import { useUploadLogoMutation, useUploadSignatureMutation } from '../../hooks/useSettingsQueries'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { preloadImage } from '../../lib/imagePreload'
 
 export type SettingsImageField = 'avatarUrl' | 'logoUrl' | 'signatureUrl'
 
@@ -36,6 +37,7 @@ export function useSettingsImageUpload({ setSettings, setSettingsError }: UseSet
 
       if (field === 'avatarUrl') {
         const { signedUrl } = await uploadAvatarMutation.mutateAsync(file)
+        preloadImage(signedUrl)
         setSettings((prev) => {
           const next = { ...prev, profile: { ...prev.profile, avatarUrl: signedUrl } }
           saveTailorSettings(next)
@@ -45,6 +47,7 @@ export function useSettingsImageUpload({ setSettings, setSettingsError }: UseSet
       }
 
       const { signedUrl } = field === 'logoUrl' ? await uploadLogoMutation.mutateAsync(file) : await uploadSignatureMutation.mutateAsync(file)
+      preloadImage(signedUrl)
       setSettings((prev) => {
         const next = { ...prev, brand: { ...prev.brand, [field]: signedUrl } }
         saveTailorSettings(next)

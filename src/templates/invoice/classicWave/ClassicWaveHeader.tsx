@@ -19,7 +19,7 @@ export function BrandBlock({ accent, payload, primary }: { accent: string; paylo
     <div style={styles.brandBlock}>
       <div style={styles.logoBox(primary)}>
         {payload.brand.logoUrl ? (
-          <img src={payload.brand.logoUrl} alt={`${shopName} logo`} style={styles.logoImage} />
+          <img src={payload.brand.logoUrl} alt={`${shopName} logo`} style={styles.logoImage} decoding="async" />
         ) : (
           <span style={styles.logoPlaceholderText}>YOUR LOGO</span>
         )}

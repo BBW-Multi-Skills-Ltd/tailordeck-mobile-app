@@ -16,7 +16,13 @@ export default function ProfileMenu({ menuOpen, menuRef, onClose, onSignOut, onT
   return (
     <div className="app-profile-menu" ref={menuRef}>
       <button type="button" className="app-profile-trigger" aria-haspopup="menu" aria-expanded={menuOpen} aria-label="Open profile menu" onClick={onToggle}>
-        <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="User avatar placeholder" className="app-profile-image" />
+        <img
+          src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER}
+          alt="User avatar placeholder"
+          className="app-profile-image"
+          decoding="async"
+          loading="eager"
+        />
         <span className="app-business-name">{settings.businessInfo.shopName || 'Your Shop'}</span>
         <HiChevronDown size={16} className={`app-menu-chevron${menuOpen ? ' open' : ''}`} />
       </button>

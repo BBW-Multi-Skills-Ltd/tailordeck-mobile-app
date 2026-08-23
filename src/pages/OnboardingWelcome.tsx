@@ -15,14 +15,20 @@ export default function OnboardingWelcome() {
       <div className="onboarding-shell onboarding-shell-welcome">
         <div className="onboarding-brand">
           <div className="onboarding-brand-icon" aria-hidden>
-            <img src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png" alt="" className="onboarding-brand-logo" />
+            <img
+              src="/Tailor%20deck%20app%20icon%20for%20phone%20screen.png"
+              alt=""
+              className="onboarding-brand-logo"
+              decoding="async"
+              loading="eager"
+            />
           </div>
           <h1 className="onboarding-title">Welcome to TailorDeck</h1>
           <p className="onboarding-subtitle">Your shop, in your pocket</p>
         </div>
 
         <div className="onboarding-hero-image" aria-hidden>
-          <img src="/images/onboarding-tailor-shop-3d.svg" alt="" />
+          <img src="/images/onboarding-tailor-shop-3d.svg" alt="" decoding="async" />
         </div>
 
         <section className="onboarding-card onboarding-card-plain">
