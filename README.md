@@ -21,9 +21,12 @@ Create `.env` in the project root:
 ```bash
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_EMAIL_OTP_EXPIRY_SECONDS=180
 ```
 
 Never commit `.env` or a Supabase service-role key. `.env` is ignored by git.
+
+`VITE_EMAIL_OTP_EXPIRY_SECONDS` must match the Supabase Auth email OTP expiry setting.
 
 Install and run:
 
