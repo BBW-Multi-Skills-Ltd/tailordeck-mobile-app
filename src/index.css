@@ -7638,6 +7638,14 @@ button.more-row {
   overscroll-behavior-y: contain;
 }
 
+.sheet-overlay.job-image-viewer {
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.96);
+  z-index: 500;
+  touch-action: none;
+}
+
 .sheet {
   background: var(--bg-card);
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
