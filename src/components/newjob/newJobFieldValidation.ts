@@ -76,7 +76,8 @@ function validateDeadlineStep(state: NewJobWizardStateModel): NewJobFieldErrors 
   if (!hasText(state.deadlineTime)) errors.deadlineTime = 'Select delivery time.'
   if (!state.reminder) errors.reminder = 'Choose reminder option.'
 
-  const invalidPhoto = state.referencePhotoFiles.find((file) => !isImageFile(file))
+  const targetPhotos = Object.values(state.referencePhotoFilesByTarget).flat()
+  const invalidPhoto = [...state.referencePhotoFiles, ...targetPhotos].find((file) => !isImageFile(file))
   if (invalidPhoto) errors.referencePhotos = 'Upload image files only.'
 
   return errors

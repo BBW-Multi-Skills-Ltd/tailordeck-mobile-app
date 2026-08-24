@@ -34,7 +34,7 @@ export async function uploadLogo(file: File): Promise<{ storagePath: string; sig
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 720, maxBytes: 260_000, initialQuality: 0.82, minQuality: 0.58 })
-  const storagePath = `${userId}/logo.${fileExtension(uploadFile)}`
+  const storagePath = `${userId}/logo-${Date.now()}.${fileExtension(uploadFile)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ logo_storage_path: storagePath, logo_url: null })
@@ -45,7 +45,7 @@ export async function uploadSignature(file: File): Promise<{ storagePath: string
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 900, maxBytes: 280_000, initialQuality: 0.82, minQuality: 0.58 })
-  const storagePath = `${userId}/signature.${fileExtension(uploadFile)}`
+  const storagePath = `${userId}/signature-${Date.now()}.${fileExtension(uploadFile)}`
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ signature_storage_path: storagePath, signature_url: null })

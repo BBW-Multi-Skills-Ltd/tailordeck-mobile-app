@@ -107,11 +107,45 @@ export async function uploadPrivateFile(params: {
 
 export async function createSignedUrl(bucket: string, path: string | null | undefined, expiresIn = 60 * 60): Promise<string> {
   if (!path) return ''
+  const cacheKey = `tailordeck:signed-url:${bucket}:${path}:${expiresIn}`
+  const cached = getCachedSignedUrl(cacheKey)
+  if (cached) return cached
+
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn)
   if (error) throw error
+  cacheSignedUrl(cacheKey, data.signedUrl, expiresIn)
   return data.signedUrl
 }
 
 export function userScopedPath(userId: string, fileName: string): string {
   return `${userId}/${fileName}`
+}
+
+function getCachedSignedUrl(cacheKey: string): string {
+  if (typeof window === 'undefined') return ''
+
+  try {
+    const raw = window.sessionStorage.getItem(cacheKey)
+    if (!raw) return ''
+    const cached = JSON.parse(raw) as { expiresAt?: number; url?: string }
+    if (!cached.url || !cached.expiresAt || cached.expiresAt <= Date.now()) {
+      window.sessionStorage.removeItem(cacheKey)
+      return ''
+    }
+    return cached.url
+  } catch {
+    return ''
+  }
+}
+
+function cacheSignedUrl(cacheKey: string, url: string, expiresIn: number): void {
+  if (typeof window === 'undefined') return
+
+  try {
+    const refreshMarginMs = 60_000
+    const expiresAt = Date.now() + Math.max(0, expiresIn * 1000 - refreshMarginMs)
+    window.sessionStorage.setItem(cacheKey, JSON.stringify({ expiresAt, url }))
+  } catch {
+    // Storage can fail in private browsing or quota-limited sessions; the app still works without this cache.
+  }
 }

@@ -8,7 +8,13 @@ const percentAmount = z.number().finite().min(0, 'Deposit cannot be below 0%.').
 const fileSchema = z.custom<File>((value) => {
   if (typeof File === 'undefined') return true
   return value instanceof File
-}, 'Invalid file upload.')
+}, 'Invalid file upload.').superRefine((file, context) => {
+  if (typeof File === 'undefined' || !(file instanceof File)) return
+
+  if (file.type && !file.type.startsWith('image/')) {
+    context.addIssue({ code: 'custom', message: 'Only image files are allowed.' })
+  }
+})
 
 export const newJobClientStepSchema = z.object({
   clientId: z.string().uuid().optional().nullable(),
@@ -88,8 +94,18 @@ export const createFullJobSchema = newJobClientStepSchema
     persons: z.array(newJobPersonSchema).min(1, 'Add at least one person or item measurement.'),
   })
   .superRefine((input, context) => {
+    const isDraft = input.status === 'Draft'
+
     if (input.depositPercent > 0 && input.chargeAmount <= 0) {
       context.addIssue({ code: 'custom', path: ['chargeAmount'], message: 'Enter a charge amount before collecting deposit.' })
+    }
+
+    if (!isDraft && !input.deadlineDate?.trim()) {
+      context.addIssue({ code: 'custom', path: ['deadlineDate'], message: 'Select delivery date.' })
+    }
+
+    if (!isDraft && !input.deadlineTime?.trim()) {
+      context.addIssue({ code: 'custom', path: ['deadlineTime'], message: 'Select delivery time.' })
     }
 
     if (input.deadlineDate && Number.isNaN(Date.parse(input.deadlineDate))) {

@@ -33,7 +33,6 @@ export function createNewJobWizardActions({ confirmDiscard, navigate, state, val
     handleAmendmentMaterialsToggle: materialActions.handleAmendmentMaterialsToggle,
     handleClientNameChange: stepOneActions.handleClientNameChange,
     handleDepositPercentKeyDown: materialActions.handleDepositPercentKeyDown,
-    handleFinalizeJob: navigationActions.handleFinalizeJob,
     handleJobTypeChange: stepOneActions.handleJobTypeChange,
     handleMakeCategoryChange: stepOneActions.handleMakeCategoryChange,
     handleOrderModeChange: stepOneActions.handleOrderModeChange,

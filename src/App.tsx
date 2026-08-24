@@ -5,7 +5,6 @@ import { RouteGuard } from './components/layout/RouteGuard'
 
 const Home = lazy(() => import('./pages/Home'))
 const Clients = lazy(() => import('./pages/Clients'))
-const NewClient = lazy(() => import('./pages/NewClient'))
 const ClientProfile = lazy(() => import('./pages/ClientProfile'))
 const Jobs = lazy(() => import('./pages/Jobs'))
 const NewJob = lazy(() => import('./pages/NewJob'))
@@ -69,7 +68,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/clients" element={<Clients />} />
-            <Route path="/clients/new" element={<NewClient />} />
+            <Route path="/clients/new" element={<Navigate to="/jobs/new" replace />} />
             <Route path="/clients/:id" element={<ClientProfile />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/jobs/new" element={<NewJob />} />

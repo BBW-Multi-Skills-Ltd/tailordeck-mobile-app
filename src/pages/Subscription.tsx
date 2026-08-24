@@ -14,7 +14,6 @@ export default function SubscriptionPage() {
   const [settings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
-  const [planFeedback, setPlanFeedback] = useState('')
   const [planError, setPlanError] = useState('')
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const subscriptionQuery = useSubscriptionQuery()
@@ -30,7 +29,6 @@ export default function SubscriptionPage() {
 
   async function choosePlan(plan: PaidPlan) {
     setPlanError('')
-    setPlanFeedback('')
     setSelectedPlan(plan)
     try {
       const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
@@ -68,7 +66,6 @@ export default function SubscriptionPage() {
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
       ) : null}
       {visiblePlans.length > 0 ? <PaymentTrustNote /> : null}
-      {planFeedback ? <p className="auth-feedback success" role="status">{planFeedback}</p> : null}
       {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 
       {visiblePlans.length > 0 ? (

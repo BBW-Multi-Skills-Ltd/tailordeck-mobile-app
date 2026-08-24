@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
-import { ClientsProvider } from './context/ClientsContext'
 import { AuthProvider } from './context/AuthContext'
 import { initializeTheme } from './lib/theme'
 import { initMonitoring } from './lib/monitoring'
@@ -50,13 +49,11 @@ createRoot(document.getElementById('root')!).render(
       <ScrollToTop />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ClientsProvider>
-            <AppFeedbackProvider>
-              <AppErrorBoundary>
-                <App />
-              </AppErrorBoundary>
-            </AppFeedbackProvider>
-          </ClientsProvider>
+          <AppFeedbackProvider>
+            <AppErrorBoundary>
+              <App />
+            </AppErrorBoundary>
+          </AppFeedbackProvider>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
   return {
     define: {
       'import.meta.env.VITE_EMAIL_OTP_EXPIRY_SECONDS': JSON.stringify(env.VITE_EMAIL_OTP_EXPIRY_SECONDS),
+      'import.meta.env.VITE_SENTRY_DSN': JSON.stringify(env.VITE_SENTRY_DSN),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
     },

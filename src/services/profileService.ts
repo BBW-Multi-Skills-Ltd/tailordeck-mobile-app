@@ -71,7 +71,7 @@ export async function uploadAvatar(file: File): Promise<{ storagePath: string; s
   fileUploadSchema.parse(file)
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 520, maxBytes: 180_000, initialQuality: 0.82, minQuality: 0.58 })
-  const storagePath = userScopedPath(userId, `avatar.${fileExtension(uploadFile)}`)
+  const storagePath = userScopedPath(userId, `avatar-${Date.now()}.${fileExtension(uploadFile)}`)
   await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('avatars', storagePath, AVATAR_SIGNED_URL_TTL)
   await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
