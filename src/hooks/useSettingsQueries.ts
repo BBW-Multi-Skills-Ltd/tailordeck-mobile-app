@@ -21,28 +21,23 @@ function useSettingsInvalidation() {
 }
 
 export function useSaveProfileSettingsMutation() {
-  const invalidate = useSettingsInvalidation()
-  return useMutation({ mutationFn: saveProfileSettings, onSuccess: invalidate })
+  return useMutation({ mutationFn: saveProfileSettings })
 }
 
 export function useSaveBusinessSettingsMutation() {
-  const invalidate = useSettingsInvalidation()
-  return useMutation({ mutationFn: saveBusinessSettings, onSuccess: invalidate })
+  return useMutation({ mutationFn: saveBusinessSettings })
 }
 
 export function useSavePreferenceSettingsMutation() {
-  const invalidate = useSettingsInvalidation()
-  return useMutation({ mutationFn: savePreferenceSettings, onSuccess: invalidate })
+  return useMutation({ mutationFn: savePreferenceSettings })
 }
 
 export function useSaveReminderSettingsMutation() {
-  const invalidate = useSettingsInvalidation()
-  return useMutation({ mutationFn: saveReminderSettings, onSuccess: invalidate })
+  return useMutation({ mutationFn: saveReminderSettings })
 }
 
 export function useSaveBrandSettingsMutation() {
-  const invalidate = useSettingsInvalidation()
-  return useMutation({ mutationFn: saveBrandSettings, onSuccess: invalidate })
+  return useMutation({ mutationFn: saveBrandSettings })
 }
 
 export function useUploadLogoMutation() {

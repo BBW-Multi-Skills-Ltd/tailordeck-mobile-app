@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   loadTailorSettings,
@@ -35,6 +35,7 @@ export function useSettingsPage() {
   const saveBrandMutation = useSaveBrandSettingsMutation()
   const { setTheme, theme } = useSettingsTheme()
   const draft = useSettingsDraftState(loadTailorSettings())
+  const lastAppliedSettingsQueryAtRef = useRef(0)
   const {
     confirmPasswordDraft, generatedPreviewKind, invoicePreviewGenerated, openBrandPreviewSheet, openColorPicker, panel,
     passwordDraft, savedSection, savedTick, securityFeedback, settingsError, setConfirmPasswordDraft, setGeneratedPreviewKind,
@@ -76,10 +77,12 @@ export function useSettingsPage() {
   useEffect(() => {
     if (!settingsQuery.data) return
     if (settingsSavePending) return
+    if (lastAppliedSettingsQueryAtRef.current === settingsQuery.dataUpdatedAt) return
+    lastAppliedSettingsQueryAtRef.current = settingsQuery.dataUpdatedAt
     const next = saveTailorSettings(settingsQuery.data)
     setSettings(next)
     applyTheme(next.preferences.darkMode ? 'dark' : 'light')
-  }, [settingsQuery.data, settingsSavePending, setSettings])
+  }, [settingsQuery.data, settingsQuery.dataUpdatedAt, settingsSavePending, setSettings])
 
   async function handleThemeToggle(): Promise<void> {
     const nextTheme = setTheme()

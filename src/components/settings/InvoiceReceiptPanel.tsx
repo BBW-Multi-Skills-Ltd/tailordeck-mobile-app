@@ -71,27 +71,7 @@ export default function InvoiceReceiptPanel({
 
   function handleBusinessDetailClick(item: { key: BrandDetailKey; label: string }): void {
     if (availableBusinessDetails[item.key]) {
-      const nextSettings = {
-        ...settings,
-        brand: {
-          ...settings.brand,
-          includeBusinessDetails: {
-            ...settings.brand.includeBusinessDetails,
-            [item.key]: !settings.brand.includeBusinessDetails[item.key],
-          },
-        },
-      }
-      if (autosaveTimerRef.current) {
-        window.clearTimeout(autosaveTimerRef.current)
-        autosaveTimerRef.current = null
-      }
-      initialAutosaveSignatureRef.current = JSON.stringify({
-        colors: nextSettings.brand.colors,
-        documentTemplate: nextSettings.brand.documentTemplate,
-        includeBusinessDetails: nextSettings.brand.includeBusinessDetails,
-      })
       onToggleBrandDetail(item.key)
-      onAutoSave(nextSettings)
       return
     }
 

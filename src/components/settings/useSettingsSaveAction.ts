@@ -1,6 +1,8 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { queryKeys } from '../../hooks/queryKeys'
 import { persistSettingsSection, type SettingsPersistenceMutations } from './settingsPersistence'
 
 const SAVED_FEEDBACK_MS = 2600
@@ -25,7 +27,13 @@ export function useSettingsSaveAction({
   setSavedTick,
   setSettingsError,
 }: UseSettingsSaveActionArgs) {
+  const queryClient = useQueryClient()
   const savedTimerRef = useRef<number | null>(null)
+  const currentSettingsRef = useRef(settings)
+
+  useEffect(() => {
+    currentSettingsRef.current = settings
+  }, [settings])
 
   useEffect(() => {
     return () => {
@@ -44,8 +52,11 @@ export function useSettingsSaveAction({
   }
 
   async function markSaved(sectionLabel: string, nextSettings: TailorSettings = settings): Promise<void> {
+    const saveFingerprint = settingsFingerprint(nextSettings)
+    currentSettingsRef.current = nextSettings
     try {
       setSettingsError('')
+      await queryClient.cancelQueries({ queryKey: queryKeys.settings })
       await persistSettingsSection(sectionLabel, nextSettings, {
         saveBrandMutation,
         saveBusinessMutation,
@@ -53,7 +64,9 @@ export function useSettingsSaveAction({
         saveProfileMutation,
         saveReminderMutation,
       })
+      if (settingsFingerprint(currentSettingsRef.current) !== saveFingerprint) return
       const next = saveTailorSettings(nextSettings)
+      queryClient.setQueryData(queryKeys.settings, next)
       setSettings(next)
       setSavedTick(Date.now())
       setSavedSection(sectionLabel)
@@ -67,4 +80,8 @@ export function useSettingsSaveAction({
   }
 
   return { markSaved }
+}
+
+function settingsFingerprint(settings: TailorSettings): string {
+  return JSON.stringify({ ...settings, updatedAt: '' })
 }
