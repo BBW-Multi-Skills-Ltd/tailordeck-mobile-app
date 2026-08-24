@@ -59,6 +59,7 @@ export default function AboutTailorDeckPanel() {
         <h3>Official Links</h3>
         <div className="settings-about-link-grid">
           <a href="https://tailordeck.com.ng" target="_blank" rel="noreferrer">tailordeck.com.ng</a>
+          <a href="https://bbwtechinnovations.com" target="_blank" rel="noreferrer">bbwtechinnovations.com</a>
           <Link to="/privacy-policy">Privacy Policy</Link>
           <Link to="/terms-of-service">Terms of Service</Link>
         </div>

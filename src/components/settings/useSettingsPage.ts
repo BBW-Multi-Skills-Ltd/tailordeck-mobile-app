@@ -66,13 +66,20 @@ export function useSettingsPage() {
     settings,
     signOut,
   })
+  const settingsSavePending =
+    saveProfileMutation.isPending ||
+    saveBusinessMutation.isPending ||
+    savePreferenceMutation.isPending ||
+    saveReminderMutation.isPending ||
+    saveBrandMutation.isPending
 
   useEffect(() => {
     if (!settingsQuery.data) return
+    if (settingsSavePending) return
     const next = saveTailorSettings(settingsQuery.data)
     setSettings(next)
     applyTheme(next.preferences.darkMode ? 'dark' : 'light')
-  }, [settingsQuery.data, setSettings])
+  }, [settingsQuery.data, settingsSavePending, setSettings])
 
   async function handleThemeToggle(): Promise<void> {
     const nextTheme = setTheme()
