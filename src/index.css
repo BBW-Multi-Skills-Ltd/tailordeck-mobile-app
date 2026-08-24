@@ -3054,6 +3054,7 @@ button.more-row {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-inline: auto;
   width: 52px;
   height: 52px;
   border-radius: 18px;
@@ -4234,19 +4235,20 @@ button.more-row {
 .settings-profile-summary-actions {
   margin-top: 7px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   width: 100%;
 }
 
 .settings-profile-edit-btn {
+  min-width: 0;
   min-height: 34px;
-  padding: 0 12px;
+  padding: 0 clamp(8px, 2.4vw, 12px);
   border: 0;
   border-radius: 12px;
   background: var(--primary);
   color: #fff;
-  font-size: 13px;
+  font-size: clamp(12px, 3.35vw, 13px);
   font-weight: 700;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
@@ -4254,6 +4256,8 @@ button.more-row {
   align-items: center;
   justify-content: center;
   text-align: center;
+  white-space: nowrap;
+  line-height: 1.1;
 }
 
 .settings-profile-edit-btn.save-photo {
@@ -7500,7 +7504,8 @@ button.more-row {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.96);
-  z-index: 320;
+  z-index: 500;
+  touch-action: none;
 }
 
 .job-image-stage {
@@ -8994,14 +8999,16 @@ button.more-row {
 
 .wizard-expense-entry-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.75fr) 64px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(92px, 0.75fr) 58px;
   gap: 10px;
   align-items: stretch;
 }
 
 .wizard-expense-name-input,
 .wizard-expense-cost-input {
+  min-width: 0;
   min-height: 58px;
+  font-size: clamp(12px, 3.4vw, 14px);
 }
 
 .wizard-expense-add-btn {
@@ -9220,6 +9227,15 @@ button.more-row {
   color: var(--text-h);
 }
 
+.wizard-deadline-checklist > .row-between {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.wizard-deadline-checklist > .row-between > div {
+  min-width: 0;
+}
+
 .wizard-deadline-entry-card {
   padding: 12px;
 }
@@ -9231,6 +9247,7 @@ button.more-row {
 }
 
 .wizard-checklist-score {
+  flex: 0 0 auto;
   min-width: 54px;
   border-radius: var(--radius-full);
   border: 1px solid color-mix(in srgb, var(--danger) 24%, transparent);
@@ -10916,6 +10933,20 @@ button.more-row {
 ============================================ */
 
 @media (max-width: 380px) {
+  .settings-profile-summary {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .settings-profile-avatar-large {
+    width: 82px;
+    height: 82px;
+  }
+
+  .settings-profile-summary-actions {
+    gap: 6px;
+  }
+
   .document-preview-modal-overlay {
     align-items: stretch;
     padding: 8px;
@@ -11009,11 +11040,12 @@ button.more-row {
   }
 
   .wizard-expense-entry-row {
-    grid-template-columns: minmax(0, 1fr) 58px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(82px, 0.75fr) 52px;
+    gap: 8px;
   }
 
   .wizard-expense-name-input {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   .wizard-expense-cost-input,
