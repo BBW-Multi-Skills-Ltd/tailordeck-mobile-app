@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ImageIcon, X } from 'lucide-react'
+import { SmartImage } from '../shared/SmartImage'
 
 export function JobImageViewer({
   activePhoto,
@@ -54,7 +55,12 @@ export function JobImageViewer({
         >
           <X size={20} />
         </button>
-        <img src={activePhoto} alt="Full reference" className="job-image-full" />
+        <SmartImage
+          src={activePhoto}
+          alt="Full reference"
+          wrapperClassName="job-image-full"
+          fallback={<ImageIcon size={28} />}
+        />
       </div>
 
       <button

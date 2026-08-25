@@ -5,6 +5,7 @@ import SignOutConfirmDialog from '../components/layout/SignOutConfirmDialog'
 import { useSettingsPage } from '../components/settings/useSettingsPage'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
+import { SmartImage } from '../components/shared/SmartImage'
 import { AVATAR_PLACEHOLDER } from '../lib/settings'
 
 type SettingsHubRowProps = {
@@ -80,7 +81,14 @@ export default function SettingsPage() {
 
       <Link to="/settings/security" className="clay-card more-profile-card settings-profile-top-card">
         <div className="more-avatar clay-inset" aria-hidden>
-          {settings.profile.avatarUrl ? <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" /> : <span>{initial}</span>}
+          {settings.profile.avatarUrl ? (
+            <SmartImage
+              src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER}
+              alt=""
+              wrapperClassName="more-avatar-image"
+              fallback={<span>{initial}</span>}
+            />
+          ) : <span>{initial}</span>}
         </div>
         <div className="stack gap-2 min-w-0">
           <p className="more-profile-name truncate">{fullName}</p>

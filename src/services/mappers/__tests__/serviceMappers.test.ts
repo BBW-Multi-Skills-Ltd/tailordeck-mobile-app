@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mapClientRow } from '../clientMapper'
 import { mapJobCreateMoney, mapJobRow } from '../jobMapper'
 import { mapNotificationRow } from '../notificationMapper'
+import { mergeSettingsRows } from '../settingsMapper'
 import { mapJobStatusFromDb, mapJobStatusToDb } from '../statusMapper'
 import type { ClientRow, JobRow, NotificationRow } from '../../types'
 
@@ -146,6 +147,35 @@ describe('service mappers', () => {
       href: '/',
       createdAt,
       read: false,
+    })
+  })
+
+  it('preselects invoice business detail pills from onboarding business details when brand settings do not exist yet', () => {
+    const settings = mergeSettingsRows({
+      business: {
+        id: 'business-1',
+        user_id: 'user-1',
+        shop_name: 'Faith Shop',
+        shop_address: 'Lagos, Nigeria',
+        business_phone: '+2349010851071',
+        business_phone_normalized: '2349010851071',
+        business_email: 'shop@example.com',
+        website: 'tailordeck.com.ng',
+        cac_registration_number: 'RC12345',
+        created_at: createdAt,
+        updated_at: updatedAt,
+      },
+      handles: [{ id: 'handle-1', user_id: 'user-1', platform: 'Instagram', handle: '@faithshop', created_at: createdAt, updated_at: updatedAt }],
+      brand: null,
+    })
+
+    expect(settings.brand.includeBusinessDetails).toEqual({
+      phone: true,
+      email: true,
+      website: true,
+      social: true,
+      address: true,
+      cac: true,
     })
   })
 })

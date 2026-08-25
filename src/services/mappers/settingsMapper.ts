@@ -16,6 +16,28 @@ export function mergeSettingsRows(rows: {
     rows.brand?.body_color || fallback.brand.colors[1],
     rows.brand?.accent_color || fallback.brand.colors[2],
   ]
+  const hasBrandSettings = Boolean(rows.brand)
+  const businessInfo = {
+    shopName: rows.business?.shop_name || fallback.businessInfo.shopName,
+    shopAddress: rows.business?.shop_address || fallback.businessInfo.shopAddress,
+    businessPhone: rows.business?.business_phone || fallback.businessInfo.businessPhone,
+    businessEmail: rows.business?.business_email || fallback.businessInfo.businessEmail,
+    website: rows.business?.website || fallback.businessInfo.website,
+    cacRegistrationNumber: rows.business?.cac_registration_number || fallback.businessInfo.cacRegistrationNumber,
+    socialHandles: (rows.handles ?? []).map((handle) => ({
+      id: handle.id,
+      platform: handle.platform,
+      handle: handle.handle,
+    })),
+  }
+  const fallbackIncludeBusinessDetails = {
+    phone: Boolean(businessInfo.businessPhone) || fallback.brand.includeBusinessDetails.phone,
+    email: Boolean(businessInfo.businessEmail) || fallback.brand.includeBusinessDetails.email,
+    website: Boolean(businessInfo.website) || fallback.brand.includeBusinessDetails.website,
+    social: businessInfo.socialHandles.length > 0 || fallback.brand.includeBusinessDetails.social,
+    address: Boolean(businessInfo.shopAddress) || fallback.brand.includeBusinessDetails.address,
+    cac: Boolean(businessInfo.cacRegistrationNumber) || fallback.brand.includeBusinessDetails.cac,
+  }
 
   return {
     ...fallback,
@@ -39,19 +61,7 @@ export function mergeSettingsRows(rows: {
       notificationBellEnabled: rows.preferences?.notification_bell_enabled ?? fallback.reminders.notificationBellEnabled,
       notificationBell: rows.preferences?.notification_bell || fallback.reminders.notificationBell,
     },
-    businessInfo: {
-      shopName: rows.business?.shop_name || fallback.businessInfo.shopName,
-      shopAddress: rows.business?.shop_address || fallback.businessInfo.shopAddress,
-      businessPhone: rows.business?.business_phone || fallback.businessInfo.businessPhone,
-      businessEmail: rows.business?.business_email || fallback.businessInfo.businessEmail,
-      website: rows.business?.website || fallback.businessInfo.website,
-      cacRegistrationNumber: rows.business?.cac_registration_number || fallback.businessInfo.cacRegistrationNumber,
-      socialHandles: (rows.handles ?? []).map((handle) => ({
-        id: handle.id,
-        platform: handle.platform,
-        handle: handle.handle,
-      })),
-    },
+    businessInfo,
     brand: {
       name: rows.business?.shop_name || fallback.brand.name,
       colors,
@@ -59,12 +69,12 @@ export function mergeSettingsRows(rows: {
       signatureUrl: rows.brand?.signature_url || fallback.brand.signatureUrl,
       documentTemplate: rows.brand?.document_template || fallback.brand.documentTemplate,
       includeBusinessDetails: {
-        phone: rows.brand?.show_business_phone ?? fallback.brand.includeBusinessDetails.phone,
-        email: rows.brand?.show_business_email ?? fallback.brand.includeBusinessDetails.email,
-        website: rows.brand?.show_website ?? fallback.brand.includeBusinessDetails.website,
-        social: rows.brand?.show_social ?? fallback.brand.includeBusinessDetails.social,
-        address: rows.brand?.show_address ?? fallback.brand.includeBusinessDetails.address,
-        cac: rows.brand?.show_cac ?? fallback.brand.includeBusinessDetails.cac,
+        phone: hasBrandSettings ? rows.brand?.show_business_phone ?? fallbackIncludeBusinessDetails.phone : fallbackIncludeBusinessDetails.phone,
+        email: hasBrandSettings ? rows.brand?.show_business_email ?? fallbackIncludeBusinessDetails.email : fallbackIncludeBusinessDetails.email,
+        website: hasBrandSettings ? rows.brand?.show_website ?? fallbackIncludeBusinessDetails.website : fallbackIncludeBusinessDetails.website,
+        social: hasBrandSettings ? rows.brand?.show_social ?? fallbackIncludeBusinessDetails.social : fallbackIncludeBusinessDetails.social,
+        address: hasBrandSettings ? rows.brand?.show_address ?? fallbackIncludeBusinessDetails.address : fallbackIncludeBusinessDetails.address,
+        cac: hasBrandSettings ? rows.brand?.show_cac ?? fallbackIncludeBusinessDetails.cac : fallbackIncludeBusinessDetails.cac,
       },
     },
     subscription: {

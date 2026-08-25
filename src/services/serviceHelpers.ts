@@ -98,7 +98,7 @@ export async function uploadPrivateFile(params: {
   file: File
 }): Promise<string> {
   const { error } = await supabase.storage.from(params.bucket).upload(params.path, params.file, {
-    cacheControl: '3600',
+    cacheControl: '604800',
     upsert: true,
   })
   if (error) throw error
@@ -125,10 +125,11 @@ function getCachedSignedUrl(cacheKey: string): string {
   if (typeof window === 'undefined') return ''
 
   try {
-    const raw = window.sessionStorage.getItem(cacheKey)
+    const raw = window.localStorage.getItem(cacheKey) || window.sessionStorage.getItem(cacheKey)
     if (!raw) return ''
     const cached = JSON.parse(raw) as { expiresAt?: number; url?: string }
     if (!cached.url || !cached.expiresAt || cached.expiresAt <= Date.now()) {
+      window.localStorage.removeItem(cacheKey)
       window.sessionStorage.removeItem(cacheKey)
       return ''
     }
@@ -144,7 +145,9 @@ function cacheSignedUrl(cacheKey: string, url: string, expiresIn: number): void 
   try {
     const refreshMarginMs = 60_000
     const expiresAt = Date.now() + Math.max(0, expiresIn * 1000 - refreshMarginMs)
-    window.sessionStorage.setItem(cacheKey, JSON.stringify({ expiresAt, url }))
+    const value = JSON.stringify({ expiresAt, url })
+    window.localStorage.setItem(cacheKey, value)
+    window.sessionStorage.setItem(cacheKey, value)
   } catch {
     // Storage can fail in private browsing or quota-limited sessions; the app still works without this cache.
   }

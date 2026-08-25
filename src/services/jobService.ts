@@ -11,6 +11,8 @@ import { buildJobUpdateRow } from './jobs/jobUpdateRows'
 import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
 import { validateCreateFullJobInput } from '../validation/jobSchemas'
 
+const JOB_PHOTO_SIGNED_URL_TTL = 60 * 60 * 24 * 7
+
 export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from './jobs/jobServiceTypes'
 
 export async function getJobs(status?: JobStatus, limit = 100): Promise<MockJob[]> {
@@ -116,7 +118,7 @@ async function hydrateJobPhotoUrls(job: JobWithRelations): Promise<JobWithRelati
   const signedPhotos = await Promise.all(
     photos.map(async (photo) => ({
       ...photo,
-      signed_url: await createSignedUrl('job-photos', photo.storage_path),
+      signed_url: await createSignedUrl('job-photos', photo.storage_path, JOB_PHOTO_SIGNED_URL_TTL),
     })),
   )
 

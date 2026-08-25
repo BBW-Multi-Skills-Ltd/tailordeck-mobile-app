@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { HiChevronDown } from 'react-icons/hi2'
 import type { RefObject } from 'react'
 import { AVATAR_PLACEHOLDER, type TailorSettings } from '../../lib/settings'
+import { SmartImage } from '../shared/SmartImage'
 
 type ProfileMenuProps = {
   menuOpen: boolean
@@ -16,11 +17,11 @@ export default function ProfileMenu({ menuOpen, menuRef, onClose, onSignOut, onT
   return (
     <div className="app-profile-menu" ref={menuRef}>
       <button type="button" className="app-profile-trigger" aria-haspopup="menu" aria-expanded={menuOpen} aria-label="Open profile menu" onClick={onToggle}>
-        <img
+        <SmartImage
           src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER}
           alt="User avatar placeholder"
-          className="app-profile-image"
-          decoding="async"
+          wrapperClassName="app-profile-image"
+          fallback={<span className="smart-image-initial">{settings.profile.fullName?.charAt(0) || 'U'}</span>}
           loading="eager"
         />
         <span className="app-business-name">{settings.businessInfo.shopName || 'Your Shop'}</span>

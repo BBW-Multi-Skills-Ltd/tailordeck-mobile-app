@@ -11,17 +11,8 @@ export function getClassicWaveLabels(kind: DocumentTemplatePayload['kind']) {
 }
 
 export function getClassicWaveBusinessDetails(payload: DocumentTemplatePayload) {
-  const showAllPreviewSlots = payload.previewMode === 'settings'
-  const details = showAllPreviewSlots
-    ? {
-        phone: true,
-        email: true,
-        website: true,
-        social: true,
-        address: true,
-        cac: true,
-      }
-    : payload.brand.includeBusinessDetails
+  const previewPlaceholders = payload.previewMode === 'settings'
+  const details = payload.brand.includeBusinessDetails
 
   return {
     businessAddress: payload.brand.shopAddress,
@@ -29,7 +20,7 @@ export function getClassicWaveBusinessDetails(payload: DocumentTemplatePayload) 
     businessEmail: payload.brand.businessEmail,
     businessPhone: payload.brand.businessPhone,
     details,
-    previewPlaceholders: showAllPreviewSlots,
+    previewPlaceholders,
     socialHandles: details.social ? payload.brand.socialHandles : [],
     website: payload.brand.website,
   }

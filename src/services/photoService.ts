@@ -3,6 +3,8 @@ import { compressImageFile } from '../lib/imageCompression'
 import type { JobReferencePhotoRow } from './types'
 import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile } from './serviceHelpers'
 
+const JOB_PHOTO_SIGNED_URL_TTL = 60 * 60 * 24 * 7
+
 export type UploadJobPhotoInput = {
   file: File
   jobId: string
@@ -48,7 +50,7 @@ export async function uploadJobPhoto(input: UploadJobPhotoInput): Promise<JobRef
 
   if (error) throw error
 
-  return { ...data, signed_url: await createSignedUrl('job-photos', storagePath) }
+  return { ...data, signed_url: await createSignedUrl('job-photos', storagePath, JOB_PHOTO_SIGNED_URL_TTL) }
 }
 
 export async function getJobPhotoSignedUrls(jobId: string): Promise<string[]> {
@@ -63,5 +65,5 @@ export async function getJobPhotoSignedUrls(jobId: string): Promise<string[]> {
 
   if (error) throw error
 
-  return Promise.all((data ?? []).map((photo) => createSignedUrl('job-photos', photo.storage_path)))
+  return Promise.all((data ?? []).map((photo) => createSignedUrl('job-photos', photo.storage_path, JOB_PHOTO_SIGNED_URL_TTL)))
 }

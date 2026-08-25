@@ -1,3 +1,6 @@
+import { ImageIcon } from 'lucide-react'
+import { SmartImage } from '../shared/SmartImage'
+
 export function JobReferencePhotos({
   photos,
   onOpen,
@@ -20,7 +23,12 @@ export function JobReferencePhotos({
               onClick={() => onOpen(index)}
               aria-label={`Open reference photo ${index + 1}`}
             >
-              <img src={photo} alt={`Reference ${index + 1}`} className="job-photo-item" />
+              <SmartImage
+                src={photo}
+                alt={`Reference ${index + 1}`}
+                wrapperClassName="job-photo-item"
+                fallback={<ImageIcon size={18} />}
+              />
             </button>
           ))}
         </div>

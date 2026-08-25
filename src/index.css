@@ -2219,6 +2219,12 @@ p { margin: 0; }
   object-fit: cover;
 }
 
+.more-avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .more-profile-name {
   margin: 0;
   color: var(--text-h);
@@ -2426,8 +2432,74 @@ button.more-row {
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  object-fit: cover;
   border: 1px solid var(--primary-border);
+}
+
+.app-profile-image img {
+  border-radius: inherit;
+}
+
+.smart-image {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--clay-surface-muted) 76%, var(--bg-card) 24%);
+  color: var(--text-muted);
+}
+
+.smart-image > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.smart-image.is-loaded > img {
+  opacity: 1;
+}
+
+.smart-image-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  background:
+    linear-gradient(100deg, transparent 0%, color-mix(in srgb, var(--clay-highlight) 58%, transparent) 45%, transparent 88%),
+    color-mix(in srgb, var(--clay-surface-muted) 82%, var(--bg-card) 18%);
+  background-size: 220% 100%;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  animation: smart-image-shimmer 1.35s ease-in-out infinite;
+}
+
+.smart-image.is-loaded .smart-image-fallback {
+  display: none;
+}
+
+.smart-image.is-failed .smart-image-fallback {
+  animation: none;
+}
+
+.smart-image-initial {
+  color: var(--primary);
+  font-weight: 850;
+}
+
+@keyframes smart-image-shimmer {
+  0% {
+    background-position: 180% 0;
+  }
+
+  100% {
+    background-position: -80% 0;
+  }
 }
 
 .app-business-name {
@@ -4186,6 +4258,12 @@ button.more-row {
   display: block;
 }
 
+.settings-profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .settings-profile-avatar-camera {
   position: absolute;
   right: -2px;
@@ -5480,6 +5558,12 @@ button.more-row {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.settings-brand-upload-preview-image {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .settings-brand-generate-btn {
@@ -7334,11 +7418,14 @@ button.more-row {
 .job-photo-item {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
   border-radius: var(--clay-radius-md);
   border: 1px solid var(--clay-border);
   background: var(--clay-surface-muted);
   box-shadow: var(--clay-shadow-press);
+}
+
+.job-photo-item img {
+  border-radius: inherit;
 }
 
 .job-photo-button {
@@ -7522,10 +7609,13 @@ button.more-row {
   height: 100svh;
   max-width: none;
   max-height: none;
-  object-fit: contain;
   border-radius: 0;
   border: none;
   background: #111;
+}
+
+.job-image-full img {
+  object-fit: contain;
 }
 
 .job-image-close {
@@ -9428,6 +9518,11 @@ button.more-row {
   object-fit: cover;
 }
 
+.wizard-reference-preview-image {
+  width: 100%;
+  height: 100%;
+}
+
 .wizard-reference-viewer {
   position: fixed;
   inset: 0;
@@ -9446,13 +9541,25 @@ button.more-row {
   gap: 12px;
 }
 
-.wizard-reference-viewer-content img {
+.wizard-reference-viewer-content > img {
   width: min(100%, 520px);
   max-height: 72dvh;
   object-fit: contain;
   border-radius: 22px;
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.wizard-reference-viewer-image {
+  width: min(100%, 520px);
+  max-height: 72dvh;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.wizard-reference-viewer-image img {
+  object-fit: contain;
 }
 
 .wizard-reference-viewer-content p {

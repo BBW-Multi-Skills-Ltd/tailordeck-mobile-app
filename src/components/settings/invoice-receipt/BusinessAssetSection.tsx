@@ -1,6 +1,7 @@
 import type { ChangeEvent, ReactNode } from 'react'
 import { Image as ImageIcon, Upload } from 'lucide-react'
 import type { TailorSettings } from '../../../lib/settings'
+import { SmartImage } from '../../shared/SmartImage'
 import { SectionHeader } from './InvoiceSetupProgress'
 import { hasCustomDocumentLogo } from './invoiceReceiptConfig'
 
@@ -21,14 +22,28 @@ export function BusinessAssetSection({
           label="Business Logo"
           locked={locked}
           helper="PNG or JPG, max 2MB."
-          preview={hasCustomDocumentLogo(settings.brand.logoUrl) ? <img src={settings.brand.logoUrl} alt="Logo preview" /> : <ImageIcon size={18} />}
+          preview={hasCustomDocumentLogo(settings.brand.logoUrl) ? (
+            <SmartImage
+              src={settings.brand.logoUrl}
+              alt="Logo preview"
+              wrapperClassName="settings-brand-upload-preview-image"
+              fallback={<ImageIcon size={18} />}
+            />
+          ) : <ImageIcon size={18} />}
           onChange={(event) => onFileUpload('logoUrl', event)}
         />
         <UploadBox
           label="Business Signature"
           locked={locked}
           helper="Transparent PNG works best."
-          preview={settings.brand.signatureUrl ? <img src={settings.brand.signatureUrl} alt="Signature preview" /> : <Upload size={18} />}
+          preview={settings.brand.signatureUrl ? (
+            <SmartImage
+              src={settings.brand.signatureUrl}
+              alt="Signature preview"
+              wrapperClassName="settings-brand-upload-preview-image"
+              fallback={<Upload size={18} />}
+            />
+          ) : <Upload size={18} />}
           onChange={(event) => onFileUpload('signatureUrl', event)}
         />
       </div>

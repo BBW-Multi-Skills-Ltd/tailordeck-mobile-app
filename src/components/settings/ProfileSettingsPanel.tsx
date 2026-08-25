@@ -1,6 +1,7 @@
 import { Camera } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import { AVATAR_PLACEHOLDER, type TailorSettings } from '../../lib/settings'
+import { SmartImage } from '../shared/SmartImage'
 
 type ProfileSettingsPanelProps = {
   settings: TailorSettings
@@ -14,7 +15,12 @@ export default function ProfileSettingsPanel({ settings, saved, onAvatarUpload, 
     <div className="stack gap-14 settings-profile-summary-panel">
       <div className="settings-profile-summary">
         <div className="settings-profile-avatar-large">
-          <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="Profile avatar" />
+          <SmartImage
+            src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER}
+            alt="Profile avatar"
+            wrapperClassName="settings-profile-avatar-image"
+            fallback={<span className="smart-image-initial">{settings.profile.fullName?.charAt(0) || 'U'}</span>}
+          />
           <label className="settings-profile-avatar-camera" aria-label="Upload profile avatar">
             <Camera size={14} />
             <input type="file" accept="image/*" className="settings-brand-upload-input" onChange={onAvatarUpload} />

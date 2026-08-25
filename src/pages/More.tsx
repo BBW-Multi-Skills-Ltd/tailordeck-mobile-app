@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { BarChart3, BriefcaseBusiness, ChevronRight, CircleHelp, CreditCard, FileText, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { SmartImage } from '../components/shared/SmartImage'
 import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
 
 type MoreHubItem = {
@@ -75,7 +76,12 @@ export default function More() {
       <Link to="/settings/security" className="clay-card more-profile-card">
         <div className="more-avatar clay-inset" aria-hidden>
           {settings.profile.avatarUrl ? (
-            <img src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER} alt="" />
+            <SmartImage
+              src={settings.profile.avatarUrl || AVATAR_PLACEHOLDER}
+              alt=""
+              wrapperClassName="more-avatar-image"
+              fallback={<span>{initial}</span>}
+            />
           ) : (
             <span>{initial}</span>
           )}

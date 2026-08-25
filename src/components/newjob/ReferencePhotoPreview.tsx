@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { SmartImage } from '../shared/SmartImage'
 
 export type ReferencePreviewPhoto = {
   id: string
@@ -34,7 +35,7 @@ export function ReferencePhotoPreviewGrid({ photos }: { photos: ReferencePreview
       <div className="wizard-reference-preview-grid">
         {photosWithUrls.map((photo) => (
           <button key={photo.id} type="button" className="wizard-reference-preview-btn" onClick={() => setActivePhotoId(photo.id)}>
-            <img src={photo.url} alt={photo.label} />
+            <SmartImage src={photo.url} alt={photo.label} wrapperClassName="wizard-reference-preview-image" fallback={<span>Photo</span>} />
           </button>
         ))}
       </div>
@@ -53,7 +54,7 @@ export function ReferencePhotoPreviewGrid({ photos }: { photos: ReferencePreview
             <X size={18} />
           </button>
           <div className="wizard-reference-viewer-content" onClick={(event) => event.stopPropagation()}>
-            <img src={activePhoto.url} alt={activePhoto.label} />
+            <SmartImage src={activePhoto.url} alt={activePhoto.label} wrapperClassName="wizard-reference-viewer-image" fallback={<span>Photo preview</span>} />
             <p>{activePhoto.label}</p>
           </div>
         </div>
