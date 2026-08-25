@@ -2492,6 +2492,88 @@ button.more-row {
   font-weight: 850;
 }
 
+.app-error-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: max(36px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary) 9%, transparent) 0 26%, transparent 48%),
+    var(--bg);
+  color: var(--text);
+}
+
+.app-error-card {
+  width: min(100%, 440px);
+  margin-top: clamp(18px, 7vh, 68px);
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  padding: 26px 20px 22px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-lg);
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-rest);
+  text-align: center;
+}
+
+.app-error-logo {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  object-fit: cover;
+  box-shadow: var(--clay-shadow-press);
+}
+
+.app-error-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.app-error-eyebrow {
+  margin: 0;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.app-error-copy h1 {
+  margin: 0;
+  color: var(--text-h);
+  font-size: clamp(25px, 7vw, 34px);
+  line-height: 1.05;
+}
+
+.app-error-copy p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.app-error-actions {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.app-error-support-link {
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+@media (max-width: 360px) {
+  .app-error-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
 @keyframes smart-image-shimmer {
   0% {
     background-position: 180% 0;

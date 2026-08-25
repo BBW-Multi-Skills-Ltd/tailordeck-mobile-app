@@ -16,6 +16,10 @@ async function expectReadyAuthenticatedShell(page: Page) {
   await expectNoHorizontalOverflow(page)
 }
 
+async function gotoAppRoute(page: Page, path: string) {
+  await page.goto(path, { waitUntil: 'domcontentloaded' })
+}
+
 const protectedRoutes = [
   { path: '/', label: 'home' },
   { path: '/jobs', label: 'jobs' },
@@ -28,13 +32,13 @@ const protectedRoutes = [
 
 for (const route of protectedRoutes) {
   test(`authenticated ${route.label} route renders within mobile viewport`, async ({ page }) => {
-    await page.goto(route.path)
+    await gotoAppRoute(page, route.path)
     await expectReadyAuthenticatedShell(page)
   })
 }
 
 test('reference image viewer stays above notification drawer layer', async ({ page }) => {
-  await page.goto('/')
+  await gotoAppRoute(page, '/')
   await expectReadyAuthenticatedShell(page)
 
   const zIndex = await page.evaluate(() => {

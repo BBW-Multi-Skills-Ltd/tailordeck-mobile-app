@@ -5,6 +5,51 @@ import { dirname, resolve } from 'node:path'
 
 const authStorageState = '.playwright/.auth/qa-user.json'
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'object' && error && 'message' in error) {
+    return String((error as { message?: unknown }).message ?? '')
+  }
+  return String(error)
+}
+
+function isRetriableNetworkError(error: unknown): boolean {
+  const message = getErrorMessage(error).toLowerCase()
+  return (
+    message.includes('fetch failed') ||
+    message.includes('connect timeout') ||
+    message.includes('network') ||
+    message.includes('timeout') ||
+    message.includes('502') ||
+    message.includes('503') ||
+    message.includes('504')
+  )
+}
+
+async function withNetworkRetry<T>(label: string, operation: () => Promise<T>, attempts = 4): Promise<T> {
+  let lastError: unknown
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error
+      if (attempt === attempts || !isRetriableNetworkError(error)) throw error
+
+      console.warn(`[e2e] ${label} failed on attempt ${attempt}; retrying...`)
+      await sleep(attempt * 1500)
+    }
+  }
+
+  throw lastError
+}
+
 function readEnvValue(key: string): string {
   if (process.env[key]) return process.env[key] as string
 
@@ -42,27 +87,43 @@ async function prepareQaAccount(email: string, password: string): Promise<void> 
     auth: { persistSession: false },
   })
 
-  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-  if (signInError) throw signInError
-
-  const { error: activateError } = await supabase.rpc('activate_verified_profile', {
-    email_value: email,
-    full_name_value: 'TailorDeck QA',
-    phone_value: '+2349010851071',
+  await withNetworkRetry('sign in QA user', async () => {
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) throw signInError
   })
-  if (activateError) throw activateError
 
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({ onboarding_complete: true })
-    .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-  if (profileError) throw profileError
+  await withNetworkRetry('activate QA profile', async () => {
+    const { error: activateError } = await supabase.rpc('activate_verified_profile', {
+      email_value: email,
+      full_name_value: 'TailorDeck QA',
+      phone_value: '+2349010851071',
+    })
+    if (activateError) throw activateError
+  })
 
-  const { error: trialError } = await supabase.rpc('start_free_trial_subscription')
-  if (trialError && !trialError.message.toLowerCase().includes('duplicate')) throw trialError
+  const userId = await withNetworkRetry('load QA user', async () => {
+    const { data, error } = await supabase.auth.getUser()
+    if (error) throw error
+    return data.user?.id
+  })
+
+  await withNetworkRetry('mark QA onboarding complete', async () => {
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ onboarding_complete: true })
+      .eq('user_id', userId)
+    if (profileError) throw profileError
+  })
+
+  await withNetworkRetry('start QA trial', async () => {
+    const { error: trialError } = await supabase.rpc('start_free_trial_subscription')
+    if (trialError && !trialError.message.toLowerCase().includes('duplicate')) throw trialError
+  })
 }
 
 test('authenticate QA user', async ({ page }) => {
+  test.setTimeout(90_000)
+
   const email = process.env.E2E_TEST_EMAIL
   const password = process.env.E2E_TEST_PASSWORD
 
@@ -73,7 +134,8 @@ test('authenticate QA user', async ({ page }) => {
   await prepareQaAccount(email, password)
   mkdirSync(dirname(authStorageState), { recursive: true })
 
-  await page.goto('/auth/signin')
+  await page.goto('/auth/signin', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByLabel('Email')).toBeVisible({ timeout: 20_000 })
   await page.getByLabel('Email').fill(email)
   await page.getByRole('textbox', { name: 'Password' }).fill(password)
   await page.getByRole('button', { name: 'Sign In', exact: true }).click()

@@ -11,6 +11,7 @@ import { installAppRecoveryHandlers } from './lib/appRecovery'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
 import AppErrorBoundary from './components/shared/AppErrorBoundary'
+import MonitoringBridge from './components/shared/MonitoringBridge'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <AppFeedbackProvider>
             <AppErrorBoundary>
+              <MonitoringBridge />
               <App />
             </AppErrorBoundary>
           </AppFeedbackProvider>

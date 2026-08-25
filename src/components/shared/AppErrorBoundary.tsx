@@ -4,25 +4,30 @@ import { isRecoverableChunkError, recoverFromStaleAppShell } from '../../lib/app
 
 function AppErrorFallback() {
   return (
-    <main className="min-h-dvh bg-[var(--bg)] px-6 py-12 text-[var(--text)]">
-      <section className="mx-auto flex max-w-md flex-col items-center gap-4 rounded-[2rem] border border-[var(--border)] bg-[var(--bg-card)] p-6 text-center shadow-[var(--clay-shadow-rest)]">
+    <main className="app-error-page">
+      <section className="app-error-card">
         <img
-          className="h-14 w-14 rounded-2xl"
+          className="app-error-logo"
           src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
           alt="TailorDeck"
           decoding="async"
         />
-        <div className="space-y-2">
-          <h1 className="text-2xl font-black">Something went wrong</h1>
-          <p className="text-sm font-semibold text-[var(--text-muted)]">Reload TailorDeck. If it repeats, contact support from the Help page.</p>
+        <div className="app-error-copy">
+          <p className="app-error-eyebrow">App recovery</p>
+          <h1>TailorDeck hit a problem</h1>
+          <p>Reload the app first. If it repeats, contact support so we can trace it.</p>
         </div>
-        <button
-          type="button"
-          className="h-12 w-full rounded-full bg-[var(--primary)] px-5 text-sm font-black text-white shadow-[var(--clay-shadow-primary)]"
-          onClick={() => window.location.reload()}
-        >
-          Reload app
-        </button>
+        <div className="app-error-actions">
+          <button type="button" className="btn btn-primary btn-full" onClick={() => window.location.reload()}>
+            Reload
+          </button>
+          <button type="button" className="btn btn-secondary btn-full" onClick={() => window.location.assign('/')}>
+            Go Home
+          </button>
+        </div>
+        <a className="app-error-support-link" href="/help?from=crash">
+          Contact Support
+        </a>
       </section>
     </main>
   )
