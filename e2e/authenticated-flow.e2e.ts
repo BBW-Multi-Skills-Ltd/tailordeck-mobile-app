@@ -21,6 +21,7 @@ const protectedRoutes = [
   { path: '/jobs', label: 'jobs' },
   { path: '/dashboard', label: 'dashboard' },
   { path: '/more', label: 'more' },
+  { path: '/help', label: 'help and support' },
   { path: '/settings/security', label: 'account and security' },
   { path: '/documents', label: 'invoice and receipt setup' },
 ]

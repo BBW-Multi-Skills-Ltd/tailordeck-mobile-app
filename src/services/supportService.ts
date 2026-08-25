@@ -90,7 +90,11 @@ export async function createSupportTicket(input: CreateSupportTicketInput): Prom
 
   if (error) throw error
 
-  await notifySupportTeam(data.id)
+  try {
+    await notifySupportTeam(data.id)
+  } catch (notifyError) {
+    console.warn('Support ticket was saved, but email notification failed:', notifyError)
+  }
 
   return data
 }

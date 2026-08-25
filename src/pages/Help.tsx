@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bug, ChevronRight, CreditCard, Lightbulb, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
@@ -69,6 +69,7 @@ const supportCategories: SupportCategoryConfig[] = [
 ]
 
 const whatsappNumber = '2349010851071'
+const SUPPORT_SUCCESS_TIMEOUT_MS = 4500
 
 export default function Help() {
   const [searchParams] = useSearchParams()
@@ -76,7 +77,7 @@ export default function Help() {
   const returnLabel = searchParams.get('from') === 'subscription' ? 'Back to manage plan' : 'Back to more'
   const settingsQuery = useSettingsQuery()
   const createTicket = useCreateSupportTicketMutation()
-  const supportCooldownQuery = useSupportCooldownQuery()
+  const { data: supportCooldown, refetch: refetchSupportCooldown } = useSupportCooldownQuery()
   const settings = settingsQuery.data
   const [selectedCategory, setSelectedCategory] = useState<SupportTicketCategory>('billing')
   const [message, setMessage] = useState('')
@@ -85,6 +86,8 @@ export default function Help() {
   const [error, setError] = useState('')
   const [submittedTicketId, setSubmittedTicketId] = useState('')
   const [nowMs, setNowMs] = useState(() => Date.now())
+  const successTimerRef = useRef<number | null>(null)
+  const cooldownRefetchKeyRef = useRef('')
 
   const selected = useMemo(
     () => supportCategories.find((item) => item.id === selectedCategory) ?? supportCategories[0],
@@ -94,20 +97,51 @@ export default function Help() {
   const contactName = settings?.profile.fullName || settings?.businessInfo.shopName || 'TailorDeck user'
   const contactEmail = settings?.profile.email || settings?.businessInfo.businessEmail || ''
   const contactPhone = settings?.profile.phone || settings?.businessInfo.businessPhone || ''
+  const nextAvailableMs = supportCooldown?.nextAvailableAt ? Date.parse(supportCooldown.nextAvailableAt) : 0
+  const cooldownSeconds = nextAvailableMs > nowMs ? Math.ceil((nextAvailableMs - nowMs) / 1000) : 0
+  const cooldownActive = cooldownSeconds > 0
+  const cooldownText = cooldownActive
+    ? `You can send another request in ${formatSupportCooldown(cooldownSeconds)}.`
+    : supportCooldown?.limited
+      ? 'You can send another request now.'
+      : supportCooldown
+      ? `${supportCooldown.remaining} support request${supportCooldown.remaining === 1 ? '' : 's'} left this hour.`
+      : ''
 
   useEffect(() => {
-    if (!submittedTicketId) return undefined
-    const timer = window.setTimeout(() => setSubmittedTicketId(''), 6000)
-    return () => window.clearTimeout(timer)
-  }, [submittedTicketId])
+    return () => {
+      if (successTimerRef.current) window.clearTimeout(successTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
-    if (!supportCooldownQuery.data?.limited) return undefined
+    if (!supportCooldown?.limited) return undefined
     const timer = window.setInterval(() => {
       setNowMs(Date.now())
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [supportCooldownQuery.data?.limited, supportCooldownQuery.data?.nextAvailableAt])
+  }, [supportCooldown?.limited, supportCooldown?.nextAvailableAt])
+
+  useEffect(() => {
+    const nextAvailableAt = supportCooldown?.nextAvailableAt ?? ''
+    if (!supportCooldown?.limited || cooldownSeconds > 0 || cooldownRefetchKeyRef.current === nextAvailableAt) return
+    cooldownRefetchKeyRef.current = nextAvailableAt
+    void refetchSupportCooldown()
+  }, [
+    cooldownSeconds,
+    refetchSupportCooldown,
+    supportCooldown?.limited,
+    supportCooldown?.nextAvailableAt,
+  ])
+
+  function showTicketSuccess(ticketId: string): void {
+    if (successTimerRef.current) window.clearTimeout(successTimerRef.current)
+    setSubmittedTicketId(ticketId)
+    successTimerRef.current = window.setTimeout(() => {
+      setSubmittedTicketId('')
+      successTimerRef.current = null
+    }, SUPPORT_SUCCESS_TIMEOUT_MS)
+  }
 
   function openWhatsAppSupport(): void {
     const cleanUrgentMessage = urgentMessage.trim()
@@ -159,25 +193,20 @@ export default function Help() {
           selectedLabel: selected.label,
         },
       })
-      setSubmittedTicketId(ticket.id)
+      showTicketSuccess(ticket.id)
       setMessage('')
-      void supportCooldownQuery.refetch()
+      await refetchSupportCooldown()
     } catch (submitError) {
-      setError(getServiceErrorMessage(submitError, 'Unable to send support request.'))
-      void supportCooldownQuery.refetch()
+      const cooldownResult = await refetchSupportCooldown()
+      const nextAvailableAt = cooldownResult.data?.nextAvailableAt
+      const nextWaitSeconds = nextAvailableAt ? Math.max(1, Math.ceil((Date.parse(nextAvailableAt) - Date.now()) / 1000)) : 0
+      setError(
+        cooldownResult.data?.limited && nextWaitSeconds > 0
+          ? `Please wait ${formatSupportCooldown(nextWaitSeconds)} before sending another request.`
+          : getServiceErrorMessage(submitError, 'Unable to send support request.'),
+      )
     }
   }
-
-  const nextAvailableMs = supportCooldownQuery.data?.nextAvailableAt ? Date.parse(supportCooldownQuery.data.nextAvailableAt) : 0
-  const cooldownSeconds = nextAvailableMs > nowMs ? Math.ceil((nextAvailableMs - nowMs) / 1000) : 0
-  const cooldownActive = cooldownSeconds > 0
-  const cooldownText = cooldownActive
-    ? `You can send another request in ${formatSupportCooldown(cooldownSeconds)}.`
-    : supportCooldownQuery.data?.limited
-      ? 'You can send another request now.'
-      : supportCooldownQuery.data
-      ? `${supportCooldownQuery.data.remaining} support request${supportCooldownQuery.data.remaining === 1 ? '' : 's'} left this hour.`
-      : ''
 
   return (
     <section className="section stack gap-12">
