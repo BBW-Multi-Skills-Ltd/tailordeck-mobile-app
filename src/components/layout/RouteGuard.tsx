@@ -70,8 +70,11 @@ export function RouteGuard() {
     return <Navigate to="/onboarding/setup" replace />
   }
 
-  const isExpired = subscription.data?.status === 'expired' || subscription.data?.status === 'past_due'
-  if (!subscription.isError && isExpired && location.pathname !== '/settings/subscription' && !isBillingCallback) {
+  const subscriptionData = subscription.data
+  const isExpiredPaidPlan =
+    subscriptionData?.plan_name !== 'free' &&
+    (subscriptionData?.status === 'expired' || subscriptionData?.status === 'past_due')
+  if (!subscription.isError && isExpiredPaidPlan && location.pathname !== '/settings/subscription' && !isBillingCallback) {
     return <Navigate to="/settings/subscription" replace />
   }
 
