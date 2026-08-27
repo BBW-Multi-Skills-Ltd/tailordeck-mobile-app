@@ -10,6 +10,7 @@ import { buildFullJobRow, buildJobRow } from './jobs/jobRows'
 import { buildJobUpdateRow } from './jobs/jobUpdateRows'
 import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
 import { validateCreateFullJobInput } from '../validation/jobSchemas'
+import { getJobCreationBlockedMessage, getJobCreationEntitlement } from './subscriptionService'
 
 const JOB_PHOTO_SIGNED_URL_TTL = 60 * 60 * 24 * 7
 
@@ -56,6 +57,7 @@ export async function getClientJobs(clientId: string): Promise<JobWithRelations[
 }
 
 export async function createJob(input: CreateJobInput): Promise<MockJob> {
+  await assertCanCreateJob()
   const userId = await requireUserId()
   const { data, error } = await supabase.from('jobs').insert(buildJobRow(input, userId)).select('*').single<JobRow>()
   if (error) throw error
@@ -64,6 +66,7 @@ export async function createJob(input: CreateJobInput): Promise<MockJob> {
 
 export async function createFullJob(input: CreateFullJobInput): Promise<MockJob> {
   validateCreateFullJobInput(input)
+  await assertCanCreateJob()
   const userId = await requireUserId()
   const client = input.clientId
     ? null
@@ -84,6 +87,13 @@ export async function createFullJob(input: CreateFullJobInput): Promise<MockJob>
   await touchClientLastJobDate(userId, clientId, input.status)
 
   return mapJobRow(job)
+}
+
+async function assertCanCreateJob(): Promise<void> {
+  const entitlement = await getJobCreationEntitlement()
+  if (!entitlement.can_create_job) {
+    throw new ServiceError(getJobCreationBlockedMessage(entitlement))
+  }
 }
 
 export async function updateFullJob(id: string, input: CreateFullJobInput): Promise<MockJob> {

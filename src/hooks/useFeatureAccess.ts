@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import {
   checkFeatureAccess,
+  getJobCreationEntitlement,
   getSubscription,
   selectSubscriptionPlan,
   setCancelAtPeriodEnd,
@@ -33,6 +34,14 @@ export function useFeatureAccess(featureKey: string) {
   })
 }
 
+export function useJobCreationEntitlementQuery(enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.jobCreationEntitlement,
+    queryFn: getJobCreationEntitlement,
+    enabled,
+  })
+}
+
 export function useSelectSubscriptionPlanMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -42,6 +51,7 @@ export function useSelectSubscriptionPlanMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
       void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })
 }
@@ -54,6 +64,7 @@ export function useCancelAtPeriodEndMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
       void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })
 }
@@ -72,6 +83,7 @@ export function useVerifySubscriptionPaymentMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
       void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
       void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })
 }

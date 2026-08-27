@@ -22,20 +22,19 @@ export const billingCycles: BillingCycle[] = ['monthly', 'yearly']
 export const subscriptionPlans: SubscriptionPlanCard[] = [
   {
     id: 'free',
-    label: '14 Days Free Trial',
-    badge: 'FREE TRIAL',
+    label: 'Free',
+    badge: '14-DAY FULL TRIAL',
     price: { monthly: '\u20A60', yearly: '\u20A60' },
-    suffix: { monthly: 'for 14 days', yearly: 'for 14 days' },
-    subtitle: 'Try every TailorDeck tool before choosing a plan.',
-    helper: 'Start free, then choose Starter or Pro when your trial ends.',
-    cta: 'Get Started',
+    suffix: { monthly: 'forever', yearly: 'forever' },
+    subtitle: 'Start with full access',
+    helper: 'Full access for 14 days. After that, keep using TailorDeck with 3 jobs included.',
+    cta: 'Start Free',
     features: [
-      'All TailorDeck features for 14 days',
-      'Create jobs and save clients automatically',
-      'Invoice and receipt PDF preview',
-      'Dashboard analytics',
-      'Business and document setup',
-      'Reminder alerts',
+      'Full access for 14 days',
+      'Continue free after trial',
+      '3 jobs included after trial',
+      'Invoice and receipt preview',
+      'Upgrade anytime',
     ],
   },
   {
@@ -95,7 +94,7 @@ export function getCurrentPlanCopy(plan: SubscriptionPlan): { title: string; sub
   }
 
   return {
-    title: 'Free Trial',
-    subtitle: 'Your trial includes every TailorDeck tool for 14 days.',
+    title: 'Free',
+    subtitle: 'Start with 14 days full access, then continue with 3 jobs included.',
   }
 }

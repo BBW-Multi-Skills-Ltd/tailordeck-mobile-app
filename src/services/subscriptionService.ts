@@ -5,6 +5,13 @@ import type { SubscriptionRow } from './types'
 
 export type EffectiveSubscriptionPlan = SubscriptionPlan | 'trial' | 'inactive'
 
+export type JobCreationEntitlement = {
+  effective_plan: EffectiveSubscriptionPlan
+  jobs_used: number
+  job_limit: number | null
+  can_create_job: boolean
+}
+
 export async function getSubscription(): Promise<SubscriptionRow | null> {
   const userId = await requireUserId()
   const { data, error } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle<SubscriptionRow>()
@@ -72,6 +79,29 @@ export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
   })
   if (error) throw error
   return data === true
+}
+
+export async function getJobCreationEntitlement(): Promise<JobCreationEntitlement> {
+  const { data, error } = await supabase.rpc('get_job_creation_entitlement').maybeSingle<JobCreationEntitlement>()
+  if (error) throw error
+  if (!data) {
+    return {
+      effective_plan: 'inactive',
+      jobs_used: 0,
+      job_limit: null,
+      can_create_job: false,
+    }
+  }
+  return data
+}
+
+export function getJobCreationBlockedMessage(entitlement?: Pick<JobCreationEntitlement, 'effective_plan' | 'job_limit'> | null): string {
+  if (entitlement?.effective_plan === 'free') {
+    const limitLabel = typeof entitlement.job_limit === 'number' ? entitlement.job_limit : 3
+    return `You've reached your Free plan limit. Upgrade to Starter to continue creating more than ${limitLabel} jobs.`
+  }
+
+  return 'Your current plan cannot create jobs right now. View plans to continue.'
 }
 
 export function isSubscriptionUsable(subscription: SubscriptionRow): boolean {

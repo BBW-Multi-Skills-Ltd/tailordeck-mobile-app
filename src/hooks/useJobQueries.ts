@@ -21,7 +21,13 @@ export function useClientJobsQuery(clientId: string | undefined) {
 
 export function useCreateJobMutation() {
   const queryClient = useQueryClient()
-  return useMutation({ mutationFn: createJob, onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['jobs'] }) })
+  return useMutation({
+    mutationFn: createJob,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+    },
+  })
 }
 
 export function useCreateFullJobMutation() {
@@ -35,6 +41,7 @@ export function useCreateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'status'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })
 }
@@ -79,5 +86,11 @@ export function useUpdateJobStatusMutation() {
 
 export function useSoftDeleteJobMutation() {
   const queryClient = useQueryClient()
-  return useMutation({ mutationFn: softDeleteJob, onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['jobs'] }) })
+  return useMutation({
+    mutationFn: softDeleteJob,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+    },
+  })
 }

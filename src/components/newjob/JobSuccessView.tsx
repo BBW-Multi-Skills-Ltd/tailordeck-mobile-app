@@ -16,7 +16,7 @@ export function JobSuccessView(props: JobSuccessViewProps) {
   const navigate = useNavigate()
   const feedback = useAppFeedback()
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
-  const invoiceLocked = documentSendingAccess.data === false
+  const invoiceLocked = documentSendingAccess.data !== true
   const { balanceToCollect, brand, successDetails, successJob } = useJobSuccessDocumentData(props)
   const { docPreviewRef, handleSystemShare, handleWhatsAppToClient } = useJobDocumentActions({
     brand,

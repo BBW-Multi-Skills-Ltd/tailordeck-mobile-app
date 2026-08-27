@@ -48,7 +48,7 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
   const [statusError, setStatusError] = useState('')
   const documentsQuery = useDocumentsQuery(job.id)
   const updateStatusMutation = useUpdateJobStatusMutation()
-  const documentsLocked = documentSendingAccess.data === false
+  const documentsLocked = documentSendingAccess.data !== true
   const persistedSentDocuments = {
     invoice: documentsQuery.data?.some((document) => document.type === 'invoice' && Boolean(document.sent_at)) ?? false,
     receipt: documentsQuery.data?.some((document) => document.type === 'receipt' && Boolean(document.sent_at)) ?? false,

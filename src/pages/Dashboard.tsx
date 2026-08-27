@@ -19,7 +19,7 @@ import { featureKeys } from '../lib/features'
 export default function Dashboard() {
   const [monthOffset, setMonthOffset] = useState(0)
   const analyticsAccess = useFeatureAccess(featureKeys.dashboardAnalytics)
-  const analyticsUnlocked = analyticsAccess.data !== false
+  const analyticsUnlocked = analyticsAccess.data === true
   const monthlyStatsQuery = useMonthlyStatsQuery(analyticsUnlocked)
   const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
   const hasAnalytics = monthlyStats.some((month) => month.jobs > 0)

@@ -10,7 +10,7 @@ export default function Documents() {
   const navigate = useNavigate()
   const { actions, state } = useSettingsPage()
   const setupAccess = useFeatureAccess(featureKeys.fullDocumentSetup)
-  const locked = setupAccess.data === false
+  const locked = setupAccess.data !== true
 
   return (
     <section className="section stack gap-16">

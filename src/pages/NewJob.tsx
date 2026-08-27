@@ -1,4 +1,6 @@
 import { useLayoutEffect } from 'react'
+import { Lock } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
 import { stepLabels } from '../components/newjob/newJobConfig'
 import {
   JobSuccessView,
@@ -10,12 +12,21 @@ import {
 } from '../components/newjob/NewJobChrome'
 import NewJobStepContent from '../components/newjob/NewJobStepContent'
 import { useNewJobWizard } from '../components/newjob/useNewJobWizard'
+import EmptyState from '../components/shared/EmptyState'
+import HistoryBackButton from '../components/shared/HistoryBackButton'
+import PageHeader from '../components/shared/PageHeader'
+import { useJobCreationEntitlementQuery } from '../hooks/useFeatureAccess'
 import { scrollAppToTop } from '../lib/scroll'
+import { getJobCreationBlockedMessage } from '../services/subscriptionService'
 
 export default function NewJob() {
+  const [searchParams] = useSearchParams()
+  const draftId = searchParams.get('draftId')
+  const jobCreationEntitlement = useJobCreationEntitlementQuery(!draftId)
   const wizard = useNewJobWizard()
   const { actions, derived, sectionRef, state } = wizard
   const hasStepProgress = !state.stepFourReviewMode
+  const creationBlocked = !draftId && jobCreationEntitlement.data?.can_create_job === false
 
   useLayoutEffect(() => {
     scrollAppToTop('auto')
@@ -45,6 +56,21 @@ export default function NewJob() {
         totalYard={state.materialYards}
         onViewJobDetails={actions.viewCreatedJob}
       />
+    )
+  }
+
+  if (creationBlocked) {
+    return (
+      <section className="section stack gap-16">
+        <PageHeader title="New Job" centered leading={<HistoryBackButton fallbackTo="/jobs" />} />
+        <EmptyState
+          icon={Lock}
+          title="Free job limit reached"
+          description={getJobCreationBlockedMessage(jobCreationEntitlement.data)}
+          actionLabel="View Plans"
+          actionTo="/settings/subscription"
+        />
+      </section>
     )
   }
 

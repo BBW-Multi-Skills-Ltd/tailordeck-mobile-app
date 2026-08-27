@@ -15,6 +15,7 @@
   supportTickets: ['support-tickets'] as const,
   supportCooldown: ['support-tickets', 'cooldown'] as const,
   subscription: ['subscription'] as const,
+  jobCreationEntitlement: ['subscription', 'job-creation-entitlement'] as const,
   feature: (featureKey: string) => ['feature-access', featureKey] as const,
   documents: (jobId: string) => ['documents', jobId] as const,
 }
