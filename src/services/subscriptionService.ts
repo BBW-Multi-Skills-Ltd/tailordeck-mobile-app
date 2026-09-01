@@ -14,6 +14,8 @@ export type JobCreationEntitlement = {
 
 export async function getSubscription(): Promise<SubscriptionRow | null> {
   const userId = await requireUserId()
+  const { error: lifecycleError } = await supabase.rpc('refresh_current_subscription_lifecycle')
+  if (lifecycleError) throw lifecycleError
   const { data, error } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle<SubscriptionRow>()
   if (error) throw error
   return data
@@ -106,6 +108,8 @@ export function getJobCreationBlockedMessage(entitlement?: Pick<JobCreationEntit
 
 export function isSubscriptionUsable(subscription: SubscriptionRow): boolean {
   if (subscription.plan_name === 'free') return subscription.status === 'active'
+  if (subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() <= Date.now()) return true
+  if (subscription.status === 'cancelled' && subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() > Date.now()) return true
   if (subscription.status === 'expired' || subscription.status === 'past_due' || subscription.status === 'cancelled') return false
   return true
 }
@@ -125,7 +129,8 @@ export function isFreeTrialActive(subscription: SubscriptionRow, now = Date.now(
 export function getEffectiveSubscriptionPlan(subscription: SubscriptionRow, now = Date.now()): EffectiveSubscriptionPlan {
   if (isFreeTrialActive(subscription, now)) return 'trial'
   if (subscription.plan_name === 'free' && subscription.status === 'active') return 'free'
+  if (subscription.plan_name !== 'free' && subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() <= now) return 'free'
+  if (subscription.status === 'cancelled' && subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() > now) return subscription.plan_name
   if (subscription.status !== 'active') return 'inactive'
-  if (subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() <= now) return 'inactive'
   return subscription.plan_name
 }

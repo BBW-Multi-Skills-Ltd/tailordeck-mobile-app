@@ -52,7 +52,7 @@ async function markSubscriptionDisabled(subscriptionCode: string | undefined) {
     .from('subscriptions')
     .update({
       cancel_at_period_end: true,
-      status: 'cancelled',
+      status: 'active',
       updated_at: new Date().toISOString(),
     })
     .eq('paystack_subscription_code', subscriptionCode)

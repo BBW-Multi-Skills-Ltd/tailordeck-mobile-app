@@ -126,7 +126,7 @@ Deno.serve(async (request) => {
         cancel_at_period_end: body.cancelAtPeriodEnd,
         paystack_email_token: paystackEmailToken,
         paystack_subscription_code: paystackSubscriptionCode,
-        status: body.cancelAtPeriodEnd && subscription.plan_name === 'free' ? 'cancelled' : 'active',
+        status: 'active',
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', userData.user.id)
