@@ -9,6 +9,7 @@ import { SubscriptionPlanCarousel } from '../components/subscription/Subscriptio
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
+import { getEffectiveSubscriptionPlan } from '../services/subscriptionService'
 
 export default function SubscriptionPage() {
   const [settings] = useState(() => loadTailorSettings())
@@ -18,7 +19,8 @@ export default function SubscriptionPage() {
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const subscriptionQuery = useSubscriptionQuery()
   const currentPlan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
-  const currentPlanCopy = getCurrentPlanCopy(currentPlan)
+  const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : currentPlan
+  const currentPlanCopy = getCurrentPlanCopy(currentPlan, effectivePlan)
   const visiblePlans = useMemo(() => {
     if (currentPlan === 'starter') return paidSubscriptionPlans.filter((plan) => plan.id === 'pro')
     if (currentPlan === 'pro') return []

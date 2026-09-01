@@ -1,3 +1,4 @@
+import type { EffectiveSubscriptionPlan } from '../services/subscriptionService'
 import type { SubscriptionPlan } from './settingsTypes'
 
 export type BillingCycle = 'monthly' | 'yearly'
@@ -78,7 +79,7 @@ export const subscriptionPlans: SubscriptionPlanCard[] = [
 
 export const paidSubscriptionPlans = subscriptionPlans.filter((plan): plan is SubscriptionPlanCard & { id: PaidPlan } => plan.id !== 'free')
 
-export function getCurrentPlanCopy(plan: SubscriptionPlan): { title: string; subtitle: string } {
+export function getCurrentPlanCopy(plan: SubscriptionPlan, effectivePlan?: EffectiveSubscriptionPlan): { title: string; subtitle: string } {
   if (plan === 'starter') {
     return {
       title: 'Starter',
@@ -93,8 +94,15 @@ export function getCurrentPlanCopy(plan: SubscriptionPlan): { title: string; sub
     }
   }
 
+  if (effectivePlan === 'trial') {
+    return {
+      title: 'Free Trial',
+      subtitle: 'Full access is active during your 14-day trial.',
+    }
+  }
+
   return {
     title: 'Free',
-    subtitle: 'Start with 14 days full access, then continue with 3 jobs included.',
+    subtitle: '3 jobs included. Upgrade to Starter for unlimited job management.',
   }
 }
