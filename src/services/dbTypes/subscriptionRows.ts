@@ -6,6 +6,7 @@ export interface SubscriptionRow {
   plan_name: SubscriptionPlan
   status: 'active' | 'expired' | 'cancelled' | 'past_due'
   trial_ends_at: string | null
+  free_started_at: string | null
   billing_cycle: 'monthly' | 'yearly'
   cancel_at_period_end: boolean
   current_period_ends_at: string | null
