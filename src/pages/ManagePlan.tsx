@@ -21,6 +21,7 @@ export default function ManagePlan() {
         cancelScheduled={state.cancelScheduled}
         currentPlan={state.currentPlan}
         isPaidPlan={state.isPaidPlan}
+        isTrialActive={state.isTrialActive}
         trialEndDate={state.trialEndDate}
       />
 
@@ -28,6 +29,7 @@ export default function ManagePlan() {
         currentPlan={state.currentPlan}
         cycle={state.cycle}
         isPaidPlan={state.isPaidPlan}
+        isTrialActive={state.isTrialActive}
         renewalDate={state.renewalDate}
         trialEndDate={state.trialEndDate}
       />

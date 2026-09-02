@@ -7,10 +7,11 @@ type CurrentPlanSectionProps = {
   cancelScheduled: boolean
   currentPlan: SubscriptionPlanCard
   isPaidPlan: boolean
+  isTrialActive: boolean
   trialEndDate: string
 }
 
-export function CurrentPlanSection({ cancelScheduled, currentPlan, isPaidPlan, trialEndDate }: CurrentPlanSectionProps) {
+export function CurrentPlanSection({ cancelScheduled, currentPlan, isPaidPlan, isTrialActive, trialEndDate }: CurrentPlanSectionProps) {
   return (
     <section className="stack gap-8">
       <p className="more-group-title">Current Plan</p>
@@ -18,7 +19,7 @@ export function CurrentPlanSection({ cancelScheduled, currentPlan, isPaidPlan, t
         <div className="row-between">
           <div className="stack gap-4">
             <h2>{currentPlan.label}</h2>
-            <p>{getCurrentPlanMessage(isPaidPlan, cancelScheduled, trialEndDate)}</p>
+            <p>{getCurrentPlanMessage(isPaidPlan, cancelScheduled, trialEndDate, isTrialActive)}</p>
           </div>
           <span className={`manage-plan-status${cancelScheduled ? ' warning' : ''}`}>
             {cancelScheduled ? 'Ends soon' : 'Active'}
@@ -33,11 +34,12 @@ type BillingSummarySectionProps = {
   currentPlan: SubscriptionPlanCard
   cycle: BillingCycle
   isPaidPlan: boolean
+  isTrialActive: boolean
   renewalDate: string
   trialEndDate: string
 }
 
-export function BillingSummarySection({ currentPlan, cycle, isPaidPlan, renewalDate, trialEndDate }: BillingSummarySectionProps) {
+export function BillingSummarySection({ currentPlan, cycle, isPaidPlan, isTrialActive, renewalDate, trialEndDate }: BillingSummarySectionProps) {
   return (
     <section className="stack gap-8">
       <p className="more-group-title">Billing Summary</p>
@@ -51,9 +53,9 @@ export function BillingSummarySection({ currentPlan, cycle, isPaidPlan, renewalD
         <span className="more-row-divider" aria-hidden />
         <ManagePlanRow
           icon={CalendarClock}
-          title={isPaidPlan ? 'Next Renewal' : 'Trial Ends'}
-          desc={isPaidPlan ? 'Your next billing date' : 'Upgrade before this date to continue'}
-          value={isPaidPlan ? renewalDate : trialEndDate}
+          title={isPaidPlan ? 'Next Renewal' : isTrialActive ? 'Trial Ends' : 'Free Plan'}
+          desc={isPaidPlan ? 'Your next billing date' : isTrialActive ? 'Upgrade before this date to continue' : 'Upgrade anytime for unlimited jobs'}
+          value={isPaidPlan ? renewalDate : isTrialActive ? trialEndDate : '3 jobs included'}
         />
       </div>
     </section>

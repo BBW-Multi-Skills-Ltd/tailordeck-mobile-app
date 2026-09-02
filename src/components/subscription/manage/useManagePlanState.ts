@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCancelAtPeriodEndMutation, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../../../hooks/useFeatureAccess'
 import { loadTailorSettings, saveTailorSettings } from '../../../lib/settings'
 import { subscriptionPlans, type BillingCycle, type PaidPlan } from '../../../lib/subscriptionPlans'
+import { getEffectiveSubscriptionPlan } from '../../../services/subscriptionService'
 import { getServiceErrorMessage } from '../../../services/serviceHelpers'
 import { formatIsoDate, formatRelativeDate, getDefaultManagePlan, getManagePlanOptions } from './managePlanUtils'
 
@@ -24,6 +25,8 @@ export function useManagePlanState() {
   const currentPlan = useMemo(() => subscriptionPlans.find((item) => item.id === plan) ?? subscriptionPlans[0], [plan])
   const changePlanOptions = useMemo(() => getManagePlanOptions(plan), [plan])
   const isPaidPlan = plan === 'starter' || plan === 'pro'
+  const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : plan
+  const isTrialActive = effectivePlan === 'trial'
   const cancelScheduled = subscriptionQuery.data?.cancel_at_period_end ?? settings.subscription.cancelAtPeriodEnd
   const trialEndDate = formatIsoDate(subscriptionQuery.data?.tester_trial_ends_at || subscriptionQuery.data?.trial_ends_at) || formatRelativeDate(14)
   const renewalDate = formatIsoDate(subscriptionQuery.data?.current_period_ends_at) || formatRelativeDate(cycle === 'yearly' ? 365 : 30)
@@ -118,6 +121,7 @@ export function useManagePlanState() {
       cycle,
       isBusy: checkoutMutation.isPending || cancelMutation.isPending,
       isPaidPlan,
+      isTrialActive,
       plan,
       renewalDate,
       selectedPlan,

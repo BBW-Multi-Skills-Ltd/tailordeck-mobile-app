@@ -14,11 +14,12 @@ export function formatIsoDate(value: string | null | undefined): string {
   return date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export function getCurrentPlanMessage(isPaidPlan: boolean, cancelScheduled: boolean, trialEndDate: string): string {
+export function getCurrentPlanMessage(isPaidPlan: boolean, cancelScheduled: boolean, trialEndDate: string, isTrialActive: boolean): string {
   if (cancelScheduled && isPaidPlan) return 'Your workspace stays active until the billing period ends.'
-  if (cancelScheduled) return `Your free trial stays active until ${trialEndDate}.`
+  if (cancelScheduled && isTrialActive) return `Your free trial stays active until ${trialEndDate}.`
   if (isPaidPlan) return 'Your workspace is active.'
-  return 'Your free trial is active.'
+  if (isTrialActive) return 'Full trial access is active.'
+  return 'Free plan is active with 3 jobs included.'
 }
 
 export function getManagePlanOptions(plan: SubscriptionPlan) {
