@@ -1,7 +1,7 @@
 import { RiScissorsLine } from 'react-icons/ri'
 import { TbMoneybag } from 'react-icons/tb'
 import { formatNaira } from '../../lib/money'
-import type { MonthlyStat } from '../../services/dashboardService'
+import type { HomeSummary, MonthlyStat } from '../../services/dashboardService'
 import type { JobStatus } from '../../types/job'
 
 export type RecentJob = {
@@ -29,6 +29,17 @@ export function getHomeKpiCards(currentMonth?: MonthlyStat) {
     { label: 'Jobs This Month', value: String(currentMonth?.jobs ?? 0), icon: RiScissorsLine },
     { label: 'Total Expenses', value: formatCompactNaira(currentMonth?.expensesKobo ?? 0), icon: TbMoneybag },
   ]
+}
+
+export function getHomeSummaryKpiCards(summary?: HomeSummary) {
+  return [
+    { label: 'Jobs This Month', value: String(summary?.jobs ?? 0), icon: RiScissorsLine },
+    { label: 'Total Expenses', value: formatCompactNaira(summary?.expensesKobo ?? 0), icon: TbMoneybag },
+  ]
+}
+
+export function formatHomeSummaryProfit(summary?: HomeSummary): string {
+  return formatNaira(summary?.profitKobo ?? 0)
 }
 
 export function formatHomeProfit(currentMonth?: MonthlyStat): string {

@@ -4,23 +4,22 @@ import { HomeKpiGrid } from '../components/home/HomeKpiGrid'
 import { HomeProfitCard } from '../components/home/HomeProfitCard'
 import { HomeRecentJobs } from '../components/home/HomeRecentJobs'
 import { HomeSetupGuide } from '../components/home/HomeSetupGuide'
-import { formatHomeProfit, getCurrentMonthStats, getGreeting, getHomeKpiCards } from '../components/home/homeMetrics'
-import { useMonthlyStatsQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
+import { formatHomeSummaryProfit, getGreeting, getHomeSummaryKpiCards } from '../components/home/homeMetrics'
+import { useHomeSummaryQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
 import { loadTailorSettings, TAILOR_ONBOARDING_SETUP_SKIPPED_KEY } from '../lib/settings'
 
 export default function Home() {
   const navigate = useNavigate()
   const [settings, setSettings] = useState(() => loadTailorSettings())
-  const monthlyStatsQuery = useMonthlyStatsQuery()
+  const homeSummaryQuery = useHomeSummaryQuery()
   const recentJobsQuery = useRecentJobsQuery(3)
-  const monthlyStats = useMemo(() => monthlyStatsQuery.data ?? [], [monthlyStatsQuery.data])
+  const homeSummary = homeSummaryQuery.data
   const recentJobs = useMemo(() => recentJobsQuery.data ?? [], [recentJobsQuery.data])
-  const homeDataReady = !monthlyStatsQuery.isLoading && !recentJobsQuery.isLoading
-  const currentMonth = useMemo(() => getCurrentMonthStats(monthlyStats), [monthlyStats])
-  const hasJobs = recentJobs.length > 0 || monthlyStats.some((month) => month.jobs > 0)
+  const homeDataReady = !homeSummaryQuery.isLoading && !recentJobsQuery.isLoading
+  const hasJobs = recentJobs.length > 0 || (homeSummary?.jobs ?? 0) > 0
   const firstName = settings.profile.fullName.trim().split(/\s+/)[0] || 'Tailor'
   const greeting = getGreeting()
-  const kpiCards = useMemo(() => getHomeKpiCards(currentMonth), [currentMonth])
+  const kpiCards = useMemo(() => getHomeSummaryKpiCards(homeSummary), [homeSummary])
   const isNewWorkspace = homeDataReady && !hasJobs
   const homeTitle = isNewWorkspace ? 'Welcome to TailorDeck' : `${greeting}, ${firstName}`
   const homeSubcopy = !homeDataReady
@@ -52,7 +51,7 @@ export default function Home() {
 
       {homeDataReady && !hasJobs ? <HomeSetupGuide settings={settings} setupWasSkipped={setupWasSkipped} /> : null}
       {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
-      {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeProfit(currentMonth)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
+      {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeSummaryProfit(homeSummary)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}
     </section>
   )

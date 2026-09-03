@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import AppHeader from './AppHeader'
 import BottomNav from './BottomNav'
+import TrialExpiredNotice from './TrialExpiredNotice'
 
 const HIDE_NAV_PATHS = ['/welcome', '/onboarding', '/jobs/new']
 
@@ -23,6 +24,7 @@ export default function AppLayout() {
       <main className={`page page-with-header${hideNav ? ' page-no-bottom-nav' : ''}`}>
         <Outlet />
       </main>
+      <TrialExpiredNotice />
       {hideNav ? null : <BottomNav />}
     </>
   )

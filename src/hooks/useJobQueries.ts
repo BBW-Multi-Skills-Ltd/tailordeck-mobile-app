@@ -25,6 +25,7 @@ export function useCreateJobMutation() {
     mutationFn: createJob,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })
@@ -39,6 +40,7 @@ export function useCreateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'monthly'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'status'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
@@ -56,6 +58,7 @@ export function useUpdateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.clients })
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'monthly'] })
       void queryClient.invalidateQueries({ queryKey: ['dashboard', 'status'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
     },
@@ -69,6 +72,7 @@ export function useUpdateJobMutation() {
     onSuccess: (_job, vars) => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
     },
   })
 }
@@ -80,6 +84,7 @@ export function useUpdateJobStatusMutation() {
     onSuccess: (_job, vars) => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
     },
   })
 }
@@ -90,6 +95,7 @@ export function useSoftDeleteJobMutation() {
     mutationFn: softDeleteJob,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
     },
   })

@@ -1,9 +1,13 @@
 ﻿import { useQuery } from '@tanstack/react-query'
-import { getJobStatusBreakdown, getMonthlyStats, getRecentJobs } from '../services/dashboardService'
+import { getHomeCurrentMonthSummary, getJobStatusBreakdown, getMonthlyStats, getRecentJobs } from '../services/dashboardService'
 import { queryKeys } from './queryKeys'
 
 export function useMonthlyStatsQuery(enabled = true, monthCount = 6) {
   return useQuery({ queryKey: queryKeys.dashboardMonthly(monthCount), queryFn: () => getMonthlyStats(monthCount), enabled })
+}
+
+export function useHomeSummaryQuery() {
+  return useQuery({ queryKey: queryKeys.homeSummary, queryFn: getHomeCurrentMonthSummary })
 }
 
 export function useJobStatusBreakdownQuery(enabled = true, monthKey?: string) {

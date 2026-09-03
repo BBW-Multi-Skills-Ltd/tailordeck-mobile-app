@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../hooks/useFeatureAccess'
+import { useJobCreationEntitlementQuery, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../hooks/useFeatureAccess'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
@@ -18,9 +18,13 @@ export default function SubscriptionPage() {
   const [planError, setPlanError] = useState('')
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const subscriptionQuery = useSubscriptionQuery()
+  const entitlementQuery = useJobCreationEntitlementQuery()
   const currentPlan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
   const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : currentPlan
   const currentPlanCopy = getCurrentPlanCopy(currentPlan, effectivePlan)
+  const freeJobLimit = entitlementQuery.data?.job_limit ?? null
+  const freeJobsUsed = entitlementQuery.data?.jobs_used ?? 0
+  const showFreeUsage = effectivePlan === 'free' && typeof freeJobLimit === 'number'
   const visiblePlans = useMemo(() => {
     if (currentPlan === 'starter') return paidSubscriptionPlans.filter((plan) => plan.id === 'pro')
     if (currentPlan === 'pro') return []
@@ -50,9 +54,16 @@ export default function SubscriptionPage() {
       />
 
       <article className="subscription-current-card">
-        <div className="row-between">
-          <div className="stack gap-2">
-            <p className="subscription-current-title">{currentPlanCopy.title}</p>
+        <div className="subscription-current-head">
+          <div className="stack gap-2 min-w-0 flex-1">
+            <div className="subscription-current-title-row">
+              <p className="subscription-current-title">{currentPlanCopy.title}</p>
+              {showFreeUsage ? (
+                <span className="subscription-free-usage">
+                  {Math.min(freeJobsUsed, freeJobLimit)} of {freeJobLimit} Free jobs used
+                </span>
+              ) : null}
+            </div>
             <p className="subscription-current-subtitle">{currentPlanCopy.subtitle}</p>
           </div>
           <span className="subscription-active-chip">Active</span>

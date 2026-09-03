@@ -6406,6 +6406,21 @@ button.more-row {
   border-color: color-mix(in srgb, var(--primary) 22%, var(--border));
 }
 
+.subscription-current-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.subscription-current-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
 .subscription-current-title {
   margin: 0;
   font-size: 17px;
@@ -7015,6 +7030,23 @@ button.more-row {
   color: var(--text-muted);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.trial-expired-overlay {
+  background: color-mix(in srgb, #000 22%, transparent);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.subscription-free-usage {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+  color: var(--success);
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .confirm-required-input-wrap {

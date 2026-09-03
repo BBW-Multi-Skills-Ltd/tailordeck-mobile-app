@@ -17,6 +17,14 @@ export interface JobStatusBreakdown {
   pending: number
 }
 
+export interface HomeSummary {
+  month: string
+  jobs: number
+  revenueKobo: number
+  expensesKobo: number
+  profitKobo: number
+}
+
 interface MonthlyStatsRpcRow {
   month: string
   jobs: number
@@ -31,6 +39,14 @@ interface StatusBreakdownRpcRow {
   pending: number
 }
 
+interface HomeSummaryRpcRow {
+  month: string
+  jobs: number
+  revenue_kobo: number
+  expenses_kobo: number
+  profit_kobo: number
+}
+
 export async function getRecentJobs(limit = 5) {
   const userId = await requireUserId()
   const { data, error } = await supabase
@@ -43,6 +59,20 @@ export async function getRecentJobs(limit = 5) {
     .returns<JobRow[]>()
   if (error) throw error
   return (data ?? []).map(mapJobRow)
+}
+
+export async function getHomeCurrentMonthSummary(): Promise<HomeSummary> {
+  await requireUserId()
+  const { data, error } = await supabase.rpc('get_home_current_month_summary').maybeSingle<HomeSummaryRpcRow>()
+  if (error) throw error
+  const fallbackMonth = new Date().toISOString().slice(0, 7)
+  return {
+    month: data?.month ?? fallbackMonth,
+    jobs: data?.jobs ?? 0,
+    revenueKobo: data?.revenue_kobo ?? 0,
+    expensesKobo: data?.expenses_kobo ?? 0,
+    profitKobo: data?.profit_kobo ?? 0,
+  }
 }
 
 export async function getMonthlyStats(monthCount = 6): Promise<MonthlyStat[]> {
