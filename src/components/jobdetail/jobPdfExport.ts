@@ -2,10 +2,7 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
   if (!docPreviewNode) return null
 
   const documentNode = docPreviewNode.querySelector<HTMLElement>('.doc-landscape-root') ?? docPreviewNode
-  const fitStage = documentNode.closest<HTMLElement>('.document-fit-stage')
-  const fitShell = documentNode.closest<HTMLElement>('.document-fit-shell')
-  const previousStageTransform = fitStage?.style.transform
-  const previousShellHeight = fitShell?.style.height
+  const captureNode = createOffscreenCaptureNode(documentNode)
 
   const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
     import('html2canvas'),
@@ -13,11 +10,9 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
   ])
 
   try {
-    if (fitStage) fitStage.style.transform = 'none'
-    if (fitShell) fitShell.style.height = `${documentNode.offsetHeight}px`
-    await waitForDocumentAssets(documentNode)
+    await waitForDocumentAssets(captureNode)
 
-    const canvas = await html2canvas(documentNode, {
+    const canvas = await html2canvas(captureNode, {
       scale: 2,
       backgroundColor: '#ffffff',
       useCORS: true,
@@ -39,9 +34,31 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
     pdf.addImage(imageData, 'PNG', x, y, width, height)
     return pdf.output('blob')
   } finally {
-    if (fitStage && previousStageTransform !== undefined) fitStage.style.transform = previousStageTransform
-    if (fitShell && previousShellHeight !== undefined) fitShell.style.height = previousShellHeight
+    captureNode.parentElement?.remove()
   }
+}
+
+function createOffscreenCaptureNode(documentNode: HTMLElement): HTMLElement {
+  const host = document.createElement('div')
+  const clone = documentNode.cloneNode(true) as HTMLElement
+  const width = documentNode.scrollWidth || documentNode.offsetWidth
+
+  host.style.position = 'fixed'
+  host.style.left = '-10000px'
+  host.style.top = '0'
+  host.style.width = `${width}px`
+  host.style.background = '#ffffff'
+  host.style.pointerEvents = 'none'
+  host.style.zIndex = '-1'
+
+  clone.style.width = `${width}px`
+  clone.style.maxWidth = 'none'
+  clone.style.transform = 'none'
+  clone.style.transformOrigin = 'top left'
+
+  host.appendChild(clone)
+  document.body.appendChild(host)
+  return clone
 }
 
 async function waitForDocumentAssets(documentNode: HTMLElement): Promise<void> {

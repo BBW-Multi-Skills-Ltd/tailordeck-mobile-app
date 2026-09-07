@@ -6,6 +6,7 @@ import {
   useDeleteNotificationMutation,
   useMarkAllNotificationsReadMutation,
   useMarkNotificationReadMutation,
+  useNotificationRealtime,
   useNotificationsQuery,
 } from '../../hooks/useNotificationQueries'
 import { clearPreviewSession } from '../../lib/auth'
@@ -32,6 +33,7 @@ export function useAppHeader() {
   const deleteMutation = useDeleteNotificationMutation()
   const clearMutation = useClearNotificationsMutation()
   const notifications = notificationsQuery.data ?? []
+  useNotificationRealtime()
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
