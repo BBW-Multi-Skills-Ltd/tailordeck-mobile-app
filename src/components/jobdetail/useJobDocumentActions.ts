@@ -7,7 +7,7 @@ import {
 } from '../invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import type { MockJob } from '../../types/job'
-import { buildDocumentNumber, canSharePdfFile, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
+import { buildDocumentNumber, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
 import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
 export function useJobDocumentActions({
@@ -66,42 +66,9 @@ export function useJobDocumentActions({
     async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
       const blob = await buildPdfBlob(preparedBlob)
       if (!blob) return
-      const pdfFile = createPdfFile(blob, brand, type, job.id)
-      await saveDocumentRecord(type, pdfFile)
       triggerPdfDownload(blob, brand, type, job.id)
     },
-    [brand, buildPdfBlob, job.id, saveDocumentRecord],
-  )
-
-  const handleSystemShare = useCallback(
-    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
-      const blob = await buildPdfBlob(preparedBlob)
-      if (!blob) return
-
-      const pdfFile = createPdfFile(blob, brand, type, job.id)
-
-      if (navigator.share) {
-        try {
-          if (!canSharePdfFile(pdfFile)) throw new Error('File share unsupported')
-
-          await navigator.share({
-            title: `${brand.shopName} ${type === 'invoice' ? 'Invoice' : 'Receipt'}`,
-            text: shareText(type),
-            files: [pdfFile],
-          })
-          await saveDocumentRecord(type, pdfFile, { markSent: true })
-          return
-        } catch {
-          await saveDocumentRecord(type, pdfFile)
-          triggerPdfDownload(blob, brand, type, job.id)
-          return
-        }
-      }
-
-      await saveDocumentRecord(type, pdfFile)
-      triggerPdfDownload(blob, brand, type, job.id)
-    },
-    [brand, buildPdfBlob, job.id, saveDocumentRecord, shareText],
+    [brand, buildPdfBlob, job.id],
   )
 
   const handleWhatsAppToClient = useCallback(
@@ -125,7 +92,6 @@ export function useJobDocumentActions({
   return {
     docPreviewRef,
     handleDownload,
-    handleSystemShare,
     handleWhatsAppToClient,
   }
 }

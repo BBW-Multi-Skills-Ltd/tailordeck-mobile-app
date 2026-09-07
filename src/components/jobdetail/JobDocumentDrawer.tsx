@@ -80,7 +80,7 @@ export function JobDocumentDrawer({
         await onWhatsApp(type, pdfBlob)
       }
     } catch {
-      setPdfError('Unable to share this PDF. Please try again.')
+      setPdfError(action === 'download' ? 'Unable to download this PDF. Please try again.' : 'Unable to open WhatsApp. Please try again.')
     } finally {
       setPdfAction(null)
     }
@@ -155,7 +155,7 @@ export function JobDocumentDrawer({
               onClick={() => void runPdfAction('whatsapp')}
             >
               <FaWhatsapp size={18} />
-              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'whatsapp' ? 'Opening WhatsApp...' : 'Send PDF to Client'}
+              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'whatsapp' ? 'Opening WhatsApp...' : 'Message Client on WhatsApp'}
             </button>
           </div>
         </div>
