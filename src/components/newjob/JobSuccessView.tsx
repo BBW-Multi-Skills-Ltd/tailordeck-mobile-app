@@ -18,7 +18,7 @@ export function JobSuccessView(props: JobSuccessViewProps) {
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
   const invoiceLocked = documentSendingAccess.data !== true
   const { balanceToCollect, brand, successDetails, successJob } = useJobSuccessDocumentData(props)
-  const { docPreviewRef, handleSystemShare, handleWhatsAppToClient } = useJobDocumentActions({
+  const { docPreviewRef, handleDownload, handleWhatsAppToClient } = useJobDocumentActions({
     brand,
     job: successJob,
     details: successDetails,
@@ -73,7 +73,7 @@ export function JobSuccessView(props: JobSuccessViewProps) {
           balanceToCollect={balanceToCollect}
           docPreviewRef={docPreviewRef}
           onClose={() => setInvoiceOpen(false)}
-          onShare={(type, preparedBlob) => handleSystemShare(type, preparedBlob)}
+          onDownload={(type, preparedBlob) => handleDownload(type, preparedBlob)}
           onWhatsApp={(type, preparedBlob) => handleWhatsAppToClient(type, preparedBlob)}
         />
       ) : null}

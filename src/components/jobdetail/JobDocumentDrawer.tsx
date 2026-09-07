@@ -1,4 +1,4 @@
-import { Share2, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { Download, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { useEffect, useState, type RefObject } from 'react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import type { DetailedJobData } from '../../types/jobDetails'
@@ -17,7 +17,7 @@ export function JobDocumentDrawer({
   balanceToCollect,
   docPreviewRef,
   onClose,
-  onShare,
+  onDownload,
   onWhatsApp,
 }: {
   type: InvoiceType
@@ -27,14 +27,14 @@ export function JobDocumentDrawer({
   balanceToCollect: number
   docPreviewRef: RefObject<HTMLDivElement | null>
   onClose: () => void
-  onShare: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
+  onDownload: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
   onWhatsApp: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
 }) {
   const lineItems = buildClientFacingLineItems({ details, job })
   const [zoom, setZoom] = useState(1)
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
   const [pdfPreparing, setPdfPreparing] = useState(true)
-  const [pdfAction, setPdfAction] = useState<'share' | 'whatsapp' | null>(null)
+  const [pdfAction, setPdfAction] = useState<'download' | 'whatsapp' | null>(null)
   const [pdfError, setPdfError] = useState('')
   const zoomPercent = Math.round(zoom * 100)
   const pdfReady = Boolean(pdfBlob) && !pdfPreparing
@@ -69,13 +69,13 @@ export function JobDocumentDrawer({
     }
   }, [docPreviewRef, type])
 
-  async function runPdfAction(action: 'share' | 'whatsapp'): Promise<void> {
+  async function runPdfAction(action: 'download' | 'whatsapp'): Promise<void> {
     if (!pdfReady) return
     try {
       setPdfAction(action)
       setPdfError('')
-      if (action === 'share') {
-        await onShare(type, pdfBlob)
+      if (action === 'download') {
+        await onDownload(type, pdfBlob)
       } else {
         await onWhatsApp(type, pdfBlob)
       }
@@ -143,10 +143,10 @@ export function JobDocumentDrawer({
               type="button"
               className="btn btn-primary btn-full"
               disabled={!pdfReady || pdfAction !== null}
-              onClick={() => void runPdfAction('share')}
+              onClick={() => void runPdfAction('download')}
             >
-              <Share2 size={16} />
-              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'share' ? 'Opening Share...' : 'Share PDF'}
+              <Download size={16} />
+              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'download' ? 'Downloading...' : 'Download PDF'}
             </button>
             <button
               type="button"

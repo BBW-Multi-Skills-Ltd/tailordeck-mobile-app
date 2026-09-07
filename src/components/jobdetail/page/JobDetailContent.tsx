@@ -41,7 +41,7 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
   const estimatedProfit = job.chargeAmount - totalExpenses
   const measurementScopeText = getMeasurementScopeText({ details, measurementOrderScope, fallbackScope: job.jobType })
   const interactions = useJobDetailInteractions({ balanceToCollect, brand, details, job })
-  const { docPreviewRef, handleSystemShare, handleWhatsAppToClient } = interactions.documentActions
+  const { docPreviewRef, handleDownload, handleWhatsAppToClient } = interactions.documentActions
   const navigate = useNavigate()
   const feedback = useAppFeedback()
   const documentSendingAccess = useFeatureAccess(featureKeys.documentSending)
@@ -126,7 +126,7 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
             balanceToCollect={balanceToCollect}
             docPreviewRef={docPreviewRef}
             onClose={() => interactions.setOpenDrawer(null)}
-            onShare={(type, preparedBlob) => interactions.handleSharedDocument(type, handleSystemShare, preparedBlob)}
+            onDownload={(type, preparedBlob) => handleDownload(type, preparedBlob)}
             onWhatsApp={(type, preparedBlob) => interactions.handleSharedDocument(type, handleWhatsAppToClient, preparedBlob)}
           />
         </Suspense>

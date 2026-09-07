@@ -63,8 +63,8 @@ export function useJobDocumentActions({
   )
 
   const handleDownload = useCallback(
-    async (type: InvoiceType): Promise<void> => {
-      const blob = await buildPdfBlob()
+    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+      const blob = await buildPdfBlob(preparedBlob)
       if (!blob) return
       const pdfFile = createPdfFile(blob, brand, type, job.id)
       await saveDocumentRecord(type, pdfFile)
@@ -106,30 +106,18 @@ export function useJobDocumentActions({
 
   const handleWhatsAppToClient = useCallback(
     async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+      const whatsappUrl = buildWhatsAppURL(job.clientPhone, shareText(type))
+      const whatsappWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
       const blob = await buildPdfBlob(preparedBlob)
-      if (blob && navigator.share) {
-        const pdfFile = createPdfFile(blob, brand, type, job.id)
-        try {
-          if (canSharePdfFile(pdfFile)) {
-            await navigator.share({
-              title: `${brand.shopName} ${type === 'invoice' ? 'Invoice' : 'Receipt'}`,
-              text: `For ${job.clientName} (${job.clientPhone})`,
-              files: [pdfFile],
-            })
-          } else {
-            triggerPdfDownload(blob, brand, type, job.id)
-          }
-        } catch {
-          triggerPdfDownload(blob, brand, type, job.id)
-        }
-        await saveDocumentRecord(type, pdfFile, { markSent: true, sentViaWhatsApp: true })
-      } else if (blob) {
+
+      if (blob) {
         const pdfFile = createPdfFile(blob, brand, type, job.id)
         await saveDocumentRecord(type, pdfFile, { markSent: true, sentViaWhatsApp: true })
-        triggerPdfDownload(blob, brand, type, job.id)
       }
 
-      window.open(buildWhatsAppURL(job.clientPhone, shareText(type)), '_blank', 'noopener,noreferrer')
+      if (!whatsappWindow) {
+        window.location.href = whatsappUrl
+      }
     },
     [brand, buildPdfBlob, job, saveDocumentRecord, shareText],
   )
