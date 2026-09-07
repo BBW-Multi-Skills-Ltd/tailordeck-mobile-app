@@ -33,8 +33,12 @@ export function useJobDetailInteractions({
     setViewerIndex((prev) => (prev === null ? 0 : (prev + 1) % details.referencePhotos.length))
   }
 
-  async function handleSharedDocument(type: InvoiceType, shareAction: (type: InvoiceType) => Promise<void>): Promise<void> {
-    await shareAction(type)
+  async function handleSharedDocument(
+    type: InvoiceType,
+    shareAction: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void>,
+    preparedBlob?: Blob | null,
+  ): Promise<void> {
+    await shareAction(type, preparedBlob)
     setSentDocuments((prev) => ({ ...prev, [type]: true }))
   }
 

@@ -8164,6 +8164,10 @@ button.more-row {
   margin-top: 8px;
 }
 
+.side-sheet-pdf-error {
+  margin: 8px 2px 0;
+}
+
 .whatsapp-send-btn {
   background: #25D366;
   border: 1px solid #1FAF56;

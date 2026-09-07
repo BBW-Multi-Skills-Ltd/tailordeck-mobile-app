@@ -126,8 +126,8 @@ export function JobDetailContent({ brand, completedAt, details, job, measurement
             balanceToCollect={balanceToCollect}
             docPreviewRef={docPreviewRef}
             onClose={() => interactions.setOpenDrawer(null)}
-            onShare={(type) => void interactions.handleSharedDocument(type, handleSystemShare)}
-            onWhatsApp={(type) => void interactions.handleSharedDocument(type, handleWhatsAppToClient)}
+            onShare={(type, preparedBlob) => interactions.handleSharedDocument(type, handleSystemShare, preparedBlob)}
+            onWhatsApp={(type, preparedBlob) => interactions.handleSharedDocument(type, handleWhatsAppToClient, preparedBlob)}
           />
         </Suspense>
       ) : null}

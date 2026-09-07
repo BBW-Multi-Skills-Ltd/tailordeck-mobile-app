@@ -25,7 +25,11 @@ export function useJobDocumentActions({
   const canPersistDocument = isUuid(job.id)
   const createDocumentMutation = useCreateDocumentMutation(canPersistDocument ? job.id : '')
 
-  const buildPdfBlob = useCallback((): Promise<Blob | null> => buildJobDocumentPdfBlob(docPreviewRef.current), [])
+  const buildPdfBlob = useCallback(
+    (preparedBlob?: Blob | null): Promise<Blob | null> =>
+      preparedBlob ? Promise.resolve(preparedBlob) : buildJobDocumentPdfBlob(docPreviewRef.current),
+    [],
+  )
 
   const shareText = useCallback(
     (type: InvoiceType): string =>
@@ -70,8 +74,8 @@ export function useJobDocumentActions({
   )
 
   const handleSystemShare = useCallback(
-    async (type: InvoiceType): Promise<void> => {
-      const blob = await buildPdfBlob()
+    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+      const blob = await buildPdfBlob(preparedBlob)
       if (!blob) return
 
       const pdfFile = createPdfFile(blob, brand, type, job.id)
@@ -101,8 +105,8 @@ export function useJobDocumentActions({
   )
 
   const handleWhatsAppToClient = useCallback(
-    async (type: InvoiceType): Promise<void> => {
-      const blob = await buildPdfBlob()
+    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+      const blob = await buildPdfBlob(preparedBlob)
       if (blob && navigator.share) {
         const pdfFile = createPdfFile(blob, brand, type, job.id)
         try {

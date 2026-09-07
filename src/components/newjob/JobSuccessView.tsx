@@ -73,8 +73,8 @@ export function JobSuccessView(props: JobSuccessViewProps) {
           balanceToCollect={balanceToCollect}
           docPreviewRef={docPreviewRef}
           onClose={() => setInvoiceOpen(false)}
-          onShare={(type) => void handleSystemShare(type)}
-          onWhatsApp={(type) => void handleWhatsAppToClient(type)}
+          onShare={(type, preparedBlob) => handleSystemShare(type, preparedBlob)}
+          onWhatsApp={(type, preparedBlob) => handleWhatsAppToClient(type, preparedBlob)}
         />
       ) : null}
     </section>

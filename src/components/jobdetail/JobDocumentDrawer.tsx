@@ -1,5 +1,5 @@
 import { Share2, X, ZoomIn, ZoomOut } from 'lucide-react'
-import { useState, type RefObject } from 'react'
+import { useEffect, useState, type RefObject } from 'react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import type { DetailedJobData } from '../../types/jobDetails'
 import type { DocumentTemplateLineItem } from '../../templates/types'
@@ -7,6 +7,7 @@ import type { MockJob } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import { buildDocumentNumber } from './jobDocumentHelpers'
+import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
 export function JobDocumentDrawer({
   type,
@@ -26,12 +27,64 @@ export function JobDocumentDrawer({
   balanceToCollect: number
   docPreviewRef: RefObject<HTMLDivElement | null>
   onClose: () => void
-  onShare: (type: InvoiceType) => void
-  onWhatsApp: (type: InvoiceType) => void
+  onShare: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
+  onWhatsApp: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
 }) {
   const lineItems = buildClientFacingLineItems({ details, job })
   const [zoom, setZoom] = useState(1)
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
+  const [pdfPreparing, setPdfPreparing] = useState(true)
+  const [pdfAction, setPdfAction] = useState<'share' | 'whatsapp' | null>(null)
+  const [pdfError, setPdfError] = useState('')
   const zoomPercent = Math.round(zoom * 100)
+  const pdfReady = Boolean(pdfBlob) && !pdfPreparing
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function preparePdf(): Promise<void> {
+      try {
+        setPdfPreparing(true)
+        setPdfError('')
+        setPdfBlob(null)
+        await new Promise((resolve) => window.requestAnimationFrame(resolve))
+        const blob = await buildJobDocumentPdfBlob(docPreviewRef.current)
+        if (cancelled) return
+        if (!blob) {
+          setPdfError('Unable to prepare this PDF. Close and try again.')
+          return
+        }
+        setPdfBlob(blob)
+      } catch {
+        if (!cancelled) setPdfError('Unable to prepare this PDF. Close and try again.')
+      } finally {
+        if (!cancelled) setPdfPreparing(false)
+      }
+    }
+
+    void preparePdf()
+
+    return () => {
+      cancelled = true
+    }
+  }, [docPreviewRef, type])
+
+  async function runPdfAction(action: 'share' | 'whatsapp'): Promise<void> {
+    if (!pdfReady) return
+    try {
+      setPdfAction(action)
+      setPdfError('')
+      if (action === 'share') {
+        await onShare(type, pdfBlob)
+      } else {
+        await onWhatsApp(type, pdfBlob)
+      }
+    } catch {
+      setPdfError('Unable to share this PDF. Please try again.')
+    } finally {
+      setPdfAction(null)
+    }
+  }
 
   return (
     <div
@@ -83,14 +136,26 @@ export function JobDocumentDrawer({
             </div>
           </div>
 
+          {pdfError ? <p className="inline-error side-sheet-pdf-error">{pdfError}</p> : null}
+
           <div className="stack gap-8 side-sheet-actions">
-            <button type="button" className="btn btn-primary btn-full" onClick={() => onShare(type)}>
+            <button
+              type="button"
+              className="btn btn-primary btn-full"
+              disabled={!pdfReady || pdfAction !== null}
+              onClick={() => void runPdfAction('share')}
+            >
               <Share2 size={16} />
-              Share PDF
+              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'share' ? 'Opening Share...' : 'Share PDF'}
             </button>
-            <button type="button" className="btn btn-full whatsapp-send-btn" onClick={() => onWhatsApp(type)}>
+            <button
+              type="button"
+              className="btn btn-full whatsapp-send-btn"
+              disabled={!pdfReady || pdfAction !== null}
+              onClick={() => void runPdfAction('whatsapp')}
+            >
               <FaWhatsapp size={18} />
-              Send PDF to Client
+              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'whatsapp' ? 'Opening WhatsApp...' : 'Send PDF to Client'}
             </button>
           </div>
         </div>
