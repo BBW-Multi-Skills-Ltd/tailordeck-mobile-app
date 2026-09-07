@@ -49,7 +49,7 @@ function TrialExpiredDialog({ noticeKey }: { noticeKey: string }) {
       <div className="confirm-modal trial-expired-modal" onClick={(event) => event.stopPropagation()}>
         <h3>Your 14-day full trial has ended</h3>
         <p>You can continue on Free with 3 jobs included, or upgrade to Starter for unlimited job management.</p>
-        <div className="row gap-8">
+        <div className="trial-expired-actions">
           <button type="button" className="btn btn-secondary flex-1" onClick={closeNotice}>Continue Free</button>
           <button type="button" className="btn btn-primary flex-1" onClick={upgradePlan}>Upgrade Plan</button>
         </div>
