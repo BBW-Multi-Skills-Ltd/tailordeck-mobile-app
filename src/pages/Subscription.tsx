@@ -9,7 +9,7 @@ import { SubscriptionPlanCarousel } from '../components/subscription/Subscriptio
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
-import { getEffectiveSubscriptionPlan } from '../services/subscriptionService'
+import { getEffectiveSubscriptionPlan, getTrialEnd } from '../services/subscriptionService'
 
 export default function SubscriptionPage() {
   const [settings] = useState(() => loadTailorSettings())
@@ -25,6 +25,8 @@ export default function SubscriptionPage() {
   const freeJobLimit = entitlementQuery.data?.job_limit ?? null
   const freeJobsUsed = entitlementQuery.data?.jobs_used ?? 0
   const showFreeUsage = effectivePlan === 'free' && typeof freeJobLimit === 'number'
+  const trialEnd = subscriptionQuery.data ? getTrialEnd(subscriptionQuery.data) : null
+  const trialStatus = effectivePlan === 'trial' ? formatTrialStatus(trialEnd) : ''
   const visiblePlans = useMemo(() => {
     if (currentPlan === 'starter') return paidSubscriptionPlans.filter((plan) => plan.id === 'pro')
     if (currentPlan === 'pro') return []
@@ -57,16 +59,19 @@ export default function SubscriptionPage() {
         <div className="subscription-current-head">
           <div className="stack gap-2 min-w-0 flex-1">
             <div className="subscription-current-title-row">
-              <p className="subscription-current-title">{currentPlanCopy.title}</p>
+              <div className="subscription-current-title-status">
+                <p className="subscription-current-title">{currentPlanCopy.title}</p>
+                <span className="subscription-active-chip">Active</span>
+              </div>
               {showFreeUsage ? (
                 <span className="subscription-free-usage">
                   {Math.min(freeJobsUsed, freeJobLimit)} of {freeJobLimit} Free jobs used
                 </span>
               ) : null}
+              {trialStatus ? <span className="subscription-trial-usage">{trialStatus}</span> : null}
             </div>
             <p className="subscription-current-subtitle">{currentPlanCopy.subtitle}</p>
           </div>
-          <span className="subscription-active-chip">Active</span>
         </div>
         <Link to="/settings/subscription/manage" className="btn btn-secondary btn-full subscription-manage-btn">
           Manage Plan
@@ -103,6 +108,14 @@ export default function SubscriptionPage() {
       )}
     </section>
   )
+}
+
+function formatTrialStatus(trialEnd: string | null): string {
+  if (!trialEnd) return ''
+  const msLeft = new Date(trialEnd).getTime() - Date.now()
+  if (msLeft <= 0) return 'Trial ending'
+  const daysLeft = Math.max(1, Math.ceil(msLeft / (1000 * 60 * 60 * 24)))
+  return `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`
 }
 
 

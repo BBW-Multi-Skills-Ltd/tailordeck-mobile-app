@@ -6421,6 +6421,13 @@ button.more-row {
   min-width: 0;
 }
 
+.subscription-current-title-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .subscription-current-title {
   margin: 0;
   font-size: 17px;
@@ -7038,7 +7045,8 @@ button.more-row {
   -webkit-backdrop-filter: none;
 }
 
-.subscription-free-usage {
+.subscription-free-usage,
+.subscription-trial-usage {
   flex: 0 0 auto;
   margin: 0;
   padding: 0;

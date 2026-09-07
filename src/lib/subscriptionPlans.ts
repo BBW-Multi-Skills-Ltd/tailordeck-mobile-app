@@ -27,9 +27,9 @@ export const subscriptionPlans: SubscriptionPlanCard[] = [
     badge: '14-DAY FULL TRIAL',
     price: { monthly: '\u20A60', yearly: '\u20A60' },
     suffix: { monthly: 'forever', yearly: 'forever' },
-    subtitle: 'Start with full access',
+    subtitle: 'Start with full trial access',
     helper: 'Full access for 14 days. After that, keep using TailorDeck with 3 jobs included.',
-    cta: 'Start Free',
+    cta: 'Start 14-Day Trial',
     features: [
       'Full access for 14 days',
       'Continue free after trial',
@@ -97,7 +97,7 @@ export function getCurrentPlanCopy(plan: SubscriptionPlan, effectivePlan?: Effec
   if (effectivePlan === 'trial') {
     return {
       title: 'Free Trial',
-      subtitle: 'Full access is active during your 14-day trial.',
+      subtitle: 'Full TailorDeck access is active during your trial.',
     }
   }
 

@@ -8,9 +8,9 @@ import { useJobsQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
-type JobFilter = 'All' | 'Draft' | 'In Progress' | 'Completed'
+type JobFilter = 'All' | 'Draft' | 'Pending' | 'Completed'
 
-const filters: JobFilter[] = ['All', 'Draft', 'In Progress', 'Completed']
+const filters: JobFilter[] = ['All', 'Draft', 'Pending', 'Completed']
 
 function statusClass(status: JobStatus): string {
   if (status === 'Completed') return 'badge badge-done'
@@ -41,7 +41,7 @@ export default function Jobs() {
   function emptyMessage(filter: JobFilter): string {
     if (search.trim()) return `No ${filter === 'All' ? 'jobs' : filter.toLowerCase()} match that search.`
     if (filter === 'Draft') return 'No draft jobs yet. Saved drafts will appear here.'
-    if (filter === 'In Progress') return 'No jobs in progress yet. Finalized jobs you are working on will appear here.'
+    if (filter === 'Pending') return 'No pending jobs yet. Finalized jobs you have not completed will appear here.'
     if (filter === 'Completed') return 'No completed jobs yet. Jobs you mark as completed will appear here.'
     return 'Tap the center plus button to create your first job with client details, measurements, pricing, and deadline.'
   }
@@ -49,7 +49,7 @@ export default function Jobs() {
   function emptyTitle(filter: JobFilter): string {
     if (search.trim()) return 'Nothing found'
     if (filter === 'Draft') return 'No drafts yet'
-    if (filter === 'In Progress') return 'No jobs in progress'
+    if (filter === 'Pending') return 'No pending jobs'
     if (filter === 'Completed') return 'No completed jobs yet'
     return 'No jobs yet'
   }
