@@ -86,8 +86,8 @@ Deno.serve(async (request) => {
     if (!ticket) return jsonResponse({ error: 'Ticket not found' }, 404, request)
 
     const resendApiKey = requiredEnv('RESEND_API_KEY')
-    const supportTo = Deno.env.get('SUPPORT_TO_EMAIL') || 'support@tailordeck.com.ng'
-    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <support@tailordeck.com.ng>'
+    const supportTo = Deno.env.get('SUPPORT_TO_EMAIL') || 'bbwmultiskillsltd@gmail.com'
+    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <noreply@tailordeck.app>'
 
     const html = `
       <h2>New TailorDeck Support Ticket</h2>

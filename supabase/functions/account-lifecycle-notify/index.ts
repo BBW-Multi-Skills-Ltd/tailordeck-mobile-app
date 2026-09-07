@@ -59,7 +59,7 @@ function formatDate(value: string | null): string {
 
 function messageFor(eventType: AccountLifecycleEvent, profile: Profile): { subject: string; title: string; body: string; action?: string } {
   const name = profile.full_name?.trim() || 'TailorDeck user'
-  const appUrl = Deno.env.get('APP_URL') || 'https://tailor-deck.vercel.app'
+  const appUrl = Deno.env.get('APP_URL') || 'https://tailordeck.app'
 
   if (eventType === 'account_deletion_requested') {
     return {
@@ -130,7 +130,7 @@ Deno.serve(async (request) => {
     if (!to) return jsonResponse({ error: 'No account email found.' }, 400, request)
 
     const resendApiKey = requiredEnv('RESEND_API_KEY')
-    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <support@tailordeck.com.ng>'
+    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <noreply@tailordeck.app>'
     const content = messageFor(eventType as AccountLifecycleEvent, profile)
     const actionMarkup = content.action
       ? `<p><a href="${htmlEscape(content.action)}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#7B1E37;color:#fff;text-decoration:none;font-weight:700;">Open TailorDeck</a></p>`
