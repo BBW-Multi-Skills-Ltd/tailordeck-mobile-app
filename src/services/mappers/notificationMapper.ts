@@ -5,6 +5,7 @@ function mapNotificationType(type: DbNotificationType): NotificationType {
   if (type === 'deadline') return 'deadline'
   if (type === 'balance') return 'balance'
   if (type === 'invoice') return 'document'
+  if (type === 'account') return 'account'
   return 'job'
 }
 

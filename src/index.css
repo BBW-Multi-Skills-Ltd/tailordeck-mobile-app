@@ -2818,15 +2818,18 @@ button.more-row {
   min-height: 0;
 }
 
+.notification-sheet-body.is-empty {
+  flex: 0 0 auto;
+}
+
 .notification-empty {
   border: 1px dashed var(--border);
   border-radius: 12px;
-  padding: 12px;
+  padding: 16px 14px;
   background: var(--bg-input);
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .notification-empty-title {
@@ -2859,6 +2862,35 @@ button.more-row {
 
 .notification-item.unread {
   border-color: color-mix(in srgb, var(--primary) 35%, var(--bg-card) 65%);
+}
+
+.notification-skeleton-item {
+  background: var(--clay-surface);
+  box-shadow: var(--clay-shadow-press);
+}
+
+.notification-skeleton-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.notification-skeleton-line {
+  display: block;
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.notification-skeleton-line.strong {
+  width: 62%;
+  height: 12px;
+}
+
+.notification-skeleton-line.short {
+  width: 34%;
+  height: 8px;
 }
 
 .notification-main {
@@ -2909,6 +2941,11 @@ button.more-row {
 .notification-icon.job {
   color: var(--primary);
   background: color-mix(in srgb, var(--primary) 10%, var(--bg-card) 90%);
+}
+
+.notification-icon.account {
+  color: var(--success);
+  background: var(--success-bg);
 }
 
 .notification-text {
@@ -3092,6 +3129,114 @@ button.more-row {
 
 .home-profit-trend {
   opacity: 0.45;
+}
+
+.home-kpi-skeleton {
+  min-height: 118px;
+}
+
+.home-profit-skeleton {
+  min-height: 112px;
+  border-radius: var(--clay-radius-lg);
+}
+
+.home-recent-skeleton {
+  min-height: 72px;
+  border-radius: var(--clay-radius-md);
+}
+
+.app-boot-header {
+  pointer-events: none;
+}
+
+.app-boot-logo,
+.app-boot-avatar,
+.app-boot-bell {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.app-boot-logo {
+  width: 32px;
+  height: 32px;
+}
+
+.app-boot-brand {
+  width: 96px;
+  height: 16px;
+  border-radius: 999px;
+}
+
+.app-boot-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+.app-boot-name {
+  width: 68px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.app-boot-bell {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+.app-boot-page {
+  padding-top: 28px;
+}
+
+.app-boot-heading {
+  width: min(74%, 260px);
+  height: 28px;
+  border-radius: 999px;
+}
+
+.app-boot-subheading {
+  width: min(86%, 320px);
+  height: 14px;
+  border-radius: 999px;
+}
+
+.app-boot-bottom-nav {
+  pointer-events: none;
+}
+
+.app-boot-auth {
+  min-height: 100vh;
+  padding: calc(var(--safe-top) + 80px) 24px calc(var(--safe-bottom) + 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  background: var(--bg);
+}
+
+.app-boot-auth-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+}
+
+.app-boot-auth-title {
+  width: min(58vw, 220px);
+  height: 30px;
+  border-radius: 999px;
+}
+
+.app-boot-auth-card {
+  width: min(100%, 390px);
+  height: 230px;
+  border-radius: var(--clay-radius-xl);
+}
+
+.app-boot-auth-line {
+  width: min(72vw, 280px);
+  height: 14px;
+  border-radius: 999px;
 }
 
 .home-link {

@@ -10,6 +10,7 @@ import { softDeleteAllJobs } from '../../services/jobService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import { getSecurityDangerMessage } from './settingsSecurityActions'
+import { createAccountSecurityNotification } from '../../services/notificationService'
 
 type UseSettingsAccountActionsArgs = {
   confirmPasswordDraft: string
@@ -93,6 +94,7 @@ export function useSettingsAccountActions({
     try {
       await verifyLoginEmailChangeOtp({ email, token })
       await syncProfileEmailFromAuth()
+      await notifySecurityEvent('email_updated')
       await markSaved('Account & Security', {
         ...settings,
         profile: {
@@ -124,6 +126,7 @@ export function useSettingsAccountActions({
         confirmPassword: confirmPasswordDraft,
         nonce: securityCode?.trim() || undefined,
       })
+      await notifySecurityEvent('password_updated')
       setSecurityFeedback('')
     } catch (error) {
       setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update password.'))
@@ -170,5 +173,13 @@ export function useSettingsAccountActions({
     handleRequestPasswordCode,
     handleConfirmEmailChange,
     handleUpdatePasswordWithCode,
+  }
+}
+
+async function notifySecurityEvent(eventKey: 'email_updated' | 'password_updated'): Promise<void> {
+  try {
+    await createAccountSecurityNotification(eventKey)
+  } catch (error) {
+    console.warn('Account security notification failed:', error)
   }
 }

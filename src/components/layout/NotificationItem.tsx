@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { CalendarClock, CheckCircle2, FileText, HandCoins, Scissors, Trash2 } from 'lucide-react'
+import { CalendarClock, CheckCircle2, FileText, HandCoins, Scissors, ShieldCheck, Trash2 } from 'lucide-react'
 import type { AppNotification, NotificationType } from '../../lib/notifications'
 import { getRelativeTime } from './appHeaderUtils'
 
@@ -40,5 +40,6 @@ function getItemIcon(type: NotificationType): ReactNode {
   if (type === 'balance') return <HandCoins size={16} />
   if (type === 'document') return <FileText size={16} />
   if (type === 'job') return <Scissors size={16} />
+  if (type === 'account') return <ShieldCheck size={16} />
   return <CheckCircle2 size={16} />
 }

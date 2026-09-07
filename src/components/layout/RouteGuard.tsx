@@ -4,25 +4,13 @@ import { useAuth } from '../../context/authContextCore'
 import { useProfileQuery } from '../../hooks/useProfileQueries'
 import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
 import { hasStartedDeviceOnboarding } from '../../lib/auth'
+import AppBootSkeleton from './AppBootSkeleton'
 
 const ROUTE_GUARD_DATA_TIMEOUT_MS = 6000
 const ACCOUNT_ACTION_SIGNING_OUT_KEY = 'tailordeck-account-action-signing-out'
 
 function RouteGuardFallback() {
-  return (
-    <main className="page-full route-guard-loading">
-      <span className="onboarding-brand-icon" aria-hidden>
-        <img
-          src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
-          alt=""
-          className="onboarding-brand-logo"
-          decoding="async"
-          loading="eager"
-        />
-      </span>
-      <p>Getting things ready...</p>
-    </main>
-  )
+  return <AppBootSkeleton />
 }
 
 export function RouteGuard() {

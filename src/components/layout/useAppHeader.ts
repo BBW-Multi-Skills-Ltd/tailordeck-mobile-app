@@ -53,6 +53,7 @@ export function useAppHeader() {
     setMenuOpen(false)
     setNotificationError('')
     setDrawerOpen(true)
+    void notificationsQuery.refetch()
   }
 
   async function handleClearAll(): Promise<void> {
@@ -147,7 +148,7 @@ export function useAppHeader() {
       menuOpen,
       notifications,
       notificationError,
-      notificationsLoading: notificationsQuery.isLoading,
+      notificationsLoading: notificationsQuery.isLoading || (drawerOpen && notificationsQuery.isFetching && notifications.length === 0),
       signOutConfirmOpen,
       settings,
       unreadCount: notifications.filter((item) => !item.read).length,

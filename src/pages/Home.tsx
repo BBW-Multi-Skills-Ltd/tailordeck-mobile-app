@@ -49,10 +49,28 @@ export default function Home() {
         <p className="text-base text-muted">{homeSubcopy}</p>
       </div>
 
+      {!homeDataReady ? <HomeLoadingSkeleton /> : null}
       {homeDataReady && !hasJobs ? <HomeSetupGuide settings={settings} setupWasSkipped={setupWasSkipped} /> : null}
       {homeDataReady && hasJobs ? <HomeKpiGrid cards={kpiCards} /> : null}
       {homeDataReady && hasJobs ? <HomeProfitCard profit={formatHomeSummaryProfit(homeSummary)} onOpenDashboard={() => navigate('/dashboard')} /> : null}
       {homeDataReady && hasJobs ? <HomeRecentJobs jobs={recentJobs} /> : null}
     </section>
+  )
+}
+
+function HomeLoadingSkeleton() {
+  return (
+    <div className="stack gap-16" aria-label="Loading home summary">
+      <div className="kpi-grid" aria-hidden="true">
+        <div className="home-kpi-skeleton skeleton" />
+        <div className="home-kpi-skeleton skeleton" />
+      </div>
+      <div className="home-profit-skeleton skeleton" aria-hidden="true" />
+      <div className="stack gap-8" aria-hidden="true">
+        <div className="home-recent-skeleton skeleton" />
+        <div className="home-recent-skeleton skeleton" />
+        <div className="home-recent-skeleton skeleton" />
+      </div>
+    </div>
   )
 }

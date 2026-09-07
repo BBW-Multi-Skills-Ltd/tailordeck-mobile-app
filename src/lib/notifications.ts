@@ -1,4 +1,4 @@
-export type NotificationType = 'deadline' | 'balance' | 'document' | 'job'
+export type NotificationType = 'deadline' | 'balance' | 'document' | 'job' | 'account'
 
 export interface AppNotification {
   id: string
@@ -67,7 +67,7 @@ export function loadNotifications(): AppNotification[] {
 function normalizeNotification(item: AppNotification): AppNotification {
   const legacyType = item.type as NotificationType | 'payment' | 'system'
   if (legacyType === 'payment') return { ...item, type: 'balance' }
-  if (legacyType === 'system') return { ...item, type: 'job' }
+  if (legacyType === 'system') return { ...item, type: 'account' }
   return item
 }
 

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
+import AppBootSkeleton from './components/layout/AppBootSkeleton'
 import { RouteGuard } from './components/layout/RouteGuard'
 
 const Home = lazy(() => import('./pages/Home'))
@@ -35,17 +36,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const TermsOfService = lazy(() => import('./pages/TermsOfService'))
 
 function RouteLoadingFallback() {
-  return (
-    <main className="page-full route-guard-loading">
-      <img
-        src="/branding/TailorDeck%20app%20logo%20for%20splac%20screen.png"
-        alt="TailorDeck"
-        decoding="async"
-        loading="eager"
-      />
-      <p>Getting things ready...</p>
-    </main>
-  )
+  return <AppBootSkeleton />
 }
 
 export default function App() {

@@ -6,11 +6,19 @@ type NotificationFiltersProps = {
 }
 
 export function NotificationFilters({ activeFilter, onChange }: NotificationFiltersProps) {
+  const filters = [
+    { key: 'all', label: 'All' },
+    { key: 'unread', label: 'Unread' },
+    { key: 'deadline', label: 'Deadlines' },
+    { key: 'document', label: 'Documents' },
+    { key: 'account', label: 'Account' },
+  ] as const
+
   return (
     <div className="notification-filter-row" role="tablist" aria-label="Notification filters">
-      {(['all', 'unread', 'deadline'] as const).map((item) => (
-        <button key={item} type="button" role="tab" aria-selected={activeFilter === item} className={`notification-filter-pill${activeFilter === item ? ' active' : ''}`} onClick={() => onChange(item)}>
-          {item === 'all' ? 'All' : item === 'unread' ? 'Unread' : 'Deadlines'}
+      {filters.map((item) => (
+        <button key={item.key} type="button" role="tab" aria-selected={activeFilter === item.key} className={`notification-filter-pill${activeFilter === item.key ? ' active' : ''}`} onClick={() => onChange(item.key)}>
+          {item.label}
         </button>
       ))}
     </div>

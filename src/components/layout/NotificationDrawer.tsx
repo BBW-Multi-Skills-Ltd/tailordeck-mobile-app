@@ -6,6 +6,7 @@ import type { NotificationDrawerProps, NotificationFilter } from './notification
 export default function NotificationDrawer({
   errorMessage,
   filter,
+  loading = false,
   notifications,
   onClearAll,
   onClose,
@@ -28,7 +29,7 @@ export default function NotificationDrawer({
           <header className="notification-panel-header">
             <div>
               <h2 className="notification-sheet-title">Notifications</h2>
-              <p className="notification-panel-subtitle">Deadlines and unread updates.</p>
+              <p className="notification-panel-subtitle">Jobs, deadlines, documents, and account updates.</p>
             </div>
             <button type="button" className="btn btn-ghost btn-icon notification-panel-close" aria-label="Close notifications" onClick={onClose}>
               <X size={20} />
@@ -42,7 +43,7 @@ export default function NotificationDrawer({
 
           <NotificationFilters activeFilter={filter} onChange={onFilterChange} />
           {errorMessage ? <p className="inline-feedback-error notification-panel-error" role="alert">{errorMessage}</p> : null}
-          <NotificationList filter={filter} notifications={visibleNotifications} onDelete={onDelete} onItemOpen={onItemOpen} onMarkRead={onMarkRead} />
+          <NotificationList filter={filter} loading={loading} notifications={visibleNotifications} onDelete={onDelete} onItemOpen={onItemOpen} onMarkRead={onMarkRead} />
         </div>
       </aside>
     </div>

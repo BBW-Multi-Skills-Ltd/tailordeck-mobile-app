@@ -41,3 +41,8 @@ export async function clearNotifications(): Promise<void> {
   const { error } = await supabase.from('notifications').update({ deleted_at: new Date().toISOString() }).eq('user_id', userId).is('deleted_at', null)
   if (error) throw error
 }
+
+export async function createAccountSecurityNotification(eventKey: 'email_updated' | 'password_updated'): Promise<void> {
+  const { error } = await supabase.rpc('create_account_security_notification', { event_key: eventKey })
+  if (error) throw error
+}

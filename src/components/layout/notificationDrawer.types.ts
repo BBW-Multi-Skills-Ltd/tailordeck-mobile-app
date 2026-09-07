@@ -5,6 +5,7 @@ export type NotificationFilter = 'all' | 'unread' | NotificationType
 export type NotificationDrawerProps = {
   errorMessage?: string
   filter: NotificationFilter
+  loading?: boolean
   notifications: AppNotification[]
   onClearAll: () => void
   onClose: () => void

@@ -48,6 +48,7 @@ export default function AppHeader() {
         <NotificationDrawer
           errorMessage={state.notificationError}
           filter={state.filter}
+          loading={state.notificationsLoading}
           notifications={state.notifications}
           onClearAll={actions.handleClearAll}
           onClose={actions.closeNotificationDrawer}
