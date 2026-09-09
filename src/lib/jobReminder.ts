@@ -1,4 +1,4 @@
-import type { Reminder, ReminderSelection, ReminderUnit } from '../components/newjob/newJobTypes'
+import type { Reminder, ReminderSelection, ReminderUnit } from './reminderTypes'
 
 export const CUSTOM_REMINDER_MINUTES_MIN = 10
 export const CUSTOM_REMINDER_MINUTES_MAX = 60 * 24 * 30

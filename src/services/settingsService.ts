@@ -1,4 +1,5 @@
 import type { TailorSettings } from '../lib/settingsTypes'
+import { reminderToDbFields } from '../lib/jobReminder'
 import { getBrandSettings, updateBrandSettings } from './brandService'
 import { getBusinessProfile, getSocialHandles, updateBusinessProfile, updateSocialHandles } from './businessService'
 import { mergeSettingsRows } from './mappers/settingsMapper'
@@ -48,9 +49,19 @@ export async function savePreferenceSettings(settings: TailorSettings) {
 }
 
 export async function saveReminderSettings(settings: TailorSettings) {
+  const reminderFields = reminderToDbFields(
+    settings.reminders.defaultReminder,
+    settings.reminders.defaultCustomReminderValue,
+    settings.reminders.defaultCustomReminderUnit,
+  )
+
   return updatePreferences({
     push_notifications: settings.reminders.pushNotifications,
     default_reminder: settings.reminders.defaultReminder,
+    default_custom_reminder_value: reminderFields.customReminderValue,
+    default_custom_reminder_unit: reminderFields.customReminderUnit,
+    default_custom_reminder_minutes: reminderFields.customReminderMinutes,
+    default_reminder_label: reminderFields.reminderLabel,
     ringtone_enabled: settings.reminders.ringtoneEnabled,
     ringtone: settings.reminders.ringtone,
     notification_bell_enabled: settings.reminders.notificationBellEnabled,

@@ -1,6 +1,9 @@
+import type { Reminder, ReminderUnit } from './reminderTypes'
+
 export type MeasurementUnit = 'cm' | 'inches'
 export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
-export type ReminderLead = '1 day before' | '3 days before' | '1 week before'
+export type ReminderLead = Reminder
+export type { ReminderUnit }
 export type SubscriptionPlan = 'free' | 'starter' | 'pro'
 export type SubscriptionBillingCycle = 'monthly' | 'yearly'
 export type RingtoneOption = 'Classic Ring' | 'Soft Chime' | 'Pulse Tone'
@@ -30,6 +33,8 @@ export interface TailorSettings {
   reminders: {
     pushNotifications: boolean
     defaultReminder: ReminderLead
+    defaultCustomReminderValue: string
+    defaultCustomReminderUnit: ReminderUnit
     ringtoneEnabled: boolean
     ringtone: RingtoneOption
     notificationBellEnabled: boolean

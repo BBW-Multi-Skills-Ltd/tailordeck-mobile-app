@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientQuery } from '../../hooks/useClientQueries'
 import { useJobQuery } from '../../hooks/useJobQueries'
+import { useSettingsQuery } from '../../hooks/useSettingsQueries'
 import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import { hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
@@ -23,6 +24,7 @@ export function useNewJobWizard() {
   const sectionRef = useRef<HTMLElement | null>(null)
   const appliedDraftIdRef = useRef('')
   const state = useNewJobWizardState()
+  const settingsQuery = useSettingsQuery()
   const repeatClientId = searchParams.get('clientId')
   const draftId = searchParams.get('draftId')
   const repeatClientQuery = useClientQuery(repeatClientId ?? undefined)
@@ -82,6 +84,13 @@ export function useNewJobWizard() {
     applyDraftToNewJobState(draftQuery.data, state)
     appliedDraftIdRef.current = draftQuery.data.id
   }, [draftQuery.data, state])
+
+  useEffect(() => {
+    if (draftId || state.reminder || !settingsQuery.data) return
+    state.setReminder(settingsQuery.data.reminders.defaultReminder)
+    state.setCustomReminderValue(settingsQuery.data.reminders.defaultCustomReminderValue)
+    state.setCustomReminderUnit(settingsQuery.data.reminders.defaultCustomReminderUnit)
+  }, [draftId, settingsQuery.data, state])
 
   const actions = createNewJobWizardActions({
     confirmDiscard: () =>

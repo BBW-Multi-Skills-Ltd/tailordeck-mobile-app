@@ -1,10 +1,10 @@
+import type { Reminder, ReminderSelection, ReminderUnit } from '../../lib/reminderTypes'
+
 export type JobType = 'Single' | 'Couple' | 'Family'
 export type PersonSex = 'Male' | 'Female' | 'Boy' | 'Girl'
 export type MakeCategory = 'Body Wear' | 'Non-Body Item'
 export type OrderMode = 'New Stitch' | 'Amendment / Repair'
-export type Reminder = '1 day before' | '3 days before' | '1 week before' | 'custom' | 'none'
-export type ReminderSelection = Reminder | ''
-export type ReminderUnit = 'minutes' | 'hours' | 'days' | 'weeks'
+export type { Reminder, ReminderSelection, ReminderUnit }
 export type MaterialQuality = 'Normal' | 'Original' | 'Fake' | 'High Standard'
 export type MaterialSource = 'Client is Providing Material' | 'I Am Getting It'
 

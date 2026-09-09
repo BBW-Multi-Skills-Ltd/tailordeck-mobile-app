@@ -57,6 +57,8 @@ export function getDefaultTailorSettings(): TailorSettings {
     reminders: {
       pushNotifications: true,
       defaultReminder: '1 day before',
+      defaultCustomReminderValue: '',
+      defaultCustomReminderUnit: 'hours',
       ringtoneEnabled: true,
       ringtone: 'Classic Ring',
       notificationBellEnabled: true,

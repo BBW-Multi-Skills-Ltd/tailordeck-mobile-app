@@ -121,6 +121,7 @@ export function useSettingsPage() {
       setOpenColorPicker,
       setPanel,
       setPasswordDraft,
+      setSettingsError,
       setSettings,
       setSignOutConfirmOpen,
       setSocialHandleInput,

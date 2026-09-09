@@ -56,6 +56,8 @@ export function mergeSettingsRows(rows: {
     reminders: {
       pushNotifications: rows.preferences?.push_notifications ?? fallback.reminders.pushNotifications,
       defaultReminder: rows.preferences?.default_reminder || fallback.reminders.defaultReminder,
+      defaultCustomReminderValue: rows.preferences?.default_custom_reminder_value ? String(rows.preferences.default_custom_reminder_value) : fallback.reminders.defaultCustomReminderValue,
+      defaultCustomReminderUnit: rows.preferences?.default_custom_reminder_unit || fallback.reminders.defaultCustomReminderUnit,
       ringtoneEnabled: rows.preferences?.ringtone_enabled ?? fallback.reminders.ringtoneEnabled,
       ringtone: rows.preferences?.ringtone || fallback.reminders.ringtone,
       notificationBellEnabled: rows.preferences?.notification_bell_enabled ?? fallback.reminders.notificationBellEnabled,

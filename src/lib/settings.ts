@@ -17,6 +17,7 @@ export type {
   MeasurementUnit,
   NotificationBellOption,
   ReminderLead,
+  ReminderUnit,
   RingtoneOption,
   SocialHandle,
   SocialPlatform,

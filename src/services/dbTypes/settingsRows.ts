@@ -1,4 +1,4 @@
-import type { MaterialQuality, MeasurementUnit, NotificationBellOption, ReminderLead, RingtoneOption } from '../../lib/settingsTypes'
+import type { MaterialQuality, MeasurementUnit, NotificationBellOption, ReminderLead, ReminderUnit, RingtoneOption } from '../../lib/settingsTypes'
 
 export interface UserPreferencesRow {
   id: string
@@ -8,6 +8,10 @@ export interface UserPreferencesRow {
   dark_mode: boolean
   push_notifications: boolean
   default_reminder: ReminderLead
+  default_custom_reminder_value: number | null
+  default_custom_reminder_unit: ReminderUnit | null
+  default_custom_reminder_minutes: number | null
+  default_reminder_label: string | null
   ringtone_enabled: boolean
   ringtone: RingtoneOption
   notification_bell_enabled: boolean

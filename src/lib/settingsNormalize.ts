@@ -24,6 +24,8 @@ export function normalizeSettings(value: Partial<TailorSettings>): TailorSetting
     reminders: {
       pushNotifications: value.reminders?.pushNotifications ?? defaults.reminders.pushNotifications,
       defaultReminder: value.reminders?.defaultReminder ?? defaults.reminders.defaultReminder,
+      defaultCustomReminderValue: value.reminders?.defaultCustomReminderValue ?? defaults.reminders.defaultCustomReminderValue,
+      defaultCustomReminderUnit: value.reminders?.defaultCustomReminderUnit ?? defaults.reminders.defaultCustomReminderUnit,
       ringtoneEnabled: value.reminders?.ringtoneEnabled ?? defaults.reminders.ringtoneEnabled,
       ringtone: value.reminders?.ringtone ?? defaults.reminders.ringtone,
       notificationBellEnabled: value.reminders?.notificationBellEnabled ?? defaults.reminders.notificationBellEnabled,
