@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { reportError } from '../lib/monitoring'
 import { getFunctionInvokeErrorMessage, requireUserId, ServiceError } from './serviceHelpers'
 import type { SupportTicketCategory, SupportTicketPriority, SupportTicketRow } from './types'
 
@@ -93,6 +94,7 @@ export async function createSupportTicket(input: CreateSupportTicketInput): Prom
   try {
     await notifySupportTeam(data.id)
   } catch (notifyError) {
+    reportError(notifyError, { service: 'supportService.notifySupportTeam', ticketId: data.id })
     console.warn('Support ticket was saved, but email notification failed:', notifyError)
   }
 

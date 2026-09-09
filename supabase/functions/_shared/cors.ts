@@ -1,6 +1,7 @@
 const productionOrigins = [
   'https://tailordeck.app',
   'https://www.tailordeck.app',
+  'https://tailordeck.vercel.app',
   'https://tailor-deck.vercel.app',
 ]
 

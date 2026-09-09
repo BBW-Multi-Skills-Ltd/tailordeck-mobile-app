@@ -4,6 +4,7 @@ import { compressImageFile } from '../lib/imageCompression'
 import type { ProfileRow } from './types'
 import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
 import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
+import { reportError } from '../lib/monitoring'
 
 const AVATAR_SIGNED_URL_TTL = 60 * 60 * 24 * 7
 type AccountLifecycleEvent = 'account_deactivated' | 'account_deletion_requested' | 'account_restored'
@@ -110,6 +111,7 @@ async function notifyAccountLifecycle(eventType: AccountLifecycleEvent): Promise
     })
     if (error) throw error
   } catch (error) {
+    reportError(error, { eventType, service: 'profileService.notifyAccountLifecycle' })
     console.warn('Account lifecycle email notification failed:', error)
   }
 }
