@@ -1,39 +1,40 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
+import { lazyWithReload } from './lib/lazyWithReload'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from './components/layout/AppLayout'
 import AppBootSkeleton from './components/layout/AppBootSkeleton'
 import { RouteGuard } from './components/layout/RouteGuard'
 
-const Home = lazy(() => import('./pages/Home'))
-const Clients = lazy(() => import('./pages/Clients'))
-const ClientProfile = lazy(() => import('./pages/ClientProfile'))
-const Jobs = lazy(() => import('./pages/Jobs'))
-const NewJob = lazy(() => import('./pages/NewJob'))
-const JobDetail = lazy(() => import('./pages/JobDetail'))
-const JobMeasurements = lazy(() => import('./pages/JobMeasurements'))
-const Dashboard = lazy(() => import('./pages/Dashboard'))
-const SettingsPage = lazy(() => import('./pages/Settings'))
-const SettingsReminders = lazy(() => import('./pages/SettingsReminders'))
-const SettingsSecurity = lazy(() => import('./pages/SettingsSecurity'))
-const SettingsAbout = lazy(() => import('./pages/SettingsAbout'))
-const SubscriptionPage = lazy(() => import('./pages/Subscription'))
-const ManagePlan = lazy(() => import('./pages/ManagePlan'))
-const BillingCallback = lazy(() => import('./pages/BillingCallback'))
-const AccountStatus = lazy(() => import('./pages/AccountStatus'))
-const More = lazy(() => import('./pages/More'))
-const Business = lazy(() => import('./pages/Business'))
-const Documents = lazy(() => import('./pages/Documents'))
-const Help = lazy(() => import('./pages/Help'))
-const OnboardingWelcome = lazy(() => import('./pages/OnboardingWelcome'))
-const OnboardingSetup = lazy(() => import('./pages/OnboardingSetup'))
-const OnboardingPlan = lazy(() => import('./pages/OnboardingPlan'))
-const SignIn = lazy(() => import('./pages/SignIn'))
-const SignUp = lazy(() => import('./pages/SignUp'))
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'))
-const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
-const ResetPassword = lazy(() => import('./pages/ResetPassword'))
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
-const TermsOfService = lazy(() => import('./pages/TermsOfService'))
+const Home = lazyWithReload(() => import('./pages/Home'))
+const Clients = lazyWithReload(() => import('./pages/Clients'))
+const ClientProfile = lazyWithReload(() => import('./pages/ClientProfile'))
+const Jobs = lazyWithReload(() => import('./pages/Jobs'))
+const NewJob = lazyWithReload(() => import('./pages/NewJob'))
+const JobDetail = lazyWithReload(() => import('./pages/JobDetail'))
+const JobMeasurements = lazyWithReload(() => import('./pages/JobMeasurements'))
+const Dashboard = lazyWithReload(() => import('./pages/Dashboard'))
+const SettingsPage = lazyWithReload(() => import('./pages/Settings'))
+const SettingsReminders = lazyWithReload(() => import('./pages/SettingsReminders'))
+const SettingsSecurity = lazyWithReload(() => import('./pages/SettingsSecurity'))
+const SettingsAbout = lazyWithReload(() => import('./pages/SettingsAbout'))
+const SubscriptionPage = lazyWithReload(() => import('./pages/Subscription'))
+const ManagePlan = lazyWithReload(() => import('./pages/ManagePlan'))
+const BillingCallback = lazyWithReload(() => import('./pages/BillingCallback'))
+const AccountStatus = lazyWithReload(() => import('./pages/AccountStatus'))
+const More = lazyWithReload(() => import('./pages/More'))
+const Business = lazyWithReload(() => import('./pages/Business'))
+const Documents = lazyWithReload(() => import('./pages/Documents'))
+const Help = lazyWithReload(() => import('./pages/Help'))
+const OnboardingWelcome = lazyWithReload(() => import('./pages/OnboardingWelcome'))
+const OnboardingSetup = lazyWithReload(() => import('./pages/OnboardingSetup'))
+const OnboardingPlan = lazyWithReload(() => import('./pages/OnboardingPlan'))
+const SignIn = lazyWithReload(() => import('./pages/SignIn'))
+const SignUp = lazyWithReload(() => import('./pages/SignUp'))
+const VerifyEmail = lazyWithReload(() => import('./pages/VerifyEmail'))
+const ForgotPassword = lazyWithReload(() => import('./pages/ForgotPassword'))
+const ResetPassword = lazyWithReload(() => import('./pages/ResetPassword'))
+const PrivacyPolicy = lazyWithReload(() => import('./pages/PrivacyPolicy'))
+const TermsOfService = lazyWithReload(() => import('./pages/TermsOfService'))
 
 function RouteLoadingFallback() {
   return <AppBootSkeleton />
@@ -86,3 +87,4 @@ export default function App() {
     </Suspense>
   )
 }
+

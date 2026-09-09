@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { BrandConfig, InvoiceType } from '../../invoice/documentTypes'
 import HistoryBackButton from '../../shared/HistoryBackButton'
@@ -8,6 +8,7 @@ import { useDocumentsQuery } from '../../../hooks/useDocumentQueries'
 import { useFeatureAccess } from '../../../hooks/useFeatureAccess'
 import { useUpdateJobStatusMutation } from '../../../hooks/useJobQueries'
 import { featureKeys } from '../../../lib/features'
+import { lazyWithReload } from '../../../lib/lazyWithReload'
 import { getServiceErrorMessage } from '../../../services/serviceHelpers'
 import type { MockJob } from '../../../types/job'
 import type { DetailedJobData } from '../../../types/jobDetails'
@@ -23,7 +24,7 @@ import { JobReferencePhotos } from '../JobReferencePhotos'
 import { getMeasurementScopeText } from '../jobDetailUtils'
 import { useJobDetailInteractions } from './useJobDetailInteractions'
 
-const JobDocumentDrawer = lazy(() =>
+const JobDocumentDrawer = lazyWithReload(() =>
   import('../JobDocumentDrawer').then((module) => ({ default: module.JobDocumentDrawer })),
 )
 

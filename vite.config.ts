@@ -50,6 +50,8 @@ export default defineConfig(({ mode }) => {
         ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
@@ -62,6 +64,7 @@ export default defineConfig(({ mode }) => {
             },
           },
         ],
+        skipWaiting: true,
       },
         devOptions: {
           enabled: false,
