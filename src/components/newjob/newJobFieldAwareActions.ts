@@ -1,5 +1,6 @@
 import { isImageFile } from '../../lib/formValidation'
 import { cleanClientPhoneInput, type NewJobFieldKey } from './newJobFieldValidation'
+import { cleanReminderValue } from '../../lib/jobReminder'
 import type { createNewJobWizardActions } from './newJobWizardActions'
 import type { NewJobWizardStateModel } from './useNewJobWizardState'
 
@@ -72,7 +73,16 @@ export function createFieldAwareNewJobActions({ actions, clearFieldError, state 
     },
     setReminder: (value: Parameters<typeof actions.setReminder>[0]) => {
       clearFieldError('reminder')
+      clearFieldError('customReminder')
       actions.setReminder(value)
+    },
+    setCustomReminderValue: (value: string) => {
+      clearFieldError('customReminder')
+      actions.setCustomReminderValue(cleanReminderValue(value))
+    },
+    setCustomReminderUnit: (value: Parameters<typeof actions.setCustomReminderUnit>[0]) => {
+      clearFieldError('customReminder')
+      actions.setCustomReminderUnit(value)
     },
     handleReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles?: number) => {
       const incomingFiles = files ? Array.from(files) : []

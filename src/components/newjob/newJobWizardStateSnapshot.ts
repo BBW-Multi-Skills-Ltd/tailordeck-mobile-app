@@ -14,6 +14,8 @@ export function getNewJobWizardStateSnapshot(state: NewJobWizardStateModel) {
     clientPhone: state.clientPhone,
     createdJobId: state.createdJobId,
     customMaterialType: state.customMaterialType,
+    customReminderUnit: state.customReminderUnit,
+    customReminderValue: state.customReminderValue,
     deadlineDate: state.deadlineDate,
     deadlineTime: state.deadlineTime,
     depositPercent: state.depositPercent,

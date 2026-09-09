@@ -20,6 +20,7 @@ import {
 import { formatNaira } from '../../../lib/utils'
 import { ReviewRow } from '../NewJobChrome'
 import { ReferencePhotoPreviewGrid, type ReferencePreviewPhoto } from '../ReferencePhotoPreview'
+import { getReminderLabel } from '../../../lib/jobReminder'
 import { AmendmentReviewRows } from './AmendmentReviewRows'
 import type { ReviewSummaryProps } from './reviewSummaryTypes'
 import { formatExpenses, getMeasurementSummary, getReviewDescription, getReviewItemType } from './reviewSummaryUtils'
@@ -66,6 +67,7 @@ export function ReviewSummaryRows(props: ReviewSummaryProps) {
         valueClassName={props.projectedProfit >= 0 ? 'text-success' : 'text-danger'}
       />
       <ReviewRow icon={<CalendarClock size={15} className="text-primary" />} label="Delivery date and time" value={`${props.deadlineDate || '-'} ${props.deadlineTime ? `at ${props.deadlineTime}` : ''}`} />
+      <ReviewRow icon={<CalendarClock size={15} className="text-gold" />} label="Reminder" value={getReminderLabel(props.reminder, props.customReminderValue, props.customReminderUnit)} />
     </>
   )
 }

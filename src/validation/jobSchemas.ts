@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { CUSTOM_REMINDER_MINUTES_MAX, CUSTOM_REMINDER_MINUTES_MIN } from '../lib/jobReminder'
 
 const requiredText = (field: string) => z.string().trim().min(1, `${field} is required.`)
 const optionalText = z.string().trim().optional().nullable()
@@ -61,7 +62,11 @@ export const newJobCostingStepSchema = z.object({
 export const newJobDeadlineStepSchema = z.object({
   deadlineDate: z.string().trim().optional().nullable(),
   deadlineTime: z.string().trim().optional().nullable(),
-  reminder: z.enum(['1 day before', '3 days before', '1 week before', 'none']),
+  reminder: z.enum(['1 day before', '3 days before', '1 week before', 'custom', 'none']),
+  customReminderValue: z.number().int().positive().optional().nullable(),
+  customReminderUnit: z.enum(['minutes', 'hours', 'days', 'weeks']).optional().nullable(),
+  customReminderMinutes: z.number().int().optional().nullable(),
+  reminderLabel: optionalText,
   referencePhotos: z.array(z.object({
     file: fileSchema,
     sortOrder: z.number().int().positive(),
@@ -106,6 +111,14 @@ export const createFullJobSchema = newJobClientStepSchema
 
     if (!isDraft && !input.deadlineTime?.trim()) {
       context.addIssue({ code: 'custom', path: ['deadlineTime'], message: 'Select delivery time.' })
+    }
+
+    if (input.reminder === 'custom') {
+      if (!input.customReminderValue || !input.customReminderUnit || !input.customReminderMinutes) {
+        context.addIssue({ code: 'custom', path: ['customReminderValue'], message: 'Enter a custom reminder time.' })
+      } else if (input.customReminderMinutes < CUSTOM_REMINDER_MINUTES_MIN || input.customReminderMinutes > CUSTOM_REMINDER_MINUTES_MAX) {
+        context.addIssue({ code: 'custom', path: ['customReminderValue'], message: 'Use 10 minutes to 30 days before delivery.' })
+      }
     }
 
     if (input.deadlineDate && Number.isNaN(Date.parse(input.deadlineDate))) {

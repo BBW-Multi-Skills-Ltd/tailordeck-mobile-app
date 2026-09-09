@@ -10103,6 +10103,103 @@ button.more-row {
   white-space: nowrap;
 }
 
+.wizard-custom-reminder {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-lg);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.72), rgba(250, 248, 245, 0.86));
+  box-shadow: var(--clay-shadow-inset);
+}
+
+.wizard-custom-reminder.input-invalid {
+  border-color: var(--danger);
+}
+
+.wizard-custom-reminder-field {
+  display: grid;
+  gap: 6px;
+}
+
+.wizard-custom-reminder-field span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wizard-custom-reminder-input-wrap {
+  position: relative;
+}
+
+.wizard-custom-reminder-input {
+  padding-right: 104px;
+}
+
+.wizard-custom-reminder-input-unit {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  max-width: 84px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.wizard-custom-reminder-units {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.wizard-custom-reminder-units::-webkit-scrollbar {
+  display: none;
+}
+
+.wizard-custom-reminder-unit {
+  flex: 0 0 auto;
+  text-transform: capitalize;
+}
+
+.wizard-custom-reminder-unit.active {
+  border-color: color-mix(in srgb, var(--primary) 76%, var(--clay-border));
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent),
+    var(--bg-card);
+  color: var(--primary);
+  box-shadow:
+    0 10px 20px color-mix(in srgb, var(--primary) 12%, transparent),
+    inset 0 1px 0 var(--clay-highlight);
+}
+
+.wizard-custom-reminder-preview {
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--success) 45%, var(--clay-border));
+  background: color-mix(in srgb, var(--success) 10%, var(--bg-card));
+  color: var(--success);
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.wizard-custom-reminder-note {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .wizard-success-overlay {
   align-items: center;
 }

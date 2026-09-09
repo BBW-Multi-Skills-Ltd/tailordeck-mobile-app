@@ -7,7 +7,7 @@ export const stepLabels = [
   'Deadline',
 ] as const
 
-export const reminders: Reminder[] = ['1 day before', '3 days before', '1 week before', 'none']
+export const reminders: Reminder[] = ['1 day before', '3 days before', '1 week before', 'custom', 'none']
 export const qualities: MaterialQuality[] = ['Normal', 'Original', 'Fake', 'High Standard']
 export const materialSources: MaterialSource[] = ['Client is Providing Material', 'I Am Getting It']
 export const makeCategories: MakeCategory[] = ['Body Wear', 'Non-Body Item']

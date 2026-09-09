@@ -50,6 +50,8 @@ export function createNewJobWizardActions({ confirmDiscard, navigate, state, val
     setChargeAmount: state.setChargeAmount,
     setClientPhone: state.setClientPhone,
     setCustomMaterialType: state.setCustomMaterialType,
+    setCustomReminderUnit: state.setCustomReminderUnit,
+    setCustomReminderValue: state.setCustomReminderValue,
     setDeadlineDate: state.setDeadlineDate,
     setDeadlineTime: state.setDeadlineTime,
     setDepositPercent: state.setDepositPercent,

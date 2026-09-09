@@ -71,6 +71,8 @@ export function applyDraftToNewJobState(job: JobWithRelations, state: NewJobWiza
   state.setDeadlineDate(job.deadline_date ?? '')
   state.setDeadlineTime(job.deadline_time?.slice(0, 5) ?? '')
   state.setReminder(job.reminder)
+  state.setCustomReminderValue(job.custom_reminder_value ? String(job.custom_reminder_value) : '')
+  state.setCustomReminderUnit(job.custom_reminder_unit ?? 'hours')
   state.setDraftSaved(false)
   state.setStepFourReviewMode(false)
   state.setStep(0)

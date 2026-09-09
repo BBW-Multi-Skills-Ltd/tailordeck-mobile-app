@@ -8,6 +8,8 @@ import { getReferencePhotoTargets } from './deadline/referencePhotoTargets'
 export function DeadlineFields({
   balance,
   clientName,
+  customReminderUnit,
+  customReminderValue,
   deadlineDate,
   deadlineTime,
   effectiveItemType,
@@ -22,6 +24,8 @@ export function DeadlineFields({
   sameItemForAll,
   onDeadlineDateChange,
   onDeadlineTimeChange,
+  onCustomReminderUnitChange,
+  onCustomReminderValueChange,
   onReferencePhotoUpload,
   onReminderChange,
 }: DeadlineFieldsProps) {
@@ -47,11 +51,23 @@ export function DeadlineFields({
       />
       <DeadlineReminderSelector
         reminder={reminder}
+        customReminderValue={customReminderValue}
         error={fieldErrors.reminder}
+        customError={fieldErrors.customReminder}
         errorKey={fieldErrorKey}
+        customReminderUnit={customReminderUnit}
         onReminderChange={onReminderChange}
+        onCustomReminderValueChange={onCustomReminderValueChange}
+        onCustomReminderUnitChange={onCustomReminderUnitChange}
       />
-      <DeliveryChecklist balance={balance} deadlineDate={deadlineDate} deadlineTime={deadlineTime} reminder={reminder} />
+      <DeliveryChecklist
+        balance={balance}
+        deadlineDate={deadlineDate}
+        deadlineTime={deadlineTime}
+        reminder={reminder}
+        customReminderValue={customReminderValue}
+        customReminderUnit={customReminderUnit}
+      />
       <ReferencePhotoUpload
         filesByTarget={referencePhotoFilesByTarget}
         namesByTarget={referencePhotoNamesByTarget}

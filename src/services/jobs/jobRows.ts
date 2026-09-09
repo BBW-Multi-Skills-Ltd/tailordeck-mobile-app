@@ -21,6 +21,10 @@ export function buildJobRow(input: CreateJobInput, userId: string) {
     deadline_date: input.deadlineDate || null,
     deadline_time: input.deadlineTime || null,
     reminder: input.reminder,
+    custom_reminder_value: input.customReminderValue ?? null,
+    custom_reminder_unit: input.customReminderUnit ?? null,
+    custom_reminder_minutes: input.customReminderMinutes ?? null,
+    reminder_label: input.reminderLabel ?? input.reminder,
     status: mapJobStatusToDb(input.status ?? 'Pending'),
   }
 }

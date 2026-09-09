@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import type { DetailedJobData } from '../../../types/jobDetails'
 import type { MockJob } from '../../../types/job'
 import { readBrandConfig } from '../../invoice/documentHelpers'
+import { getReminderLabel } from '../../../lib/jobReminder'
 import type { JobSuccessViewProps } from './jobSuccessTypes'
 
 export function useJobSuccessDocumentData({
@@ -10,6 +11,8 @@ export function useJobSuccessDocumentData({
   clientPhone,
   color,
   createdJobId,
+  customReminderUnit,
+  customReminderValue,
   deadlineDate,
   deadlineTime,
   deposit,
@@ -64,7 +67,7 @@ export function useJobSuccessDocumentData({
       materialQuality: materialQuality || 'Normal',
       materialSource: materialSource || '-',
       deliveryTime: deadlineTime || '-',
-      reminder,
+      reminder: getReminderLabel(reminder, customReminderValue, customReminderUnit),
       referencePhotos: [],
       expenses: expenses.map((expense) => ({
         name: expense.name,
@@ -72,7 +75,7 @@ export function useJobSuccessDocumentData({
       })),
       depositAmount: deposit,
     }),
-    [color, deadlineTime, deposit, expenses, jobType, makeCategory, materialQuality, materialSource, materialType, orderMode, reminder, service, totalYard],
+    [color, customReminderUnit, customReminderValue, deadlineTime, deposit, expenses, jobType, makeCategory, materialQuality, materialSource, materialType, orderMode, reminder, service, totalYard],
   )
 
   return { balanceToCollect, brand, successDetails, successJob }

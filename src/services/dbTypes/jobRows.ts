@@ -36,7 +36,11 @@ export interface JobRow {
   is_worth_it: boolean | null
   deadline_date: string | null
   deadline_time: string | null
-  reminder: '1 day before' | '3 days before' | '1 week before' | 'none'
+  reminder: '1 day before' | '3 days before' | '1 week before' | 'custom' | 'none'
+  custom_reminder_value: number | null
+  custom_reminder_unit: 'minutes' | 'hours' | 'days' | 'weeks' | null
+  custom_reminder_minutes: number | null
+  reminder_label: string | null
   status: DbJobStatus
   completed_at: string | null
   deleted_at: string | null

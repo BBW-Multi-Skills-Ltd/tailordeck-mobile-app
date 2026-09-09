@@ -19,6 +19,10 @@ export function buildJobUpdateRow(updates: Partial<CreateJobInput>): Record<stri
     ...(updates.deadlineDate !== undefined ? { deadline_date: updates.deadlineDate || null } : {}),
     ...(updates.deadlineTime !== undefined ? { deadline_time: updates.deadlineTime || null } : {}),
     ...(updates.reminder ? { reminder: updates.reminder } : {}),
+    ...(updates.customReminderValue !== undefined ? { custom_reminder_value: updates.customReminderValue } : {}),
+    ...(updates.customReminderUnit !== undefined ? { custom_reminder_unit: updates.customReminderUnit } : {}),
+    ...(updates.customReminderMinutes !== undefined ? { custom_reminder_minutes: updates.customReminderMinutes } : {}),
+    ...(updates.reminderLabel !== undefined ? { reminder_label: updates.reminderLabel } : {}),
     ...(updates.status ? { status: mapJobStatusToDb(updates.status) } : {}),
     updated_at: new Date().toISOString(),
   }

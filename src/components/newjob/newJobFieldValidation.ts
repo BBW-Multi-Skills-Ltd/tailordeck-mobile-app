@@ -1,4 +1,5 @@
 import { isImageFile, isValidNigerianMobileLocal, localNigerianPhone, type FieldErrors } from '../../lib/formValidation'
+import { isCustomReminderValid } from '../../lib/jobReminder'
 import type { NewJobWizardDerivedModel } from './newJobWizardDerived'
 import type { NewJobWizardStateModel } from './useNewJobWizardState'
 
@@ -18,6 +19,7 @@ export type NewJobFieldKey =
   | 'deadlineDate'
   | 'deadlineTime'
   | 'reminder'
+  | 'customReminder'
   | 'referencePhotos'
 
 export type NewJobFieldErrors = FieldErrors<NewJobFieldKey>
@@ -75,6 +77,9 @@ function validateDeadlineStep(state: NewJobWizardStateModel): NewJobFieldErrors 
   if (!hasText(state.deadlineDate)) errors.deadlineDate = 'Select delivery date.'
   if (!hasText(state.deadlineTime)) errors.deadlineTime = 'Select delivery time.'
   if (!state.reminder) errors.reminder = 'Choose reminder option.'
+  if (state.reminder === 'custom' && !isCustomReminderValid(state.customReminderValue, state.customReminderUnit)) {
+    errors.customReminder = 'Use 10 minutes to 30 days before delivery.'
+  }
 
   const targetPhotos = Object.values(state.referencePhotoFilesByTarget).flat()
   const invalidPhoto = [...state.referencePhotoFiles, ...targetPhotos].find((file) => !isImageFile(file))

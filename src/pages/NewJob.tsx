@@ -39,6 +39,8 @@ export default function NewJob() {
         clientName={state.clientName}
         clientPhone={state.clientPhone}
         color={state.materialColor}
+        customReminderUnit={state.customReminderUnit}
+        customReminderValue={state.customReminderValue}
         deadlineTime={state.deadlineTime}
         deposit={derived.deposit}
         effectiveItemType={derived.effectiveItemType || state.amendmentIssueType}

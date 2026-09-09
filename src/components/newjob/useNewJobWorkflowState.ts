@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ReminderSelection } from './newJobConfig'
+import type { ReminderSelection, ReminderUnit } from './newJobConfig'
 
 export function useNewJobWorkflowState() {
   const [step, setStep] = useState(0)
@@ -10,6 +10,8 @@ export function useNewJobWorkflowState() {
   const [deadlineDate, setDeadlineDate] = useState('')
   const [deadlineTime, setDeadlineTime] = useState('')
   const [reminder, setReminder] = useState<ReminderSelection>('')
+  const [customReminderValue, setCustomReminderValue] = useState('')
+  const [customReminderUnit, setCustomReminderUnit] = useState<ReminderUnit>('hours')
   const [draftSaved, setDraftSaved] = useState(false)
   const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [stepFourReviewMode, setStepFourReviewMode] = useState(false)
@@ -22,6 +24,8 @@ export function useNewJobWorkflowState() {
 
   return {
     createdJobId,
+    customReminderUnit,
+    customReminderValue,
     deadlineDate,
     deadlineTime,
     draftSaved,
@@ -33,6 +37,8 @@ export function useNewJobWorkflowState() {
     referencePhotoNamesByTarget,
     reminder,
     setCreatedJobId,
+    setCustomReminderUnit,
+    setCustomReminderValue,
     setDeadlineDate,
     setDeadlineTime,
     setDraftSaved,

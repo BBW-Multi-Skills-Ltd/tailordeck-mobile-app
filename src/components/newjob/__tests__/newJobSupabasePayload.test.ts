@@ -17,6 +17,8 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     clientPhone: '08012345678',
     createdJobId: '',
     customMaterialType: '',
+    customReminderUnit: 'hours',
+    customReminderValue: '',
     deadlineDate: '2026-08-10',
     deadlineTime: '14:30',
     depositPercent: '40',
@@ -71,6 +73,8 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     setClientPhone: vi.fn(),
     setCreatedJobId: vi.fn(),
     setCustomMaterialType: vi.fn(),
+    setCustomReminderUnit: vi.fn(),
+    setCustomReminderValue: vi.fn(),
     setDeadlineDate: vi.fn(),
     setDeadlineTime: vi.fn(),
     setDepositPercent: vi.fn(),
@@ -185,5 +189,22 @@ describe('buildNewJobPayload', () => {
       quantity: '4',
       measurements: { width: 60, length: 84 },
     })
+  })
+
+  it('maps a custom reminder into structured database fields', () => {
+    const payload = buildNewJobPayload({
+      state: makeState({
+        customReminderUnit: 'hours',
+        customReminderValue: '2',
+        reminder: 'custom',
+      }),
+      derived: makeDerived(),
+    })
+
+    expect(payload.reminder).toBe('custom')
+    expect(payload.customReminderValue).toBe(2)
+    expect(payload.customReminderUnit).toBe('hours')
+    expect(payload.customReminderMinutes).toBe(120)
+    expect(payload.reminderLabel).toBe('2 hours before')
   })
 })

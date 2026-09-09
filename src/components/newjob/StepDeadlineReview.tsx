@@ -19,9 +19,13 @@ export default function StepDeadlineReview(props: StepDeadlineReviewProps) {
         referencePhotoFilesByTarget={props.referencePhotoFilesByTarget}
         referencePhotoNamesByTarget={props.referencePhotoNamesByTarget}
         reminder={props.reminder}
+        customReminderValue={props.customReminderValue}
+        customReminderUnit={props.customReminderUnit}
         sameItemForAll={props.sameItemForAll}
         onDeadlineDateChange={props.onDeadlineDateChange}
         onDeadlineTimeChange={props.onDeadlineTimeChange}
+        onCustomReminderValueChange={props.onCustomReminderValueChange}
+        onCustomReminderUnitChange={props.onCustomReminderUnitChange}
         onReferencePhotoUpload={props.onReferencePhotoUpload}
         onReminderChange={props.onReminderChange}
       />

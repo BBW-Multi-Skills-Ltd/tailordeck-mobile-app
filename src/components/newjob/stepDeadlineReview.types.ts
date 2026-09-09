@@ -8,6 +8,7 @@ import type {
   PersonForm,
   Reminder,
   ReminderSelection,
+  ReminderUnit,
 } from './newJobConfig'
 import type { NewJobFieldErrors } from './newJobFieldValidation'
 
@@ -17,6 +18,8 @@ export type StepDeadlineReviewProps = {
   draftSaved: boolean
   balance: number
   reminder: ReminderSelection
+  customReminderValue: string
+  customReminderUnit: ReminderUnit
   deadlineDate: string
   deadlineTime: string
   clientName: string
@@ -52,6 +55,8 @@ export type StepDeadlineReviewProps = {
   projectedProfit: number
   onDeadlineDateChange: (value: string) => void
   onDeadlineTimeChange: (value: string) => void
+  onCustomReminderValueChange: (value: string) => void
+  onCustomReminderUnitChange: (value: ReminderUnit) => void
   onReferencePhotoUpload: (targetId: string, files: FileList | null, maxFiles: number) => void
   onReminderChange: (value: Reminder) => void
   onDetailsOpenChange: (updater: (previous: boolean) => boolean) => void

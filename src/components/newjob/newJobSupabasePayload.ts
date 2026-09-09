@@ -1,7 +1,8 @@
 import type { CreateFullJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from '../../services/jobService'
 import type { JobStatus } from '../../types/job'
-import { digitsOnly, numericValue } from './newJobConfig'
+import { digitsOnly, numericValue, type Reminder } from './newJobConfig'
 import { getReferencePhotoTargets } from './deadline/referencePhotoTargets'
+import { reminderToDbFields } from '../../lib/jobReminder'
 import type { NewJobWizardDerivedModel } from './newJobWizardDerived'
 import type { NewJobWizardStateModel } from './useNewJobWizardState'
 
@@ -108,6 +109,8 @@ export function buildNewJobPayload(params: {
 }): CreateFullJobInput {
   const { derived, repeatClientId, state, status = 'Pending' } = params
   const itemType = derived.effectiveItemType || state.amendmentIssueType || 'Tailoring job'
+  const reminder: Reminder = state.reminder || 'none'
+  const reminderFields = reminderToDbFields(reminder, state.customReminderValue, state.customReminderUnit)
 
   return {
     clientId: repeatClientId || null,
@@ -125,7 +128,8 @@ export function buildNewJobPayload(params: {
     depositPercent: derived.depositPercentValue,
     deadlineDate: state.deadlineDate,
     deadlineTime: state.deadlineTime,
-    reminder: state.reminder || 'none',
+    reminder,
+    ...reminderFields,
     status,
     measurementUnit: 'inches',
     amendmentIssueType: state.amendmentIssueType,

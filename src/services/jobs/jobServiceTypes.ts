@@ -16,6 +16,10 @@ export interface CreateJobInput {
   deadlineDate?: string
   deadlineTime?: string
   reminder: JobRow['reminder']
+  customReminderValue?: number | null
+  customReminderUnit?: JobRow['custom_reminder_unit']
+  customReminderMinutes?: number | null
+  reminderLabel?: string | null
   status?: JobStatus
 }
 

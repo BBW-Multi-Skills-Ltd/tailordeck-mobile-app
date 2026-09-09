@@ -57,7 +57,7 @@ export function getJobDetailsFromRow(job: JobWithRelations): DetailedJobData {
     materialQuality: job.material_quality || '-',
     materialSource: job.material_source === 'Client is Providing Material' ? 'Client Provided' : job.material_source || '-',
     deliveryTime: job.deadline_time || '-',
-    reminder: job.reminder || '-',
+    reminder: job.reminder_label || job.reminder || '-',
     referencePhotos: getReferencePhotos(job),
     expenses: (job.job_expenses ?? []).map((expense) => ({
       name: expense.name,

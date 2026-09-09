@@ -1,10 +1,12 @@
-import type { ExpenseForm, JobType, MakeCategory, OrderMode, Reminder } from '../newJobConfig'
+import type { ExpenseForm, JobType, MakeCategory, OrderMode, Reminder, ReminderUnit } from '../newJobConfig'
 
 export type JobSuccessViewProps = {
   createdJobId: string
   clientName: string
   clientPhone: string
   color: string
+  customReminderValue: string
+  customReminderUnit: ReminderUnit
   deadlineTime: string
   deposit: number
   effectiveItemType: string

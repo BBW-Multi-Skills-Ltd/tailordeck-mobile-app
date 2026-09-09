@@ -15,6 +15,8 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       draftSaved={state.draftSaved}
       balance={derived.balance}
       reminder={state.reminder}
+      customReminderValue={state.customReminderValue}
+      customReminderUnit={state.customReminderUnit}
       deadlineDate={state.deadlineDate}
       deadlineTime={state.deadlineTime}
       clientName={state.clientName}
@@ -50,6 +52,8 @@ export function RenderDeadlineReviewStep({ wizard }: StepRendererProps) {
       projectedProfit={derived.projectedProfit}
       onDeadlineDateChange={actions.setDeadlineDate}
       onDeadlineTimeChange={actions.setDeadlineTime}
+      onCustomReminderValueChange={actions.setCustomReminderValue}
+      onCustomReminderUnitChange={actions.setCustomReminderUnit}
       onReferencePhotoUpload={actions.handleReferencePhotoUpload}
       onReminderChange={actions.setReminder}
       onDetailsOpenChange={actions.setStepFourDetailsOpen}
