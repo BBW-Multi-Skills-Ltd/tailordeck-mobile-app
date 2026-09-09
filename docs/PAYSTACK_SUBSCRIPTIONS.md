@@ -17,7 +17,7 @@ Existing required secrets:
 
 ```powershell
 npx supabase secrets set PAYSTACK_SECRET_KEY=<your_paystack_secret_key>
-npx supabase secrets set APP_URL=https://tailor-deck.vercel.app
+npx supabase secrets set APP_URL=https://tailordeck.app
 ```
 
 ## Paystack Dashboard Setup
@@ -37,6 +37,12 @@ Set the Paystack webhook URL to:
 
 ```text
 https://eebwrtrrslouqlfoxhkw.supabase.co/functions/v1/paystack-webhook
+```
+
+Set the Paystack callback URL to:
+
+```text
+https://tailordeck.app/billing/callback
 ```
 
 ## Safety Rule

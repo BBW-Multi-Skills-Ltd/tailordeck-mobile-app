@@ -26,7 +26,7 @@ function makePayload(includeBusinessDetails: DocumentTemplatePayload['brand']['i
       shopAddress: 'Lagos, Nigeria',
       businessPhone: '+2349010851071',
       businessEmail: 'shop@example.com',
-      website: 'tailordeck.com.ng',
+      website: 'tailordeck.app',
       cacRegistrationNumber: 'RC12345',
       socialHandles: [{ id: 'ig', platform: 'Instagram', handle: '@faithshop' }],
       includeBusinessDetails,
@@ -57,3 +57,4 @@ describe('classic wave invoice business details', () => {
     expect(details.previewPlaceholders).toBe(true)
   })
 })
+

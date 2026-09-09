@@ -91,7 +91,7 @@ const sections = [
   {
     title: 'Contact',
     body: [
-      'For privacy requests, support, or data deletion, contact TailorDeck support at support@tailordeck.com.ng. If this address is not yet active during beta, use the support channel provided inside the app.',
+      'For privacy requests, support, or data deletion, use the Help & Support page inside TailorDeck or contact BBW Multi-Skills Ltd at bbwmultiskillsltd@gmail.com.',
     ],
   },
 ]

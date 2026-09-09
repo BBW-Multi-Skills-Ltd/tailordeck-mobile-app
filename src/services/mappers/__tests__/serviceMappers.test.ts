@@ -160,7 +160,7 @@ describe('service mappers', () => {
         business_phone: '+2349010851071',
         business_phone_normalized: '2349010851071',
         business_email: 'shop@example.com',
-        website: 'tailordeck.com.ng',
+        website: 'tailordeck.app',
         cac_registration_number: 'RC12345',
         created_at: createdAt,
         updated_at: updatedAt,
@@ -179,3 +179,4 @@ describe('service mappers', () => {
     })
   })
 })
+

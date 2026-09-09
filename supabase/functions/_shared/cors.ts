@@ -2,7 +2,6 @@ const productionOrigins = [
   'https://tailordeck.app',
   'https://www.tailordeck.app',
   'https://tailordeck.vercel.app',
-  'https://tailor-deck.vercel.app',
 ]
 
 const localDevelopmentOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173']
