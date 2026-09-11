@@ -2712,6 +2712,7 @@ button.more-row {
   display: flex;
   flex-direction: column;
   animation: notification-panel-enter 180ms ease-out both;
+  overflow: hidden;
 }
 
 @keyframes notification-panel-enter {
@@ -2816,6 +2817,8 @@ button.more-row {
 .notification-sheet-body {
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .notification-sheet-body.is-empty {
@@ -2830,6 +2833,7 @@ button.more-row {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  min-height: 136px;
 }
 
 .notification-empty-title {
@@ -9603,6 +9607,8 @@ button.more-row {
 }
 
 .wizard-deadline-checklist > .row-between {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
   gap: 10px;
 }
@@ -9803,19 +9809,23 @@ button.more-row {
 .wizard-reference-viewer {
   position: fixed;
   inset: 0;
-  z-index: 140;
+  z-index: 1000;
   display: grid;
   place-items: center;
   gap: 12px;
-  padding: 22px;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
   background: rgba(16, 14, 13, 0.78);
   backdrop-filter: blur(14px);
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .wizard-reference-viewer-content {
   display: grid;
   place-items: center;
   gap: 12px;
+  max-width: 100%;
+  touch-action: pan-x pan-y pinch-zoom;
 }
 
 .wizard-reference-viewer-content > img {
@@ -11433,7 +11443,44 @@ button.more-row {
   }
 
   .settings-profile-summary-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .settings-profile-edit-btn {
+    min-height: 38px;
+    padding-inline: 5px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .dashboard-empty-guide {
+    text-align: center;
+  }
+
+  .dashboard-empty-steps span {
+    min-height: 36px;
+    padding-inline: 9px;
+  }
+
+  .notification-sheet-content {
+    gap: 9px;
+    padding-inline: 12px;
+  }
+
+  .notification-empty {
+    min-height: 126px;
+  }
+
+  .wizard-deadline-checklist > .row-between {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .wizard-checklist-score {
+    min-width: 48px;
+    padding: 5px 8px;
+    font-size: 10px;
   }
 
   .document-preview-modal-overlay {
@@ -11529,7 +11576,7 @@ button.more-row {
   }
 
   .wizard-expense-entry-row {
-    grid-template-columns: minmax(0, 1.15fr) minmax(82px, 0.75fr) 52px;
+    grid-template-columns: minmax(0, 1.12fr) minmax(82px, 0.78fr) 50px;
     gap: 8px;
   }
 
@@ -11540,6 +11587,20 @@ button.more-row {
   .wizard-expense-cost-input,
   .wizard-expense-add-btn {
     min-height: 52px;
+  }
+
+  .wizard-expense-name-input,
+  .wizard-expense-cost-input {
+    font-size: 12px;
+  }
+
+  .wizard-reference-viewer {
+    padding-inline: 12px;
+  }
+
+  .wizard-reference-viewer-close {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
   }
 }
 
@@ -11563,5 +11624,18 @@ button.more-row {
 
   .wizard-progress-percent {
     font-size: 12px;
+  }
+
+  .wizard-deadline-checklist > .row-between {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-checklist-score {
+    justify-self: start;
+  }
+
+  .wizard-expense-entry-row {
+    grid-template-columns: minmax(0, 1fr) minmax(74px, 0.72fr) 46px;
+    gap: 6px;
   }
 }

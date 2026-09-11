@@ -1,13 +1,12 @@
+import { isRecoverableChunkError, recoverFromStaleAppShell } from '../../lib/appRecovery'
+
 export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | null): Promise<Blob | null> {
   if (!docPreviewNode) return null
 
   const documentNode = docPreviewNode.querySelector<HTMLElement>('.doc-landscape-root') ?? docPreviewNode
   const captureNode = createOffscreenCaptureNode(documentNode)
 
-  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-    import('html2canvas'),
-    import('jspdf'),
-  ])
+  const [{ default: html2canvas }, { default: jsPDF }] = await loadPdfDependencies()
 
   try {
     await waitForDocumentAssets(captureNode)
@@ -35,6 +34,17 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
     return pdf.output('blob')
   } finally {
     captureNode.parentElement?.remove()
+  }
+}
+
+async function loadPdfDependencies() {
+  try {
+    return await Promise.all([import('html2canvas'), import('jspdf')])
+  } catch (error) {
+    if (isRecoverableChunkError(error) && (await recoverFromStaleAppShell(error))) {
+      return new Promise<never>(() => undefined)
+    }
+    throw error
   }
 }
 

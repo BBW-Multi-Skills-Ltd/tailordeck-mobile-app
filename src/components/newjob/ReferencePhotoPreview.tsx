@@ -28,6 +28,17 @@ export function ReferencePhotoPreviewGrid({ photos }: { photos: ReferencePreview
   const photosWithUrls = useObjectUrls(photos)
   const activePhoto = photosWithUrls.find((photo) => photo.id === activePhotoId)
 
+  useEffect(() => {
+    if (!activePhoto) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [activePhoto])
+
   if (!photos.length) return null
 
   return (
