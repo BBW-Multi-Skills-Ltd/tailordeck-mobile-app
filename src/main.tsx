@@ -11,7 +11,9 @@ import { installAppRecoveryHandlers } from './lib/appRecovery'
 import ScrollToTop from './components/layout/ScrollToTop'
 import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
 import AppErrorBoundary from './components/shared/AppErrorBoundary'
+import ConnectivityStatus from './components/shared/ConnectivityStatus'
 import MonitoringBridge from './components/shared/MonitoringBridge'
+import NativeAppShell from './components/shared/NativeAppShell'
 import NativeNotificationBridge from './components/shared/NativeNotificationBridge'
 
 const queryClient = new QueryClient({
@@ -53,6 +55,8 @@ createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <AppFeedbackProvider>
             <AppErrorBoundary>
+              <NativeAppShell />
+              <ConnectivityStatus />
               <MonitoringBridge />
               <NativeNotificationBridge />
               <App />

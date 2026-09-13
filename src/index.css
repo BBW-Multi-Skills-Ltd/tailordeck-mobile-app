@@ -189,6 +189,7 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  background: var(--bg);
 }
 
 body {
@@ -202,12 +203,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;             /* prevents pull-to-refresh bounce */
   overflow-x: hidden;
+  min-height: 100dvh;
 }
 
 #root {
   width: 100%;
   max-width: 430px;                      /* mobile only — no desktop layout */
   min-height: 100svh;
+  min-height: 100dvh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -258,6 +261,42 @@ body {
 
 .page-no-bottom-nav {
   padding-bottom: calc(var(--safe-bottom) + 16px);
+}
+
+.connectivity-banner {
+  position: fixed;
+  top: calc(var(--safe-top) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 130;
+  width: min(calc(100% - 28px), 402px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--clay-border));
+  border-radius: var(--clay-radius-pill);
+  background: color-mix(in srgb, var(--danger-bg) 86%, var(--bg-card));
+  box-shadow: var(--clay-shadow-rest);
+  color: color-mix(in srgb, var(--danger) 70%, var(--text-h));
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.connectivity-banner.is-restored {
+  border-color: color-mix(in srgb, var(--success) 30%, var(--clay-border));
+  background: color-mix(in srgb, var(--success-bg) 86%, var(--bg-card));
+  color: color-mix(in srgb, var(--success) 72%, var(--text-h));
+}
+
+.connectivity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  background: currentColor;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 12%, transparent);
 }
 
 /* Page with no bottom nav (auth, onboarding) */

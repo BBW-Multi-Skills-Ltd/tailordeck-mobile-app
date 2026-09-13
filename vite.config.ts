@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         name: 'TailorDeck',
         short_name: 'TailorDeck',
         description: 'Your shop, in your pocket.',
-        theme_color: '#111111',
+        theme_color: '#FAF8F5',
         background_color: '#FAF8F5',
         display: 'standalone',
         orientation: 'portrait',
