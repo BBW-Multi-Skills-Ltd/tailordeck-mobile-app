@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import { LocalNotifications, type ActionPerformed, type LocalNotificationSchema } from '@capacitor/local-notifications'
+import { LocalNotifications, type LocalNotificationSchema } from '@capacitor/local-notifications'
 import type { PluginListenerHandle } from '@capacitor/core'
 import type { JobReminderSchedule } from '../services/jobService'
 
@@ -8,16 +8,18 @@ const REMINDER_STRONG_CHANNEL_ID = 'tailordeck-job-reminders-strong-v1'
 const REMINDER_ALARM_CHANNEL_ID = 'tailordeck-job-reminders-alarm-v1'
 const REMINDER_ACTION_TYPE_ID = 'tailordeck-job-reminder-actions'
 const REMINDER_ACTION_OPEN = 'open_job'
-const REMINDER_ACTION_SNOOZE = 'snooze_15'
+const REMINDER_ACTION_COMPLETE = 'mark_completed'
 const REMINDER_GROUP = 'tailordeck-job-reminders'
 const REMINDER_SMALL_ICON = 'ic_stat_tailordeck'
 const REMINDER_LARGE_ICON = 'ic_notification_tailordeck_large'
 const REMINDER_SOUND = 'tailordeck_reminder.wav'
 const REMINDER_ID_PREFIX = 420000000
-const SNOOZE_ID_PREFIX = 1420000000
 const MAX_SCHEDULED_REMINDERS = 64
 
-type NotificationTapHandler = (jobId: string) => void
+type NotificationActionHandlers = {
+  onOpenJob: (jobId: string) => void
+  onMarkJobCompleted: (jobId: string) => void | Promise<void>
+}
 type ExactAlarmPermission = 'granted' | 'denied' | 'prompt' | 'prompt-with-rationale'
 
 export type NativeReminderOptions = {
@@ -56,14 +58,6 @@ function getNotificationId(jobId: string): number {
     hash = (hash * 31 + jobId.charCodeAt(index)) >>> 0
   }
   return REMINDER_ID_PREFIX + (hash % 1000000000)
-}
-
-function getSnoozeNotificationId(jobId: string): number {
-  let hash = 0
-  for (let index = 0; index < jobId.length; index += 1) {
-    hash = (hash * 33 + jobId.charCodeAt(index)) >>> 0
-  }
-  return SNOOZE_ID_PREFIX + (hash % 600000000)
 }
 
 function formatReminderBody(job: JobReminderSchedule, deadline: Date): string {
@@ -161,7 +155,7 @@ async function registerReminderActions(): Promise<void> {
         id: REMINDER_ACTION_TYPE_ID,
         actions: [
           { id: REMINDER_ACTION_OPEN, title: 'View job' },
-          { id: REMINDER_ACTION_SNOOZE, title: 'Snooze 15 min' },
+          { id: REMINDER_ACTION_COMPLETE, title: 'Mark completed' },
         ],
       },
     ],
@@ -224,32 +218,6 @@ async function canScheduleExactAlarm(options: NativeReminderOptions): Promise<bo
   return state.permission === 'granted'
 }
 
-async function scheduleSnoozeNotification(action: ActionPerformed): Promise<void> {
-  const extra = action.notification.extra as { source?: string; type?: string; jobId?: string } | undefined
-  if (extra?.source !== 'tailordeck' || extra.type !== 'job_reminder' || !extra.jobId) return
-
-  const notification: LocalNotificationSchema = {
-    ...action.notification,
-    id: getSnoozeNotificationId(extra.jobId),
-    title: 'TailorDeck reminder',
-    body: action.notification.body,
-    largeBody: 'Snoozed for 15 minutes. Open TailorDeck to view this job.',
-    schedule: {
-      at: new Date(Date.now() + 15 * 60 * 1000),
-      allowWhileIdle: true,
-    },
-    isExactNotification: false,
-    isExactMandatory: false,
-    foreground: true,
-    autoCancel: true,
-    channelId: action.notification.channelId || REMINDER_STRONG_CHANNEL_ID,
-    actionTypeId: REMINDER_ACTION_TYPE_ID,
-    extra,
-  }
-
-  await LocalNotifications.schedule({ notifications: [notification] })
-}
-
 export async function syncNativeJobReminders(jobs: JobReminderSchedule[], options: NativeReminderOptions = {}): Promise<void> {
   if (!isNativeNotificationsSupported()) return
 
@@ -285,7 +253,7 @@ export async function syncNativeJobReminders(jobs: JobReminderSchedule[], option
   }
 }
 
-export function registerNativeJobReminderTapHandler(onOpenJob: NotificationTapHandler): () => void {
+export function registerNativeJobReminderTapHandler(handlers: NotificationActionHandlers): () => void {
   if (!isNativeNotificationsSupported()) return () => undefined
 
   let listener: PluginListenerHandle | null = null
@@ -293,13 +261,13 @@ export function registerNativeJobReminderTapHandler(onOpenJob: NotificationTapHa
   void LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
     const extra = action.notification.extra as { source?: string; type?: string; jobId?: string } | undefined
     if (extra?.source !== 'tailordeck' || extra.type !== 'job_reminder' || !extra.jobId) return
-    if (action.actionId === REMINDER_ACTION_SNOOZE) {
-      void scheduleSnoozeNotification(action).catch((error) => {
-        console.warn('Unable to snooze TailorDeck reminder:', error)
+    if (action.actionId === REMINDER_ACTION_COMPLETE) {
+      void Promise.resolve(handlers.onMarkJobCompleted(extra.jobId)).catch((error) => {
+        console.warn('Unable to mark TailorDeck reminder job completed:', error)
       })
       return
     }
-    onOpenJob(extra.jobId)
+    handlers.onOpenJob(extra.jobId)
   }).then((handle) => {
     listener = handle
   })
