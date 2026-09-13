@@ -5,6 +5,8 @@ import type { JobReminderSchedule } from '../services/jobService'
 
 const REMINDER_CHANNEL_ID = 'tailordeck-job-reminders'
 const REMINDER_GROUP = 'tailordeck-job-reminders'
+const REMINDER_SMALL_ICON = 'ic_stat_tailordeck'
+const REMINDER_LARGE_ICON = 'ic_notification_tailordeck_large'
 const REMINDER_ID_PREFIX = 420000000
 const MAX_SCHEDULED_REMINDERS = 64
 
@@ -64,6 +66,9 @@ function buildNotification(job: JobReminderSchedule): LocalNotificationSchema | 
     },
     isExactNotification: false,
     foreground: true,
+    smallIcon: REMINDER_SMALL_ICON,
+    largeIcon: REMINDER_LARGE_ICON,
+    iconColor: '#7B1E37',
     channelId: REMINDER_CHANNEL_ID,
     group: REMINDER_GROUP,
     extra: {
