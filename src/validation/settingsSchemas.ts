@@ -67,6 +67,7 @@ export const preferencesUpdateSchema = z.object({
   default_reminder_label: optionalText,
   ringtone_enabled: z.boolean().optional(),
   ringtone: z.enum(['Classic Ring', 'Soft Chime', 'Pulse Tone']).optional(),
+  exact_alarm_enabled: z.boolean().optional(),
   notification_bell_enabled: z.boolean().optional(),
   notification_bell: z.enum(['Standard Bell', 'Soft Bell', 'Sharp Bell']).optional(),
   created_at: optionalText,

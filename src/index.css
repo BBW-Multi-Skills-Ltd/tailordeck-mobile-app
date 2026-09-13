@@ -4785,6 +4785,29 @@ button.more-row {
   color: var(--text-muted);
 }
 
+.settings-reminder-permission {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed color-mix(in srgb, var(--primary) 24%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--primary) 4%, var(--bg-card));
+}
+
+.settings-reminder-permission p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.settings-reminder-permission-btn {
+  width: fit-content;
+  min-height: 38px;
+  padding-inline: 14px;
+  font-size: 13px;
+}
+
 .settings-help-text {
   margin: 0;
   font-size: 12px;

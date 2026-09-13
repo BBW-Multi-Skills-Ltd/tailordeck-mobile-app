@@ -6,11 +6,16 @@ type RemindersPanelProps = {
   settings: TailorSettings
   saved: boolean
   onPushNotificationsChange: (value: boolean) => void
+  onRingtoneEnabledChange: (value: boolean) => void
+  onExactAlarmEnabledChange: (value: boolean) => void
+  onRequestExactAlarmPermission: () => void
   onDefaultReminderChange: (value: ReminderLead) => void
   onDefaultCustomReminderValueChange: (value: string) => void
   onDefaultCustomReminderUnitChange: (value: ReminderUnit) => void
   onSave: () => void
   customReminderError?: string
+  exactAlarmSupported?: boolean
+  exactAlarmPermission?: string
 }
 
 export default function RemindersPanel({
@@ -19,9 +24,14 @@ export default function RemindersPanel({
   saved,
   onDefaultCustomReminderUnitChange,
   onDefaultCustomReminderValueChange,
+  onExactAlarmEnabledChange,
   onPushNotificationsChange,
+  onRequestExactAlarmPermission,
+  onRingtoneEnabledChange,
   onDefaultReminderChange,
   onSave,
+  exactAlarmPermission,
+  exactAlarmSupported = false,
 }: RemindersPanelProps) {
   const reminderOptions: ReminderLead[] = ['1 day before', '3 days before', '1 week before', 'custom', 'none']
   const reminderUnits: ReminderUnit[] = ['minutes', 'hours', 'days', 'weeks']
@@ -39,6 +49,40 @@ export default function RemindersPanel({
           <p className="settings-reminder-help">Phone pop-up alerts for deadlines and updates.</p>
         </div>
         <Toggle checked={settings.reminders.pushNotifications} onChange={onPushNotificationsChange} />
+      </section>
+
+      <section className="clay-card settings-reminder-card row-between settings-reminder-row">
+        <div className="stack gap-4">
+          <p className="settings-reminder-label">Sound & Vibration</p>
+          <p className="settings-reminder-help">Stronger deadline alerts with TailorDeck sound and vibration.</p>
+        </div>
+        <Toggle checked={settings.reminders.ringtoneEnabled} onChange={onRingtoneEnabledChange} />
+      </section>
+
+      <section className="clay-card settings-reminder-card stack settings-reminder-group">
+        <div className="row-between settings-reminder-row">
+          <div className="stack gap-4">
+            <p className="settings-reminder-label">Alarm Accuracy</p>
+            <p className="settings-reminder-help">Use Android exact alarms for important deadline reminders.</p>
+          </div>
+          <Toggle checked={settings.reminders.exactAlarmEnabled} onChange={onExactAlarmEnabledChange} />
+        </div>
+        {settings.reminders.exactAlarmEnabled ? (
+          <div className="settings-reminder-permission">
+            <p>
+              {exactAlarmSupported
+                ? exactAlarmPermission === 'granted'
+                  ? 'Exact alarm permission is enabled on this device.'
+                  : 'Allow exact alarms in Android settings for the strongest timing.'
+                : 'Exact alarm permission applies only inside the Android app.'}
+            </p>
+            {exactAlarmSupported && exactAlarmPermission !== 'granted' ? (
+              <button type="button" className="settings-choice-pill settings-reminder-permission-btn" onClick={onRequestExactAlarmPermission}>
+                Allow exact alarms
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </section>
 
       <section className="clay-card settings-reminder-card stack settings-reminder-group">

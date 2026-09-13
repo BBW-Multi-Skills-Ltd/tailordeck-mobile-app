@@ -14,6 +14,7 @@ export interface UserPreferencesRow {
   default_reminder_label: string | null
   ringtone_enabled: boolean
   ringtone: RingtoneOption
+  exact_alarm_enabled: boolean | null
   notification_bell_enabled: boolean
   notification_bell: NotificationBellOption
   created_at: string

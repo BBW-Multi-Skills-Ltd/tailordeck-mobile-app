@@ -64,6 +64,7 @@ export async function saveReminderSettings(settings: TailorSettings) {
     default_reminder_label: reminderFields.reminderLabel,
     ringtone_enabled: settings.reminders.ringtoneEnabled,
     ringtone: settings.reminders.ringtone,
+    exact_alarm_enabled: settings.reminders.exactAlarmEnabled,
     notification_bell_enabled: settings.reminders.notificationBellEnabled,
     notification_bell: settings.reminders.notificationBell,
   })

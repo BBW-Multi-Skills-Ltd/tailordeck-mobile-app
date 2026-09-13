@@ -60,6 +60,7 @@ export function mergeSettingsRows(rows: {
       defaultCustomReminderUnit: rows.preferences?.default_custom_reminder_unit || fallback.reminders.defaultCustomReminderUnit,
       ringtoneEnabled: rows.preferences?.ringtone_enabled ?? fallback.reminders.ringtoneEnabled,
       ringtone: rows.preferences?.ringtone || fallback.reminders.ringtone,
+      exactAlarmEnabled: rows.preferences?.exact_alarm_enabled ?? fallback.reminders.exactAlarmEnabled,
       notificationBellEnabled: rows.preferences?.notification_bell_enabled ?? fallback.reminders.notificationBellEnabled,
       notificationBell: rows.preferences?.notification_bell || fallback.reminders.notificationBell,
     },

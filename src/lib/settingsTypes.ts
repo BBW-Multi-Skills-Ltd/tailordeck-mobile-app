@@ -37,6 +37,7 @@ export interface TailorSettings {
     defaultCustomReminderUnit: ReminderUnit
     ringtoneEnabled: boolean
     ringtone: RingtoneOption
+    exactAlarmEnabled: boolean
     notificationBellEnabled: boolean
     notificationBell: NotificationBellOption
   }

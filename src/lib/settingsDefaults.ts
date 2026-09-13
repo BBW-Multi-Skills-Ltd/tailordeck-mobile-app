@@ -61,6 +61,7 @@ export function getDefaultTailorSettings(): TailorSettings {
       defaultCustomReminderUnit: 'hours',
       ringtoneEnabled: true,
       ringtone: 'Classic Ring',
+      exactAlarmEnabled: false,
       notificationBellEnabled: true,
       notificationBell: 'Standard Bell',
     },

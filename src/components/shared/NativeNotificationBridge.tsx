@@ -37,7 +37,10 @@ function NativeNotificationSync() {
 
     if (!reminderJobsQuery.data) return
 
-    void syncNativeJobReminders(reminderJobsQuery.data).catch((error) => {
+    void syncNativeJobReminders(reminderJobsQuery.data, {
+      ringtoneEnabled: settingsQuery.data.reminders.ringtoneEnabled,
+      exactAlarmEnabled: settingsQuery.data.reminders.exactAlarmEnabled,
+    }).catch((error) => {
       console.warn('Unable to sync native reminders:', error)
     })
   }, [pushNotificationsEnabled, reminderJobsQuery.data, settingsQuery.data])
