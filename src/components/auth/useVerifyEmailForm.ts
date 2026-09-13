@@ -18,6 +18,7 @@ import {
 import { formatSeconds, getFriendlyOtpError } from './verifyEmailUtils'
 import { useOtpDigits } from './useOtpDigits'
 import { completeVerifiedEmail } from './verifyEmailCompletion'
+import { readClipboardText } from '../../lib/clipboard'
 
 export function useVerifyEmailForm() {
   const navigate = useNavigate()
@@ -138,13 +139,8 @@ export function useVerifyEmailForm() {
   async function handlePasteFromClipboard(): Promise<void> {
     clearFeedback()
 
-    if (!navigator.clipboard?.readText) {
-      showError('Paste the code manually.')
-      return
-    }
-
     try {
-      const pasted = (await navigator.clipboard.readText()).replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH)
+      const pasted = (await readClipboardText()).replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH)
       if (!pasted) {
         showError(`Copy the ${EMAIL_OTP_LENGTH}-digit code first.`)
         return
