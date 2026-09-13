@@ -33,7 +33,7 @@ export default function RemindersPanel({
   exactAlarmPermission,
   exactAlarmSupported = false,
 }: RemindersPanelProps) {
-  const reminderOptions: ReminderLead[] = ['1 day before', '3 days before', '1 week before', 'custom', 'none']
+  const reminderOptions: ReminderLead[] = ['none', 'custom', '1 day before', '3 days before', '1 week before']
   const reminderUnits: ReminderUnit[] = ['minutes', 'hours', 'days', 'weeks']
   const customReminderPreview = getReminderLabel(
     'custom',

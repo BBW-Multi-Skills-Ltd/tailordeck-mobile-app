@@ -4805,6 +4805,14 @@ button.more-row {
   gap: 12px;
 }
 
+.settings-reminder-row > .stack {
+  min-width: 0;
+}
+
+.settings-reminder-row .settings-toggle {
+  margin-left: auto;
+}
+
 .settings-reminder-group {
   gap: 10px;
 }
@@ -6216,20 +6224,29 @@ button.more-row {
 
 .settings-toggle {
   width: 48px;
+  min-width: 48px;
+  max-width: 48px;
   height: 28px;
+  flex: 0 0 48px;
   border-radius: 999px;
   border: 1px solid var(--clay-border);
   background: var(--clay-surface-muted);
   padding: 2px;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
   box-shadow: var(--clay-shadow-press);
   transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .settings-toggle-knob {
   width: 22px;
+  min-width: 22px;
   height: 22px;
+  flex: 0 0 22px;
   border-radius: 999px;
   background: var(--bg-card);
   box-shadow: 0 2px 6px color-mix(in srgb, var(--shadow-color) 18%, transparent), inset 0 1px 0 var(--clay-highlight);
