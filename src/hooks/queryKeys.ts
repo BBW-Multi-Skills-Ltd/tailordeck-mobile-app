@@ -8,6 +8,7 @@
   job: (id: string) => ['job', id] as const,
   jobExpenses: (jobId: string) => ['job-expenses', jobId] as const,
   jobPersons: (jobId: string) => ['job-persons', jobId] as const,
+  jobReminderSchedules: ['jobs', 'native-reminder-schedules'] as const,
   dashboardMonthly: (monthCount = 6) => ['dashboard', 'monthly', monthCount] as const,
   dashboardStatus: (monthKey?: string) => ['dashboard', 'status', monthKey ?? 'all'] as const,
   homeSummary: ['home', 'current-month-summary'] as const,

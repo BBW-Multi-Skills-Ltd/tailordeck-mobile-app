@@ -12,6 +12,10 @@ const config: CapacitorConfig = {
       androidScaleType: 'CENTER',
       showSpinner: false,
     },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_tailordeck',
+      iconColor: '#7B1E37',
+    },
   },
 }
 

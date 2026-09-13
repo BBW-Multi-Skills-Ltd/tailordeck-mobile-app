@@ -12,6 +12,7 @@ import ScrollToTop from './components/layout/ScrollToTop'
 import { AppFeedbackProvider } from './components/shared/AppFeedbackProvider'
 import AppErrorBoundary from './components/shared/AppErrorBoundary'
 import MonitoringBridge from './components/shared/MonitoringBridge'
+import NativeNotificationBridge from './components/shared/NativeNotificationBridge'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
           <AppFeedbackProvider>
             <AppErrorBoundary>
               <MonitoringBridge />
+              <NativeNotificationBridge />
               <App />
             </AppErrorBoundary>
           </AppFeedbackProvider>

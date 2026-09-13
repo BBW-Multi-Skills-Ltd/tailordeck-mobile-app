@@ -16,6 +16,20 @@ const JOB_PHOTO_SIGNED_URL_TTL = 60 * 60 * 24 * 7
 
 export type { CreateFullJobInput, CreateJobInput, CreateJobPersonInput, CreateJobReferencePhotoInput } from './jobs/jobServiceTypes'
 
+export type JobReminderSchedule = Pick<
+  JobRow,
+  | 'id'
+  | 'client_name'
+  | 'deadline_date'
+  | 'deadline_time'
+  | 'item_type'
+  | 'reminder'
+  | 'custom_reminder_minutes'
+  | 'reminder_label'
+  | 'status'
+  | 'title'
+>
+
 export async function getJobs(status?: JobStatus, limit = 100): Promise<MockJob[]> {
   const userId = await requireUserId()
   let query = supabase.from('jobs').select('*').eq('user_id', userId).is('deleted_at', null).order('created_at', { ascending: false }).limit(limit)
@@ -27,6 +41,23 @@ export async function getJobs(status?: JobStatus, limit = 100): Promise<MockJob[
   const { data, error } = await query.returns<JobRow[]>()
   if (error) throw error
   return (data ?? []).map(mapJobRow)
+}
+
+export async function getJobReminderSchedules(limit = 100): Promise<JobReminderSchedule[]> {
+  const userId = await requireUserId()
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('id, client_name, deadline_date, deadline_time, item_type, reminder, custom_reminder_minutes, reminder_label, status, title')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .not('deadline_date', 'is', null)
+    .neq('reminder', 'none')
+    .in('status', ['pending', 'in_progress'])
+    .order('deadline_date', { ascending: true })
+    .limit(limit)
+    .returns<JobReminderSchedule[]>()
+  if (error) throw error
+  return data ?? []
 }
 
 export async function getJob(id: string): Promise<JobWithRelations | null> {

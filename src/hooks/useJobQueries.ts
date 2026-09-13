@@ -1,6 +1,6 @@
 ﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { JobStatus } from '../types/job'
-import { createFullJob, createJob, getClientJobs, getJob, getJobs, softDeleteJob, updateFullJob, updateJob, updateJobStatus, type CreateFullJobInput, type CreateJobInput } from '../services/jobService'
+import { createFullJob, createJob, getClientJobs, getJob, getJobReminderSchedules, getJobs, softDeleteJob, updateFullJob, updateJob, updateJobStatus, type CreateFullJobInput, type CreateJobInput } from '../services/jobService'
 import { queryKeys } from './queryKeys'
 
 export function useJobsQuery(status?: JobStatus) {
@@ -19,6 +19,15 @@ export function useClientJobsQuery(clientId: string | undefined) {
   })
 }
 
+export function useJobReminderSchedulesQuery(enabled: boolean) {
+  return useQuery({
+    queryKey: queryKeys.jobReminderSchedules,
+    queryFn: () => getJobReminderSchedules(),
+    enabled,
+    staleTime: 1000 * 60,
+  })
+}
+
 export function useCreateJobMutation() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -27,6 +36,7 @@ export function useCreateJobMutation() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
@@ -44,6 +54,7 @@ export function useCreateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
@@ -61,6 +72,7 @@ export function useUpdateFullJobMutation() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(3) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.recentJobs(5) })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
@@ -73,6 +85,7 @@ export function useUpdateJobMutation() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
@@ -85,6 +98,7 @@ export function useUpdateJobStatusMutation() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.job(vars.id) })
       void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
@@ -97,6 +111,7 @@ export function useSoftDeleteJobMutation() {
       void queryClient.invalidateQueries({ queryKey: ['jobs'] })
       void queryClient.invalidateQueries({ queryKey: queryKeys.homeSummary })
       void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobReminderSchedules })
     },
   })
 }
