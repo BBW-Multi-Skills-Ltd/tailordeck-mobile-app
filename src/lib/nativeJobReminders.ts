@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { LocalNotifications, type LocalNotificationSchema } from '@capacitor/local-notifications'
 import type { PluginListenerHandle } from '@capacitor/core'
 import type { JobReminderSchedule } from '../services/jobService'
@@ -31,6 +31,32 @@ export type NativeExactAlarmState = {
   supported: boolean
   permission: ExactAlarmPermission
 }
+
+type NativeAlarmPayload = {
+  id: number
+  jobId: string
+  title: string
+  body: string
+  largeBody: string
+  reminderLabel: string
+  fireAt: number
+}
+
+type NativeAlarmAction = {
+  action: 'open' | 'cancel' | 'snooze' | 'complete'
+  jobId?: string
+  id?: number
+}
+
+type TailorDeckAlarmPlugin = {
+  scheduleAlarms(options: { alarms: NativeAlarmPayload[] }): Promise<{ scheduled: number }>
+  clearAlarms(): Promise<void>
+  checkExactAlarmPermission(): Promise<{ supported: boolean; granted: boolean }>
+  openExactAlarmSettings(): Promise<void>
+  addListener(eventName: 'alarmAction', listenerFunc: (event: NativeAlarmAction) => void): Promise<PluginListenerHandle>
+}
+
+const TailorDeckAlarm = registerPlugin<TailorDeckAlarmPlugin>('TailorDeckAlarm')
 
 function isNativeNotificationsSupported(): boolean {
   return Capacitor.isNativePlatform()
@@ -106,6 +132,28 @@ function buildNotification(job: JobReminderSchedule, options: NativeReminderOpti
       type: 'job_reminder',
       jobId: job.id,
     },
+  }
+}
+
+function buildNativeAlarm(job: JobReminderSchedule): NativeAlarmPayload | null {
+  const reminderMinutes = getReminderMinutes(job)
+  const deadline = getJobDeadline(job)
+  if (!reminderMinutes || !deadline) return null
+
+  const scheduledAt = new Date(deadline.getTime() - reminderMinutes * 60 * 1000)
+  if (scheduledAt.getTime() <= Date.now() + 5000) return null
+
+  const body = formatReminderBody(job, deadline)
+  const reminderLabel = job.reminder_label || job.reminder || 'Deadline reminder'
+
+  return {
+    id: getNotificationId(job.id),
+    jobId: job.id,
+    title: 'TailorDeck reminder',
+    body,
+    largeBody: `${reminderLabel} reminder. Choose what to do with this job.`,
+    reminderLabel,
+    fireAt: scheduledAt.getTime(),
   }
 }
 
@@ -190,6 +238,12 @@ export async function getNativeExactAlarmState(): Promise<NativeExactAlarmState>
     return { supported: false, permission: 'denied' }
   }
 
+  if (Capacitor.isPluginAvailable('TailorDeckAlarm')) {
+    const state = await TailorDeckAlarm.checkExactAlarmPermission()
+    if (state.supported && state.granted) return { supported: true, permission: 'granted' }
+    if (state.supported) return { supported: true, permission: 'prompt' }
+  }
+
   const state = await LocalNotifications.checkExactNotificationSetting()
   return { supported: true, permission: state.exact_alarm as ExactAlarmPermission }
 }
@@ -199,12 +253,23 @@ export async function requestNativeExactAlarmPermission(): Promise<NativeExactAl
     return { supported: false, permission: 'denied' }
   }
 
+  if (Capacitor.isPluginAvailable('TailorDeckAlarm')) {
+    await TailorDeckAlarm.openExactAlarmSettings()
+    return getNativeExactAlarmState()
+  }
+
   const state = await LocalNotifications.changeExactNotificationSetting()
   return { supported: true, permission: state.exact_alarm as ExactAlarmPermission }
 }
 
 export async function clearNativeJobReminders(): Promise<void> {
   if (!isNativeNotificationsSupported()) return
+
+  if (Capacitor.isPluginAvailable('TailorDeckAlarm')) {
+    await TailorDeckAlarm.clearAlarms().catch((error) => {
+      console.warn('Unable to clear TailorDeck native alarms:', error)
+    })
+  }
 
   const ids = await getTailorDeckPendingIds()
   if (!ids.length) return
@@ -216,6 +281,19 @@ async function canScheduleExactAlarm(options: NativeReminderOptions): Promise<bo
 
   const state = await getNativeExactAlarmState()
   return state.permission === 'granted'
+}
+
+async function scheduleNativeAlarms(jobs: JobReminderSchedule[]): Promise<boolean> {
+  if (!Capacitor.isPluginAvailable('TailorDeckAlarm')) return false
+
+  const alarms = jobs
+    .map(buildNativeAlarm)
+    .filter((alarm): alarm is NativeAlarmPayload => Boolean(alarm))
+    .sort((first, second) => first.fireAt - second.fireAt)
+    .slice(0, MAX_SCHEDULED_REMINDERS)
+
+  await TailorDeckAlarm.scheduleAlarms({ alarms })
+  return true
 }
 
 export async function syncNativeJobReminders(jobs: JobReminderSchedule[], options: NativeReminderOptions = {}): Promise<void> {
@@ -231,6 +309,25 @@ export async function syncNativeJobReminders(jobs: JobReminderSchedule[], option
   await registerReminderActions()
 
   const exactAlarmAllowed = await canScheduleExactAlarm(options)
+
+  if (options.exactAlarmEnabled && exactAlarmAllowed) {
+    try {
+      const scheduledNativeAlarms = await scheduleNativeAlarms(jobs)
+      if (scheduledNativeAlarms) {
+        const pendingIds = await getTailorDeckPendingIds()
+        if (pendingIds.length) {
+          await LocalNotifications.cancel({ notifications: pendingIds.map((id) => ({ id })) })
+        }
+        return
+      }
+    } catch (error) {
+      console.warn('Unable to sync TailorDeck native alarms, falling back to notifications:', error)
+    }
+  } else if (Capacitor.isPluginAvailable('TailorDeckAlarm')) {
+    await TailorDeckAlarm.clearAlarms().catch((error) => {
+      console.warn('Unable to clear TailorDeck native alarms:', error)
+    })
+  }
 
   const nextNotifications = jobs
     .map((job) => buildNotification(job, options, exactAlarmAllowed))
@@ -257,6 +354,7 @@ export function registerNativeJobReminderTapHandler(handlers: NotificationAction
   if (!isNativeNotificationsSupported()) return () => undefined
 
   let listener: PluginListenerHandle | null = null
+  let alarmListener: PluginListenerHandle | null = null
 
   void LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
     const extra = action.notification.extra as { source?: string; type?: string; jobId?: string } | undefined
@@ -272,7 +370,25 @@ export function registerNativeJobReminderTapHandler(handlers: NotificationAction
     listener = handle
   })
 
+  if (Capacitor.isPluginAvailable('TailorDeckAlarm')) {
+    void TailorDeckAlarm.addListener('alarmAction', (event) => {
+      if (!event.jobId) return
+      if (event.action === 'complete') {
+        void Promise.resolve(handlers.onMarkJobCompleted(event.jobId)).catch((error) => {
+          console.warn('Unable to mark TailorDeck alarm job completed:', error)
+        })
+        return
+      }
+      if (event.action === 'open') {
+        handlers.onOpenJob(event.jobId)
+      }
+    }).then((handle) => {
+      alarmListener = handle
+    })
+  }
+
   return () => {
     void listener?.remove()
+    void alarmListener?.remove()
   }
 }

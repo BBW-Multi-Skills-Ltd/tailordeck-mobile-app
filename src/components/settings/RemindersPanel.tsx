@@ -63,7 +63,7 @@ export default function RemindersPanel({
         <div className="row-between settings-reminder-row">
           <div className="stack gap-4">
             <p className="settings-reminder-label">Alarm Accuracy</p>
-            <p className="settings-reminder-help">Use Android exact alarms for important deadline reminders.</p>
+            <p className="settings-reminder-help">Alarm Accuracy uses Android alarm permission for important deadline reminders.</p>
           </div>
           <Toggle checked={settings.reminders.exactAlarmEnabled} onChange={onExactAlarmEnabledChange} />
         </div>
