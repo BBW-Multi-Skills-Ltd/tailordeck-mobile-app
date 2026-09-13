@@ -95,25 +95,14 @@ public class TailorDeckAlarmActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setGravity(Gravity.CENTER);
-        root.setPadding(dp(22), dp(28), dp(22), dp(28));
+        root.setPadding(dp(26), dp(34), dp(26), dp(34));
         scroll.addView(root, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT, ScrollView.LayoutParams.MATCH_PARENT));
 
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setGravity(Gravity.CENTER);
-        card.setPadding(dp(24), dp(28), dp(24), dp(26));
-        card.setBackground(roundedStroke(Color.rgb(255, 253, 250), dp(34), Color.rgb(232, 220, 211), dp(1)));
-        card.setElevation(dp(12));
-        root.addView(card, matchWrap());
-
         ImageView logoIcon = new ImageView(this);
-        logoIcon.setImageResource(R.drawable.splash_icon);
+        logoIcon.setImageResource(R.mipmap.ic_launcher);
         logoIcon.setAdjustViewBounds(true);
         logoIcon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        logoIcon.setPadding(dp(12), dp(12), dp(12), dp(12));
-        logoIcon.setBackground(roundedStroke(Color.rgb(255, 255, 255), dp(22), Color.rgb(230, 216, 206), dp(1)));
-        logoIcon.setElevation(dp(8));
-        card.addView(logoIcon, squareParams(70));
+        root.addView(logoIcon, squareParams(86));
 
         TextView brand = new TextView(this);
         brand.setText("TailorDeck");
@@ -122,7 +111,7 @@ public class TailorDeckAlarmActivity extends Activity {
         brand.setTypeface(Typeface.DEFAULT_BOLD);
         brand.setGravity(Gravity.CENTER);
         brand.setPadding(0, dp(16), 0, 0);
-        card.addView(brand, matchWrap());
+        root.addView(brand, matchWrap());
 
         TextView eyebrow = new TextView(this);
         eyebrow.setText("DEADLINE ALERT");
@@ -132,7 +121,7 @@ public class TailorDeckAlarmActivity extends Activity {
         eyebrow.setLetterSpacing(0.12f);
         eyebrow.setGravity(Gravity.CENTER);
         eyebrow.setPadding(0, dp(8), 0, dp(22));
-        card.addView(eyebrow, matchWrap());
+        root.addView(eyebrow, matchWrap());
 
         TextView title = new TextView(this);
         title.setText("Job deadline alarm");
@@ -141,7 +130,7 @@ public class TailorDeckAlarmActivity extends Activity {
         title.setTypeface(Typeface.DEFAULT_BOLD);
         title.setGravity(Gravity.CENTER);
         title.setPadding(0, 0, 0, dp(12));
-        card.addView(title, matchWrap());
+        root.addView(title, matchWrap());
 
         TextView body = new TextView(this);
         body.setText(payload.body == null || payload.body.isEmpty() ? "A TailorDeck job needs your attention." : payload.body);
@@ -149,7 +138,7 @@ public class TailorDeckAlarmActivity extends Activity {
         body.setTextSize(20);
         body.setGravity(Gravity.CENTER);
         body.setLineSpacing(dp(3), 1.05f);
-        card.addView(body, matchWrap());
+        root.addView(body, matchWrap());
 
         TextView reminder = new TextView(this);
         reminder.setText(payload.reminderLabel == null || payload.reminderLabel.isEmpty() ? "Deadline reminder" : payload.reminderLabel);
@@ -161,7 +150,7 @@ public class TailorDeckAlarmActivity extends Activity {
         reminder.setBackground(roundedStroke(Color.rgb(253, 249, 243), dp(999), Color.rgb(224, 196, 126), dp(1)));
         LinearLayout.LayoutParams reminderParams = wrapCentered();
         reminderParams.setMargins(0, dp(20), 0, dp(28));
-        card.addView(reminder, reminderParams);
+        root.addView(reminder, reminderParams);
 
         LinearLayout firstRow = new LinearLayout(this);
         firstRow.setOrientation(LinearLayout.HORIZONTAL);
@@ -175,11 +164,11 @@ public class TailorDeckAlarmActivity extends Activity {
         Button snooze = secondaryButton("Snooze 15 min");
         snooze.setOnClickListener(view -> snoozeAlarm());
         firstRow.addView(snooze, weightedButton());
-        card.addView(firstRow, matchWrap());
+        root.addView(firstRow, matchWrap());
 
         Button complete = primaryButton("Mark job completed");
         complete.setOnClickListener(view -> completeJob());
-        card.addView(complete, matchWrap());
+        root.addView(complete, matchWrap());
 
         TextView hint = new TextView(this);
         hint.setText("Cancel only stops this alarm. Mark completed updates the job.");
@@ -187,7 +176,7 @@ public class TailorDeckAlarmActivity extends Activity {
         hint.setTextSize(13);
         hint.setGravity(Gravity.CENTER);
         hint.setPadding(0, dp(18), 0, 0);
-        card.addView(hint, matchWrap());
+        root.addView(hint, matchWrap());
 
         return scroll;
     }
