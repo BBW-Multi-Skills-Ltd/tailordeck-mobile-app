@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         registerPlugin(TailorDeckAlarmPlugin.class);
+        registerPlugin(TailorDeckBillingPlugin.class);
         super.onCreate(savedInstanceState);
         configureSystemBars();
     }

@@ -9,7 +9,9 @@ type SubscriptionPlanCarouselProps<TPlan extends SubscriptionPlanCard> = {
   className?: string
   cycle: BillingCycle
   disabled?: boolean
+  getUnavailableLabel?: (plan: TPlan) => string
   getCtaLabel: (plan: TPlan) => string
+  isPlanUnavailable?: (plan: TPlan) => boolean
   plans: TPlan[]
   selectedPlan: TPlan['id']
   onChoosePlan: (plan: TPlan) => void | Promise<void>
@@ -22,8 +24,10 @@ export function SubscriptionPlanCarousel<TPlan extends SubscriptionPlanCard>({
   className,
   cycle,
   disabled = false,
+  getUnavailableLabel,
   getCtaLabel,
   getBusyLabel,
+  isPlanUnavailable,
   plans,
   selectedPlan,
   onChoosePlan,
@@ -74,6 +78,7 @@ export function SubscriptionPlanCarousel<TPlan extends SubscriptionPlanCard>({
       {plans.map((plan) => {
         const active = selectedPlan === plan.id
         const busy = busyPlanId === plan.id
+        const unavailable = isPlanUnavailable?.(plan) ?? false
 
         return (
           <article
@@ -110,11 +115,12 @@ export function SubscriptionPlanCarousel<TPlan extends SubscriptionPlanCard>({
               className={`btn btn-full subscription-plan-btn${active ? ' btn-primary' : ' btn-secondary'}`}
               onClick={(event) => {
                 event.stopPropagation()
+                if (unavailable) return
                 void onChoosePlan(plan)
               }}
-              disabled={disabled}
+              disabled={disabled || unavailable}
             >
-              {busy ? getBusyLabel?.(plan) ?? 'Saving...' : getCtaLabel(plan)}
+              {unavailable ? getUnavailableLabel?.(plan) ?? 'Unavailable' : busy ? getBusyLabel?.(plan) ?? 'Saving...' : getCtaLabel(plan)}
             </button>
 
             <div className="subscription-plan-divider" />

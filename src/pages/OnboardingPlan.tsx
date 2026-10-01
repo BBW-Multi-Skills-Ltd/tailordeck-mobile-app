@@ -8,6 +8,7 @@ import SegmentedControl from '../components/shared/SegmentedControl'
 import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { markOnboardingCompleted } from '../lib/auth'
+import { googlePlayBillingPendingMessage, isGooglePlayBillingPending } from '../lib/billingPlatform'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import { updateProfile } from '../services/profileService'
@@ -22,6 +23,7 @@ export default function OnboardingPlan() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const googlePlayBillingPending = isGooglePlayBillingPending()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
 
   async function activatePlan(plan: SubscriptionPlan) {
@@ -40,6 +42,10 @@ export default function OnboardingPlan() {
         await updateProfile({ onboarding_complete: true })
         markOnboardingCompleted()
       } else {
+        if (googlePlayBillingPending) {
+          setErrorMessage(googlePlayBillingPendingMessage)
+          return
+        }
         setSettings(saveTailorSettings({
           ...settings,
           subscription: { ...settings.subscription, billingCycle: cycle },
@@ -84,7 +90,11 @@ export default function OnboardingPlan() {
         <h3 className="subscription-section-title">Choose the plan that's right for you</h3>
 
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
-        <PaymentTrustNote />
+        {!googlePlayBillingPending ? <PaymentTrustNote /> : (
+          <p className="payment-trust-note payment-trust-note-warning" role="status">
+            {googlePlayBillingPendingMessage}
+          </p>
+        )}
         {errorMessage ? <p className="auth-feedback error" role="alert">{errorMessage}</p> : null}
         <SubscriptionPlanCarousel
           ariaLabel="Onboarding pricing plans"
@@ -92,7 +102,9 @@ export default function OnboardingPlan() {
           className="onboarding-plan-carousel"
           cycle={cycle}
           disabled={savingPlan !== null}
+          getUnavailableLabel={() => 'Billing coming soon'}
           getCtaLabel={(plan) => plan.cta}
+          isPlanUnavailable={(plan) => googlePlayBillingPending && plan.id !== 'free'}
           plans={subscriptionPlans}
           selectedPlan={selectedPlan}
           onChoosePlan={(plan) => activatePlan(plan.id)}

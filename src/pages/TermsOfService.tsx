@@ -93,7 +93,7 @@ const sections = [
   {
     title: 'Contact',
     body: [
-      'For questions about these terms, billing, support, or account deletion, use the Help & Support page inside TailorDeck or contact BBW Multi-Skills Ltd at bbwmultiskillsltd@gmail.com.',
+      'For questions about these terms, billing, support, or account deletion, use the Help & Support page inside TailorDeck or contact BBW Multi-Skills Ltd at support@tailordeck.app.',
     ],
   },
 ]

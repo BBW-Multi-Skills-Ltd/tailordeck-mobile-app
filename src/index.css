@@ -6790,6 +6790,12 @@ button.more-row {
   flex: 0 0 auto;
 }
 
+.payment-trust-note-warning {
+  border-color: color-mix(in srgb, var(--gold) 42%, var(--clay-border));
+  background: color-mix(in srgb, var(--gold) 10%, var(--clay-surface-muted) 90%);
+  color: color-mix(in srgb, var(--primary) 76%, var(--text-primary));
+}
+
 .subscription-plan-carousel {
   display: flex;
   gap: 12px;

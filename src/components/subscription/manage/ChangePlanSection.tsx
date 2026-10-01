@@ -1,4 +1,5 @@
 import type { SubscriptionPlan } from '../../../lib/settings'
+import { googlePlayBillingPendingMessage, isGooglePlayBillingPending } from '../../../lib/billingPlatform'
 import { billingCycles, type BillingCycle, type PaidPlan, type SubscriptionPlanCard } from '../../../lib/subscriptionPlans'
 import SegmentedControl from '../../shared/SegmentedControl'
 import PaymentTrustNote from '../PaymentTrustNote'
@@ -26,18 +27,26 @@ export function ChangePlanSection({
   onSelectedPlanChange,
   selectedPlan,
 }: ChangePlanSectionProps) {
+  const googlePlayBillingPending = isGooglePlayBillingPending()
+
   return (
     <section className="stack gap-8">
       <p className="more-group-title">Change Plan</p>
       <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={onCycleChange} className="subscription-billing-toggle" />
-      <PaymentTrustNote />
+      {!googlePlayBillingPending ? <PaymentTrustNote /> : (
+        <p className="payment-trust-note payment-trust-note-warning" role="status">
+          {googlePlayBillingPendingMessage}
+        </p>
+      )}
       <SubscriptionPlanCarousel
         ariaLabel="Available plans"
         busyPlanId={isBusy ? selectedPlan : null}
         className="manage-plan-carousel"
         cycle={cycle}
         disabled={isBusy}
+        getUnavailableLabel={() => 'Billing coming soon'}
         getCtaLabel={(plan) => getManagePlanCta(currentPlan, plan.id)}
+        isPlanUnavailable={() => googlePlayBillingPending}
         plans={changePlanOptions}
         selectedPlan={selectedPlan}
         onChoosePlan={(plan) => onChoosePlan(plan.id)}
