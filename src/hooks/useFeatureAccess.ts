@@ -6,7 +6,7 @@ import {
   getSubscription,
   selectSubscriptionPlan,
   setCancelAtPeriodEnd,
-  startSubscriptionCheckout,
+  startPaidPlanUpgrade,
   verifySubscriptionPayment,
 } from '../services/subscriptionService'
 import { queryKeys } from './queryKeys'
@@ -70,8 +70,16 @@ export function useCancelAtPeriodEndMutation() {
 }
 
 export function useStartSubscriptionCheckoutMutation() {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: startSubscriptionCheckout,
+    mutationFn: startPaidPlanUpgrade,
+    onSuccess: (result) => {
+      if (result.provider !== 'google_play') return
+      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
+      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
+    },
   })
 }
 

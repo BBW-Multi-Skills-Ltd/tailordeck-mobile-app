@@ -52,6 +52,20 @@ export function useManagePlanState() {
 
     try {
       const checkout = await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
+      if (checkout.provider === 'google_play') {
+        setSettings(saveTailorSettings({
+          ...settings,
+          subscription: {
+            ...settings.subscription,
+            plan: checkout.subscription.plan_name,
+            billingCycle: checkout.subscription.billing_cycle,
+            cancelAtPeriodEnd: checkout.subscription.cancel_at_period_end,
+          },
+          updatedAt: new Date().toISOString(),
+        }))
+        showNotice('Plan updated.')
+        return
+      }
       setSettings(saveTailorSettings({
         ...settings,
         subscription: { ...settings.subscription, billingCycle: cycle },

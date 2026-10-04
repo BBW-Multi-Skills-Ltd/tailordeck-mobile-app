@@ -26,12 +26,6 @@ type VerifyRequest = {
   basePlanId?: unknown
 }
 
-type ParsedVerifyRequest = {
-  productId: SupportedProductId
-  purchaseToken: string
-  basePlanId?: BillingCycle
-}
-
 type SupabaseServiceClient = ReturnType<typeof createClient>
 
 type ServiceAccountJson = {
@@ -301,6 +295,7 @@ async function saveGooglePlaySubscription(
     cancel_at_period_end: false,
     billing_provider: 'google_play',
     current_period_end: input.expiryTime,
+    current_period_ends_at: input.expiryTime,
     google_play_product_id: input.productId,
     google_play_base_plan_id: input.basePlanId,
     google_play_purchase_token: input.purchaseToken,

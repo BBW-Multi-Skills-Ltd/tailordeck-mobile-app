@@ -6,7 +6,6 @@ import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
-import { googlePlayBillingPendingMessage, isGooglePlayBillingPending } from '../lib/billingPlatform'
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
@@ -17,7 +16,6 @@ export default function SubscriptionPage() {
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
   const [planError, setPlanError] = useState('')
-  const googlePlayBillingPending = isGooglePlayBillingPending()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const subscriptionQuery = useSubscriptionQuery()
   const entitlementQuery = useJobCreationEntitlementQuery()
@@ -40,12 +38,9 @@ export default function SubscriptionPage() {
   async function choosePlan(plan: PaidPlan) {
     setPlanError('')
     setSelectedPlan(plan)
-    if (googlePlayBillingPending) {
-      setPlanError(googlePlayBillingPendingMessage)
-      return
-    }
     try {
       const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
+      if (checkout.provider === 'google_play') return
       window.sessionStorage.setItem('tailordeck-paystack-return', '/settings/subscription')
       window.location.assign(checkout.authorizationUrl)
     } catch (error) {
@@ -89,12 +84,7 @@ export default function SubscriptionPage() {
       {visiblePlans.length > 0 ? (
         <SegmentedControl label="Billing cycle" options={billingCycles} value={cycle} onChange={setCycle} className="subscription-billing-toggle" />
       ) : null}
-      {visiblePlans.length > 0 && !googlePlayBillingPending ? <PaymentTrustNote /> : null}
-      {visiblePlans.length > 0 && googlePlayBillingPending ? (
-        <p className="payment-trust-note payment-trust-note-warning" role="status">
-          {googlePlayBillingPendingMessage}
-        </p>
-      ) : null}
+      {visiblePlans.length > 0 ? <PaymentTrustNote /> : null}
       {planError ? <p className="auth-feedback error" role="alert">{planError}</p> : null}
 
       {visiblePlans.length > 0 ? (
@@ -107,7 +97,6 @@ export default function SubscriptionPage() {
           getUnavailableLabel={() => 'Unavailable'}
           getBusyLabel={() => 'Opening checkout...'}
           getCtaLabel={(plan) => `Upgrade to ${plan.label}`}
-          isPlanUnavailable={() => googlePlayBillingPending}
           plans={visiblePlans}
           selectedPlan={activeSelectedPlan}
           onChoosePlan={(plan) => choosePlan(plan.id)}

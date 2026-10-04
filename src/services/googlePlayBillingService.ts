@@ -1,4 +1,5 @@
-import { Capacitor, registerPlugin } from '@capacitor/core'
+import { registerPlugin } from '@capacitor/core'
+import { isNativeAndroidApp } from '../lib/billingPlatform'
 
 export type GooglePlayProductId = 'tailordeck_starter' | 'tailordeck_pro'
 export type GooglePlayBasePlanId = 'monthly' | 'yearly'
@@ -38,7 +39,7 @@ interface TailorDeckBillingPlugin {
 const TailorDeckBilling = registerPlugin<TailorDeckBillingPlugin>('TailorDeckBilling')
 
 export function isGooglePlayBillingRuntime(): boolean {
-  return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
+  return isNativeAndroidApp()
 }
 
 export function toGooglePlayProductId(planName: GooglePlayPlanName): GooglePlayProductId {

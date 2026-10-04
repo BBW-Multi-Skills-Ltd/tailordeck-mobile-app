@@ -4,6 +4,12 @@ const productionOrigins = [
   'https://tailordeck.vercel.app',
 ]
 
+const capacitorNativeOrigins = [
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+]
+
 const localDevelopmentOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173']
 
 function normalizeOrigin(origin: string): string {
@@ -20,6 +26,7 @@ function getAllowedOrigins(): string[] {
     Deno.env.get('APP_URL'),
     ...(Deno.env.get('ALLOWED_ORIGINS') ?? '').split(','),
     ...productionOrigins,
+    ...capacitorNativeOrigins,
     ...(allowLocalhost ? localDevelopmentOrigins : []),
   ]
 
