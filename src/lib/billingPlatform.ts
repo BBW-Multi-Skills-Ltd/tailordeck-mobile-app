@@ -5,8 +5,8 @@ export function isNativeAndroidApp(): boolean {
 }
 
 export function isGooglePlayBillingPending(): boolean {
-  return isNativeAndroidApp()
+  return false
 }
 
 export const googlePlayBillingPendingMessage =
-  'Google Play Billing is coming soon for Android. Your tester trial remains active while we finish paid upgrades.'
+  'Google Play Billing is available in the Android app.'

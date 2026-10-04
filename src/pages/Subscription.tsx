@@ -104,7 +104,7 @@ export default function SubscriptionPage() {
           className="manage-plan-carousel"
           cycle={cycle}
           disabled={checkoutMutation.isPending}
-          getUnavailableLabel={() => 'Billing coming soon'}
+          getUnavailableLabel={() => 'Unavailable'}
           getBusyLabel={() => 'Opening checkout...'}
           getCtaLabel={(plan) => `Upgrade to ${plan.label}`}
           isPlanUnavailable={() => googlePlayBillingPending}

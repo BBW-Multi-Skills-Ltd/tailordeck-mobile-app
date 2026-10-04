@@ -44,7 +44,7 @@ export function ChangePlanSection({
         className="manage-plan-carousel"
         cycle={cycle}
         disabled={isBusy}
-        getUnavailableLabel={() => 'Billing coming soon'}
+        getUnavailableLabel={() => 'Unavailable'}
         getCtaLabel={(plan) => getManagePlanCta(currentPlan, plan.id)}
         isPlanUnavailable={() => googlePlayBillingPending}
         plans={changePlanOptions}

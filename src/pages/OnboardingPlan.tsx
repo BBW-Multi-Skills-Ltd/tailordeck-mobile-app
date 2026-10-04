@@ -102,7 +102,7 @@ export default function OnboardingPlan() {
           className="onboarding-plan-carousel"
           cycle={cycle}
           disabled={savingPlan !== null}
-          getUnavailableLabel={() => 'Billing coming soon'}
+          getUnavailableLabel={() => 'Unavailable'}
           getCtaLabel={(plan) => plan.cta}
           isPlanUnavailable={(plan) => googlePlayBillingPending && plan.id !== 'free'}
           plans={subscriptionPlans}
