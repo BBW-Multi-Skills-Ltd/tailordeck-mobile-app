@@ -2,11 +2,15 @@ import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import { supabase } from '../lib/supabase'
 import {
+  getGooglePlayActivePurchases,
+  GOOGLE_PLAY_PURCHASE_STATE_PURCHASED,
+  type GooglePlayOwnedPurchase,
   isGooglePlayBillingRuntime,
+  openGooglePlaySubscriptions,
   purchaseGooglePlaySubscription,
   toGooglePlayProductId,
 } from './googlePlayBillingService'
-import { getFunctionInvokeErrorMessage, requireUserId, ServiceError } from './serviceHelpers'
+import { getFunctionInvokeErrorMessage, PurchaseCancelledError, requireUserId, ServiceError } from './serviceHelpers'
 import type { SubscriptionRow } from './types'
 
 export type EffectiveSubscriptionPlan = SubscriptionPlan | 'trial' | 'inactive'
@@ -24,6 +28,14 @@ export async function getSubscription(): Promise<SubscriptionRow | null> {
   if (lifecycleError) throw lifecycleError
   const { data, error } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle<SubscriptionRow>()
   if (error) throw error
+
+  if (await syncGooglePlayPurchases(data)) {
+    const { data: synced, error: syncedError } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle<SubscriptionRow>()
+    if (syncedError) throw syncedError
+    if (synced) applySubscriptionToLocalSettings(synced)
+    return synced
+  }
+
   return data
 }
 
@@ -32,7 +44,7 @@ export async function selectSubscriptionPlan(
   billingCycle: SubscriptionBillingCycle = 'monthly',
 ): Promise<SubscriptionRow> {
   if (planName !== 'free') {
-    throw new ServiceError('Paid plans must be activated through Paystack checkout.')
+    throw new ServiceError(PAID_PLANS_ANDROID_ONLY_MESSAGE)
   }
 
   void billingCycle
@@ -41,37 +53,47 @@ export async function selectSubscriptionPlan(
   return data
 }
 
-export type PaidPlanUpgradeResult =
-  | { provider: 'paystack'; authorizationUrl: string; reference: string }
-  | { provider: 'google_play'; subscription: SubscriptionRow }
-
-export async function startSubscriptionCheckout(params: {
-  planName: Exclude<SubscriptionPlan, 'free'>
-  billingCycle: SubscriptionBillingCycle
-}): Promise<{ authorizationUrl: string; reference: string }> {
-  const { data, error } = await supabase.functions.invoke('paystack-initialize-subscription', {
-    body: params,
-  })
-
-  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to start Paystack checkout.'))
-
-  const authorizationUrl = typeof data?.authorizationUrl === 'string' ? data.authorizationUrl : ''
-  const reference = typeof data?.reference === 'string' ? data.reference : ''
-  if (!authorizationUrl || !reference) throw new ServiceError('Unable to start Paystack checkout.')
-
-  return { authorizationUrl, reference }
-}
+export const PAID_PLANS_ANDROID_ONLY_MESSAGE = 'Paid plans are available through Google Play in the TailorDeck Android app.'
 
 export async function startPaidPlanUpgrade(params: {
   planName: Exclude<SubscriptionPlan, 'free'>
   billingCycle: SubscriptionBillingCycle
-}): Promise<PaidPlanUpgradeResult> {
-  if (isGooglePlayBillingRuntime()) {
-    return purchaseAndVerifyGooglePlaySubscription(params)
-  }
+}): Promise<{ subscription: SubscriptionRow }> {
+  if (!isGooglePlayBillingRuntime()) throw new ServiceError(PAID_PLANS_ANDROID_ONLY_MESSAGE)
+  return purchaseAndVerifyGooglePlaySubscription(params)
+}
 
-  const checkout = await startSubscriptionCheckout(params)
-  return { provider: 'paystack', ...checkout }
+/** Opens Google Play's subscription screen, where paid plans are cancelled or restored. */
+export async function openGooglePlaySubscriptionManagement(subscription: SubscriptionRow | null | undefined): Promise<void> {
+  if (!isGooglePlayBillingRuntime()) throw new ServiceError('Manage your subscription in the Google Play Store on your Android device.')
+  await openGooglePlaySubscriptions(subscription?.google_play_product_id ?? null)
+}
+
+/** Re-reads the linked Google Play subscription (e.g. after the user cancels or restores it in the Play Store). */
+export async function refreshGooglePlaySubscription(subscription: SubscriptionRow | null | undefined): Promise<boolean> {
+  if (!isGooglePlayBillingRuntime()) return false
+  if (subscription?.billing_provider !== 'google_play') return false
+  if (!subscription.google_play_purchase_token || !subscription.google_play_product_id) return false
+
+  try {
+    await verifyGooglePlayPurchase({
+      productId: subscription.google_play_product_id,
+      purchaseToken: subscription.google_play_purchase_token,
+    })
+    return true
+  } catch (error) {
+    console.error('Unable to refresh Google Play subscription:', error)
+    return false
+  }
+}
+
+/** Free-trial cancellation only; paid Google Play plans are cancelled in the Play Store. */
+export async function setFreeTrialCancellation(cancelAtPeriodEnd: boolean): Promise<SubscriptionRow> {
+  const { data, error } = await supabase
+    .rpc('set_free_trial_cancellation', { cancel_at_period_end_value: cancelAtPeriodEnd })
+    .single<SubscriptionRow>()
+  if (error) throw error
+  return data
 }
 
 export function applySubscriptionToLocalSettings(subscription: SubscriptionRow): void {
@@ -88,26 +110,66 @@ export function applySubscriptionToLocalSettings(subscription: SubscriptionRow):
   })
 }
 
+const GOOGLE_PLAY_VERIFY_ATTEMPTS = 3
+const GOOGLE_PLAY_SYNC_RETRY_MS = 60_000
+const googlePlaySyncAttempts = new Map<string, number>()
+let googlePlaySyncInFlight: Promise<boolean> | null = null
+
 async function purchaseAndVerifyGooglePlaySubscription(params: {
   planName: Exclude<SubscriptionPlan, 'free'>
   billingCycle: SubscriptionBillingCycle
-}): Promise<{ provider: 'google_play'; subscription: SubscriptionRow }> {
+}): Promise<{ subscription: SubscriptionRow }> {
+  const userId = await requireUserId()
+  const { data: current, error: currentError } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle<SubscriptionRow>()
+  if (currentError) throw currentError
+
+  const replacesGooglePlayPlan =
+    current?.billing_provider === 'google_play' &&
+    Boolean(current.google_play_purchase_token) &&
+    current.plan_name !== 'free'
+
   const purchase = await purchaseGooglePlaySubscription({
     planName: params.planName,
     billingCycle: params.billingCycle,
+    oldPurchaseToken: replacesGooglePlayPlan ? current?.google_play_purchase_token : null,
+    userId,
   })
 
-  if (purchase.status !== 'purchased') {
-    throw new ServiceError('Google Play purchase was cancelled.')
+  if (purchase.status === 'canceled') throw new PurchaseCancelledError()
+  if (purchase.status === 'pending') {
+    throw new ServiceError('Your Google Play payment is still processing. Your plan will update once Google confirms it.')
   }
 
-  const { data, error } = await supabase.functions.invoke('google-play-verify-subscription', {
-    body: {
+  try {
+    await verifyGooglePlayPurchaseWithRetry({
       productId: purchase.productId || toGooglePlayProductId(params.planName),
       basePlanId: purchase.basePlanId || params.billingCycle,
       purchaseToken: purchase.purchaseToken,
-    },
-  })
+    })
+  } catch (error) {
+    // Google has already charged the user here, so the message must say the payment is safe and will be retried.
+    console.error('Google Play purchase verification failed:', error)
+    throw new ServiceError(
+      'Google Play received your payment, but we could not confirm it yet. Reopen Subscription in a moment and we will finish activating your plan automatically.',
+    )
+  }
+
+  const subscription = await getSubscription()
+  if (!subscription) throw new ServiceError('Unable to load subscription after Google Play purchase.')
+  applySubscriptionToLocalSettings(subscription)
+  return { subscription }
+}
+
+async function verifyGooglePlayPurchase(body: {
+  productId: string
+  basePlanId?: string
+  purchaseToken: string
+}): Promise<void> {
+  const { data, error } = await supabase.functions.invoke('google-play-verify-subscription', { body })
 
   if (error) {
     throw new ServiceError(
@@ -118,34 +180,76 @@ async function purchaseAndVerifyGooglePlaySubscription(params: {
   if (!data || data.ok !== true) {
     throw new ServiceError('Unable to verify Google Play subscription.')
   }
-
-  const subscription = await getSubscription()
-  if (!subscription) throw new ServiceError('Unable to load subscription after Google Play purchase.')
-  applySubscriptionToLocalSettings(subscription)
-  return { provider: 'google_play', subscription }
 }
 
-export async function verifySubscriptionPayment(reference: string): Promise<SubscriptionRow> {
-  const { data, error } = await supabase.functions.invoke('paystack-verify-transaction', {
-    body: { reference },
-  })
-
-  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to verify subscription payment.'))
-
-  const subscription = data?.subscription as SubscriptionRow | undefined
-  if (!subscription?.id) throw new ServiceError('Unable to verify subscription payment.')
-
-  return subscription
+async function verifyGooglePlayPurchaseWithRetry(body: Parameters<typeof verifyGooglePlayPurchase>[0]): Promise<void> {
+  let lastError: unknown
+  for (let attempt = 1; attempt <= GOOGLE_PLAY_VERIFY_ATTEMPTS; attempt += 1) {
+    try {
+      await verifyGooglePlayPurchase(body)
+      return
+    } catch (error) {
+      lastError = error
+      if (attempt < GOOGLE_PLAY_VERIFY_ATTEMPTS) {
+        await new Promise((resolve) => window.setTimeout(resolve, attempt * 1500))
+      }
+    }
+  }
+  throw lastError
 }
 
-export async function setCancelAtPeriodEnd(cancelAtPeriodEnd: boolean): Promise<SubscriptionRow> {
-  const { data, error } = await supabase.functions.invoke('paystack-update-subscription-cancellation', {
-    body: { cancelAtPeriodEnd },
-  })
-  if (error) throw new ServiceError(await getFunctionInvokeErrorMessage(error, 'Unable to update subscription cancellation.'))
-  const subscription = data?.subscription as SubscriptionRow | undefined
-  if (!subscription?.id) throw new ServiceError('Unable to update subscription cancellation.')
-  return subscription
+/**
+ * Re-verifies Google Play subscriptions the device owns but TailorDeck has not linked yet
+ * (e.g. verification failed after payment, or the app closed mid-purchase). Google refunds
+ * purchases that stay unacknowledged for 3 days, so this runs whenever the subscription loads.
+ * It also re-checks the linked purchase once its period has ended, so Google renewals keep the plan.
+ * Returns true when at least one purchase was newly linked or refreshed.
+ */
+export function syncGooglePlayPurchases(subscription: SubscriptionRow | null): Promise<boolean> {
+  if (!isGooglePlayBillingRuntime()) return Promise.resolve(false)
+  if (googlePlaySyncInFlight) return googlePlaySyncInFlight
+
+  googlePlaySyncInFlight = (async () => {
+    let linked = false
+    try {
+      const purchases = await getGooglePlayActivePurchases()
+      for (const purchase of purchases) {
+        if (!shouldSyncGooglePlayPurchase(purchase, subscription)) continue
+
+        const lastAttempt = googlePlaySyncAttempts.get(purchase.purchaseToken) ?? 0
+        if (Date.now() - lastAttempt < GOOGLE_PLAY_SYNC_RETRY_MS) continue
+        googlePlaySyncAttempts.set(purchase.purchaseToken, Date.now())
+
+        try {
+          await verifyGooglePlayPurchase({ productId: purchase.productId, purchaseToken: purchase.purchaseToken })
+          linked = true
+        } catch (error) {
+          console.error('Unable to sync Google Play purchase:', error)
+        }
+      }
+    } catch (error) {
+      console.error('Unable to read Google Play purchases:', error)
+    } finally {
+      googlePlaySyncInFlight = null
+    }
+    return linked
+  })()
+
+  return googlePlaySyncInFlight
+}
+
+function shouldSyncGooglePlayPurchase(purchase: GooglePlayOwnedPurchase, subscription: SubscriptionRow | null): boolean {
+  if (purchase.purchaseState !== GOOGLE_PLAY_PURCHASE_STATE_PURCHASED) return false
+
+  const linkedToken = subscription?.google_play_purchase_token ?? null
+  const planLapsed =
+    !subscription ||
+    subscription.plan_name === 'free' ||
+    Boolean(subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() <= Date.now())
+
+  if (purchase.purchaseToken === linkedToken) return planLapsed
+  // An acknowledged purchase that differs from the linked one was already handled (e.g. a replaced plan).
+  return !purchase.isAcknowledged || !linkedToken || planLapsed
 }
 
 export async function checkFeatureAccess(featureKey: string): Promise<boolean> {

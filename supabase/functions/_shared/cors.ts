@@ -30,7 +30,7 @@ function getAllowedOrigins(): string[] {
     ...(allowLocalhost ? localDevelopmentOrigins : []),
   ]
 
-  return [...new Set(configuredOrigins.map((origin) => normalizeOrigin(origin.trim())).filter(Boolean))]
+  return [...new Set(configuredOrigins.map((origin) => normalizeOrigin((origin ?? '').trim())).filter(Boolean))]
 }
 
 export function corsHeadersForRequest(request?: Request): HeadersInit {
@@ -48,7 +48,7 @@ export function corsHeadersForRequest(request?: Request): HeadersInit {
 }
 
 const baseCorsHeaders = {
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-paystack-signature',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 }
 

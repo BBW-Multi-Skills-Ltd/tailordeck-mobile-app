@@ -1,20 +1,34 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useCancelAtPeriodEndMutation, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../../../hooks/useFeatureAccess'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  invalidateSubscriptionQueries,
+  useFreeTrialCancellationMutation,
+  useStartSubscriptionCheckoutMutation,
+  useSubscriptionQuery,
+} from '../../../hooks/useFeatureAccess'
+import { usePurchaseFeedback } from '../../../hooks/usePurchaseFeedback'
+import { useStorePricedPlans } from '../../../hooks/useStorePricedPlans'
 import { loadTailorSettings, saveTailorSettings } from '../../../lib/settings'
 import { subscriptionPlans, type BillingCycle, type PaidPlan } from '../../../lib/subscriptionPlans'
-import { getEffectiveSubscriptionPlan } from '../../../services/subscriptionService'
-import { getServiceErrorMessage } from '../../../services/serviceHelpers'
+import {
+  getEffectiveSubscriptionPlan,
+  openGooglePlaySubscriptionManagement,
+  refreshGooglePlaySubscription,
+} from '../../../services/subscriptionService'
 import { formatIsoDate, formatRelativeDate, getDefaultManagePlan, getManagePlanOptions } from './managePlanUtils'
 
 export function useManagePlanState() {
   const subscriptionQuery = useSubscriptionQuery()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
-  const cancelMutation = useCancelAtPeriodEndMutation()
+  const trialCancellationMutation = useFreeTrialCancellationMutation()
+  const queryClient = useQueryClient()
   const noticeTimerRef = useRef<number | null>(null)
+  const awaitingPlayReturnRef = useRef(false)
   const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycleOverride, setCycleOverride] = useState<BillingCycle | null>(null)
   const [cancelOpen, setCancelOpen] = useState(false)
-  const [actionError, setActionError] = useState('')
+  const { message: actionError, showError, clear: clearActionError } = usePurchaseFeedback()
+  const pricedPlans = useStorePricedPlans(subscriptionPlans)
   const [actionNotice, setActionNotice] = useState('')
   const plan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
   const cycle = cycleOverride ?? subscriptionQuery.data?.billing_cycle ?? settings.subscription.billingCycle
@@ -22,8 +36,8 @@ export function useManagePlanState() {
     plan: settings.subscription.plan,
     selectedPlan: getDefaultManagePlan(settings.subscription.plan),
   }))
-  const currentPlan = useMemo(() => subscriptionPlans.find((item) => item.id === plan) ?? subscriptionPlans[0], [plan])
-  const changePlanOptions = useMemo(() => getManagePlanOptions(plan), [plan])
+  const currentPlan = useMemo(() => pricedPlans.find((item) => item.id === plan) ?? pricedPlans[0], [plan, pricedPlans])
+  const changePlanOptions = useStorePricedPlans(useMemo(() => getManagePlanOptions(plan), [plan]))
   const isPaidPlan = plan === 'starter' || plan === 'pro'
   const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : plan
   const isTrialActive = effectivePlan === 'trial'
@@ -36,6 +50,21 @@ export function useManagePlanState() {
     if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
   }, [])
 
+  // After the user returns from Google Play, re-read the subscription so a cancel/restore shows up.
+  const subscription = subscriptionQuery.data
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState !== 'visible' || !awaitingPlayReturnRef.current) return
+      awaitingPlayReturnRef.current = false
+      void refreshGooglePlaySubscription(subscription).then((refreshed) => {
+        if (refreshed) invalidateSubscriptionQueries(queryClient)
+      })
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [queryClient, subscription])
+
   function showNotice(message: string) {
     if (noticeTimerRef.current) window.clearTimeout(noticeTimerRef.current)
     setActionNotice(message)
@@ -46,44 +75,53 @@ export function useManagePlanState() {
   }
 
   async function choosePlan(nextPlan: PaidPlan) {
-    setActionError('')
+    clearActionError()
     setActionNotice('')
     setSelectedPlanState({ plan: nextPlan, selectedPlan: nextPlan })
 
     try {
-      const checkout = await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
-      if (checkout.provider === 'google_play') {
-        setSettings(saveTailorSettings({
-          ...settings,
-          subscription: {
-            ...settings.subscription,
-            plan: checkout.subscription.plan_name,
-            billingCycle: checkout.subscription.billing_cycle,
-            cancelAtPeriodEnd: checkout.subscription.cancel_at_period_end,
-          },
-          updatedAt: new Date().toISOString(),
-        }))
-        showNotice('Plan updated.')
-        return
-      }
+      const { subscription } = await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
       setSettings(saveTailorSettings({
         ...settings,
-        subscription: { ...settings.subscription, billingCycle: cycle },
+        subscription: {
+          ...settings.subscription,
+          plan: subscription.plan_name,
+          billingCycle: subscription.billing_cycle,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        },
         updatedAt: new Date().toISOString(),
       }))
-      window.sessionStorage.setItem('tailordeck-paystack-return', '/settings/subscription/manage')
-      window.location.assign(checkout.authorizationUrl)
+      showNotice('Plan updated.')
     } catch (error) {
-      const message = getServiceErrorMessage(error, 'Unable to start checkout.')
-      setActionError(message)
+      showError(error, 'Unable to start checkout.')
+    }
+  }
+
+  async function openGooglePlayManagement(): Promise<boolean> {
+    try {
+      await openGooglePlaySubscriptionManagement(subscriptionQuery.data)
+      awaitingPlayReturnRef.current = true
+      return true
+    } catch (error) {
+      showError(error, 'Unable to open Google Play.')
+      return false
     }
   }
 
   async function confirmCancel() {
-    setActionError('')
+    clearActionError()
     setActionNotice('')
+
+    if (isPaidPlan) {
+      if (await openGooglePlayManagement()) {
+        setCancelOpen(false)
+        showNotice('Finish cancelling in Google Play. Your plan stays active until the billing period ends.')
+      }
+      return
+    }
+
     try {
-      await cancelMutation.mutateAsync(true)
+      await trialCancellationMutation.mutateAsync(true)
       const nextSettings = saveTailorSettings({
         ...settings,
         subscription: { ...settings.subscription, cancelAtPeriodEnd: true },
@@ -93,16 +131,21 @@ export function useManagePlanState() {
       setCancelOpen(false)
       showNotice('Cancellation successful')
     } catch (error) {
-      const message = getServiceErrorMessage(error, 'Unable to schedule cancellation.')
-      setActionError(message)
+      showError(error, 'Unable to schedule cancellation.')
     }
   }
 
   async function keepPlanActive() {
-    setActionError('')
+    clearActionError()
     setActionNotice('')
+
+    if (isPaidPlan) {
+      if (await openGooglePlayManagement()) showNotice('Restore your subscription in Google Play to keep your plan active.')
+      return
+    }
+
     try {
-      await cancelMutation.mutateAsync(false)
+      await trialCancellationMutation.mutateAsync(false)
       const nextSettings = saveTailorSettings({
         ...settings,
         subscription: { ...settings.subscription, cancelAtPeriodEnd: false },
@@ -111,8 +154,7 @@ export function useManagePlanState() {
       setSettings(nextSettings)
       showNotice('Plan kept active.')
     } catch (error) {
-      const message = getServiceErrorMessage(error, 'Unable to keep plan active.')
-      setActionError(message)
+      showError(error, 'Unable to keep plan active.')
     }
   }
 
@@ -133,7 +175,7 @@ export function useManagePlanState() {
       changePlanOptions,
       currentPlan,
       cycle,
-      isBusy: checkoutMutation.isPending || cancelMutation.isPending,
+      isBusy: checkoutMutation.isPending || trialCancellationMutation.isPending,
       isPaidPlan,
       isTrialActive,
       plan,

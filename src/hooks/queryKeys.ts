@@ -18,6 +18,7 @@
   supportCooldown: ['support-tickets', 'cooldown'] as const,
   subscription: ['subscription'] as const,
   jobCreationEntitlement: ['subscription', 'job-creation-entitlement'] as const,
+  googlePlayPrices: ['google-play-prices'] as const,
   feature: (featureKey: string) => ['feature-access', featureKey] as const,
   documents: (jobId: string) => ['documents', jobId] as const,
 }

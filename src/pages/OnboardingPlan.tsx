@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { queryKeys } from '../hooks/queryKeys'
 import { useStartSubscriptionCheckoutMutation } from '../hooks/useFeatureAccess'
+import { usePurchaseFeedback } from '../hooks/usePurchaseFeedback'
+import { useStorePricedPlans } from '../hooks/useStorePricedPlans'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
@@ -11,7 +13,7 @@ import { markOnboardingCompleted } from '../lib/auth'
 import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import { updateProfile } from '../services/profileService'
-import { getServiceErrorMessage } from '../services/serviceHelpers'
+import { isGooglePlayBillingRuntime } from '../services/googlePlayBillingService'
 import { selectSubscriptionPlan } from '../services/subscriptionService'
 
 export default function OnboardingPlan() {
@@ -21,11 +23,12 @@ export default function OnboardingPlan() {
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
-  const [errorMessage, setErrorMessage] = useState('')
+  const { message: errorMessage, showError, clear: clearError } = usePurchaseFeedback()
+  const plans = useStorePricedPlans(subscriptionPlans)
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
 
   async function activatePlan(plan: SubscriptionPlan) {
-    setErrorMessage('')
+    clearError()
     setSelectedPlan(plan)
     setSavingPlan(plan)
     try {
@@ -45,12 +48,7 @@ export default function OnboardingPlan() {
           subscription: { ...settings.subscription, billingCycle: cycle },
           updatedAt: new Date().toISOString(),
         }))
-        const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
-        if (checkout.provider === 'paystack') {
-          window.sessionStorage.setItem('tailordeck-paystack-return', '/onboarding/plan')
-          window.location.assign(checkout.authorizationUrl)
-          return
-        }
+        await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
         await updateProfile({ onboarding_complete: true })
         markOnboardingCompleted()
       }
@@ -63,7 +61,7 @@ export default function OnboardingPlan() {
       navigate('/')
     } catch (error) {
       console.error('Unable to activate onboarding plan:', error)
-      setErrorMessage(getServiceErrorMessage(error, 'Unable to activate plan.'))
+      showError(error, 'Unable to activate plan.')
     } finally {
       setSavingPlan(null)
     }
@@ -96,9 +94,10 @@ export default function OnboardingPlan() {
           className="onboarding-plan-carousel"
           cycle={cycle}
           disabled={savingPlan !== null}
-          getUnavailableLabel={() => 'Unavailable'}
+          getUnavailableLabel={() => 'Available in Android app'}
+          isPlanUnavailable={(plan) => plan.id !== 'free' && !isGooglePlayBillingRuntime()}
           getCtaLabel={(plan) => plan.cta}
-          plans={subscriptionPlans}
+          plans={plans}
           selectedPlan={selectedPlan}
           onChoosePlan={(plan) => activatePlan(plan.id)}
           onSelectedPlanChange={setSelectedPlan}

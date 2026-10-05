@@ -8,7 +8,7 @@ export default function PaymentTrustNote({ className = '' }: PaymentTrustNotePro
   return (
     <p className={`payment-trust-note${className ? ` ${className}` : ''}`}>
       <ShieldCheck size={15} aria-hidden />
-      <span>Secure payment handled by BBW Tech Innovations, the company behind TailorDeck.</span>
+      <span>Secure payment through Google Play. Cancel anytime in the Play Store.</span>
     </p>
   )
 }

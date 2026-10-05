@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useSubscriptionQuery } from '../../hooks/useFeatureAccess'
 import { getEffectiveSubscriptionPlan, getTrialEnd } from '../../services/subscriptionService'
 
 const NOTICE_KEY_PREFIX = 'tailordeck-trial-expired-notice'
 
 export default function TrialExpiredNotice() {
-  const location = useLocation()
   const subscriptionQuery = useSubscriptionQuery()
   const [now] = useState(() => Date.now())
   const subscription = subscriptionQuery.data
@@ -18,11 +17,10 @@ export default function TrialExpiredNotice() {
 
   const shouldShow = useMemo(() => {
     if (!subscription || !noticeKey) return false
-    if (location.pathname.startsWith('/billing/callback')) return false
     const trialEnd = getTrialEnd(subscription)
     if (!trialEnd || new Date(trialEnd).getTime() > now) return false
     return getEffectiveSubscriptionPlan(subscription, now) === 'free'
-  }, [location.pathname, noticeKey, now, subscription])
+  }, [noticeKey, now, subscription])
 
   if (!shouldShow) return null
   return <TrialExpiredDialog key={noticeKey} noticeKey={noticeKey} />

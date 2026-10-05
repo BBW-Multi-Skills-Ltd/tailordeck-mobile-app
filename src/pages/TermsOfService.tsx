@@ -39,7 +39,7 @@ const sections = [
     title: 'Plans, Trials, and Payment',
     body: [
       'TailorDeck may offer free trials, starter plans, pro plans, beta tester access, discounts, or other subscription options.',
-      'Paid plans are processed through Paystack or another approved payment provider. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
+      'Paid plans are billed through Google Play and renew automatically until cancelled in the Google Play Store. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
       'TailorDeck does not directly store your card or bank payment details.',
       'If a trial ends and no active paid plan is available, some features may be limited until you upgrade.',
       'Plan features, pricing, and trial rules may change as the product grows, but active users will be notified where appropriate.',

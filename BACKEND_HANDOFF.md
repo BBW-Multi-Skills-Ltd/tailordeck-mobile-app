@@ -121,7 +121,7 @@ Current frontend expectations:
 - Manage plan page
 - Cancel at period end
 - Trial remains active until expiry even if user chooses not to upgrade
-- Paystack is likely the preferred Nigeria-first payment provider
+- Payments run through Google Play Billing in the Android app
 
 Backend should own plan status. Frontend must not be trusted for subscription access.
 

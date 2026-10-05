@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useJobCreationEntitlementQuery, useStartSubscriptionCheckoutMutation, useSubscriptionQuery } from '../hooks/useFeatureAccess'
+import { usePurchaseFeedback } from '../hooks/usePurchaseFeedback'
+import { useStorePricedPlans } from '../hooks/useStorePricedPlans'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
@@ -8,14 +10,16 @@ import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
-import { getServiceErrorMessage } from '../services/serviceHelpers'
+import { isGooglePlayBillingRuntime } from '../services/googlePlayBillingService'
 import { getEffectiveSubscriptionPlan, getTrialEnd } from '../services/subscriptionService'
 
 export default function SubscriptionPage() {
   const [settings] = useState(() => loadTailorSettings())
   const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
   const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
-  const [planError, setPlanError] = useState('')
+  const { message: planError, showError: showPlanError, clear: clearPlanError } = usePurchaseFeedback()
+  const storePlans = useStorePricedPlans(paidSubscriptionPlans)
+  const paidPlansAvailable = isGooglePlayBillingRuntime()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
   const subscriptionQuery = useSubscriptionQuery()
   const entitlementQuery = useJobCreationEntitlementQuery()
@@ -28,23 +32,20 @@ export default function SubscriptionPage() {
   const trialEnd = subscriptionQuery.data ? getTrialEnd(subscriptionQuery.data) : null
   const trialStatus = effectivePlan === 'trial' ? formatTrialStatus(trialEnd) : ''
   const visiblePlans = useMemo(() => {
-    if (currentPlan === 'starter') return paidSubscriptionPlans.filter((plan) => plan.id === 'pro')
+    if (currentPlan === 'starter') return storePlans.filter((plan) => plan.id === 'pro')
     if (currentPlan === 'pro') return []
-    return paidSubscriptionPlans
-  }, [currentPlan])
+    return storePlans
+  }, [currentPlan, storePlans])
   const sectionTitle = currentPlan === 'starter' ? 'Ready for the full toolkit?' : "Choose the plan that's right for you"
   const activeSelectedPlan = visiblePlans.length === 1 ? visiblePlans[0].id : selectedPlan
 
   async function choosePlan(plan: PaidPlan) {
-    setPlanError('')
+    clearPlanError()
     setSelectedPlan(plan)
     try {
-      const checkout = await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
-      if (checkout.provider === 'google_play') return
-      window.sessionStorage.setItem('tailordeck-paystack-return', '/settings/subscription')
-      window.location.assign(checkout.authorizationUrl)
+      await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
     } catch (error) {
-      setPlanError(getServiceErrorMessage(error, 'Unable to start checkout.'))
+      showPlanError(error, 'Unable to start checkout.')
     }
   }
 
@@ -94,8 +95,9 @@ export default function SubscriptionPage() {
           className="manage-plan-carousel"
           cycle={cycle}
           disabled={checkoutMutation.isPending}
-          getUnavailableLabel={() => 'Unavailable'}
-          getBusyLabel={() => 'Opening checkout...'}
+          getUnavailableLabel={() => 'Available in Android app'}
+          isPlanUnavailable={() => !paidPlansAvailable}
+          getBusyLabel={() => 'Opening Google Play...'}
           getCtaLabel={(plan) => `Upgrade to ${plan.label}`}
           plans={visiblePlans}
           selectedPlan={activeSelectedPlan}

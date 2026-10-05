@@ -4,10 +4,10 @@ TailorDeck payments are collected by BBW Tech Innovations, the company behind Ta
 
 ## App Copy
 
-Use this copy before Paystack checkout:
+Use this copy before Google Play checkout:
 
 ```text
-Secure payment handled by BBW Tech Innovations, the company behind TailorDeck.
+Secure payment through Google Play. Cancel anytime in the Play Store.
 ```
 
 Use this ownership copy in legal/about pages and app-sent emails:
@@ -16,11 +16,11 @@ Use this ownership copy in legal/about pages and app-sent emails:
 TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.
 ```
 
-## Paystack
+## Google Play
 
-Paystack customer-facing receipts and checkout branding are controlled from the Paystack dashboard.
+Google Play receipts show the developer name configured in Play Console.
 
-Recommended trading/display name:
+Recommended developer/display name:
 
 ```text
 BBW Tech Innovations

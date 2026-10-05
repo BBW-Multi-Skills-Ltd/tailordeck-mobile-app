@@ -19,7 +19,6 @@ const SettingsSecurity = lazyWithReload(() => import('./pages/SettingsSecurity')
 const SettingsAbout = lazyWithReload(() => import('./pages/SettingsAbout'))
 const SubscriptionPage = lazyWithReload(() => import('./pages/Subscription'))
 const ManagePlan = lazyWithReload(() => import('./pages/ManagePlan'))
-const BillingCallback = lazyWithReload(() => import('./pages/BillingCallback'))
 const AccountStatus = lazyWithReload(() => import('./pages/AccountStatus'))
 const More = lazyWithReload(() => import('./pages/More'))
 const Business = lazyWithReload(() => import('./pages/Business'))
@@ -77,7 +76,6 @@ export default function App() {
             <Route path="/settings/about" element={<SettingsAbout />} />
             <Route path="/settings/subscription" element={<SubscriptionPage />} />
             <Route path="/settings/subscription/manage" element={<ManagePlan />} />
-            <Route path="/billing/callback" element={<BillingCallback />} />
             <Route path="/more" element={<More />} />
           </Route>
         </Route>

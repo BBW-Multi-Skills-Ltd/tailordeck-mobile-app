@@ -53,8 +53,7 @@ export function RouteGuard() {
   }
 
   const onboardingComplete = profile.data?.onboarding_complete === true
-  const isBillingCallback = location.pathname.startsWith('/billing/callback')
-  if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding') && !isBillingCallback) {
+  if (!profile.isError && profile.data && !onboardingComplete && !location.pathname.startsWith('/onboarding')) {
     return <Navigate to="/onboarding/setup" replace />
   }
 
@@ -62,7 +61,7 @@ export function RouteGuard() {
   const isExpiredPaidPlan =
     subscriptionData?.plan_name !== 'free' &&
     (subscriptionData?.status === 'expired' || subscriptionData?.status === 'past_due')
-  if (!subscription.isError && isExpiredPaidPlan && location.pathname !== '/settings/subscription' && !isBillingCallback) {
+  if (!subscription.isError && isExpiredPaidPlan && location.pathname !== '/settings/subscription') {
     return <Navigate to="/settings/subscription" replace />
   }
 

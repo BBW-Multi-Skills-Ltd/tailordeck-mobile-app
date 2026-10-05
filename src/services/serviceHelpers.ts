@@ -7,6 +7,14 @@ export class ServiceError extends Error {
   }
 }
 
+// The user closed the Google Play sheet; screens show this briefly instead of as a persistent error.
+export class PurchaseCancelledError extends ServiceError {
+  constructor(message = 'Google Play purchase was cancelled.') {
+    super(message)
+    this.name = 'PurchaseCancelledError'
+  }
+}
+
 export function getServiceErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message) return error.message
   if (typeof error === 'object' && error !== null && 'message' in error) {

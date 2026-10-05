@@ -61,7 +61,7 @@ export const subscriptionPlans: SubscriptionPlanCard[] = [
     label: 'Pro',
     badge: 'PRO',
     recommended: true,
-    price: { monthly: '\u20A64,500', yearly: '\u20A642,000' },
+    price: { monthly: '\u20A65,000', yearly: '\u20A642,000' },
     suffix: { monthly: '/month', yearly: '/year' },
     subtitle: 'Documents and growth',
     cta: 'Choose Pro',

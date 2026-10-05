@@ -17,7 +17,7 @@ const sections = [
       'Account details such as your name, email address, phone number, password authentication data, and profile photo.',
       'Business details such as business name, shop address, business phone, business email, website, social handles, logo, signature, and CAC/RC number if provided.',
       'Client and job records such as client names, phone numbers, measurements, order details, pricing, deposits, expenses, deadlines, notes, photos, invoices, receipts, and job status.',
-      'Subscription and payment records connected to your TailorDeck plan. Card, bank, USSD, or transfer payment details are processed by Paystack, not stored directly by TailorDeck.',
+      'Subscription and payment records connected to your TailorDeck plan. Payment details are processed by Google Play, not stored directly by TailorDeck.',
       'Technical data such as device type, browser, app version, session state, and basic diagnostic information needed to keep the app secure and reliable.',
     ],
   },
@@ -42,7 +42,7 @@ const sections = [
     title: 'Third-Party Services',
     body: [
       'Supabase provides authentication, database, storage, and backend infrastructure.',
-      'Paystack processes subscription payments and billing verification. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
+      'Google Play processes subscription payments. TailorDeck receives a purchase confirmation from Google to activate your plan. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
       'Vercel hosts the TailorDeck web application.',
       'Resend may be used to deliver email verification and account messages.',
       'Google may be used if you choose Google sign-in.',
@@ -54,7 +54,7 @@ const sections = [
     body: [
       'Uploaded files are stored in private Supabase Storage buckets where possible. The app generates temporary signed links so authorized users can view their own files.',
       'Row Level Security is used so users should only access records belonging to their own account.',
-      'No frontend code should contain Supabase service-role secrets, Paystack secret keys, or other private backend credentials.',
+      'No frontend code should contain Supabase service-role secrets, Google service account keys, or other private backend credentials.',
       'No internet-based system is completely risk-free, but we design TailorDeck to reduce unauthorized access and protect user data.',
     ],
   },

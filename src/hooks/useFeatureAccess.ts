@@ -1,13 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import {
   checkFeatureAccess,
   getJobCreationEntitlement,
   getSubscription,
   selectSubscriptionPlan,
-  setCancelAtPeriodEnd,
+  setFreeTrialCancellation,
   startPaidPlanUpgrade,
-  verifySubscriptionPayment,
 } from '../services/subscriptionService'
 import { queryKeys } from './queryKeys'
 
@@ -56,16 +55,11 @@ export function useSelectSubscriptionPlanMutation() {
   })
 }
 
-export function useCancelAtPeriodEndMutation() {
+export function useFreeTrialCancellationMutation() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: setCancelAtPeriodEnd,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
-      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
-    },
+    mutationFn: setFreeTrialCancellation,
+    onSuccess: () => invalidateSubscriptionQueries(queryClient),
   })
 }
 
@@ -73,25 +67,13 @@ export function useStartSubscriptionCheckoutMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: startPaidPlanUpgrade,
-    onSuccess: (result) => {
-      if (result.provider !== 'google_play') return
-      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
-      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
-    },
+    onSuccess: () => invalidateSubscriptionQueries(queryClient),
   })
 }
 
-export function useVerifySubscriptionPaymentMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: verifySubscriptionPayment,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
-      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
-    },
-  })
+export function invalidateSubscriptionQueries(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
+  void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
+  void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
 }

@@ -1,6 +1,7 @@
 import type { SubscriptionPlan } from '../../../lib/settings'
 import { billingCycles, type BillingCycle, type PaidPlan, type SubscriptionPlanCard } from '../../../lib/subscriptionPlans'
 import SegmentedControl from '../../shared/SegmentedControl'
+import { isGooglePlayBillingRuntime } from '../../../services/googlePlayBillingService'
 import PaymentTrustNote from '../PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../SubscriptionPlanCarousel'
 import { getManagePlanCta } from './managePlanUtils'
@@ -37,7 +38,8 @@ export function ChangePlanSection({
         className="manage-plan-carousel"
         cycle={cycle}
         disabled={isBusy}
-        getUnavailableLabel={() => 'Unavailable'}
+        getUnavailableLabel={() => 'Available in Android app'}
+        isPlanUnavailable={() => !isGooglePlayBillingRuntime()}
         getCtaLabel={(plan) => getManagePlanCta(currentPlan, plan.id)}
         plans={changePlanOptions}
         selectedPlan={selectedPlan}

@@ -16,7 +16,7 @@ TailorDeck is a Vite React PWA for Nigerian tailors and fashion designers. The a
 - Supabase Auth
 - Supabase Storage
 - Supabase Edge Functions
-- Paystack checkout through Edge Functions
+- Google Play Billing (Android app) verified through an Edge Function
 - Optional Sentry monitoring via `VITE_SENTRY_DSN`
 
 ## Runtime Entry
@@ -67,10 +67,14 @@ TailorDeck is a Vite React PWA for Nigerian tailors and fashion designers. The a
 
 ## Payments
 
-- Frontend never talks to Paystack with a secret key.
-- Checkout initialization goes through `paystack-initialize-subscription`.
-- Payment verification goes through `paystack-verify-transaction`.
-- Paystack webhook uses HMAC signature validation before changing subscription state.
+- Paid plans are sold only through Google Play Billing in the Android app (native plugin `TailorDeckBillingPlugin`). The web app shows paid plans as Android-only.
+- Every purchase token is verified and acknowledged server-side by `google-play-verify-subscription` (Android Publisher API). Google refunds purchases left unacknowledged for 3 days.
+- On Android, loading the subscription re-verifies any owned Google Play purchase that is not linked yet or whose period has lapsed (recovery after failed verification, renewals).
+- Plan changes replace the existing Google Play subscription (`oldPurchaseToken`) so users are never billed twice.
+- Paid cancellation happens in the Google Play Store; free-trial cancellation uses the `set_free_trial_cancellation` RPC.
+- Purchases carry the TailorDeck user id as the obfuscated account id, so the server can link a purchase without the app.
+- Google Play Real-time Developer Notifications arrive via Pub/Sub push at `google-play-rtdn` (OIDC-authenticated, `verify_jwt = false`). Each notification re-reads the subscription from Google: active/grace/cancelled-but-paid keep the plan; on hold/paused set `past_due`, expired/revoked/refunded set `expired`, and the existing subscription lifecycle then moves the account to Free.
+- Shared Google Play code lives in `supabase/functions/_shared/googlePlay.ts`.
 - Subscription state is read through Supabase services and feature-access hooks.
 
 ## Validation
@@ -107,5 +111,5 @@ TailorDeck is a Vite React PWA for Nigerian tailors and fashion designers. The a
 
 - Configure `VITE_SENTRY_DSN` in Vercel for frontend error reporting.
 - Monitor Supabase Auth logs during signup/OTP testing.
-- Monitor Edge Function logs during Paystack testing.
+- Monitor `google-play-verify-subscription` logs during billing testing.
 - Record manual QA findings in `LAUNCH_READINESS.md` before each release.
