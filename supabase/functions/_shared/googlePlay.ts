@@ -18,6 +18,7 @@ export type PlanName = (typeof SUPPORTED_PRODUCTS)[SupportedProductId]
 export type BillingCycle = 'monthly' | 'yearly'
 // No generated DB types for edge functions, so the schema is left untyped.
 // deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SupabaseServiceClient = SupabaseClient<any, 'public', any>
 
 export type ServiceAccount = {

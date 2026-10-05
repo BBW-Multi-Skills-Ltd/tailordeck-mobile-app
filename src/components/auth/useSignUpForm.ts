@@ -13,7 +13,7 @@ import {
   loadTailorSettings,
   TAILOR_ONBOARDING_SYNC_PENDING_KEY,
 } from '../../lib/settings'
-import { signInWithGoogle, signUpWithEmail } from '../../services/authService'
+import { signUpWithEmail } from '../../services/authService'
 import { completeAuthenticatedSignUp, savePendingSignUpHandoff } from './signUpHandoff'
 
 type SignUpFieldKey = 'fullName' | 'email' | 'phone' | 'password' | 'confirmPassword' | 'agree' | 'form'
@@ -125,10 +125,6 @@ export function useSignUpForm() {
     }
   }
 
-  function handleGoogleSignUp() {
-    void signInWithGoogle()
-  }
-
   return {
     agree,
     checks,
@@ -138,7 +134,6 @@ export function useSignUpForm() {
     errorKey,
     errors,
     fullName,
-    handleGoogleSignUp,
     handleSubmit,
     loading,
     password,

@@ -856,30 +856,6 @@ body {
   width: 100%;
 }
 
-.auth-divider {
-  position: relative;
-  text-align: center;
-  margin: 2px 0;
-}
-
-.auth-divider::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1px solid var(--clay-border);
-}
-
-.auth-divider span {
-  position: relative;
-  z-index: 1;
-  background: var(--bg);
-  padding: 0 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
 .auth-google-btn {
   min-height: 40px;
   border-radius: var(--clay-radius-sm);

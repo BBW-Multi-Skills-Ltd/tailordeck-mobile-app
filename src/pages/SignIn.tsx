@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react'
-import { FcGoogle } from 'react-icons/fc'
 import AuthShell from '../components/auth/AuthShell'
 import { useSignInForm } from '../components/auth/useSignInForm'
 
@@ -67,11 +66,6 @@ export default function SignIn() {
         </button>
 
         {form.errors.form ? <p className="auth-feedback error" role="alert">{form.errors.form}</p> : null}
-
-        <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={form.handleGoogleSignIn}>
-          <FcGoogle size={16} />
-          Sign in with Google
-        </button>
 
         <Link to="/auth/forgot" className="auth-link-btn">
           Forgot password?

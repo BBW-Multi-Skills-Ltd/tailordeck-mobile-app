@@ -1,6 +1,5 @@
 import { Eye, EyeOff } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { FcGoogle } from 'react-icons/fc'
 import { AuthTextField } from './AuthTextField'
 import { PasswordChecklist, PasswordStrength } from './PasswordStrength'
 import type { useSignUpForm } from './useSignUpForm'
@@ -81,8 +80,6 @@ export function SignUpForm(props: SignUpFormProps) {
         {props.loading ? 'Getting things ready...' : 'Create Account'}
       </button>
       {props.errors.form ? <p className="auth-feedback error" role="alert">{props.errors.form}</p> : null}
-      <div className="auth-divider"><span>or</span></div>
-      <button type="button" className="btn btn-secondary btn-full auth-google-btn" onClick={props.handleGoogleSignUp}><FcGoogle size={16} />Sign up with Google</button>
     </form>
   )
 }

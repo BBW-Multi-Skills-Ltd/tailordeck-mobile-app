@@ -36,17 +36,6 @@ export async function signInWithEmail(input: { email: string; password: string }
   return data
 }
 
-export async function signInWithGoogle() {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${window.location.origin}/`,
-    },
-  })
-  if (error) throw error
-  return data
-}
-
 export async function verifySignUpEmailOtp(input: { email: string; token: string }) {
   const safeInput = parseAuthInput(emailOtpSchema, input)
   const { data, error } = await supabase.auth.verifyOtp({

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { type FieldErrors, isValidEmailFormat } from '../../lib/formValidation'
 import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
-import { signInWithEmail, signInWithGoogle } from '../../services/authService'
+import { signInWithEmail } from '../../services/authService'
 
 type SignInFieldKey = 'email' | 'password' | 'form'
 
@@ -60,15 +60,10 @@ export function useSignInForm() {
     }
   }
 
-  function handleGoogleSignIn(): void {
-    void signInWithGoogle()
-  }
-
   return {
     email,
     errorKey,
     errors,
-    handleGoogleSignIn,
     handleSubmit,
     loading,
     password,

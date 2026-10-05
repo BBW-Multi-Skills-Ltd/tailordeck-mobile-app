@@ -45,7 +45,6 @@ const sections = [
       'Google Play processes subscription payments. TailorDeck receives a purchase confirmation from Google to activate your plan. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
       'Vercel hosts the TailorDeck web application.',
       'Resend may be used to deliver email verification and account messages.',
-      'Google may be used if you choose Google sign-in.',
       'WhatsApp sharing opens your device sharing flow or WhatsApp link so you can send invoices, receipts, or job messages to clients.',
     ],
   },
