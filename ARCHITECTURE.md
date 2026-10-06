@@ -74,6 +74,7 @@ TailorDeck is a Vite React PWA for Nigerian tailors and fashion designers. The a
 - Paid cancellation happens in the Google Play Store; free-trial cancellation uses the `set_free_trial_cancellation` RPC.
 - Purchases carry the TailorDeck user id as the obfuscated account id, so the server can link a purchase without the app.
 - Google Play Real-time Developer Notifications arrive via Pub/Sub push at `google-play-rtdn` (OIDC-authenticated, `verify_jwt = false`). Each notification re-reads the subscription from Google: active/grace/cancelled-but-paid keep the plan; on hold/paused set `past_due`, expired/revoked/refunded set `expired`, and the existing subscription lifecycle then moves the account to Free.
+- Pub/Sub is not configured yet, so `google-play-daily-sync` (pg_cron, 02:00 UTC) re-checks every linked purchase daily and applies due downgrades.
 - Shared Google Play code lives in `supabase/functions/_shared/googlePlay.ts`.
 - Subscription state is read through Supabase services and feature-access hooks.
 

@@ -1,5 +1,11 @@
-import { bodyWearItems, type PersonForm, type PersonSex } from '../newJobConfig'
+import { bodyWearItems, getBodyWearGroups, type PersonForm, type PersonSex } from '../newJobConfig'
 import { ItemTypeChooser } from '../order-setup/ItemTypeField'
+
+/** A listed garment that the new sex's list does not include (custom text is always kept). */
+function isListedItemHiddenForSex(item: string, sex: PersonSex): boolean {
+  if (!(bodyWearItems as readonly string[]).includes(item)) return false
+  return !getBodyWearGroups(sex).some((group) => group.items.includes(item))
+}
 
 export function PersonBasicsFields({
   disableName,
@@ -46,7 +52,7 @@ export function PersonBasicsFields({
           errorKey={itemErrorKey}
           itemType={itemValue}
           label="What are you making for this person?"
-          options={bodyWearItems}
+          groups={getBodyWearGroups(person.sex)}
           onItemTypeChange={onItemChange}
         />
       ) : null}
@@ -59,7 +65,10 @@ export function PersonBasicsFields({
               key={sex}
               type="button"
               className={`pill wizard-jobtype-pill${person.sex === sex ? ' active' : ''}`}
-              onClick={() => onUpdatePerson((current) => ({ ...current, sex, role: sex === 'Boy' || sex === 'Girl' ? 'child' : 'adult' }))}
+              onClick={() => {
+                onUpdatePerson((current) => ({ ...current, sex, role: sex === 'Boy' || sex === 'Girl' ? 'child' : 'adult' }))
+                if (showItemField && itemValue && isListedItemHiddenForSex(itemValue, sex)) onItemChange('')
+              }}
             >
               {sex}
             </button>

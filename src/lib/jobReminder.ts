@@ -10,6 +10,27 @@ const unitMinutes: Record<ReminderUnit, number> = {
   weeks: 60 * 24 * 7,
 }
 
+/**
+ * One-tap reminder shortcuts. They are stored as a custom reminder (e.g. custom = 10 minutes),
+ * so the database, notifications and native alarms need no extra reminder types.
+ */
+export const REMINDER_PRESETS: ReadonlyArray<{ label: string; value: string; unit: ReminderUnit }> = [
+  { label: '10 min before', value: '10', unit: 'minutes' },
+  { label: '15 min before', value: '15', unit: 'minutes' },
+  { label: '30 min before', value: '30', unit: 'minutes' },
+  { label: '1 hour before', value: '1', unit: 'hours' },
+  { label: '2 hours before', value: '2', unit: 'hours' },
+  { label: '6 hours before', value: '6', unit: 'hours' },
+  { label: '12 hours before', value: '12', unit: 'hours' },
+]
+
+/** The preset that matches a custom reminder, compared by total minutes (so 60 minutes matches "1 hour"). */
+export function findReminderPreset(customValue: string, customUnit: ReminderUnit) {
+  const minutes = getReminderMinutes('custom', customValue, customUnit)
+  if (minutes === null) return null
+  return REMINDER_PRESETS.find((preset) => getReminderMinutes('custom', preset.value, preset.unit) === minutes) ?? null
+}
+
 export function getReminderMinutes(reminder: ReminderSelection, customValue?: string, customUnit?: ReminderUnit): number | null {
   if (reminder === '1 day before') return 60 * 24
   if (reminder === '3 days before') return 60 * 24 * 3

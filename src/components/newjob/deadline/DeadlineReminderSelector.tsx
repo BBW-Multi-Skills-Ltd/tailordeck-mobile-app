@@ -1,5 +1,10 @@
-import { reminders, type Reminder, type ReminderSelection, type ReminderUnit } from '../newJobConfig'
-import { getReminderLabel } from '../../../lib/jobReminder'
+import { type Reminder, type ReminderSelection, type ReminderUnit } from '../newJobConfig'
+import { getReminderLabel, REMINDER_PRESETS } from '../../../lib/jobReminder'
+import {
+  REMINDER_OPTIONS_AFTER_PRESETS,
+  REMINDER_OPTIONS_BEFORE_PRESETS,
+  useReminderChoice,
+} from '../../../hooks/useReminderChoice'
 
 export function DeadlineReminderSelector({
   customReminderUnit,
@@ -24,19 +29,38 @@ export function DeadlineReminderSelector({
 }) {
   const units: ReminderUnit[] = ['minutes', 'hours', 'days', 'weeks']
   const reminderPreview = getReminderLabel('custom', customReminderValue, customReminderUnit)
+  const { chooseCustom, chooseOption, choosePreset, customActive, isPresetActive } = useReminderChoice({
+    reminder,
+    customValue: customReminderValue,
+    customUnit: customReminderUnit,
+    onReminderChange,
+    onCustomValueChange: onCustomReminderValueChange,
+    onCustomUnitChange: onCustomReminderUnitChange,
+  })
+
+  const renderOption = (value: Reminder) => (
+    <button key={value} type="button" className={`pill${reminder === value ? ' active' : ''}`} onClick={() => chooseOption(value)}>
+      {value === 'none' ? 'No reminder' : value}
+    </button>
+  )
 
   return (
     <div className="input-group">
       <span className="wizard-section-label">Remind me before deadline</span>
       <div className={`wizard-reminder-scroll${error ? ' input-invalid input-shake' : ''}`} key={`reminder-options-${errorKey}`}>
-        {reminders.map((value) => (
-          <button key={value} type="button" className={`pill${reminder === value ? ' active' : ''}`} onClick={() => onReminderChange(value)}>
-            {value === 'none' ? 'No reminder' : value === 'custom' ? 'Custom' : value}
+        {REMINDER_OPTIONS_BEFORE_PRESETS.map(renderOption)}
+        {REMINDER_PRESETS.map((preset) => (
+          <button key={preset.label} type="button" className={`pill${isPresetActive(preset) ? ' active' : ''}`} onClick={() => choosePreset(preset)}>
+            {preset.label}
           </button>
         ))}
+        {REMINDER_OPTIONS_AFTER_PRESETS.map(renderOption)}
+        <button type="button" className={`pill${customActive ? ' active' : ''}`} onClick={chooseCustom}>
+          Custom
+        </button>
       </div>
       {error ? <span className="input-error-text">{error}</span> : null}
-      {reminder === 'custom' ? (
+      {customActive ? (
         <div className={`wizard-custom-reminder${customError ? ' input-invalid input-shake' : ''}`} key={`custom-reminder-${errorKey}`}>
           <label className="wizard-custom-reminder-field">
             <span>Custom time</span>

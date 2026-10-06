@@ -173,6 +173,48 @@ export async function acknowledgeGoogleSubscription(params: {
   if (!response.ok) throw await UpstreamGoogleError.fromResponse(response)
 }
 
+/**
+ * Stops auto-renewal (same as the user cancelling in the Play Store; no refund, access runs to expiry).
+ * Already-cancelled or ended subscriptions count as success. Returns true when a cancel request was sent.
+ */
+export async function cancelGoogleSubscriptionRenewal(params: {
+  packageName: string
+  purchaseToken: string
+  accessToken: string
+}): Promise<boolean> {
+  const current = await getGoogleSubscription(params.packageName, params.purchaseToken, params.accessToken).catch((error) => {
+    if (error instanceof UpstreamGoogleError && error.status === 410) return null
+    throw error
+  })
+  if (!current || !isAutoRenewing(current)) return false
+
+  const productId = current.lineItems?.find((item) => isSupportedProductId(item.productId ?? ''))?.productId
+  if (!productId) return false
+
+  const response = await fetch(
+    `${ANDROID_PUBLISHER_URL}/${encodeURIComponent(params.packageName)}/purchases/subscriptions/${encodeURIComponent(
+      productId,
+    )}/tokens/${encodeURIComponent(params.purchaseToken)}:cancel`,
+    { method: 'POST', headers: { authorization: `Bearer ${params.accessToken}` } },
+  )
+
+  if (!response.ok) {
+    // Google can reject a cancel for a subscription that has just stopped renewing; only fail if it still renews.
+    const error = await UpstreamGoogleError.fromResponse(response)
+    const after = await getGoogleSubscription(params.packageName, params.purchaseToken, params.accessToken).catch(() => null)
+    if (after && isAutoRenewing(after)) throw error
+  }
+  return true
+}
+
+function isAutoRenewing(subscription: GoogleSubscriptionPurchase): boolean {
+  const state = subscription.subscriptionState
+  if (state !== 'SUBSCRIPTION_STATE_ACTIVE' && state !== 'SUBSCRIPTION_STATE_IN_GRACE_PERIOD' && state !== 'SUBSCRIPTION_STATE_ON_HOLD') {
+    return false
+  }
+  return subscription.lineItems?.some((item) => item.autoRenewingPlan?.autoRenewEnabled !== false) ?? false
+}
+
 /** The TailorDeck user id the app attached to the purchase (BillingFlowParams.setObfuscatedAccountId). */
 export function getPurchaseUserId(subscription: GoogleSubscriptionPurchase): string | null {
   return subscription.externalAccountIdentifiers?.obfuscatedExternalAccountId ?? null
@@ -226,6 +268,43 @@ export function evaluateGoogleSubscription(
     default:
       return { kind: 'lapsed', status: 'expired', expiryTime, subscriptionState }
   }
+}
+
+/**
+ * Cancels renewal for a user's linked Google Play subscription (used when their account is being deleted)
+ * and marks the row as ending. `linked` is false when the user has no Google Play subscription;
+ * `cancelled` is true only when renewal was actually stopped by this call.
+ */
+export async function cancelLinkedSubscriptionForUser(
+  supabase: SupabaseServiceClient,
+  userId: string,
+): Promise<{ linked: boolean; cancelled: boolean }> {
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('id, google_play_purchase_token')
+    .eq('user_id', userId)
+    .eq('billing_provider', 'google_play')
+    .not('google_play_purchase_token', 'is', null)
+    .maybeSingle()
+  if (error) throw error
+  const row = data as { id: string; google_play_purchase_token: string } | null
+  if (!row) return { linked: false, cancelled: false }
+
+  const cancelled = await cancelGoogleSubscriptionRenewal({
+    packageName: getRequiredEnv('GOOGLE_PLAY_PACKAGE_NAME'),
+    purchaseToken: row.google_play_purchase_token,
+    accessToken: await getGoogleAccessToken(getPlayServiceAccount()),
+  })
+
+  if (cancelled) {
+    const { error: updateError } = await supabase
+      .from('subscriptions')
+      .update({ cancel_at_period_end: true, google_play_last_verified_at: new Date().toISOString() })
+      .eq('id', row.id)
+      .neq('plan_name', 'free')
+    if (updateError) throw updateError
+  }
+  return { linked: true, cancelled }
 }
 
 /** Upserts the user's single subscription row with an active Google Play plan. */

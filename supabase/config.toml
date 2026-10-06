@@ -389,6 +389,14 @@ deno_version = 2
 [functions.google-play-rtdn]
 verify_jwt = false
 
+# Called by pg_cron with the x-sync-secret header (checked inside the function).
+[functions.google-play-daily-sync]
+verify_jwt = false
+
+# Called by pg_cron with the x-cleanup-secret header (checked inside the function).
+[functions.process-due-account-deletions]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

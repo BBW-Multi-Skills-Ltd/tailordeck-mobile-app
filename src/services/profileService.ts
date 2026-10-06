@@ -93,8 +93,22 @@ export async function requestAccountDeletion(reason?: string): Promise<ProfileRo
     reason_value: reason?.trim() || null,
   }).single<ProfileRow>()
   if (error) throw error
-  await notifyAccountLifecycle('account_deletion_requested')
+  await Promise.all([notifyAccountLifecycle('account_deletion_requested'), cancelGooglePlayRenewalForDeletion()])
   return data
+}
+
+/**
+ * Stops Google Play auto-renewal so a locked account is not charged again. Best effort: if this fails,
+ * the daily sync and the final deletion job cancel it on the server instead.
+ */
+async function cancelGooglePlayRenewalForDeletion(): Promise<void> {
+  try {
+    const { error } = await supabase.functions.invoke('google-play-cancel-for-deletion', { body: {} })
+    if (error) throw error
+  } catch (error) {
+    reportError(error, { service: 'profileService.cancelGooglePlayRenewalForDeletion' })
+    console.warn('Google Play renewal cancellation will be retried by the server:', error)
+  }
 }
 
 export async function restoreAccount(): Promise<ProfileRow> {

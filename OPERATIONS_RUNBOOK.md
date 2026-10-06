@@ -69,6 +69,24 @@ node -e "console.log('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=' + JSON.stringify(requir
 npx supabase secrets set --env-file play.env   # then delete play.env
 ```
 
+## Google Play daily sync
+
+Without Pub/Sub, `google-play-daily-sync` is the server-side safety net. pg_cron job `google-play-daily-sync` calls it at 02:00 UTC (03:00 Lagos). It re-reads every linked Google Play purchase, updates renewals/cancellations/failed payments/refunds, then runs `process_due_subscription_downgrades`.
+
+- Auth: header `x-sync-secret` must equal the `GOOGLE_PLAY_SYNC_SECRET` function secret. The cron job reads the same value from Vault secret `google_play_sync_secret`. To rotate, set both to the same new value.
+- Deploy: `npx supabase functions deploy google-play-daily-sync --no-verify-jwt`
+- Check the last runs: `select id, status_code, content, created from net._http_response order by id desc limit 5;`
+- Run once now: execute the job's command (`select command from cron.job where jobname = 'google-play-daily-sync';`).
+
+## Account deletion cleanup
+
+pg_cron job `process-due-account-deletions` runs daily at 03:00 UTC (04:00 Lagos) with `dryRun: false`. It permanently deletes accounts whose 14-day grace period has ended (storage files, then the auth user) and writes an `account_audit_logs` row. Responses contain counts and user ids only, no emails or names.
+
+- Auth: header `x-cleanup-secret` must equal the `ACCOUNT_CLEANUP_SECRET` function secret; the cron job reads the same value from Vault secret `account_cleanup_secret`. Rotate both together.
+- Deploy: `npx supabase functions deploy process-due-account-deletions --no-verify-jwt`
+- Practice run (deletes nothing): send the same request with body `{"dryRun": true}`.
+- Google Play renewal is stopped when an account is scheduled for deletion (no refund): immediately via `google-play-cancel-for-deletion` (called by the app), daily by `google-play-daily-sync` as a backup, and again by this job before deleting. If Google cannot be reached the account is skipped and retried the next day.
+
 ## Google Play Real-time Developer Notifications
 
 1. Google Cloud (same project as the Play service account): enable the Cloud Pub/Sub API and create topic `tailordeck-play-rtdn`.

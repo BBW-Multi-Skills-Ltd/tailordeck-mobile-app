@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { useState } from 'react'
-import { bodyWearItems, nonBodyItems, type MakeCategory } from '../newJobConfig'
+import { getBodyWearGroups, nonBodyItems, type ItemOptionGroup, type MakeCategory } from '../newJobConfig'
 
 const customValue = '__custom__'
 
@@ -10,7 +10,7 @@ type ItemTypeChooserProps = {
   errorKey?: number
   itemType: string
   label: string
-  options: readonly string[]
+  groups: ItemOptionGroup[]
   onItemTypeChange: (value: string) => void
 }
 
@@ -25,10 +25,11 @@ export function ItemTypeChooser({
   errorKey = 0,
   itemType,
   label,
-  options,
+  groups,
   onItemTypeChange,
 }: ItemTypeChooserProps) {
   const [customOpen, setCustomOpen] = useState(false)
+  const options = groups.flatMap((group) => group.items)
   const selectedValue = resolveSelectedValue(itemType, options)
   const showCustomInput = customOpen || selectedValue === customValue
   const selectValue = customOpen ? customValue : selectedValue
@@ -54,11 +55,23 @@ export function ItemTypeChooser({
           aria-invalid={Boolean(error)}
         >
           <option value="">Choose item</option>
-          {options.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
+          {groups.map((group) =>
+            group.label ? (
+              <optgroup key={group.label} label={group.label}>
+                {group.items.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </optgroup>
+            ) : (
+              group.items.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))
+            ),
+          )}
           <option value={customValue}>Other / custom item</option>
         </select>
         <ChevronDown size={18} className="wizard-select-chevron" />
@@ -92,7 +105,8 @@ export function ItemTypeField({
   makeCategory: MakeCategory
   onSharedItemTypeChange: (value: string) => void
 }) {
-  const options = makeCategory === 'Body Wear' ? bodyWearItems : nonBodyItems
+  // Shared field (one item for everyone): no single gender, so all body-wear groups are shown.
+  const groups = makeCategory === 'Body Wear' ? getBodyWearGroups() : [{ items: nonBodyItems }]
 
   return (
     <ItemTypeChooser
@@ -101,7 +115,7 @@ export function ItemTypeField({
       errorKey={errorKey}
       itemType={itemType}
       label="What are you making?"
-      options={options}
+      groups={groups}
       onItemTypeChange={onSharedItemTypeChange}
     />
   )

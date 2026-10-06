@@ -1,5 +1,6 @@
 import { Toggle } from './SettingsRows'
-import { cleanReminderValue, getReminderLabel } from '../../lib/jobReminder'
+import { cleanReminderValue, getReminderLabel, REMINDER_PRESETS } from '../../lib/jobReminder'
+import { REMINDER_OPTIONS_AFTER_PRESETS, REMINDER_OPTIONS_BEFORE_PRESETS, useReminderChoice } from '../../hooks/useReminderChoice'
 import type { ReminderLead, ReminderUnit, TailorSettings } from '../../lib/settings'
 
 type RemindersPanelProps = {
@@ -33,8 +34,21 @@ export default function RemindersPanel({
   exactAlarmPermission,
   exactAlarmSupported = false,
 }: RemindersPanelProps) {
-  const reminderOptions: ReminderLead[] = ['none', 'custom', '1 day before', '3 days before', '1 week before']
   const reminderUnits: ReminderUnit[] = ['minutes', 'hours', 'days', 'weeks']
+  const { chooseCustom, chooseOption, choosePreset, customActive, isPresetActive } = useReminderChoice({
+    reminder: settings.reminders.defaultReminder,
+    customValue: settings.reminders.defaultCustomReminderValue,
+    customUnit: settings.reminders.defaultCustomReminderUnit,
+    onReminderChange: onDefaultReminderChange,
+    onCustomValueChange: onDefaultCustomReminderValueChange,
+    onCustomUnitChange: onDefaultCustomReminderUnitChange,
+  })
+  const chipClass = (active: boolean) => `settings-choice-pill settings-reminder-chip${active ? ' active' : ''}`
+  const renderOption = (reminder: ReminderLead) => (
+    <button key={reminder} type="button" className={chipClass(settings.reminders.defaultReminder === reminder)} onClick={() => chooseOption(reminder)}>
+      {reminder === 'none' ? 'No reminder' : reminder}
+    </button>
+  )
   const customReminderPreview = getReminderLabel(
     'custom',
     settings.reminders.defaultCustomReminderValue,
@@ -89,13 +103,18 @@ export default function RemindersPanel({
         <p className="settings-reminder-label">Default Reminder</p>
         <p className="settings-help-text">How early we notify you before delivery deadline.</p>
         <div className="settings-reminder-chip-row">
-          {reminderOptions.map((reminder) => (
-            <button key={reminder} type="button" className={`settings-choice-pill settings-reminder-chip${settings.reminders.defaultReminder === reminder ? ' active' : ''}`} onClick={() => onDefaultReminderChange(reminder)}>
-              {reminder === 'none' ? 'No reminder' : reminder === 'custom' ? 'Custom' : reminder}
+          {REMINDER_OPTIONS_BEFORE_PRESETS.map(renderOption)}
+          {REMINDER_PRESETS.map((preset) => (
+            <button key={preset.label} type="button" className={chipClass(isPresetActive(preset))} onClick={() => choosePreset(preset)}>
+              {preset.label}
             </button>
           ))}
+          {REMINDER_OPTIONS_AFTER_PRESETS.map(renderOption)}
+          <button type="button" className={chipClass(customActive)} onClick={chooseCustom}>
+            Custom
+          </button>
         </div>
-        {settings.reminders.defaultReminder === 'custom' ? (
+        {customActive ? (
           <div className={`wizard-custom-reminder settings-custom-reminder${customReminderError ? ' input-invalid input-shake' : ''}`}>
             <label className="wizard-custom-reminder-field">
               <span>Custom time</span>

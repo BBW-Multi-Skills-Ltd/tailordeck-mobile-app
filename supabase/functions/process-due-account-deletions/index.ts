@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.107.0'
 import { jsonResponse } from '../_shared/cors.ts'
+import { cancelLinkedSubscriptionForUser, createServiceClient } from '../_shared/googlePlay.ts'
 
 type StorageTarget = {
   bucket: 'avatars' | 'brand-assets' | 'job-photos' | 'documents'
@@ -33,6 +34,16 @@ function requiredEnv(name: string): string {
 
 function adminClient() {
   return createClient(requiredEnv('SUPABASE_URL'), requiredEnv('SUPABASE_SERVICE_ROLE_KEY'))
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  const left = new TextEncoder().encode(a)
+  const right = new TextEncoder().encode(b)
+  let diff = left.length ^ right.length
+  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
+    diff |= (left[index] ?? 0) ^ (right[index] ?? 0)
+  }
+  return diff === 0
 }
 
 function parseBoolean(value: unknown, fallback: boolean): boolean {
@@ -95,7 +106,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: 'Account cleanup is not enabled. Missing ACCOUNT_CLEANUP_SECRET.' }, 503, request)
   }
 
-  if (request.headers.get('x-cleanup-secret') !== cleanupSecret) {
+  if (!timingSafeEqual(request.headers.get('x-cleanup-secret') ?? '', cleanupSecret)) {
     return jsonResponse({ error: 'Unauthorized cleanup request.' }, 401, request)
   }
 
@@ -104,6 +115,7 @@ Deno.serve(async (request) => {
     const dryRun = parseBoolean(body.dryRun, true)
     const batchSize = Math.max(1, Math.min(Number(body.batchSize) || 25, 100))
     const admin = adminClient()
+    const googlePlayClient = createServiceClient()
 
     const { data, error } = await admin.rpc('list_due_account_deletions', { batch_size: batchSize })
     if (error) throw error
@@ -123,6 +135,9 @@ Deno.serve(async (request) => {
 
       try {
         if (!dryRun) {
+          // Never delete an account that Google Play would keep billing. If Google is unreachable this
+          // throws, the account is skipped, and the next daily run tries again.
+          await cancelLinkedSubscriptionForUser(googlePlayClient, account.userId)
           result.deletedStorageTargets = await deleteStorageTargets(admin, account.storage ?? [])
           await insertDeletionAudit(admin, account, result.deletedStorageTargets)
           const { error: deleteUserError } = await admin.auth.admin.deleteUser(account.userId)
@@ -136,11 +151,14 @@ Deno.serve(async (request) => {
       results.push(result)
     }
 
+    // No emails/names in the response: scheduled runs store responses in net._http_response,
+    // which must not keep personal data of deleted users.
     return jsonResponse({
       ok: true,
       dryRun,
       dueAccounts: accounts.length,
-      accounts,
+      deleted: results.filter((result) => result.authUserDeleted).length,
+      failed: results.filter((result) => result.error).length,
       results,
     }, 200, request)
   } catch (error) {

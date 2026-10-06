@@ -1,4 +1,4 @@
-import type { JobType, MakeCategory, MaterialQuality, MaterialSource, OrderMode, Reminder } from './newJobTypes'
+import type { JobType, MakeCategory, MaterialQuality, MaterialSource, OrderMode, PersonSex, Reminder } from './newJobTypes'
 
 export const stepLabels = [
   'Client Info & Measurements',
@@ -28,8 +28,34 @@ export const amendmentIssueOptions = [
 
 export const amendmentPartOptions = ['Zip', 'Button', 'Lining', 'Thread', 'Fabric Patch', 'Hook', 'Elastic', 'Other'] as const
 
-export const bodyWearItems = [
+// Body-wear items grouped by who usually wears them. Men/boys see men's + unisex items,
+// women/girls see women's + unisex items, and a shared "same item for everyone" field sees all.
+export const menWearItems = [
+  'Agbada',
+  'Kaftan',
+  'Senator',
+  'Buba & Sokoto',
+  'Dashiki',
+  'Jalabiya',
+  'Waistcoat',
+] as const
+
+export const womenWearItems = [
+  'Gown',
+  'Wedding Gown',
+  'Iro & Buba',
+  'Bubu (Boubou)',
+  'Skirt & Blouse',
+  'Skirt',
+  'Blouse',
+  'Corset Dress',
+  'Jumpsuit',
+  'Wrapper',
+] as const
+
+export const unisexWearItems = [
   'T-shirt',
+  'Shirt',
   '2-Piece (Up & Down)',
   'Suit Jacket',
   'Full Suit Set',
@@ -37,10 +63,17 @@ export const bodyWearItems = [
   'Shorts',
   'Jacket',
   'Hoodie',
-  'Gown',
-  'Wedding Gown',
-  'Agbada',
-  'Kaftan',
 ] as const
+
+export const bodyWearItems = [...menWearItems, ...womenWearItems, ...unisexWearItems] as const
+
+export type ItemOptionGroup = { label?: string; items: readonly string[] }
+
+export function getBodyWearGroups(sex?: PersonSex): ItemOptionGroup[] {
+  const unisex = { label: 'Unisex', items: unisexWearItems }
+  if (sex === 'Male' || sex === 'Boy') return [{ label: "Men's wear", items: menWearItems }, unisex]
+  if (sex === 'Female' || sex === 'Girl') return [{ label: "Women's wear", items: womenWearItems }, unisex]
+  return [{ label: "Men's wear", items: menWearItems }, { label: "Women's wear", items: womenWearItems }, unisex]
+}
 
 export const nonBodyItems = ['Bedcover', 'Blanket', 'Duvet', 'Pillow Case', 'Face Cap'] as const

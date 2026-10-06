@@ -138,7 +138,7 @@ export function useSettingsAccountActions({
     const requiredText = kind === 'delete' ? 'DELETE' : 'DEACTIVATE'
     const confirmed = await feedback.confirm({
       title: kind === 'delete' ? 'Delete account?' : 'Deactivate account?',
-      message: getSecurityDangerMessage(kind),
+      message: getSecurityDangerMessage(kind, settings.subscription.plan),
       confirmLabel: kind === 'delete' ? 'Request deletion' : 'Deactivate',
       requiredText,
       requiredTextLabel: 'Type',
