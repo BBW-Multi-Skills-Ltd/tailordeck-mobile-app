@@ -44,7 +44,13 @@ export async function compressImageFile(file: File, options: ImageCompressionOpt
   const minQuality = options.minQuality ?? DEFAULT_MIN_QUALITY
   let quality = options.initialQuality ?? DEFAULT_INITIAL_QUALITY
 
-  const bitmap = await createImageBitmap(file)
+  let bitmap: ImageBitmap
+  try {
+    bitmap = await createImageBitmap(file)
+  } catch {
+    // Formats the WebView cannot decode (e.g. some HEIC photos): upload the original rather than fail the save.
+    return file
+  }
   const targetSize = getTargetSize(bitmap.width, bitmap.height, maxDimension)
   const canvas = document.createElement('canvas')
   canvas.width = targetSize.width

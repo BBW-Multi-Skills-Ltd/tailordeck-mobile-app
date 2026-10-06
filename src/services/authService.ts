@@ -57,10 +57,25 @@ export async function resendSignUpEmailOtp(email: string) {
   return data
 }
 
+/**
+ * Emails a password reset code. The app works on Android only (inside it the page origin is
+ * https://localhost), so the reset is completed with the code in the app rather than with an email link.
+ * The Supabase "Reset Password" email template must include {{ .Token }}.
+ */
 export async function sendPasswordReset(email: string) {
   const safeInput = parseAuthInput(passwordResetSchema, { email })
-  const { data, error } = await supabase.auth.resetPasswordForEmail(safeInput.email, {
-    redirectTo: `${window.location.origin}/auth/reset-password`,
+  const { data, error } = await supabase.auth.resetPasswordForEmail(safeInput.email)
+  if (error) throw error
+  return data
+}
+
+/** Exchanges the emailed reset code for a short recovery session, so the new password can be saved. */
+export async function verifyPasswordResetCode(input: { email: string; token: string }) {
+  const safeInput = parseAuthInput(emailOtpSchema, input)
+  const { data, error } = await supabase.auth.verifyOtp({
+    email: safeInput.email,
+    token: safeInput.token,
+    type: 'recovery',
   })
   if (error) throw error
   return data

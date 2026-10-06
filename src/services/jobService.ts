@@ -1,11 +1,14 @@
 import type { MockJob, JobStatus } from '../types/job'
 import { supabase } from '../lib/supabase'
-import { createClient } from './clientService'
+import { toLocalDateKey } from '../lib/localDate'
+import { normalizeNigerianPhone } from '../lib/phone'
 import { mapJobRow } from './mappers/jobMapper'
 import { mapJobStatusToDb } from './mappers/statusMapper'
+import { LIST_PAGE_SIZE, toIlikeTerm, toListPage, type ListPage } from './listPaging'
 import { createSignedUrl, requireUserId, ServiceError } from './serviceHelpers'
 import type { JobRow, JobWithRelations } from './types'
-import { insertJobRelations, replaceJobRelations, touchClientLastJobDate, uploadJobReferencePhotos } from './jobs/jobRelationPersistence'
+import { uploadJobReferencePhotos } from './jobs/jobRelationPersistence'
+import { buildJobExpenseRows, buildJobPersonRows } from './jobs/jobRelationRows'
 import { buildFullJobRow, buildJobRow } from './jobs/jobRows'
 import { buildJobUpdateRow } from './jobs/jobUpdateRows'
 import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
@@ -30,27 +33,40 @@ export type JobReminderSchedule = Pick<
   | 'title'
 >
 
-export async function getJobs(status?: JobStatus, limit = 100): Promise<MockJob[]> {
+/** One page of jobs, newest first. Search runs on the server so it finds every job, not just loaded ones. */
+export async function getJobsPage(params: { status?: JobStatus; search?: string; offset?: number }): Promise<ListPage<MockJob>> {
   const userId = await requireUserId()
-  let query = supabase.from('jobs').select('*').eq('user_id', userId).is('deleted_at', null).order('created_at', { ascending: false }).limit(limit)
-  if (status) {
-    query = query.eq('status', mapJobStatusToDb(status))
-  } else {
-    query = query.neq('status', 'draft')
-  }
+  const offset = params.offset ?? 0
+  let query = supabase
+    .from('jobs')
+    .select('*')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    // One extra row tells us whether another page exists.
+    .range(offset, offset + LIST_PAGE_SIZE)
+  query = params.status ? query.eq('status', mapJobStatusToDb(params.status)) : query.neq('status', 'draft')
+  const term = toIlikeTerm(params.search)
+  if (term) query = query.ilike('client_name', term)
+
   const { data, error } = await query.returns<JobRow[]>()
   if (error) throw error
-  return (data ?? []).map(mapJobRow)
+  return toListPage(data ?? [], offset, mapJobRow)
 }
 
 export async function getJobReminderSchedules(limit = 100): Promise<JobReminderSchedule[]> {
   const userId = await requireUserId()
+  // Past deadlines can't be reminded about anymore; without this, old unfinished jobs filled the 100 slots
+  // and upcoming jobs got no phone alarm. Yesterday is kept so late-evening deadlines near midnight still count.
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
   const { data, error } = await supabase
     .from('jobs')
     .select('id, client_name, deadline_date, deadline_time, item_type, reminder, custom_reminder_minutes, reminder_label, status, title')
     .eq('user_id', userId)
     .is('deleted_at', null)
-    .not('deadline_date', 'is', null)
+    .gte('deadline_date', toLocalDateKey(yesterday))
     .neq('reminder', 'none')
     .in('status', ['pending', 'in_progress'])
     .order('deadline_date', { ascending: true })
@@ -73,18 +89,22 @@ export async function getJob(id: string): Promise<JobWithRelations | null> {
   return data ? hydrateJobPhotoUrls(data) : null
 }
 
+/**
+ * Jobs for the client profile (history + latest measurements). Only persons are loaded: the profile shows no
+ * photos or expenses, and signing every photo URL made long-time clients slow to open.
+ */
 export async function getClientJobs(clientId: string): Promise<JobWithRelations[]> {
   const userId = await requireUserId()
   const { data, error } = await supabase
     .from('jobs')
-    .select('*, job_expenses(*), job_persons(*), job_reference_photos(*)')
+    .select('*, job_persons(*)')
     .eq('user_id', userId)
     .eq('client_id', clientId)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .returns<JobWithRelations[]>()
   if (error) throw error
-  return Promise.all((data ?? []).map(hydrateJobPhotoUrls))
+  return data ?? []
 }
 
 export async function createJob(input: CreateJobInput): Promise<MockJob> {
@@ -95,29 +115,66 @@ export async function createJob(input: CreateJobInput): Promise<MockJob> {
   return mapJobRow(data)
 }
 
-export async function createFullJob(input: CreateFullJobInput): Promise<MockJob> {
+/**
+ * Creates or updates a job with its persons, measurements and expenses in one database transaction
+ * (save_full_job). `jobId` and `newClientId` are generated once per wizard, so retrying after a network
+ * failure updates the same job instead of creating a duplicate job or client.
+ */
+export async function saveFullJob(params: { jobId: string; newClientId: string; input: CreateFullJobInput }): Promise<MockJob> {
+  const { input, jobId, newClientId } = params
   validateCreateFullJobInput(input)
-  await assertCanCreateJob()
   const userId = await requireUserId()
-  const client = input.clientId
-    ? null
-    : await createClient({
-        name: input.clientName,
-        phone: input.clientPhone,
+
+  const { data: existing, error: existingError } = await supabase
+    .from('jobs')
+    .select('id, client_id, deleted_at')
+    .eq('user_id', userId)
+    .eq('id', jobId)
+    .maybeSingle<Pick<JobRow, 'id' | 'client_id' | 'deleted_at'>>()
+  if (existingError) throw existingError
+  if (existing?.deleted_at) throw new ServiceError('This job was deleted.')
+  // Only a brand-new job counts against the plan limit; a retry of an already-saved job must not be blocked.
+  if (!existing) await assertCanCreateJob()
+
+  const clientId = input.clientId || existing?.client_id || null
+  const newClient = !clientId && !existing
+    ? {
+        id: newClientId,
+        name: input.clientName.trim(),
+        phone: input.clientPhone.trim(),
+        phone_normalized: normalizeNigerianPhone(input.clientPhone),
         sex: input.clientSex,
         measurement_unit: input.measurementUnit,
-        measurements: {},
-      })
-  const clientId = input.clientId || client?.id || null
+      }
+    : null
 
-  const { data: job, error: jobError } = await supabase.from('jobs').insert(buildFullJobRow(input, userId, clientId)).select('*').single<JobRow>()
-  if (jobError) throw jobError
+  const { data: job, error } = await supabase
+    .rpc('save_full_job', {
+      p_job_id: jobId,
+      p_job: buildFullJobRow(input, userId, clientId),
+      p_persons: buildJobPersonRows(input, userId, jobId, clientId),
+      p_expenses: buildJobExpenseRows(input, userId, jobId),
+      p_new_client: newClient,
+    })
+    .single<JobRow>()
+  if (error) throw error
 
-  await insertJobRelations(input, userId, job.id, clientId)
-  await uploadJobReferencePhotos(input, job.id)
-  await touchClientLastJobDate(userId, clientId, input.status)
+  try {
+    await uploadJobReferencePhotos(input, jobId)
+  } catch (photoError) {
+    console.error('Job saved but reference photos failed to upload:', photoError)
+    throw new JobPhotosNotSavedError()
+  }
 
   return mapJobRow(job)
+}
+
+/** The job itself is saved; only photos failed. Saving again retries just the photos (same job, no duplicates). */
+export class JobPhotosNotSavedError extends ServiceError {
+  constructor() {
+    super('Job saved, but some reference photos did not upload. Check your connection and tap the button again to retry the photos.')
+    this.name = 'JobPhotosNotSavedError'
+  }
 }
 
 async function assertCanCreateJob(): Promise<void> {
@@ -125,31 +182,6 @@ async function assertCanCreateJob(): Promise<void> {
   if (!entitlement.can_create_job) {
     throw new ServiceError(getJobCreationBlockedMessage(entitlement))
   }
-}
-
-export async function updateFullJob(id: string, input: CreateFullJobInput): Promise<MockJob> {
-  validateCreateFullJobInput(input)
-  const userId = await requireUserId()
-  const existing = await getJob(id)
-  if (!existing) throw new ServiceError('Draft not found.')
-
-  const clientId = input.clientId || existing.client_id
-  const nextRow = buildFullJobRow(input, userId, clientId)
-  const { data: job, error: jobError } = await supabase
-    .from('jobs')
-    .update({ ...nextRow, updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-    .eq('id', id)
-    .select('*')
-    .single<JobRow>()
-  if (jobError) throw jobError
-
-  const existingPhotoCount = existing.job_reference_photos?.length ?? 0
-  await replaceJobRelations(input, userId, id, clientId)
-  await uploadJobReferencePhotos(input, id, existingPhotoCount)
-  await touchClientLastJobDate(userId, clientId, input.status)
-
-  return mapJobRow(job)
 }
 
 async function hydrateJobPhotoUrls(job: JobWithRelations): Promise<JobWithRelations> {

@@ -3,19 +3,17 @@ import { ChevronRight, Phone, Search, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import EmptyState from '../components/shared/EmptyState'
-import { useClientsQuery } from '../hooks/useClientQueries'
+import { useClientsListQuery } from '../hooks/useClientQueries'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { formatDateShort, getInitial } from '../lib/utils'
 
 export default function Clients() {
-  const clientsQuery = useClientsQuery()
-  const clients = useMemo(() => clientsQuery.data ?? [], [clientsQuery.data])
   const [search, setSearch] = useState('')
-
-  const filteredClients = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return clients
-    return clients.filter((client) => client.name.toLowerCase().includes(term))
-  }, [clients, search])
+  const debouncedSearch = useDebouncedValue(search)
+  // Server-side search and paging: every client can be found, not only the first page.
+  const clientsQuery = useClientsListQuery(debouncedSearch)
+  const filteredClients = useMemo(() => clientsQuery.data?.pages.flatMap((page) => page.items) ?? [], [clientsQuery.data])
+  const searching = Boolean(debouncedSearch.trim())
 
   return (
     <section className="section stack gap-16">
@@ -44,11 +42,11 @@ export default function Clients() {
       ) : filteredClients.length === 0 ? (
         <EmptyState
           icon={Users}
-          title={clients.length === 0 ? 'No clients yet' : 'No clients found'}
+          title={searching ? 'No clients found' : 'No clients yet'}
           description={
-            clients.length === 0
-              ? 'Clients appear automatically after you create jobs. Tap the center plus button to add your first client and measurements.'
-              : 'No client matches that search. Try another name.'
+            searching
+              ? 'No client matches that search. Try another name.'
+              : 'Clients appear automatically after you create jobs. Tap the center plus button to add your first client and measurements.'
           }
         />
       ) : (
@@ -84,6 +82,16 @@ export default function Clients() {
               </Link>
             </motion.article>
           ))}
+          {clientsQuery.hasNextPage ? (
+            <button
+              type="button"
+              className="btn btn-secondary btn-full"
+              disabled={clientsQuery.isFetchingNextPage}
+              onClick={() => void clientsQuery.fetchNextPage()}
+            >
+              {clientsQuery.isFetchingNextPage ? 'Loading...' : 'Load more clients'}
+            </button>
+          ) : null}
         </motion.div>
       )}
     </section>

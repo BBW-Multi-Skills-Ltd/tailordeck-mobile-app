@@ -24,17 +24,30 @@ function safePathPart(value: string): string {
   )
 }
 
+/**
+ * Same file -> same key, so uploading a photo again (retry after a failed save, or draft then finalize)
+ * overwrites it instead of creating a duplicate.
+ */
+function photoKey(file: File): string {
+  const source = `${file.name}|${file.size}|${file.lastModified}`
+  let hash = 0
+  for (let index = 0; index < source.length; index += 1) {
+    hash = (hash * 31 + source.charCodeAt(index)) >>> 0
+  }
+  return hash.toString(36)
+}
+
 export async function uploadJobPhoto(input: UploadJobPhotoInput): Promise<JobReferencePhotoRow> {
   const userId = await requireUserId()
   const compressedFile = await compressImageFile(input.file)
   const targetPart = safePathPart(input.targetId ?? 'job')
-  const storagePath = `${userId}/${input.jobId}/${targetPart}-photo-${input.sortOrder}.${fileExtension(compressedFile)}`
+  const storagePath = `${userId}/${input.jobId}/${targetPart}-photo-${photoKey(input.file)}.${fileExtension(compressedFile)}`
 
   await uploadPrivateFile({ bucket: 'job-photos', file: compressedFile, path: storagePath })
 
   const { data, error } = await supabase
     .from('job_reference_photos')
-    .insert({
+    .upsert({
       file_name: compressedFile.name,
       job_id: input.jobId,
       mime_type: compressedFile.type,
@@ -44,7 +57,7 @@ export async function uploadJobPhoto(input: UploadJobPhotoInput): Promise<JobRef
       target_id: input.targetId ?? null,
       target_label: input.targetLabel ?? null,
       user_id: userId,
-    })
+    }, { onConflict: 'job_id,storage_path' })
     .select('*')
     .single<JobReferencePhotoRow>()
 

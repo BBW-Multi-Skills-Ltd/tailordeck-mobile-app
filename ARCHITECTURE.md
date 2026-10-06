@@ -65,6 +65,14 @@ TailorDeck is a Vite React PWA for Nigerian tailors and fashion designers. The a
 - Storage object paths should begin with the authenticated user id.
 - Plan and feature configuration is read-only from frontend.
 
+## Saving Jobs
+
+- Jobs are created and edited only through the `save_full_job` RPC: job, persons/measurements, expenses, a new client and the client's last job date are written in one transaction.
+- The New Job wizard generates the job id and new-client id once, so a retry after a network failure updates the same job instead of creating duplicates.
+- Reference photos upload after the save (two at a time); each file has a stable storage path, so retries overwrite instead of duplicating.
+- Unfinished New Job input is autosaved on the device (`newJobAutosave.ts`, per user, 7 days, no photo files).
+- Jobs and Clients lists load 50 rows per page with server-side search.
+
 ## Payments
 
 - Paid plans are sold only through Google Play Billing in the Android app (native plugin `TailorDeckBillingPlugin`). The web app shows paid plans as Android-only.

@@ -18,6 +18,9 @@ export function useNewJobWorkflowState() {
   const [isFinalizing, setIsFinalizing] = useState(false)
   const [successOpen, setSuccessOpen] = useState(false)
   const [createdJobId, setCreatedJobId] = useState('')
+  // Fixed for this wizard so a retried save updates the same job/client instead of creating duplicates.
+  const [pendingJobId, setPendingJobId] = useState<string>(() => crypto.randomUUID())
+  const [pendingClientId, setPendingClientId] = useState<string>(() => crypto.randomUUID())
   const [singleMeasurementsOpen, setSingleMeasurementsOpen] = useState(true)
   const [stepOneMeasurementsOpen, setStepOneMeasurementsOpen] = useState<Record<string, boolean>>({})
   const [stepFourDetailsOpen, setStepFourDetailsOpen] = useState(true)
@@ -31,6 +34,8 @@ export function useNewJobWorkflowState() {
     draftSaved,
     isFinalizing,
     isSavingDraft,
+    pendingClientId,
+    pendingJobId,
     referencePhotoFiles,
     referencePhotoFilesByTarget,
     referencePhotoNames,
@@ -44,6 +49,8 @@ export function useNewJobWorkflowState() {
     setDraftSaved,
     setIsFinalizing,
     setIsSavingDraft,
+    setPendingClientId,
+    setPendingJobId,
     setReferencePhotoFiles,
     setReferencePhotoFilesByTarget,
     setReferencePhotoNames,

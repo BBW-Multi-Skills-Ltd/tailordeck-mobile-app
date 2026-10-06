@@ -13,59 +13,17 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SENTRY_DSN': JSON.stringify(env.VITE_SENTRY_DSN),
       'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
+      'import.meta.env.VITE_ALLOW_WEB_APP': JSON.stringify(env.VITE_ALLOW_WEB_APP),
     },
     plugins: [
       react(),
       tailwindcss(),
+      // TailorDeck is installed from Google Play, not as a web app: no install manifest, and the service worker
+      // ships in "self-destroying" mode so browsers that installed the old PWA remove it and its offline cache.
       VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
-      manifest: {
-        name: 'TailorDeck',
-        short_name: 'TailorDeck',
-        description: 'Your shop, in your pocket.',
-        theme_color: '#FAF8F5',
-        background_color: '#FAF8F5',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: '/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: '/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-      workbox: {
-        cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
-        skipWaiting: true,
-      },
+        registerType: 'autoUpdate',
+        selfDestroying: true,
+        manifest: false,
         devOptions: {
           enabled: false,
         },

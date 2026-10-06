@@ -4,7 +4,9 @@ import { useClientQuery } from '../../hooks/useClientQueries'
 import { useJobQuery } from '../../hooks/useJobQueries'
 import { useSettingsQuery } from '../../hooks/useSettingsQueries'
 import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
+import { useAuth } from '../../context/authContextCore'
 import { useAppFeedback } from '../shared/appFeedbackCore'
+import { clearNewJobAutosave, hasMeaningfulNewJobInput, readNewJobAutosave, restoreNewJobAutosave, saveNewJobAutosave } from './newJobAutosave'
 import { hasNewJobErrors, type NewJobFieldKey, validateNewJobFields } from './newJobFieldValidation'
 import { createFieldAwareNewJobActions } from './newJobFieldAwareActions'
 import { createNewJobWizardActions } from './newJobWizardActions'
@@ -20,6 +22,7 @@ import { useNewJobWizardState } from './useNewJobWizardState'
 export function useNewJobWizard() {
   const navigate = useNavigate()
   const feedback = useAppFeedback()
+  const userId = useAuth().user?.id ?? ''
   const [searchParams] = useSearchParams()
   const sectionRef = useRef<HTMLElement | null>(null)
   const appliedDraftIdRef = useRef('')
@@ -85,6 +88,34 @@ export function useNewJobWizard() {
     appliedDraftIdRef.current = draftQuery.data.id
   }, [draftQuery.data, state])
 
+  // Offer to continue an unfinished job (left via Back, a call, or Android closing the app).
+  const autosaveCheckedRef = useRef(false)
+  useEffect(() => {
+    if (autosaveCheckedRef.current || !userId || draftId || repeatClientId) return
+    autosaveCheckedRef.current = true
+    const stored = readNewJobAutosave(userId)
+    if (!stored) return
+    const savedClient = typeof stored.values.clientName === 'string' && stored.values.clientName.trim() ? ` for ${stored.values.clientName.trim()}` : ''
+    void feedback
+      .confirm({
+        title: 'Continue unfinished job?',
+        message: `You have a job in progress${savedClient}. Continue where you stopped? Reference photos need to be added again.`,
+        confirmLabel: 'Continue',
+        cancelLabel: 'Start new',
+      })
+      .then((resume) => {
+        if (resume) restoreNewJobAutosave(state, stored)
+        else clearNewJobAutosave()
+      })
+  }, [draftId, feedback, repeatClientId, state, userId])
+
+  // Save typed-in progress shortly after each change (new jobs only; drafts are already saved online).
+  useEffect(() => {
+    if (!userId || draftId || state.successOpen || state.draftSaved || !hasMeaningfulNewJobInput(state)) return
+    const timer = window.setTimeout(() => saveNewJobAutosave(userId, state), 600)
+    return () => window.clearTimeout(timer)
+  }, [draftId, state, userId])
+
   useEffect(() => {
     if (draftId || state.reminder || !settingsQuery.data) return
     state.setReminder(settingsQuery.data.reminders.defaultReminder)
@@ -93,13 +124,16 @@ export function useNewJobWizard() {
   }, [draftId, settingsQuery.data, state])
 
   const actions = createNewJobWizardActions({
-    confirmDiscard: () =>
-      feedback.confirm({
+    confirmDiscard: async () => {
+      const confirmed = await feedback.confirm({
         title: 'Discard this job?',
         message: 'This will remove the current job draft and return to Jobs.',
         confirmLabel: 'Discard',
         tone: 'danger',
-      }),
+      })
+      if (confirmed) clearNewJobAutosave()
+      return confirmed
+    },
     navigate,
     state,
     validateCurrentStep,

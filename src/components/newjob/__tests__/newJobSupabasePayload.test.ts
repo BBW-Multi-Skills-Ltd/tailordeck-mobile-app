@@ -43,6 +43,8 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     nonBodyQuantity: '1',
     openMaterialCategory: 'local',
     orderMode: 'New Stitch',
+    pendingClientId: 'client-pending-1',
+    pendingJobId: 'job-pending-1',
     persons: [
       {
         age: '',
@@ -81,6 +83,8 @@ function makeState(overrides: Partial<NewJobWizardStateModel> = {}): NewJobWizar
     setDraftSaved: vi.fn(),
     setExpenseDraftCost: vi.fn(),
     setExpenseDraftName: vi.fn(),
+    setPendingClientId: vi.fn(),
+    setPendingJobId: vi.fn(),
     setExpenses: vi.fn(),
     setFieldErrorKey: vi.fn(),
     setFieldErrors: vi.fn(),

@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 /* ============================================
    TAILORDECK DESIGN SYSTEM
@@ -2021,6 +2021,45 @@ p { margin: 0; }
   width: 26px;
   height: 26px;
   color: inherit;
+}
+
+/* Bottom nav motion in CSS (was framer-motion, which made every app start download the animation library). */
+.clay-nav-icon-wrap {
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clay-nav-icon-wrap.active {
+  transform: translateY(-1px) scale(1.12);
+}
+
+.clay-nav-icon-wrap.active .clay-nav-knob {
+  animation: clay-nav-knob-in 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes clay-nav-knob-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+.clay-nav-fab {
+  transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.clay-nav-fab-wrap:active .clay-nav-fab {
+  transform: scale(0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clay-nav-icon-wrap,
+  .clay-nav-fab {
+    transition: none;
+  }
+
+  .clay-nav-icon-wrap.active .clay-nav-knob {
+    animation: none;
+  }
 }
 
 .clay-nav-icon {
@@ -6758,7 +6797,8 @@ button.more-row {
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
-  text-align: center;
+  /* Left-aligned so wrapped lines start together beside the shield; the pill still centers the icon + text group. */
+  text-align: left;
   box-shadow: var(--clay-shadow-press);
 }
 

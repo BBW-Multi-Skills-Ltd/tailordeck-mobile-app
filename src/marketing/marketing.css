@@ -1,0 +1,476 @@
+/* Public marketing website (browsers only). Scoped under .mk-site; loaded only with the marketing bundle. */
+
+/* The app shell caps #root at phone width; the website uses the whole window. */
+#root.mk-root {
+  max-width: none;
+}
+
+.mk-site {
+  --mk-wine: #7b1e37;
+  --mk-wine-dark: #5a1528;
+  --mk-gold: #c9a84c;
+  --mk-bg: #faf8f5;
+  --mk-card: #ffffff;
+  --mk-text: #4a3728;
+  --mk-heading: #1c0f0a;
+  --mk-muted: #8a7060;
+  --mk-border: rgba(232, 224, 216, 0.95);
+  --mk-shadow: 0 10px 26px rgba(74, 55, 40, 0.1), 0 2px 7px rgba(74, 55, 40, 0.07);
+
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--mk-bg);
+  color: var(--mk-text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+}
+
+.mk-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px max(20px, env(safe-area-inset-right)) 12px max(20px, env(safe-area-inset-left));
+  background: color-mix(in srgb, var(--mk-bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--mk-border);
+}
+
+.mk-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--mk-wine);
+  font-weight: 800;
+  font-size: 1.15rem;
+  text-decoration: none;
+}
+
+.mk-brand img {
+  border-radius: 10px;
+}
+
+.mk-header-cta {
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--mk-wine);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mk-main {
+  flex: 1;
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 0 20px 48px;
+}
+
+.mk-page-loading {
+  min-height: 40vh;
+}
+
+/* Hero */
+.mk-hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 40px;
+  padding: 56px 0 40px;
+}
+
+.mk-eyebrow {
+  margin: 0 0 10px;
+  color: var(--mk-gold);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mk-hero h1 {
+  margin: 0;
+  color: var(--mk-heading);
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.mk-lead {
+  margin: 16px 0 0;
+  font-size: 1.08rem;
+  color: var(--mk-text);
+}
+
+.mk-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  margin-top: 28px;
+}
+
+.mk-hero-note {
+  margin: 0;
+  color: var(--mk-muted);
+  font-size: 0.9rem;
+}
+
+.mk-hero-visual {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border-radius: 32px;
+  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--mk-gold) 22%, #fff), var(--mk-card) 70%);
+  box-shadow: var(--mk-shadow);
+}
+
+.mk-hero-visual img {
+  width: min(100%, 360px);
+  height: auto;
+}
+
+/* Google Play button */
+.mk-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 10px 14px;
+  border-radius: 14px;
+  background: #111;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: transform 160ms ease;
+}
+
+.mk-play-btn:active {
+  transform: scale(0.97);
+}
+
+.mk-play-btn span {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.mk-play-btn small {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* Sections */
+.mk-section {
+  padding: 40px 0;
+}
+
+.mk-section h2,
+.mk-doc h1 {
+  margin: 0;
+  color: var(--mk-heading);
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.mk-section-lead {
+  margin: 8px 0 0;
+  color: var(--mk-muted);
+}
+
+.mk-card {
+  background: var(--mk-card);
+  border: 1px solid var(--mk-border);
+  border-radius: 22px;
+  box-shadow: var(--mk-shadow);
+}
+
+.mk-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.mk-feature {
+  padding: 22px;
+}
+
+.mk-feature-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--mk-wine) 10%, #fff);
+  color: var(--mk-wine);
+}
+
+.mk-feature h3,
+.mk-plan h3 {
+  margin: 14px 0 6px;
+  color: var(--mk-heading);
+  font-size: 1.08rem;
+}
+
+.mk-feature p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Pricing */
+.mk-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+  align-items: stretch;
+}
+
+.mk-plan {
+  position: relative;
+  padding: 24px;
+}
+
+.mk-plan h3 {
+  margin-top: 0;
+}
+
+.mk-plan-featured {
+  border: 2px solid var(--mk-wine);
+}
+
+.mk-plan-badge {
+  position: absolute;
+  top: -12px;
+  right: 18px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--mk-wine);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mk-plan-price {
+  margin: 0;
+  color: var(--mk-heading);
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.mk-plan-price span {
+  color: var(--mk-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.mk-plan-sub {
+  margin: 4px 0 0;
+  min-height: 2.6em;
+  color: var(--mk-muted);
+  font-size: 0.88rem;
+}
+
+.mk-plan ul,
+.mk-doc ul,
+.mk-doc ol {
+  margin: 16px 0 0;
+  padding-left: 20px;
+}
+
+.mk-plan li {
+  margin: 6px 0;
+  font-size: 0.93rem;
+}
+
+/* Download */
+.mk-download {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 32px;
+  margin-top: 16px;
+  padding: 32px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--mk-wine), var(--mk-wine-dark));
+  color: #fff;
+}
+
+.mk-download h2 {
+  margin-top: 12px;
+  color: #fff;
+}
+
+.mk-download p {
+  margin: 8px 0 20px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.mk-download-copy img {
+  border-radius: 14px;
+}
+
+.mk-qr {
+  margin: 0;
+  padding: 14px;
+  border-radius: 20px;
+  background: #fff;
+  text-align: center;
+}
+
+.mk-qr img {
+  display: block;
+}
+
+.mk-qr figcaption {
+  margin-top: 6px;
+  color: var(--mk-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* Simple text pages (account deletion, open-in-app) */
+.mk-doc {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 0 16px;
+}
+
+.mk-doc h2 {
+  margin: 28px 0 0;
+  color: var(--mk-heading);
+  font-size: 1.2rem;
+}
+
+.mk-doc li {
+  margin: 8px 0;
+}
+
+/* The app's global reset removes list markers; documents and plan lists need them back. */
+.mk-doc ol {
+  list-style: decimal;
+}
+
+.mk-doc ul,
+.mk-plan ul {
+  list-style: disc;
+}
+
+.mk-doc li::marker,
+.mk-plan li::marker {
+  color: var(--mk-wine);
+  font-weight: 700;
+}
+
+.mk-doc p {
+  margin: 12px 0 0;
+}
+
+.mk-doc a:not(.mk-play-btn) {
+  color: var(--mk-wine);
+  font-weight: 600;
+}
+
+.mk-doc-center {
+  text-align: center;
+}
+
+.mk-doc-center .mk-play-btn {
+  margin-top: 8px;
+}
+
+/* Footer */
+.mk-footer {
+  display: grid;
+  gap: 14px;
+  padding: 28px max(20px, env(safe-area-inset-left)) calc(28px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--mk-border);
+  background: var(--mk-card);
+  font-size: 0.88rem;
+}
+
+.mk-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mk-footer-brand img {
+  border-radius: 8px;
+}
+
+.mk-footer-brand p {
+  margin: 0;
+}
+
+.mk-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.mk-footer-links a {
+  color: var(--mk-wine);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mk-footer-copy {
+  margin: 0;
+  color: var(--mk-muted);
+}
+
+/* Phones */
+@media (max-width: 860px) {
+  .mk-hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 32px;
+  }
+
+  .mk-hero-visual {
+    order: -1;
+  }
+
+  .mk-hero-visual img {
+    width: min(100%, 240px);
+  }
+
+  .mk-feature-grid,
+  .mk-pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mk-download {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  /* On a phone the visitor taps the Play button; scanning their own screen is not possible. */
+  .mk-qr {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-play-btn {
+    transition: none;
+  }
+}

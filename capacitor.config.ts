@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: 'TailorDeck',
   webDir: 'dist',
   bundledWebRuntime: false,
+  // Pinch-to-zoom for users who need larger text (also requires the viewport meta in index.html to allow it).
+  zoomEnabled: true,
   plugins: {
     SplashScreen: {
       launchAutoHide: true,

@@ -26,9 +26,35 @@ function clickOpenCloseControl(): boolean {
   return false
 }
 
+const KEYBOARD_OPEN_DELAY_MS = 350
+
+/** After the keyboard opens, bring the focused field to the middle of the screen so it is not hidden. */
+function useKeepFocusedFieldVisible() {
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return undefined
+
+    let timer = 0
+    function handleFocusIn(event: FocusEvent) {
+      const target = event.target
+      if (!(target instanceof HTMLElement) || !target.matches('input, textarea, select, [contenteditable="true"]')) return
+      window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        if (document.activeElement === target) target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      }, KEYBOARD_OPEN_DELAY_MS)
+    }
+
+    document.addEventListener('focusin', handleFocusIn)
+    return () => {
+      window.clearTimeout(timer)
+      document.removeEventListener('focusin', handleFocusIn)
+    }
+  }, [])
+}
+
 export default function NativeAppShell() {
   const location = useLocation()
   const navigate = useNavigate()
+  useKeepFocusedFieldVisible()
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return undefined

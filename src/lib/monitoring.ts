@@ -1,8 +1,13 @@
-import * as Sentry from '@sentry/react'
 import type { User } from '@supabase/supabase-js'
+
+type SentryModule = typeof import('@sentry/react')
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN
 let actionTrackerInstalled = false
+// Sentry is downloaded only when a DSN is configured, so it never slows app start when reporting is off.
+let Sentry: SentryModule | null = null
+const pendingErrors: Array<{ error: unknown; context?: Record<string, unknown> }> = []
+let latestUser: { user: User | null; loading: boolean } | null = null
 
 type MonitoringAuthState = 'loading' | 'authenticated' | 'anonymous'
 
@@ -25,23 +30,38 @@ let lastAction: LastAction | null = null
 export function initMonitoring() {
   if (!sentryDsn) return
 
-  Sentry.init({
-    dsn: sentryDsn,
-    environment: import.meta.env.MODE,
-    replaysOnErrorSampleRate: import.meta.env.PROD ? 0.1 : 0,
-    replaysSessionSampleRate: 0,
-    tracesSampleRate: import.meta.env.PROD ? 0.05 : 0,
-  })
   installActionTracker()
+  void import('@sentry/react')
+    .then((module) => {
+      module.init({
+        dsn: sentryDsn,
+        environment: import.meta.env.MODE,
+        replaysOnErrorSampleRate: import.meta.env.PROD ? 0.1 : 0,
+        replaysSessionSampleRate: 0,
+        tracesSampleRate: import.meta.env.PROD ? 0.05 : 0,
+      })
+      Sentry = module
+      if (latestUser) setMonitoringUser(latestUser.user, latestUser.loading)
+      setMonitoringRouteContext(currentContext)
+      for (const pending of pendingErrors.splice(0)) reportError(pending.error, pending.context)
+    })
+    .catch((error) => console.warn('Error monitoring failed to load:', error))
 }
 
 export function reportError(error: unknown, context?: Record<string, unknown>) {
   if (!sentryDsn) return
+  if (!Sentry) {
+    // Errors that happen while Sentry is still downloading are sent once it is ready.
+    if (pendingErrors.length < 20) pendingErrors.push({ error, context })
+    return
+  }
   Sentry.captureException(error, { extra: { ...getBaseErrorContext(), ...context } })
 }
 
 export function setMonitoringUser(user: User | null, loading = false) {
   if (!sentryDsn) return
+  latestUser = { user, loading }
+  if (!Sentry) return
 
   const authState: MonitoringAuthState = loading ? 'loading' : user ? 'authenticated' : 'anonymous'
   currentContext = { ...currentContext, authState }
@@ -62,6 +82,7 @@ export function setMonitoringRouteContext(context: MonitoringContext) {
   if (!sentryDsn) return
 
   currentContext = { ...currentContext, ...context }
+  if (!Sentry) return
   if (context.path) Sentry.setTag('route', context.path)
   if (context.plan) Sentry.setTag('plan', context.plan)
   if (context.authState) Sentry.setTag('auth_state', context.authState)
@@ -104,6 +125,7 @@ function trackAction(action: Omit<LastAction, 'at'>) {
     ...action,
     at: new Date().toISOString(),
   }
+  if (!Sentry) return
 
   Sentry.addBreadcrumb({
     category: 'ui.action',
@@ -138,5 +160,3 @@ function getBaseErrorContext() {
     plan: currentContext.plan ?? 'unknown',
   }
 }
-
-export { Sentry }

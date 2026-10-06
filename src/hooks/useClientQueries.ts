@@ -1,9 +1,16 @@
-﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createClient, getClient, getClients, softDeleteClient, updateClient } from '../services/clientService'
+﻿import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { createClient, getClient, getClientsPage, softDeleteClient, updateClient } from '../services/clientService'
 import { queryKeys } from './queryKeys'
 
-export function useClientsQuery() {
-  return useQuery({ queryKey: queryKeys.clients, queryFn: () => getClients() })
+/** Clients list in pages of 50 with server-side search; call fetchNextPage for "Load more". */
+export function useClientsListQuery(search: string) {
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.clients, 'list', search.trim().toLowerCase()],
+    queryFn: ({ pageParam }) => getClientsPage({ search, offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+    placeholderData: keepPreviousData,
+  })
 }
 
 export function useClientQuery(id: string | undefined) {

@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { Home, MoreHorizontal, Plus, Scissors, Users } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -47,14 +46,10 @@ export default function BottomNav() {
         aria-current={active ? 'page' : undefined}
       >
         <span className="clay-nav-hitbox">
-          <motion.span
-            className="clay-nav-icon-wrap"
-            animate={{ scale: active ? 1.12 : 1, y: active ? -1 : 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          >
-            {active ? <motion.span layoutId="clayNavKnob" className="clay-nav-knob" /> : null}
+          <span className={`clay-nav-icon-wrap${active ? ' active' : ''}`}>
+            {active ? <span className="clay-nav-knob" /> : null}
             <Icon size={20} strokeWidth={active ? 2.5 : 1.8} className="clay-nav-icon" />
-          </motion.span>
+          </span>
           <span className={`clay-nav-label${active ? ' active' : ''}`}>{item.label}</span>
         </span>
       </Link>
@@ -67,13 +62,9 @@ export default function BottomNav() {
         <div className="clay-nav-side">{leftItems.map(renderNavItem)}</div>
 
         <Link to="/jobs/new" className="clay-nav-fab-wrap" aria-label="Create new job">
-          <motion.span
-            className="clay-nav-fab clay-primary"
-            whileTap={{ scale: 0.88 }}
-            transition={{ type: 'spring', mass: 0.5, stiffness: 260, damping: 15 }}
-          >
+          <span className="clay-nav-fab clay-primary">
             <Plus size={27} strokeWidth={2.5} />
-          </motion.span>
+          </span>
         </Link>
 
         <div className="clay-nav-side">{rightItems.map(renderNavItem)}</div>

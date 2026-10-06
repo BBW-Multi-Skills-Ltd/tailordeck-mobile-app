@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../components/shared/EmptyState'
 import SegmentedControl from '../components/shared/SegmentedControl'
-import { useJobsQuery } from '../hooks/useJobQueries'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { useJobsListQuery } from '../hooks/useJobQueries'
 import { formatDateShort, formatNaira, getInitial } from '../lib/utils'
 import type { JobStatus } from '../types/job'
 
@@ -21,22 +22,10 @@ function statusClass(status: JobStatus): string {
 export default function Jobs() {
   const [activeFilter, setActiveFilter] = useState<JobFilter>('All')
   const [search, setSearch] = useState('')
-  const jobsQuery = useJobsQuery(activeFilter === 'All' ? undefined : activeFilter)
-  const jobs = useMemo(() => jobsQuery.data ?? [], [jobsQuery.data])
-
-  const filteredJobs = useMemo(() => {
-    const term = search.trim().toLowerCase()
-    if (!term) return jobs
-    return jobs.filter((job) => job.clientName.toLowerCase().includes(term))
-  }, [jobs, search])
-
-  const sortedJobs = useMemo(
-    () =>
-      [...filteredJobs].sort((a, b) =>
-        a.createdDate < b.createdDate ? 1 : -1,
-      ),
-    [filteredJobs],
-  )
+  const debouncedSearch = useDebouncedValue(search)
+  // Server-side search and paging: every job can be found, not only the first page.
+  const jobsQuery = useJobsListQuery(activeFilter === 'All' ? undefined : activeFilter, debouncedSearch)
+  const sortedJobs = useMemo(() => jobsQuery.data?.pages.flatMap((page) => page.items) ?? [], [jobsQuery.data])
 
   function emptyMessage(filter: JobFilter): string {
     if (search.trim()) return `No ${filter === 'All' ? 'jobs' : filter.toLowerCase()} match that search.`
@@ -117,6 +106,16 @@ export default function Jobs() {
               </Link>
             </motion.article>
           ))}
+          {jobsQuery.hasNextPage ? (
+            <button
+              type="button"
+              className="btn btn-secondary btn-full"
+              disabled={jobsQuery.isFetchingNextPage}
+              onClick={() => void jobsQuery.fetchNextPage()}
+            >
+              {jobsQuery.isFetchingNextPage ? 'Loading...' : 'Load more jobs'}
+            </button>
+          ) : null}
         </motion.div>
       )}
     </section>

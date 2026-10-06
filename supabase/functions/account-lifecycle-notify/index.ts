@@ -65,8 +65,8 @@ function messageFor(eventType: AccountLifecycleEvent, profile: Profile): { subje
     return {
       subject: 'TailorDeck account deletion requested',
       title: 'Account deletion requested',
-      body: `${name}, your TailorDeck account is locked and scheduled for permanent deletion on ${formatDate(profile.deletion_scheduled_at)}. If this was a mistake, sign in before that date to restore your account.`,
-      action: `${appUrl}/account-status`,
+      body: `${name}, your TailorDeck account is locked and scheduled for permanent deletion on ${formatDate(profile.deletion_scheduled_at)}. If this was a mistake, sign in to the TailorDeck app before that date to restore your account.`,
+      action: appUrl,
     }
   }
 
@@ -74,8 +74,8 @@ function messageFor(eventType: AccountLifecycleEvent, profile: Profile): { subje
     return {
       subject: 'TailorDeck account deactivated',
       title: 'Account deactivated',
-      body: `${name}, your TailorDeck account has been paused. Your shop data is still kept safely. You can sign in again when you want to restore access.`,
-      action: `${appUrl}/account-status`,
+      body: `${name}, your TailorDeck account has been paused. Your shop data is still kept safely. Sign in to the TailorDeck app again when you want to restore access.`,
+      action: appUrl,
     }
   }
 
@@ -133,7 +133,7 @@ Deno.serve(async (request) => {
     const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <noreply@tailordeck.app>'
     const content = messageFor(eventType as AccountLifecycleEvent, profile)
     const actionMarkup = content.action
-      ? `<p><a href="${htmlEscape(content.action)}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#7B1E37;color:#fff;text-decoration:none;font-weight:700;">Open TailorDeck</a></p>`
+      ? `<p><a href="${htmlEscape(content.action)}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#7B1E37;color:#fff;text-decoration:none;font-weight:700;">Get the TailorDeck app</a></p>`
       : ''
 
     const html = `

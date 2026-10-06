@@ -1,5 +1,8 @@
 import { isRecoverableChunkError, recoverFromStaleAppShell } from '../../lib/appRecovery'
 
+// Below this share of the full page width, a one-page document is too small to read comfortably.
+const MIN_ONE_PAGE_SCALE = 0.7
+
 export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | null): Promise<Blob | null> {
   if (!docPreviewNode) return null
 
@@ -20,17 +23,33 @@ export async function buildJobDocumentPdfBlob(docPreviewNode: HTMLDivElement | n
       },
     })
 
-    const imageData = canvas.toDataURL('image/png')
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
     const margin = 6
-    const imageRatio = Math.min((pageWidth - margin * 2) / canvas.width, (pageHeight - margin * 2) / canvas.height)
-    const width = canvas.width * imageRatio
-    const height = canvas.height * imageRatio
-    const x = (pageWidth - width) / 2
-    const y = (pageHeight - height) / 2
-    pdf.addImage(imageData, 'PNG', x, y, width, height)
+    const usableWidth = pageWidth - margin * 2
+    const usableHeight = pageHeight - margin * 2
+    const fitRatio = Math.min(usableWidth / canvas.width, usableHeight / canvas.height)
+    const fullWidthRatio = usableWidth / canvas.width
+
+    // Normal documents keep the one-page layout. Long ones (many items) would shrink until unreadable,
+    // so they continue onto extra pages at full width instead.
+    if (fitRatio >= fullWidthRatio * MIN_ONE_PAGE_SCALE) {
+      const width = canvas.width * fitRatio
+      const height = canvas.height * fitRatio
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', (pageWidth - width) / 2, (pageHeight - height) / 2, width, height)
+      return pdf.output('blob')
+    }
+
+    const sliceHeightPx = Math.floor(usableHeight / fullWidthRatio)
+    for (let top = 0, page = 0; top < canvas.height; top += sliceHeightPx, page += 1) {
+      const slice = document.createElement('canvas')
+      slice.width = canvas.width
+      slice.height = Math.min(sliceHeightPx, canvas.height - top)
+      slice.getContext('2d')?.drawImage(canvas, 0, top, canvas.width, slice.height, 0, 0, canvas.width, slice.height)
+      if (page > 0) pdf.addPage()
+      pdf.addImage(slice.toDataURL('image/png'), 'PNG', margin, margin, usableWidth, slice.height * fullWidthRatio)
+    }
     return pdf.output('blob')
   } finally {
     captureNode.parentElement?.remove()

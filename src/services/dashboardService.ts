@@ -1,4 +1,5 @@
-﻿import { supabase } from '../lib/supabase'
+﻿import { toLocalMonthKey } from '../lib/localDate'
+import { supabase } from '../lib/supabase'
 import type { JobRow } from './types'
 import { requireUserId } from './serviceHelpers'
 import { mapJobRow } from './mappers/jobMapper'
@@ -65,7 +66,7 @@ export async function getHomeCurrentMonthSummary(): Promise<HomeSummary> {
   await requireUserId()
   const { data, error } = await supabase.rpc('get_home_current_month_summary').maybeSingle<HomeSummaryRpcRow>()
   if (error) throw error
-  const fallbackMonth = new Date().toISOString().slice(0, 7)
+  const fallbackMonth = toLocalMonthKey()
   return {
     month: data?.month ?? fallbackMonth,
     jobs: data?.jobs ?? 0,

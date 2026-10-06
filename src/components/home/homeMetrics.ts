@@ -1,5 +1,6 @@
 import { RiScissorsLine } from 'react-icons/ri'
 import { TbMoneybag } from 'react-icons/tb'
+import { toLocalMonthKey } from '../../lib/localDate'
 import { formatNaira } from '../../lib/money'
 import type { HomeSummary, MonthlyStat } from '../../services/dashboardService'
 import type { JobStatus } from '../../types/job'
@@ -20,7 +21,7 @@ export function getGreeting(): string {
 }
 
 export function getCurrentMonthStats(monthlyStats: MonthlyStat[] = []): MonthlyStat | undefined {
-  const currentMonth = new Date().toISOString().slice(0, 7)
+  const currentMonth = toLocalMonthKey()
   return monthlyStats.find((stat) => stat.month === currentMonth)
 }
 

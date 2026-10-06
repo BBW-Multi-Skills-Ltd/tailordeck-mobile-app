@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
 import { sendPasswordReset } from '../services/authService'
 
 export default function ForgotPassword() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -15,10 +16,12 @@ export default function ForgotPassword() {
     setErrorMessage('')
     setLoading(true)
     try {
-      await sendPasswordReset(email)
-      setMessage('Password reset link sent. Check your email.')
+      const normalizedEmail = email.trim().toLowerCase()
+      await sendPasswordReset(normalizedEmail)
+      // The reset is finished in the app with the emailed code (email links can't open the Android app).
+      navigate(`/auth/reset-password?email=${encodeURIComponent(normalizedEmail)}`)
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to send reset link.')
+      setErrorMessage(error instanceof Error ? error.message : 'Unable to send reset code.')
     } finally {
       setLoading(false)
     }
@@ -43,7 +46,7 @@ export default function ForgotPassword() {
         </div>
 
         <button type="submit" className="btn btn-primary btn-full auth-submit" disabled={loading}>
-          {loading ? 'Sending...' : 'Send Reset Link'}
+          {loading ? 'Sending...' : 'Send Reset Code'}
         </button>
 
         {message ? <p className="auth-feedback success" role="status">{message}</p> : null}

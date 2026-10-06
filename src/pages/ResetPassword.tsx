@@ -1,15 +1,17 @@
 import { Check, Eye, EyeOff } from 'lucide-react'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AuthShell from '../components/auth/AuthShell'
 import { PasswordChecklist, PasswordStrength } from '../components/auth/PasswordStrength'
 import { passwordChecks, passwordStrength } from '../lib/formValidation'
 import { scrollFirstFormErrorIntoView } from '../lib/scroll'
 import { supabase } from '../lib/supabase'
-import { updateLoginPassword } from '../services/authService'
+import { sendPasswordReset, updateLoginPassword, verifyPasswordResetCode } from '../services/authService'
+import { EMAIL_OTP_LENGTH } from '../validation/authSchemas'
 
 type ResetPasswordErrors = {
   form?: string
+  code?: string
   password?: string
   confirmPassword?: string
 }
@@ -18,9 +20,17 @@ type ConfirmPasswordState = 'idle' | 'partial' | 'match' | 'mismatch'
 
 export default function ResetPassword() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  // Code mode (normal flow): reached from "Forgot password" with ?email=; the user types the emailed code.
+  // Link mode: an older reset email link that already signed the user into a recovery session.
+  const codeEmail = searchParams.get('email')?.trim().toLowerCase() || ''
+  const codeMode = Boolean(codeEmail)
+  const [code, setCode] = useState('')
+  const [codeVerified, setCodeVerified] = useState(false)
+  const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
   const [initialUrlError] = useState(getResetUrlError)
-  const [checkingSession, setCheckingSession] = useState(!initialUrlError)
-  const [recoveryReady, setRecoveryReady] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(!initialUrlError && !codeMode)
+  const [recoveryReady, setRecoveryReady] = useState(codeMode)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -36,7 +46,7 @@ export default function ResetPassword() {
 
   useEffect(() => {
     let active = true
-    if (initialUrlError) {
+    if (initialUrlError || codeMode) {
       return undefined
     }
 
@@ -65,10 +75,13 @@ export default function ResetPassword() {
       window.clearTimeout(timer)
       subscription.subscription.unsubscribe()
     }
-  }, [initialUrlError])
+  }, [codeMode, initialUrlError])
 
   function validate(): boolean {
     const nextErrors: ResetPasswordErrors = {}
+    if (codeMode && !codeVerified && !new RegExp(`^\\d{${EMAIL_OTP_LENGTH}}$`).test(code.trim())) {
+      nextErrors.code = `Enter the ${EMAIL_OTP_LENGTH}-digit code from your email.`
+    }
     if (!password) nextErrors.password = 'Fill this input.'
     else if (strength < 4) nextErrors.password = 'Use all password requirements.'
     if (!confirmPassword) nextErrors.confirmPassword = 'Fill this input.'
@@ -90,6 +103,11 @@ export default function ResetPassword() {
     setLoading(true)
     setErrors({})
     try {
+      // A code works once; if saving the password failed after it was accepted, retry without re-verifying.
+      if (codeMode && !codeVerified) {
+        await verifyPasswordResetCode({ email: codeEmail, token: code.trim() })
+        setCodeVerified(true)
+      }
       await updateLoginPassword({ password, confirmPassword })
       setSaved(true)
       window.setTimeout(() => {
@@ -103,11 +121,49 @@ export default function ResetPassword() {
     }
   }
 
+  async function resendCode() {
+    setResendState('sending')
+    setErrors({})
+    try {
+      await sendPasswordReset(codeEmail)
+      setResendState('sent')
+    } catch (error) {
+      setResendState('idle')
+      setErrors({ form: error instanceof Error ? error.message : 'Unable to send a new code.' })
+    }
+  }
+
   return (
     <AuthShell title="TailorDeck" subtitle="Create a new password">
       <form className="auth-form auth-form-signin" onSubmit={handleSubmit}>
         {checkingSession ? (
           <p className="auth-feedback success" role="status">Checking reset link...</p>
+        ) : null}
+
+        {codeMode ? (
+          <div className="input-group">
+            <p className="auth-feedback success" role="status">
+              We sent a {EMAIL_OTP_LENGTH}-digit code to {codeEmail}. Enter it below with your new password.
+            </p>
+            <label htmlFor="reset-code" className="auth-label">Reset code</label>
+            <input
+              key={`reset-code-${errorKey}`}
+              id="reset-code"
+              aria-describedby={errors.code ? 'reset-code-error' : undefined}
+              aria-invalid={Boolean(errors.code)}
+              autoComplete="one-time-code"
+              className={`auth-input${errors.code ? ' input-invalid input-shake' : ''}`}
+              inputMode="numeric"
+              maxLength={EMAIL_OTP_LENGTH}
+              placeholder={`${EMAIL_OTP_LENGTH}-digit code`}
+              value={code}
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, EMAIL_OTP_LENGTH))}
+            />
+            {errors.code ? <span id="reset-code-error" className="input-error-text">{errors.code}</span> : null}
+            <button type="button" className="auth-link-btn" disabled={resendState === 'sending'} onClick={() => void resendCode()}>
+              {resendState === 'sending' ? 'Sending...' : resendState === 'sent' ? 'New code sent' : 'Resend code'}
+            </button>
+          </div>
         ) : null}
 
         <PasswordInput

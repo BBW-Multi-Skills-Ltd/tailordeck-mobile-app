@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { Sentry } from '../../lib/monitoring'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { reportError } from '../../lib/monitoring'
 import { isRecoverableChunkError, recoverFromStaleAppShell } from '../../lib/appRecovery'
 
 function AppErrorFallback() {
@@ -33,15 +33,23 @@ function AppErrorFallback() {
   )
 }
 
-export default function AppErrorBoundary({ children }: { children: ReactNode }) {
-  return (
-    <Sentry.ErrorBoundary
-      fallback={<AppErrorFallback />}
-      onError={(error) => {
-        if (isRecoverableChunkError(error)) void recoverFromStaleAppShell(error)
-      }}
-    >
-      {children}
-    </Sentry.ErrorBoundary>
-  )
+/**
+ * Catches render crashes and shows the recovery screen. Plain React (not Sentry.ErrorBoundary) so the
+ * Sentry library is only downloaded when error reporting is configured; crashes are still reported to it.
+ */
+export default class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    if (isRecoverableChunkError(error)) void recoverFromStaleAppShell(error)
+    reportError(error, { componentStack: info.componentStack })
+  }
+
+  render() {
+    return this.state.hasError ? <AppErrorFallback /> : this.props.children
+  }
 }
