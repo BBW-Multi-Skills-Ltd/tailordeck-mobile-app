@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
-import { AlertTriangle, Bug, ChevronRight, CreditCard, Lightbulb, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
-import { useSearchParams } from 'react-router-dom'
+import { AlertTriangle, Bug, ChevronRight, CreditCard, Inbox, Lightbulb, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
+import { Link, useSearchParams } from 'react-router-dom'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 import { useSettingsQuery } from '../hooks/useSettingsQueries'
@@ -319,6 +319,15 @@ export default function Help() {
           ) : null}
         </motion.form>
       </article>
+
+      <Link to="/help/requests" className="clay-card support-requests-link">
+        <span className="support-icon-pill support-icon-pill-muted"><Inbox size={18} /></span>
+        <span>
+          <span className="settings-help-page-title">My support requests</span>
+          <span className="settings-help-page-copy">See your requests and our replies.</span>
+        </span>
+        <ChevronRight size={18} aria-hidden />
+      </Link>
     </section>
   )
 }

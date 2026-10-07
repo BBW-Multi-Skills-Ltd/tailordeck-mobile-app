@@ -4,8 +4,8 @@ import { FaApple, FaFacebookF, FaGooglePlay, FaInstagram, FaTiktok, FaWhatsapp, 
 import { Link, useLocation } from 'react-router-dom'
 import type { AppTheme } from '../lib/theme'
 import { getSiteTheme, toggleSiteTheme } from './siteTheme'
-import { PLAY_STORE_URL, SUPPORT_EMAIL } from '../lib/webAccess'
-import { marketingLinks } from './marketingContent'
+import { SUPPORT_EMAIL } from '../lib/webAccess'
+import { DEFAULT_SITE_CONTENT, fetchSiteContent, SiteContentContext, useSiteContent, type SiteContent } from './siteContent'
 
 // Website copy of the app icon: cropped to the burgundy square with transparent corners
 // (the app's icon file has a light border and shadow baked in, which showed as a white frame).
@@ -30,8 +30,9 @@ export function BrandLogo({ compact = false }: { compact?: boolean }) {
 }
 
 export function PlayButton({ children = 'Get it on Google Play', variant = 'primary' }: { children?: ReactNode; variant?: 'primary' | 'light' }) {
+  const { settings } = useSiteContent()
   return (
-    <a className={`mk-btn mk-btn-${variant}`} href={PLAY_STORE_URL} target="_blank" rel="noreferrer">
+    <a className={`mk-btn mk-btn-${variant}`} href={settings.play_store_url} target="_blank" rel="noreferrer">
       <FaGooglePlay size={16} aria-hidden />
       {children}
     </a>
@@ -39,22 +40,23 @@ export function PlayButton({ children = 'Get it on Google Play', variant = 'prim
 }
 
 /**
- * iOS badge. Not a link until the iPhone app launches; then set marketingLinks.appStore and it becomes one.
+ * iOS badge. "Coming soon" (not a link) until an App Store link is saved in the admin website manager.
  */
 export function AppStoreBadge({ variant = 'default' }: { variant?: 'default' | 'light' }) {
+  const appStoreUrl = useSiteContent().settings.app_store_url
   const content = (
     <>
       <FaApple size={19} aria-hidden />
       <span className="mk-store-text">
-        <small>{marketingLinks.appStore ? 'Download on the' : 'Coming soon on the'}</small>
+        <small>{appStoreUrl ? 'Download on the' : 'Coming soon on the'}</small>
         App Store
       </span>
     </>
   )
   const className = `mk-store-badge mk-store-badge-${variant}`
-  if (marketingLinks.appStore) {
+  if (appStoreUrl) {
     return (
-      <a className={className} href={marketingLinks.appStore} target="_blank" rel="noreferrer">
+      <a className={className} href={appStoreUrl} target="_blank" rel="noreferrer">
         {content}
       </a>
     )
@@ -164,11 +166,12 @@ function Header() {
 }
 
 function Socials() {
+  const { settings } = useSiteContent()
   const socials = [
-    { href: marketingLinks.instagram, label: 'Instagram', icon: FaInstagram },
-    { href: marketingLinks.facebook, label: 'Facebook', icon: FaFacebookF },
-    { href: marketingLinks.x, label: 'X (formerly Twitter)', icon: FaXTwitter },
-    { href: marketingLinks.tiktok, label: 'TikTok', icon: FaTiktok },
+    { href: settings.instagram_url, label: 'Instagram', icon: FaInstagram },
+    { href: settings.facebook_url, label: 'Facebook', icon: FaFacebookF },
+    { href: settings.x_url, label: 'X (formerly Twitter)', icon: FaXTwitter },
+    { href: settings.tiktok_url, label: 'TikTok', icon: FaTiktok },
   ].filter((social) => social.href)
   if (!socials.length) return null
   return (
@@ -183,7 +186,8 @@ function Socials() {
 }
 
 function Footer() {
-  const whatsappHref = marketingLinks.whatsappNumber ? `https://wa.me/${marketingLinks.whatsappNumber}` : ''
+  const { settings } = useSiteContent()
+  const whatsappHref = settings.whatsapp_number ? `https://wa.me/${settings.whatsapp_number}` : ''
   return (
     <footer className="mk-footer mk-clay">
       <div className="mk-shell mk-footer-grid">
@@ -207,8 +211,7 @@ function Footer() {
         </div>
         <div>
           <b>Company</b>
-          {marketingLinks.founderPage ? <a href={marketingLinks.founderPage}>Meet the founder</a> : null}
-          <a href={marketingLinks.companySite} target="_blank" rel="noreferrer">
+          <a href={settings.company_site} target="_blank" rel="noreferrer">
             BBW Tech Innovations
           </a>
           <a href="/#mission">Our mission</a>
@@ -250,6 +253,20 @@ function Footer() {
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   const { pathname, hash } = useLocation()
+  const [content, setContent] = useState<SiteContent>(DEFAULT_SITE_CONTENT)
+
+  // Admin-managed links, QR codes, reviews and demo video. The built-in defaults show until (or if) this loads.
+  useEffect(() => {
+    let active = true
+    fetchSiteContent()
+      .then((loaded) => {
+        if (active) setContent(loaded)
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
+    }
+  }, [])
 
   // Section links from other pages (e.g. "/#pricing") land on the home page; scroll once it has rendered.
   useEffect(() => {
@@ -262,10 +279,12 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
   }, [pathname, hash])
 
   return (
-    <div className="mk-site">
-      <Header />
-      <main className="mk-main">{children}</main>
-      <Footer />
-    </div>
+    <SiteContentContext.Provider value={content}>
+      <div className="mk-site">
+        <Header />
+        <main className="mk-main">{children}</main>
+        <Footer />
+      </div>
+    </SiteContentContext.Provider>
   )
 }

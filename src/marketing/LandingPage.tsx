@@ -1,12 +1,35 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Bell, Camera, ChartLine, FileText, Play, ShieldCheck, Sparkles, Star } from 'lucide-react'
+import { ArrowRight, Bell, Camera, ChartLine, FileText, Play, ShieldCheck, Sparkles, Star, X } from 'lucide-react'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import type { SubscriptionPlan } from '../lib/settingsTypes'
 import { AppStoreBadge, BBW_LOGO_SRC, BrandLogo, PlayButton } from './MarketingLayout'
 import PhoneMockup from './PhoneMockup'
-import { featureGroups, journey, marketingLinks, productRows, testimonials, type BadgeTone } from './marketingContent'
+import { featureGroups, journey, productRows, type BadgeTone } from './marketingContent'
+import { qrImageSrc, reviewerInitials, useSiteContent } from './siteContent'
+
+/** The demo video in a dialog; closes on the backdrop, the close button or Escape. */
+function DemoVideoDialog({ src, poster, onClose }: { src: string; poster: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div className="mk-video-backdrop" role="dialog" aria-modal="true" aria-label="TailorDeck demo video" onClick={onClose}>
+      <div className="mk-video-frame" onClick={(event) => event.stopPropagation()}>
+        <button type="button" className="mk-video-close" onClick={onClose} aria-label="Close video">
+          <X size={20} />
+        </button>
+        <video src={src} poster={poster || undefined} controls autoPlay playsInline />
+      </div>
+    </div>
+  )
+}
 
 function Badge({ children, tone = 'wine' }: { children: React.ReactNode; tone?: BadgeTone }) {
   return <span className={`mk-badge mk-badge-${tone}`}>{children}</span>
@@ -23,9 +46,9 @@ function SectionTitle({ eyebrow, title, copy, align = 'center' }: { eyebrow: str
 }
 
 /** Fades sections in as they scroll into view (skipped when the visitor prefers reduced motion). */
-function useRevealOnScroll() {
+function useRevealOnScroll(revealKey: number) {
   useEffect(() => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>('.mk-reveal'))
+    const elements = Array.from(document.querySelectorAll<HTMLElement>('.mk-reveal:not(.is-visible)'))
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
       elements.forEach((element) => element.classList.add('is-visible'))
       return undefined
@@ -42,11 +65,14 @@ function useRevealOnScroll() {
     )
     elements.forEach((element) => observer.observe(element))
     return () => observer.disconnect()
-  }, [])
+    // Re-run when reviews load, so the new cards are observed too.
+  }, [revealKey])
 }
 
 /** "Get TailorDeck on your phone" band. `centered` stacks everything in the middle with a large QR code. */
 function DownloadBand({ id, centered = false }: { id?: string; centered?: boolean }) {
+  const { settings } = useSiteContent()
+  const appStoreQr = settings.app_store_url && settings.app_store_qr_svg ? qrImageSrc(settings.app_store_qr_svg) : ''
   return (
     <section id={id} className={`mk-shell mk-download-band mk-reveal${centered ? ' mk-download-centered' : ''}`}>
       <div className="mk-download-copy">
@@ -58,10 +84,18 @@ function DownloadBand({ id, centered = false }: { id?: string; centered?: boolea
       </div>
       {centered ? (
         <>
-          <figure className="mk-qr-card mk-qr-card-large">
-            <img src="/marketing/google-play-qr.svg" alt="QR code to download TailorDeck on Google Play" width={240} height={240} loading="lazy" />
-            <figcaption>Scan to download</figcaption>
-          </figure>
+          <div className="mk-qr-row">
+            <figure className="mk-qr-card mk-qr-card-large">
+              <img src={qrImageSrc(settings.play_store_qr_svg)} alt="QR code to download TailorDeck on Google Play" width={240} height={240} loading="lazy" />
+              <figcaption>{appStoreQr ? 'Scan for Google Play' : 'Scan to download'}</figcaption>
+            </figure>
+            {appStoreQr ? (
+              <figure className="mk-qr-card mk-qr-card-large">
+                <img src={appStoreQr} alt="QR code to download TailorDeck on the App Store" width={240} height={240} loading="lazy" />
+                <figcaption>Scan for the App Store</figcaption>
+              </figure>
+            ) : null}
+          </div>
           <div className="mk-store-row">
             <PlayButton variant="light" />
             <AppStoreBadge variant="light" />
@@ -74,7 +108,7 @@ function DownloadBand({ id, centered = false }: { id?: string; centered?: boolea
             <AppStoreBadge variant="light" />
           </div>
           <figure className="mk-qr-card">
-            <img src="/marketing/google-play-qr.svg" alt="QR code to download TailorDeck on Google Play" width={92} height={92} />
+            <img src={qrImageSrc(settings.play_store_qr_svg)} alt="QR code to download TailorDeck on Google Play" width={92} height={92} />
             <figcaption>Scan to download</figcaption>
           </figure>
         </>
@@ -93,7 +127,9 @@ const journeyBadges: Record<number, { icon: typeof Bell; label: string }> = {
 export default function LandingPage() {
   const [cycle, setCycle] = useState<BillingCycle>('monthly')
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('pro')
-  useRevealOnScroll()
+  const [videoOpen, setVideoOpen] = useState(false)
+  const { settings, reviews } = useSiteContent()
+  useRevealOnScroll(reviews.length)
 
   return (
     <>
@@ -138,10 +174,10 @@ export default function LandingPage() {
         <div className="mk-phone-stage mk-reveal">
           <div className="mk-glow" />
           <PhoneMockup />
-          {marketingLinks.demoVideo ? (
-            <a className="mk-demo-play" href={marketingLinks.demoVideo} target="_blank" rel="noreferrer" aria-label="Watch the app demo">
+          {settings.demo_video_url ? (
+            <button type="button" className="mk-demo-play" onClick={() => setVideoOpen(true)} aria-label="Watch the app demo">
               <Play size={24} />
-            </a>
+            </button>
           ) : null}
           <div className="mk-float-chip mk-chip-one">
             <Bell size={17} />
@@ -250,7 +286,7 @@ export default function LandingPage() {
           <p>
             TailorDeck is built by <b>BBW Tech Innovations</b>, the technology division of BBW Multi-Skills Ltd.
           </p>
-          <a href={marketingLinks.companySite} target="_blank" rel="noreferrer">
+          <a href={settings.company_site} target="_blank" rel="noreferrer">
             Learn more about BBW Tech Innovations <ArrowRight size={16} />
           </a>
         </article>
@@ -260,23 +296,21 @@ export default function LandingPage() {
       <section className="mk-section mk-section-muted">
         <div className="mk-shell">
           <SectionTitle eyebrow="EARLY WORDS" title="What people are saying" copy="Real reviews from tailors using TailorDeck." />
-          {testimonials.length ? (
+          {reviews.length ? (
             <div className="mk-testimonials">
-              {testimonials.map((review) => (
-                <article key={review.name} className="mk-testimonial mk-clay mk-reveal">
-                  <div className="mk-stars" aria-label="5 out of 5 stars">
-                    {Array.from({ length: 5 }, (_, index) => (
+              {reviews.map((review) => (
+                <article key={review.id} className="mk-testimonial mk-clay mk-reveal">
+                  <div className="mk-stars" aria-label={`${review.rating} out of 5 stars`}>
+                    {Array.from({ length: review.rating }, (_, index) => (
                       <Star key={index} size={15} fill="currentColor" />
                     ))}
                   </div>
                   <blockquote>“{review.quote}”</blockquote>
                   <div className="mk-person">
-                    <span>{review.initials}</span>
+                    <span>{reviewerInitials(review.name)}</span>
                     <div>
                       <b>{review.name}</b>
-                      <small>
-                        {review.shop} • {review.city}
-                      </small>
+                      {review.shop || review.city ? <small>{[review.shop, review.city].filter(Boolean).join(' • ')}</small> : null}
                     </div>
                   </div>
                 </article>
@@ -320,6 +354,10 @@ export default function LandingPage() {
       <div className="mk-section">
         <DownloadBand centered />
       </div>
+
+      {videoOpen && settings.demo_video_url ? (
+        <DemoVideoDialog src={settings.demo_video_url} poster={settings.demo_video_poster_url} onClose={() => setVideoOpen(false)} />
+      ) : null}
     </>
   )
 }

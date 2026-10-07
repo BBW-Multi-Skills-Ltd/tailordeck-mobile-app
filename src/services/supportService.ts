@@ -101,6 +101,54 @@ export async function createSupportTicket(input: CreateSupportTicketInput): Prom
   return data
 }
 
+export type SupportTicketSummary = Pick<
+  SupportTicketRow,
+  'id' | 'category' | 'status' | 'subject' | 'message' | 'created_at' | 'updated_at'
+> & { last_reply_at: string | null }
+
+export type SupportTicketReply = { id: string; body: string; created_at: string }
+
+const SUMMARY_COLUMNS = 'id,category,status,subject,message,created_at,updated_at,last_reply_at'
+
+/** The signed-in user's own support requests, newest first. */
+export async function getMySupportTickets(): Promise<SupportTicketSummary[]> {
+  const userId = await requireUserId()
+  const { data, error } = await supabase
+    .from('support_tickets')
+    .select(SUMMARY_COLUMNS)
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+    .limit(50)
+    .returns<SupportTicketSummary[]>()
+  if (error) throw error
+  return data ?? []
+}
+
+/** One of the user's requests with TailorDeck's replies (RLS limits both to the owner). */
+export async function getMySupportTicket(ticketId: string): Promise<{ ticket: SupportTicketSummary; replies: SupportTicketReply[] } | null> {
+  const userId = await requireUserId()
+  const [ticketResult, repliesResult] = await Promise.all([
+    supabase
+      .from('support_tickets')
+      .select(SUMMARY_COLUMNS)
+      .eq('id', ticketId)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .maybeSingle<SupportTicketSummary>(),
+    supabase
+      .from('support_ticket_replies')
+      .select('id,body,created_at')
+      .eq('ticket_id', ticketId)
+      .order('created_at', { ascending: true })
+      .returns<SupportTicketReply[]>(),
+  ])
+  if (ticketResult.error) throw ticketResult.error
+  if (repliesResult.error) throw repliesResult.error
+  if (!ticketResult.data) return null
+  return { ticket: ticketResult.data, replies: repliesResult.data ?? [] }
+}
+
 async function notifySupportTeam(ticketId: string): Promise<void> {
   const { error } = await supabase.functions.invoke('support-ticket-notify', {
     body: { ticketId },

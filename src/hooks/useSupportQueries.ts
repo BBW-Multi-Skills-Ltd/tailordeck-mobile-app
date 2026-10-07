@@ -1,6 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createSupportTicket, getSupportTicketCooldown } from '../services/supportService'
+import { createSupportTicket, getMySupportTicket, getMySupportTickets, getSupportTicketCooldown } from '../services/supportService'
 import { queryKeys } from './queryKeys'
+
+export function useMySupportTicketsQuery() {
+  return useQuery({
+    queryKey: queryKeys.supportTickets,
+    queryFn: getMySupportTickets,
+    staleTime: 30 * 1000,
+  })
+}
+
+export function useMySupportTicketQuery(ticketId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.supportTickets, 'detail', ticketId] as const,
+    queryFn: () => getMySupportTicket(ticketId),
+    enabled: Boolean(ticketId),
+    staleTime: 15 * 1000,
+  })
+}
 
 export function useSupportCooldownQuery() {
   return useQuery({

@@ -997,6 +997,57 @@
   height: 240px;
 }
 
+.mk-qr-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+}
+
+/* Demo video dialog */
+button.mk-demo-play {
+  cursor: pointer;
+  padding: 0;
+}
+
+.mk-video-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(10, 6, 8, 0.82);
+}
+
+.mk-video-frame {
+  position: relative;
+  width: min(960px, 100%);
+}
+
+.mk-video-frame video {
+  display: block;
+  width: 100%;
+  max-height: 82vh;
+  border-radius: 18px;
+  background: #000;
+}
+
+.mk-video-close {
+  position: absolute;
+  top: -48px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+}
+
 /* Mission */
 .mk-mission-grid {
   display: grid;

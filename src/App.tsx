@@ -24,6 +24,7 @@ const More = lazyWithReload(() => import('./pages/More'))
 const Business = lazyWithReload(() => import('./pages/Business'))
 const Documents = lazyWithReload(() => import('./pages/Documents'))
 const Help = lazyWithReload(() => import('./pages/Help'))
+const SupportRequests = lazyWithReload(() => import('./pages/SupportRequests'))
 const OnboardingWelcome = lazyWithReload(() => import('./pages/OnboardingWelcome'))
 const OnboardingSetup = lazyWithReload(() => import('./pages/OnboardingSetup'))
 const OnboardingPlan = lazyWithReload(() => import('./pages/OnboardingPlan'))
@@ -70,6 +71,8 @@ export default function App() {
             <Route path="/business" element={<Business />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/help" element={<Help />} />
+            <Route path="/help/requests" element={<SupportRequests />} />
+            <Route path="/help/requests/:id" element={<SupportRequests />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/reminders" element={<SettingsReminders />} />
             <Route path="/settings/security" element={<SettingsSecurity />} />
