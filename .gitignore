@@ -20,6 +20,10 @@ dist-ssr
 .playwright/.auth
 .vercel
 
+# Local-only planning docs and agent rules (never pushed)
+docs/
+CLAUDE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
