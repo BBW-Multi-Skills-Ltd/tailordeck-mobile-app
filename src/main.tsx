@@ -17,6 +17,7 @@ import NativeAppShell from './components/shared/NativeAppShell'
 import NativeNotificationBridge from './components/shared/NativeNotificationBridge'
 import { isFullAppAllowed } from './lib/webAccess'
 import MarketingApp from './marketing/LazyMarketingApp'
+import { applySiteTheme, getSiteTheme } from './marketing/siteTheme'
 
 /** People who installed the old web app (PWA) get its offline cache removed so they see the current site. */
 async function removeInstalledWebApp(): Promise<void> {
@@ -43,9 +44,16 @@ const queryClient = new QueryClient({
   },
 })
 
-initializeTheme()
-// Crash reporting is for the app only; the marketing website does not need it.
-if (isFullAppAllowed()) initMonitoring()
+const fullAppAllowed = isFullAppAllowed()
+
+if (fullAppAllowed) {
+  initializeTheme()
+  // Crash reporting is for the app only; the marketing website does not need it.
+  initMonitoring()
+} else {
+  // The website has its own theme (dark by default), applied before the first paint to avoid a light flash.
+  applySiteTheme(getSiteTheme())
+}
 installAppRecoveryHandlers()
 
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {
@@ -66,7 +74,6 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   })
 }
 
-const fullAppAllowed = isFullAppAllowed()
 if (!fullAppAllowed) {
   void removeInstalledWebApp()
   // The app is phone-width only (#root max-width); the marketing site needs the full desktop width.

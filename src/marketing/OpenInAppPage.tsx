@@ -1,4 +1,4 @@
-import { GooglePlayButton } from './MarketingLayout'
+import { PlayButton } from './MarketingLayout'
 
 /** Shown for old email links (password reset, etc.) opened in a browser: TailorDeck accounts are managed in the app. */
 export default function OpenInAppPage() {
@@ -11,7 +11,7 @@ export default function OpenInAppPage() {
         email you.
       </p>
       <p>Don&apos;t have the app yet?</p>
-      <GooglePlayButton />
+      <PlayButton />
     </article>
   )
 }

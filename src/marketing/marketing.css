@@ -1,4 +1,7 @@
-/* Public marketing website (browsers only). Scoped under .mk-site; loaded only with the marketing bundle. */
+/*
+ * Public marketing website (browsers only), from the Figma Make design "Responsive Marketing Website".
+ * Built on the app's own design tokens (src/index.css) so light/dark theme and claymorphism match the app.
+ */
 
 /* The app shell caps #root at phone width; the website uses the whole window. */
 #root.mk-root {
@@ -6,385 +9,1335 @@
 }
 
 .mk-site {
-  --mk-wine: #7b1e37;
-  --mk-wine-dark: #5a1528;
-  --mk-gold: #c9a84c;
-  --mk-bg: #faf8f5;
-  --mk-card: #ffffff;
-  --mk-text: #4a3728;
-  --mk-heading: #1c0f0a;
-  --mk-muted: #8a7060;
-  --mk-border: rgba(232, 224, 216, 0.95);
-  --mk-shadow: 0 10px 26px rgba(74, 55, 40, 0.1), 0 2px 7px rgba(74, 55, 40, 0.07);
+  --mk-on-primary: #faf0e8;
+  --mk-primary-gradient: linear-gradient(145deg, var(--primary-light), var(--primary));
+  --mk-primary-shadow: var(--clay-shadow-primary);
+  --mk-header-bg: rgba(255, 255, 255, 0.82);
 
   min-height: 100vh;
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: var(--mk-bg);
-  color: var(--mk-text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.55;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.65;
+  overflow: clip;
+  transition: background 180ms ease, color 180ms ease;
 }
 
-.mk-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px max(20px, env(safe-area-inset-right)) 12px max(20px, env(safe-area-inset-left));
-  background: color-mix(in srgb, var(--mk-bg) 88%, transparent);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--mk-border);
+:root[data-theme='dark'] .mk-site {
+  --mk-on-primary: #211a0b;
+  --mk-primary-shadow: 0 12px 28px rgba(201, 168, 76, 0.22), 0 4px 10px rgba(201, 168, 76, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --mk-header-bg: rgba(21, 26, 32, 0.86);
 }
 
+.mk-site a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mk-site h1,
+.mk-site h2,
+.mk-site h3 {
+  margin-top: 0;
+  color: var(--text-h);
+  line-height: 1.1;
+}
+
+.mk-site h2 {
+  margin-bottom: 18px;
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  letter-spacing: -0.03em;
+}
+
+.mk-site h3 {
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.mk-site p {
+  margin-top: 0;
+  color: var(--text-muted);
+}
+
+.mk-shell {
+  width: min(1180px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.mk-section {
+  padding-block: 104px;
+}
+
+.mk-section-muted {
+  background: var(--bg-muted);
+}
+
+.mk-site section[id] {
+  scroll-margin-top: 96px;
+}
+
+.mk-clay {
+  background: var(--clay-surface);
+  border: 1px solid var(--clay-border);
+  box-shadow: var(--clay-shadow-rest);
+}
+
+.mk-main {
+  display: block;
+}
+
+.mk-page-loading {
+  min-height: 60vh;
+}
+
+/* Brand & buttons */
 .mk-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--mk-wine);
+  gap: 9px;
+  color: var(--primary);
   font-weight: 800;
-  font-size: 1.15rem;
-  text-decoration: none;
+  font-size: 19px;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
 }
 
 .mk-brand img {
   border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(123, 30, 55, 0.25);
 }
 
-.mk-header-cta {
-  padding: 9px 16px;
-  border-radius: 999px;
-  background: var(--mk-wine);
-  color: #fff;
+.mk-btn {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 0.9rem;
-  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease;
+}
+
+.mk-btn:hover {
+  transform: translateY(-2px);
+}
+
+.mk-btn:active {
+  transform: scale(0.97);
+}
+
+.mk-site .mk-btn-primary {
+  color: var(--mk-on-primary);
+  background: var(--mk-primary-gradient);
+  box-shadow: var(--mk-primary-shadow);
+  border: 1px solid color-mix(in srgb, var(--primary-light) 55%, transparent);
+}
+
+.mk-site .mk-btn-secondary {
+  color: var(--primary);
+  background: var(--clay-surface);
+  border: 1px solid var(--clay-border);
+  box-shadow: var(--clay-shadow-rest);
+}
+
+.mk-site .mk-btn-light {
+  color: #7b1e37;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* App Store badge ("coming soon" until the iPhone app launches) */
+.mk-store-badge {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 16px 6px 13px;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--radius-md);
+  background: var(--clay-surface);
+  color: var(--text-h);
+  box-shadow: var(--clay-shadow-rest);
   white-space: nowrap;
 }
 
-.mk-main {
-  flex: 1;
-  width: min(100%, 1120px);
-  margin: 0 auto;
-  padding: 0 20px 48px;
+.mk-store-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-.mk-page-loading {
-  min-height: 40vh;
+.mk-store-text small {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mk-store-badge-soon {
+  cursor: default;
+  opacity: 0.88;
+}
+
+/* On the burgundy download band */
+.mk-store-badge-light {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  box-shadow: none;
+}
+
+.mk-store-badge-light .mk-store-text small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mk-store-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.mk-icon-btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--clay-border);
+  border-radius: var(--clay-radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: var(--clay-shadow-rest);
+  cursor: pointer;
+}
+
+/* Badges (same tones as the app's plan badges) */
+.mk-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.mk-badge-wine {
+  color: var(--primary);
+  background: var(--primary-bg);
+  border-color: var(--primary-border);
+}
+
+.mk-badge-blue {
+  color: #2563eb;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.mk-badge-green {
+  color: #15803d;
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+}
+
+.mk-badge-amber {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+
+:root[data-theme='dark'] .mk-badge-blue,
+:root[data-theme='dark'] .mk-badge-green,
+:root[data-theme='dark'] .mk-badge-amber {
+  filter: brightness(0.83);
+}
+
+/* Header */
+.mk-header-veil {
+  position: fixed;
+  z-index: 49;
+  inset: 0 0 auto;
+  height: 106px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 82%, transparent), color-mix(in srgb, var(--bg) 58%, transparent) 68%, transparent);
+  backdrop-filter: blur(13px);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent);
+}
+
+.mk-header {
+  position: fixed;
+  z-index: 50;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1180px, calc(100% - 36px));
+  min-height: 68px;
+  padding: 9px 12px 9px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 22px;
+  background: var(--mk-header-bg);
+  backdrop-filter: blur(18px);
+}
+
+.mk-nav {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mk-nav a {
+  position: relative;
+  z-index: 1;
+  padding: 7px 10px;
+  border-radius: 9px;
+  transition: color 180ms ease;
+}
+
+.mk-nav a:hover,
+.mk-nav a.active {
+  color: var(--primary);
+}
+
+.mk-nav-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 9px;
+  background: var(--primary-bg);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  transition: left 320ms cubic-bezier(0.34, 1.56, 0.64, 1), width 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mk-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mk-menu-btn {
+  display: none;
+}
+
+.mk-mobile-sheet {
+  position: absolute;
+  top: 76px;
+  left: 0;
+  width: 100%;
+  padding: 18px;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: var(--clay-radius-md);
+  font-weight: 600;
+}
+
+.mk-mobile-sheet > a.active {
+  color: var(--primary);
 }
 
 /* Hero */
 .mk-hero {
+  min-height: 790px;
+  padding-top: 162px;
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1.08fr 0.92fr;
   align-items: center;
   gap: 40px;
-  padding: 56px 0 40px;
-}
-
-.mk-eyebrow {
-  margin: 0 0 10px;
-  color: var(--mk-gold);
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .mk-hero h1 {
-  margin: 0;
-  color: var(--mk-heading);
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  margin: 22px 0 26px;
+  font-size: clamp(3.5rem, 6.5vw, 6.1rem);
+  letter-spacing: -0.065em;
+}
+
+.mk-hero h1 em {
+  font-style: normal;
+  color: var(--primary);
+}
+
+.mk-hero-copy > p {
+  max-width: 650px;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.mk-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.mk-hero-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  color: var(--text-muted);
+}
+
+.mk-hero-proof {
+  margin-top: 46px;
+  padding-top: 24px;
+  display: flex;
+  gap: 36px;
+  border-top: 1px solid var(--border);
+}
+
+.mk-hero-proof span {
+  display: flex;
+  flex-direction: column;
+}
+
+.mk-hero-proof b {
+  color: var(--text-h);
+  font-size: 20px;
+}
+
+.mk-hero-proof small {
+  color: var(--text-muted);
+}
+
+.mk-phone-stage {
+  position: relative;
+  height: 620px;
+  display: grid;
+  place-items: center;
+}
+
+.mk-glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  max-width: 100%;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gold) 35%, transparent), color-mix(in srgb, var(--primary) 13%, transparent) 50%, transparent 72%);
+  filter: blur(8px);
+}
+
+.mk-demo-play {
+  position: absolute;
+  z-index: 4;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.mk-float-chip {
+  position: absolute;
+  z-index: 5;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--clay-border);
+  border-radius: 14px;
+  background: var(--bg-card);
+  box-shadow: var(--clay-shadow-rest);
+  color: var(--primary);
+  font-size: 11px;
+}
+
+.mk-float-chip span {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-muted);
+}
+
+.mk-float-chip b {
+  color: var(--text-h);
+}
+
+.mk-chip-one {
+  top: 120px;
+  right: 0;
+}
+
+.mk-chip-two {
+  bottom: 125px;
+  left: 0;
+}
+
+/* Phone mockup (always the app's light screen) */
+.mk-phone {
+  position: relative;
+  z-index: 2;
+  width: 286px;
+  height: 575px;
+  padding: 9px;
+  border-radius: 43px;
+  background: linear-gradient(145deg, #343434, #080808);
+  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.33), inset 0 0 0 2px #494949;
+  transform: rotate(2deg);
+}
+
+.mk-phone-small {
+  width: 226px;
+  height: 455px;
+  border-radius: 36px;
+  transform: none;
+}
+
+.mk-phone-notch {
+  position: absolute;
+  z-index: 4;
+  top: 15px;
+  left: 50%;
+  width: 92px;
+  height: 24px;
+  transform: translateX(-50%);
+  border-radius: 20px;
+  background: #090909;
+}
+
+.mk-phone-notch span {
+  position: absolute;
+  top: 9px;
+  right: 13px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #222;
+}
+
+.mk-phone-screen {
+  height: 100%;
+  padding: 42px 18px 16px;
+  overflow: hidden;
+  border-radius: 35px;
+  background: #faf8f5;
+  color: #4a3728;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.mk-phone-small .mk-phone-screen {
+  padding: 34px 14px 12px;
+  border-radius: 28px;
+}
+
+.mk-app-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.mk-app-top img,
+.mk-paper img {
+  border-radius: 8px;
+}
+
+.mk-avatar-dot {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f3e5e9;
+  color: #7b1e37;
+  font-size: 9px;
   font-weight: 800;
-  line-height: 1.08;
+}
+
+.mk-site .mk-phone .mk-tiny {
+  margin: 0;
+  color: #8a7060;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+}
+
+.mk-site .mk-phone h3 {
+  margin: 3px 0 15px;
+  color: #1c0f0a;
+  font-size: 18px;
+}
+
+.mk-app-profit {
+  padding: 19px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #9b2647, #6c1831);
+  color: #fff;
+  box-shadow: 0 12px 22px rgba(123, 30, 55, 0.27);
+}
+
+.mk-app-profit span,
+.mk-app-profit small {
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+.mk-app-profit strong {
+  margin: 4px 0;
+  font-size: 24px;
+}
+
+.mk-mini-stats {
+  margin: 11px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mk-mini-stats span {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 13px;
+  background: #f2eee9;
+  font-size: 8px;
+}
+
+.mk-mini-stats b {
+  color: #1c0f0a;
+  font-size: 17px;
+}
+
+.mk-app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mk-app-list > span {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #e8e0d8;
+  border-radius: 11px;
+}
+
+.mk-app-list i {
+  color: #7b1e37;
+  font-style: normal;
+  font-size: 8px;
+}
+
+.mk-fake-field {
+  margin: 8px 0;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px;
+  background: #f7f4f0;
+  box-shadow: inset 0 2px 7px rgba(74, 55, 40, 0.12);
+}
+
+.mk-app-action {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #7b1e37;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mk-profit-ring {
+  width: 145px;
+  height: 145px;
+  margin: 16px auto;
+  display: grid;
+  place-content: center;
+  border: 12px solid #d7c685;
+  border-radius: 50%;
+  text-align: center;
+  box-shadow: inset 0 0 0 8px #fff, inset 0 0 0 14px #7b1e37;
+}
+
+.mk-profit-ring strong {
+  color: #1c0f0a;
+  font-size: 17px;
+}
+
+.mk-profit-ring span {
+  font-size: 8px;
+}
+
+.mk-paper {
+  min-height: 255px;
+  margin: 10px 0;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #e8e0d8;
+  background: #fff;
+  box-shadow: 0 7px 18px rgba(74, 55, 40, 0.1);
+  font-size: 9px;
+}
+
+.mk-paper hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #e8e0d8;
+}
+
+.mk-paper strong {
+  color: #7b1e37;
+  font-size: 20px;
+}
+
+/* Section headings */
+.mk-section-title {
+  max-width: 720px;
+  margin: 0 auto 58px;
+  text-align: center;
+}
+
+.mk-section-title.mk-align-left {
+  margin: 0;
+  text-align: left;
+}
+
+.mk-section-title p {
+  font-size: 17px;
+}
+
+.mk-eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+/* Product rows */
+.mk-product-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 42px;
+}
+
+.mk-product-row {
+  min-height: 480px;
+  padding: 50px max(50px, 8vw);
+  display: grid;
+  grid-template-columns: 1fr 0.65fr;
+  align-items: center;
+  gap: 70px;
+  overflow: hidden;
+  border-radius: var(--clay-radius-lg);
+  background: var(--bg-muted);
+}
+
+.mk-product-row.mk-reverse {
+  grid-template-columns: 0.65fr 1fr;
+}
+
+.mk-product-row.mk-reverse > div:first-child {
+  grid-column: 2;
+}
+
+.mk-product-row.mk-reverse > .mk-phone {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.mk-product-row h3 {
+  margin: 18px 0;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+}
+
+.mk-product-row p {
+  font-size: 16px;
+}
+
+/* Whole phone visible, centred in the row (the design's "rising from the bottom" crop looked cut off). */
+.mk-product-row .mk-phone {
+  justify-self: center;
+  align-self: center;
+}
+
+.mk-stat-chips {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.mk-stat-chips span {
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Features */
+.mk-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.mk-feature-card {
+  min-height: 240px;
+  padding: 24px;
+  border-radius: var(--clay-radius-md);
+}
+
+.mk-feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.mk-feature-top {
+  margin-bottom: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mk-icon-tile {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--primary-bg);
+  color: var(--primary);
+  box-shadow: inset 0 1px 0 var(--clay-highlight);
+}
+
+.mk-feature-card p {
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+/* How it works */
+.mk-timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  list-style: none;
+}
+
+.mk-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 1px dashed var(--border);
+}
+
+.mk-step {
+  min-height: 120px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  border-radius: 18px;
+}
+
+.mk-step-number {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.mk-step small {
+  color: var(--primary);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.mk-site .mk-step h3 {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.mk-journey-icon {
+  width: 76px;
+  min-height: 68px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--border));
+  border-radius: 16px;
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.mk-journey-icon span {
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Download band */
+.mk-download-band {
+  min-height: 250px;
+  padding: 42px 44px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 30px;
+  border-radius: var(--clay-radius-lg);
+  background: linear-gradient(135deg, #5a1528, #8c2140);
+  color: #fff;
+  box-shadow: 0 25px 55px rgba(90, 21, 40, 0.26), inset 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.mk-download-copy {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.mk-download-copy .mk-brand img {
+  width: 62px;
+  height: 62px;
+  border-radius: 16px;
+}
+
+.mk-site .mk-download-copy h2 {
+  margin-bottom: 6px;
+  color: #fff;
+  font-size: 27px;
+}
+
+.mk-site .mk-download-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mk-qr-card {
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border-radius: 16px;
+  background: #fff;
+  color: #4a3728;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Closing download band: centred, large QR in the middle */
+.mk-download-band.mk-download-centered {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 26px;
+  padding: 56px 44px;
+  text-align: center;
+}
+
+.mk-download-centered .mk-download-copy {
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mk-site .mk-download-centered .mk-download-copy h2 {
+  font-size: clamp(28px, 3.4vw, 40px);
+}
+
+.mk-qr-card-large {
+  padding: 18px 18px 14px;
+  gap: 10px;
+  border-radius: 24px;
+  font-size: 13px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+}
+
+.mk-qr-card-large img {
+  display: block;
+  width: 240px;
+  height: 240px;
+}
+
+/* Mission */
+.mk-mission-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  align-items: center;
+  gap: 80px;
+}
+
+.mk-ownership {
+  padding: 38px;
+  border-radius: var(--radius-2xl);
+}
+
+.mk-site .mk-ownership h3 {
+  margin: 34px 0 18px;
+  font-size: 26px;
+}
+
+.mk-ownership p {
+  margin-bottom: 28px;
+}
+
+.mk-ownership b {
+  color: var(--text-h);
+}
+
+.mk-site .mk-ownership a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.mk-logo-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* BBW logo has a transparent background, so it sits directly on the card in both themes. */
+.mk-bbw-logo {
+  width: 96px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.mk-partner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mk-partner img {
+  width: 50px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* "Tech Innovations" style: first word strong, the rest muted. */
+.mk-partner > span {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.mk-partners .mk-partner b {
+  color: var(--text-h);
+  font-weight: 700;
+}
+
+.mk-logo-pair .mk-brand img {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+}
+
+/* Reviews */
+.mk-testimonials {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.mk-testimonial {
+  padding: 27px;
+  border-radius: var(--clay-radius-md);
+}
+
+.mk-stars {
+  margin-bottom: 12px;
+  display: flex;
+  color: var(--gold);
+}
+
+.mk-testimonial blockquote {
+  margin: 0 0 24px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.mk-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mk-person > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.mk-person div {
+  display: flex;
+  flex-direction: column;
+}
+
+.mk-person small {
+  color: var(--text-muted);
+}
+
+.mk-reviews-soon {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border-radius: var(--clay-radius-md);
+}
+
+.mk-site .mk-reviews-soon h3 {
+  margin-bottom: 4px;
+}
+
+.mk-reviews-soon p {
+  margin: 0;
+}
+
+/* Pricing: app components (SegmentedControl, PaymentTrustNote, SubscriptionPlanCarousel) */
+.mk-billing {
+  margin: -25px 0 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.mk-pricing .mk-plan-carousel {
+  max-width: 1040px;
+  margin-inline: auto;
+}
+
+@media (min-width: 761px) {
+  .mk-pricing .mk-plan-carousel {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    overflow: visible;
+    margin-right: auto;
+    padding: 4px 0 8px;
+  }
+
+  .mk-pricing .mk-plan-carousel .subscription-plan-slide {
+    min-width: 0;
+  }
+}
+
+/* Footer */
+.mk-footer {
+  padding-top: 68px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-radius: 36px 36px 0 0;
+}
+
+.mk-footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr;
+  gap: 60px;
+}
+
+.mk-footer-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mk-footer-grid b {
+  margin-bottom: 8px;
+  color: var(--text-h);
+}
+
+.mk-footer-grid a {
+  width: fit-content;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.mk-footer-grid a:hover {
+  color: var(--primary);
+}
+
+.mk-footer-brand p {
+  max-width: 300px;
+  margin-bottom: 0;
+  font-size: 13px;
+}
+
+.mk-footer-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mk-socials {
+  margin: 8px 0;
+  display: flex;
+  gap: 8px;
+}
+
+.mk-socials a {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-muted);
+}
+
+.mk-partners {
+  margin-top: 60px;
+  padding: 22px 0;
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.mk-partners b {
+  color: var(--text-h);
+}
+
+.mk-partners .mk-brand {
+  font-size: 14px;
+  opacity: 0.6;
+  filter: grayscale(1);
+}
+
+.mk-partners .mk-brand img {
+  width: 27px;
+  height: 27px;
+}
+
+.mk-footer-bottom {
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* Deliberately faint: for the TailorDeck team only. */
+.mk-admin-link {
+  font-size: 9px;
+  opacity: 0.22;
+}
+
+/* Text pages (privacy/terms use app styles; deletion & open-in-app use these) */
+.mk-doc {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 140px 24px 56px;
+}
+
+.mk-site .mk-doc h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
   letter-spacing: -0.02em;
+}
+
+.mk-site .mk-doc h2 {
+  margin: 28px 0 0;
+  font-size: 1.2rem;
+  letter-spacing: 0;
 }
 
 .mk-lead {
   margin: 16px 0 0;
   font-size: 1.08rem;
-  color: var(--mk-text);
 }
 
-.mk-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 18px;
-  margin-top: 28px;
-}
-
-.mk-hero-note {
-  margin: 0;
-  color: var(--mk-muted);
-  font-size: 0.9rem;
-}
-
-.mk-hero-visual {
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  border-radius: 32px;
-  background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--mk-gold) 22%, #fff), var(--mk-card) 70%);
-  box-shadow: var(--mk-shadow);
-}
-
-.mk-hero-visual img {
-  width: min(100%, 360px);
-  height: auto;
-}
-
-/* Google Play button */
-.mk-play-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px 10px 14px;
-  border-radius: 14px;
-  background: #111;
-  color: #fff;
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 1.05rem;
-  line-height: 1.1;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
-  transition: transform 160ms ease;
-}
-
-.mk-play-btn:active {
-  transform: scale(0.97);
-}
-
-.mk-play-btn span {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.mk-play-btn small {
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  opacity: 0.85;
-}
-
-/* Sections */
-.mk-section {
-  padding: 40px 0;
-}
-
-.mk-section h2,
-.mk-doc h1 {
-  margin: 0;
-  color: var(--mk-heading);
-  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.mk-section-lead {
-  margin: 8px 0 0;
-  color: var(--mk-muted);
-}
-
-.mk-card {
-  background: var(--mk-card);
-  border: 1px solid var(--mk-border);
-  border-radius: 22px;
-  box-shadow: var(--mk-shadow);
-}
-
-.mk-feature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.mk-feature {
-  padding: 22px;
-}
-
-.mk-feature-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--mk-wine) 10%, #fff);
-  color: var(--mk-wine);
-}
-
-.mk-feature h3,
-.mk-plan h3 {
-  margin: 14px 0 6px;
-  color: var(--mk-heading);
-  font-size: 1.08rem;
-}
-
-.mk-feature p {
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-/* Pricing */
-.mk-pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 24px;
-  align-items: stretch;
-}
-
-.mk-plan {
-  position: relative;
-  padding: 24px;
-}
-
-.mk-plan h3 {
-  margin-top: 0;
-}
-
-.mk-plan-featured {
-  border: 2px solid var(--mk-wine);
-}
-
-.mk-plan-badge {
-  position: absolute;
-  top: -12px;
-  right: 18px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--mk-wine);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.mk-plan-price {
-  margin: 0;
-  color: var(--mk-heading);
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.mk-plan-price span {
-  color: var(--mk-muted);
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.mk-plan-sub {
-  margin: 4px 0 0;
-  min-height: 2.6em;
-  color: var(--mk-muted);
-  font-size: 0.88rem;
-}
-
-.mk-plan ul,
-.mk-doc ul,
-.mk-doc ol {
-  margin: 16px 0 0;
-  padding-left: 20px;
-}
-
-.mk-plan li {
-  margin: 6px 0;
-  font-size: 0.93rem;
-}
-
-/* Download */
-.mk-download {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 32px;
-  margin-top: 16px;
-  padding: 32px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, var(--mk-wine), var(--mk-wine-dark));
-  color: #fff;
-}
-
-.mk-download h2 {
-  margin-top: 12px;
-  color: #fff;
-}
-
-.mk-download p {
-  margin: 8px 0 20px;
-  color: rgba(255, 255, 255, 0.86);
-}
-
-.mk-download-copy img {
-  border-radius: 14px;
-}
-
-.mk-qr {
-  margin: 0;
-  padding: 14px;
-  border-radius: 20px;
-  background: #fff;
-  text-align: center;
-}
-
-.mk-qr img {
-  display: block;
-}
-
-.mk-qr figcaption {
-  margin-top: 6px;
-  color: var(--mk-text);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
-/* Simple text pages (account deletion, open-in-app) */
-.mk-doc {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 48px 0 16px;
-}
-
-.mk-doc h2 {
-  margin: 28px 0 0;
-  color: var(--mk-heading);
-  font-size: 1.2rem;
-}
-
+.mk-doc p,
 .mk-doc li {
-  margin: 8px 0;
-}
-
-/* The app's global reset removes list markers; documents and plan lists need them back. */
-.mk-doc ol {
-  list-style: decimal;
-}
-
-.mk-doc ul,
-.mk-plan ul {
-  list-style: disc;
-}
-
-.mk-doc li::marker,
-.mk-plan li::marker {
-  color: var(--mk-wine);
-  font-weight: 700;
+  color: var(--text);
 }
 
 .mk-doc p {
   margin: 12px 0 0;
 }
 
-.mk-doc a:not(.mk-play-btn) {
-  color: var(--mk-wine);
+.mk-doc ol,
+.mk-doc ul {
+  margin: 16px 0 0;
+  padding-left: 22px;
+}
+
+.mk-doc ol {
+  list-style: decimal;
+}
+
+.mk-doc ul {
+  list-style: disc;
+}
+
+.mk-doc li {
+  margin: 8px 0;
+}
+
+.mk-doc li::marker {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.mk-doc strong {
+  color: var(--text-h);
+}
+
+.mk-site .mk-doc a:not(.mk-btn) {
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -392,85 +1345,390 @@
   text-align: center;
 }
 
-.mk-doc-center .mk-play-btn {
+.mk-doc-center .mk-btn {
   margin-top: 8px;
 }
 
-/* Footer */
-.mk-footer {
-  display: grid;
-  gap: 14px;
-  padding: 28px max(20px, env(safe-area-inset-left)) calc(28px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--mk-border);
-  background: var(--mk-card);
-  font-size: 0.88rem;
+/* App pages shown on the site (privacy policy, terms) sit below the floating header. */
+.mk-main > section.section {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-top: 110px;
 }
 
-.mk-footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* Scroll reveal */
+.mk-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 600ms ease, transform 600ms ease;
 }
 
-.mk-footer-brand img {
-  border-radius: 8px;
+.mk-reveal.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
-.mk-footer-brand p {
-  margin: 0;
+.mk-feature-card.is-visible,
+.mk-feature-card.is-visible:hover {
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 600ms ease;
 }
 
-.mk-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
+.mk-feature-card.is-visible:hover {
+  transform: translateY(-5px);
 }
 
-.mk-footer-links a {
-  color: var(--mk-wine);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.mk-footer-copy {
-  margin: 0;
-  color: var(--mk-muted);
-}
-
-/* Phones */
-@media (max-width: 860px) {
-  .mk-hero {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding-top: 32px;
+/* Tablet */
+@media (max-width: 980px) {
+  .mk-shell {
+    width: min(100% - 40px, 794px);
   }
 
-  .mk-hero-visual {
-    order: -1;
+  .mk-header {
+    width: calc(100% - 28px);
   }
 
-  .mk-hero-visual img {
-    width: min(100%, 240px);
-  }
-
-  .mk-feature-grid,
-  .mk-pricing-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mk-download {
-    grid-template-columns: 1fr;
-    padding: 24px;
-  }
-
-  /* On a phone the visitor taps the Play button; scanning their own screen is not possible. */
-  .mk-qr {
+  .mk-nav {
     display: none;
+  }
+
+  .mk-menu-btn {
+    display: grid;
+  }
+
+  .mk-mobile-sheet {
+    display: flex;
+  }
+
+  .mk-hero {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    min-height: 730px;
+  }
+
+  .mk-hero h1 {
+    font-size: 4.1rem;
+  }
+
+  .mk-phone-stage {
+    transform: scale(0.82);
+    margin-inline: -45px;
+  }
+
+  .mk-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mk-product-row {
+    padding-inline: 38px;
+    gap: 35px;
+  }
+
+  .mk-timeline {
+    grid-template-columns: 1fr;
+  }
+
+  .mk-timeline::before {
+    left: 46px;
+  }
+
+  .mk-download-band {
+    grid-template-columns: 1fr auto;
+  }
+
+  .mk-qr-card {
+    display: none;
+  }
+
+  /* Tablets can still be scanned by another phone, so the large closing QR stays. */
+  .mk-download-centered {
+    grid-template-columns: 1fr;
+  }
+
+  .mk-download-centered .mk-qr-card-large {
+    display: flex;
+  }
+
+  .mk-mission-grid {
+    gap: 35px;
+  }
+
+  .mk-testimonials {
+    overflow-x: auto;
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+    padding: 10px 0 22px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .mk-testimonial {
+    scroll-snap-align: start;
+  }
+
+  .mk-footer-grid {
+    grid-template-columns: 1.6fr 1fr 1fr;
+  }
+
+  .mk-footer-grid > div:last-child {
+    grid-column: 2;
+  }
+}
+
+/* Phone */
+@media (max-width: 640px) {
+  .mk-site {
+    font-size: 14px;
+  }
+
+  .mk-shell {
+    width: calc(100% - 28px);
+  }
+
+  .mk-section {
+    padding-block: 72px;
+  }
+
+  .mk-site h2 {
+    font-size: 2.1rem;
+  }
+
+  .mk-header {
+    top: calc(8px + env(safe-area-inset-top, 0px));
+    min-height: 60px;
+    padding: 7px 8px 7px 14px;
+    border-radius: 18px;
+  }
+
+  .mk-header .mk-brand {
+    font-size: 16px;
+  }
+
+  .mk-header .mk-brand img {
+    width: 31px;
+    height: 31px;
+  }
+
+  .mk-header-play {
+    display: none;
+  }
+
+  .mk-header-actions {
+    gap: 6px;
+  }
+
+  .mk-icon-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mk-hero {
+    min-height: auto;
+    padding-top: 120px;
+    padding-bottom: 50px;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .mk-hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mk-hero h1 {
+    font-size: 3.2rem;
+    line-height: 0.98;
+  }
+
+  .mk-hero-copy > p {
+    font-size: 16px;
+  }
+
+  .mk-hero .mk-button-row {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .mk-hero .mk-button-row .mk-btn,
+  .mk-hero .mk-button-row .mk-store-badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mk-download-band .mk-store-row {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .mk-download-band .mk-store-badge {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .mk-hero-proof {
+    width: 100%;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 34px;
+  }
+
+  .mk-phone-stage {
+    height: 560px;
+    transform: scale(0.82);
+    margin: 24px -30px -45px;
+  }
+
+  /* Keep the floating chips inside the screen (the stage is scaled, so offsets are in unscaled px). */
+  .mk-chip-one {
+    right: 30px;
+    max-width: 210px;
+  }
+
+  .mk-chip-two {
+    left: 30px;
+    max-width: 210px;
+  }
+
+  .mk-section-title {
+    margin-bottom: 40px;
+  }
+
+  .mk-product-row,
+  .mk-product-row.mk-reverse {
+    grid-template-columns: 1fr;
+    padding: 34px 24px;
+    text-align: center;
+  }
+
+  .mk-product-row.mk-reverse > div:first-child {
+    grid-column: 1;
+  }
+
+  .mk-product-row.mk-reverse > .mk-phone {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+
+  .mk-stat-chips {
+    justify-content: center;
+  }
+
+  .mk-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mk-feature-card {
+    min-height: 0;
+  }
+
+  .mk-step {
+    padding: 16px;
+  }
+
+  .mk-timeline::before {
+    left: 40px;
+  }
+
+  .mk-journey-icon {
+    width: 48px;
+    min-height: 48px;
+    padding: 8px;
+    border-radius: 13px;
+  }
+
+  .mk-journey-icon span {
+    display: none;
+  }
+
+  .mk-download-band {
+    padding: 32px 24px;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .mk-download-copy {
+    flex-direction: column;
+  }
+
+  .mk-site .mk-download-copy h2 {
+    font-size: 24px;
+  }
+
+  .mk-download-band .mk-btn {
+    width: 100%;
+  }
+
+  /* On a phone the visitor can't scan their own screen; the Google Play button does the job. */
+  .mk-download-centered .mk-qr-card-large {
+    display: none;
+  }
+
+  .mk-download-band.mk-download-centered {
+    padding: 36px 24px;
+  }
+
+  .mk-mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mk-mission-grid .mk-section-title {
+    text-align: center;
+  }
+
+  .mk-ownership {
+    padding: 27px;
+  }
+
+  .mk-testimonials {
+    grid-template-columns: repeat(3, 85vw);
+  }
+
+  .mk-reviews-soon {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .mk-footer {
+    padding-top: 50px;
+  }
+
+  .mk-footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px 24px;
+  }
+
+  .mk-footer-brand {
+    grid-column: 1 / -1;
+  }
+
+  .mk-footer-grid > div:last-child {
+    grid-column: auto;
+  }
+
+  .mk-partners {
+    flex-wrap: wrap;
+    gap: 15px 24px;
+  }
+
+  .mk-partners b {
+    width: 100%;
+  }
+
+  .mk-doc {
+    padding-top: 110px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mk-play-btn {
-    transition: none;
+  .mk-site *,
+  .mk-site *::before,
+  .mk-site *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .mk-reveal {
+    opacity: 1;
+    transform: none;
   }
 }

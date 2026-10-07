@@ -14,6 +14,8 @@ type SubscriptionPlanCarouselProps<TPlan extends SubscriptionPlanCard> = {
   isPlanUnavailable?: (plan: TPlan) => boolean
   plans: TPlan[]
   selectedPlan: TPlan['id']
+  /** Hide the per-plan action button (the marketing website shows plans without purchase buttons). */
+  showCta?: boolean
   onChoosePlan: (plan: TPlan) => void | Promise<void>
   onSelectedPlanChange: (planId: TPlan['id']) => void
 }
@@ -30,6 +32,7 @@ export function SubscriptionPlanCarousel<TPlan extends SubscriptionPlanCard>({
   isPlanUnavailable,
   plans,
   selectedPlan,
+  showCta = true,
   onChoosePlan,
   onSelectedPlanChange,
 }: SubscriptionPlanCarouselProps<TPlan>) {
@@ -110,20 +113,24 @@ export function SubscriptionPlanCarousel<TPlan extends SubscriptionPlanCard>({
 
             <div className="subscription-plan-divider" />
 
-            <button
-              type="button"
-              className={`btn btn-full subscription-plan-btn${active ? ' btn-primary' : ' btn-secondary'}`}
-              onClick={(event) => {
-                event.stopPropagation()
-                if (unavailable) return
-                void onChoosePlan(plan)
-              }}
-              disabled={disabled || unavailable}
-            >
-              {unavailable ? getUnavailableLabel?.(plan) ?? 'Unavailable' : busy ? getBusyLabel?.(plan) ?? 'Saving...' : getCtaLabel(plan)}
-            </button>
+            {showCta ? (
+              <>
+                <button
+                  type="button"
+                  className={`btn btn-full subscription-plan-btn${active ? ' btn-primary' : ' btn-secondary'}`}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (unavailable) return
+                    void onChoosePlan(plan)
+                  }}
+                  disabled={disabled || unavailable}
+                >
+                  {unavailable ? getUnavailableLabel?.(plan) ?? 'Unavailable' : busy ? getBusyLabel?.(plan) ?? 'Saving...' : getCtaLabel(plan)}
+                </button>
 
-            <div className="subscription-plan-divider" />
+                <div className="subscription-plan-divider" />
+              </>
+            ) : null}
 
             <p className="subscription-highlights-title">Plan highlights:</p>
             <div className="stack gap-6 subscription-feature-list">
