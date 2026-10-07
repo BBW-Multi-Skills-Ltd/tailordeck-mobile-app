@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "112157033798",
+    "project_id": "tailordeck-c35ec",
+    "storage_bucket": "tailordeck-c35ec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:112157033798:android:852ecc1191c847cde61147",
+        "android_client_info": {
+          "package_name": "app.tailordeck"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2TYLmMnsXOzMngc5M-HPyrmrqCGv972U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { unregisterPushToken } from '../lib/pushNotifications'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue } from './authContextCore'
 import { syncPendingOnboardingSettings } from '../services/onboardingService'
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       loading,
       signOut: async () => {
+        await unregisterPushToken()
         await supabase.auth.signOut()
         setSession(null)
       },

@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ArrowLeft, Inbox, Mail, Phone, RefreshCw, Send } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeft, Inbox, Mail, Phone, RefreshCw, Store, User } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { AttachmentList, ChatComposer } from '../../components/support/SupportChatParts'
+import { useAttachmentLinks } from '../../components/support/useAttachmentLinks'
 import { supabase } from '../../lib/supabase'
+import { readSupportAttachments, uploadSupportAttachment, type SupportAttachment } from '../../lib/supportAttachments'
 
-// Support centre (/admin/support). Support admins read every ticket (RLS) and reply through the
-// support-reply function, which saves the reply, notifies the user in the app and emails them.
+// Support centre (/admin/support). Support admins read every ticket (RLS) and chat through the
+// support-reply function: it pushes replies to the user's phone, and resolving/closing emails them the conversation.
 
 type TicketStatus = 'open' | 'in_review' | 'resolved' | 'closed'
 
@@ -20,9 +23,14 @@ type Ticket = {
   device_info: Record<string, unknown> | null
   created_at: string
   last_reply_at: string | null
+  last_message_by: 'support' | 'user' | null
 }
 
-type Reply = { id: string; body: string; emailed_at: string | null; created_at: string }
+type Contact = { full_name: string | null; shop_name: string | null }
+
+type ChatMessage = { id: string; author_role: 'support' | 'user'; body: string; attachments: SupportAttachment[]; created_at: string }
+
+type ReplyResult = { status: TicketStatus; pushed: number; emailed: boolean; transcriptEmailed: boolean; warning: string }
 
 const STATUS_LABELS: Record<TicketStatus, string> = {
   open: 'New',
@@ -50,7 +58,11 @@ const FILTERS: Array<{ id: Filter; label: string }> = [
   { id: 'all', label: 'All' },
 ]
 
-const TICKET_COLUMNS = 'id,category,priority,status,subject,message,account_email,contact_phone,device_info,created_at,last_reply_at'
+const TICKET_COLUMNS =
+  'id,category,priority,status,subject,message,account_email,contact_phone,device_info,created_at,last_reply_at,last_message_by'
+
+const isActive = (status: TicketStatus) => status === 'open' || status === 'in_review'
+const awaitingSupport = (ticket: Ticket) => isActive(ticket.status) && (ticket.status === 'open' || ticket.last_message_by === 'user')
 
 function errorMessage(error: unknown, fallback: string): string {
   if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message) return error.message
@@ -63,71 +75,100 @@ function formatDate(value: string): string {
 
 const ticketNumber = (id: string) => `#${id.slice(0, 8).toUpperCase()}`
 
+function displayName(ticket: Ticket, contact?: Contact): string {
+  return contact?.full_name || contact?.shop_name || ticket.account_email || 'TailorDeck user'
+}
+
 function StatusTag({ status }: { status: TicketStatus }) {
   return <span className={`ad-status ad-status-${status}`}>{STATUS_LABELS[status]}</span>
 }
 
-function TicketDetail({ ticket, onChanged }: { ticket: Ticket; onChanged: () => void }) {
-  const [replies, setReplies] = useState<Reply[] | null>(null)
+async function callSupportReply(body: Record<string, unknown>): Promise<ReplyResult> {
+  const { data, error } = await supabase.functions.invoke<ReplyResult>('support-reply', { body })
+  if (error || !data) throw error ?? new Error('Could not update the ticket.')
+  return data
+}
+
+function TicketDetail({ ticket, contact, refreshKey, onChanged }: { ticket: Ticket; contact?: Contact; refreshKey: number; onChanged: () => void }) {
+  const [messages, setMessages] = useState<ChatMessage[] | null>(null)
   const [version, setVersion] = useState(0)
-  const [body, setBody] = useState('')
-  const [nextStatus, setNextStatus] = useState<TicketStatus>('resolved')
   const [sending, setSending] = useState(false)
+  const [nextStatus, setNextStatus] = useState<'' | TicketStatus>('')
   const [status, setStatus] = useState<{ kind: 'error' | 'notice'; text: string } | null>(null)
+  const endRef = useRef<HTMLDivElement>(null)
+  const links = useAttachmentLinks((messages ?? []).flatMap((message) => message.attachments))
 
   useEffect(() => {
     let active = true
     void supabase
       .from('support_ticket_replies')
-      .select('id,body,emailed_at,created_at')
+      .select('id,author_role,body,attachments,created_at')
       .eq('ticket_id', ticket.id)
       .order('created_at', { ascending: true })
       .then(({ data, error }) => {
         if (!active) return
-        if (error) setStatus({ kind: 'error', text: errorMessage(error, 'Could not load replies.') })
-        else setReplies((data ?? []) as Reply[])
+        if (error) setStatus({ kind: 'error', text: errorMessage(error, 'Could not load the conversation.') })
+        else setMessages((data ?? []).map((row) => ({ ...(row as ChatMessage), attachments: readSupportAttachments(row.attachments) })))
       })
     return () => {
       active = false
     }
-  }, [ticket.id, version])
+  }, [ticket.id, version, refreshKey])
 
-  async function sendReply(event: FormEvent) {
-    event.preventDefault()
-    if (!body.trim()) {
-      setStatus({ kind: 'error', text: 'Write a reply first.' })
-      return
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [messages?.length])
+
+  function describe(result: ReplyResult, sentMessage: boolean): string {
+    const parts: string[] = []
+    if (sentMessage) {
+      parts.push(result.pushed ? 'Sent. The user got a push notification.' : result.emailed ? 'Sent. The user has no push on their phone, so we emailed it.' : 'Sent in the app.')
     }
+    if (result.transcriptEmailed) parts.push(`Marked ${STATUS_LABELS[result.status].toLowerCase()}; the user was emailed the full conversation.`)
+    else if (!sentMessage) parts.push(`Marked ${STATUS_LABELS[result.status].toLowerCase()}.`)
+    return parts.join(' ')
+  }
+
+  async function send(body: string, files: File[]): Promise<boolean> {
     setSending(true)
     setStatus(null)
-    const { data, error } = await supabase.functions.invoke<{ emailed: boolean; emailError: string }>('support-reply', {
-      body: { ticketId: ticket.id, body: body.trim(), status: nextStatus },
-    })
-    setSending(false)
-    if (error || !data) {
-      setStatus({ kind: 'error', text: errorMessage(error, 'Could not send the reply.') })
-      return
+    try {
+      const attachments: SupportAttachment[] = []
+      for (const file of files) attachments.push(await uploadSupportAttachment(ticket.id, file))
+      const result = await callSupportReply({ ticketId: ticket.id, body, attachments, ...(nextStatus ? { status: nextStatus } : {}) })
+      setStatus({ kind: result.warning ? 'error' : 'notice', text: result.warning || describe(result, true) })
+      setNextStatus('')
+      setVersion((current) => current + 1)
+      onChanged()
+      return true
+    } catch (error) {
+      setStatus({ kind: 'error', text: errorMessage(error, 'Could not send the message.') })
+      return false
+    } finally {
+      setSending(false)
     }
-    setBody('')
-    setStatus(
-      data.emailed
-        ? { kind: 'notice', text: 'Reply sent. The user got an email and an in-app notification.' }
-        : { kind: 'error', text: data.emailError || 'Reply saved in the app, but the email was not sent.' },
-    )
-    setVersion((current) => current + 1)
-    onChanged()
   }
 
   async function changeStatus(next: TicketStatus) {
-    const { error } = await supabase.from('support_tickets').update({ status: next }).eq('id', ticket.id)
-    if (error) setStatus({ kind: 'error', text: errorMessage(error, 'Could not change the status.') })
-    else onChanged()
+    if ((next === 'resolved' || next === 'closed') && !window.confirm(`Mark this ticket as ${STATUS_LABELS[next].toLowerCase()}? The chat closes and the user is emailed the full conversation.`)) return
+    setSending(true)
+    setStatus(null)
+    try {
+      const result = await callSupportReply({ ticketId: ticket.id, status: next })
+      setStatus({ kind: result.warning ? 'error' : 'notice', text: result.warning || describe(result, false) })
+      onChanged()
+    } catch (error) {
+      setStatus({ kind: 'error', text: errorMessage(error, 'Could not change the status.') })
+    } finally {
+      setSending(false)
+    }
   }
 
   const device = ticket.device_info ?? {}
   const deviceSummary = [device.platform, device.language, device.viewportWidth && device.viewportHeight ? `${device.viewportWidth}×${device.viewportHeight}` : '']
     .filter(Boolean)
     .join(' · ')
+  const active = isActive(ticket.status)
 
   return (
     <article className="ad-ticket mk-clay">
@@ -146,6 +187,16 @@ function TicketDetail({ ticket, onChanged }: { ticket: Ticket; onChanged: () => 
       </header>
 
       <div className="ad-ticket-contact">
+        {contact?.full_name ? (
+          <span>
+            <User size={14} /> {contact.full_name}
+          </span>
+        ) : null}
+        {contact?.shop_name ? (
+          <span>
+            <Store size={14} /> {contact.shop_name}
+          </span>
+        ) : null}
         {ticket.account_email ? (
           <a href={`mailto:${ticket.account_email}`}>
             <Mail size={14} /> {ticket.account_email}
@@ -156,56 +207,58 @@ function TicketDetail({ ticket, onChanged }: { ticket: Ticket; onChanged: () => 
             <Phone size={14} /> {ticket.contact_phone}
           </a>
         ) : null}
-        <span className="ad-muted">{formatDate(ticket.created_at)}</span>
       </div>
 
       <div className="ad-thread">
         <div className="ad-bubble ad-bubble-user">
           <p>{ticket.message}</p>
-          <small>User · {formatDate(ticket.created_at)}</small>
+          <small>
+            {displayName(ticket, contact)} · {formatDate(ticket.created_at)}
+          </small>
         </div>
-        {replies === null ? <p className="ad-muted">Loading replies…</p> : null}
-        {replies?.map((reply) => (
-          <div key={reply.id} className="ad-bubble ad-bubble-support">
-            <p>{reply.body}</p>
-            <small>
-              Support · {formatDate(reply.created_at)} · {reply.emailed_at ? 'emailed' : 'in app only'}
-            </small>
-          </div>
-        ))}
+        {messages === null ? <p className="ad-muted">Loading conversation…</p> : null}
+        {messages?.map((message) => {
+          const fromUser = message.author_role === 'user'
+          return (
+            <div key={message.id} className={`ad-bubble ${fromUser ? 'ad-bubble-user' : 'ad-bubble-support'}`}>
+              {message.body ? <p>{message.body}</p> : null}
+              <AttachmentList attachments={message.attachments} links={links} />
+              <small>
+                {fromUser ? displayName(ticket, contact) : 'Support'} · {formatDate(message.created_at)}
+              </small>
+            </div>
+          )
+        })}
+        <div ref={endRef} />
       </div>
 
-      <form className="ad-reply" onSubmit={sendReply}>
-        <label className="ad-field">
-          Reply to the user
-          <span className="ad-input-wrap ad-input-multiline">
-            <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={5} maxLength={4000} placeholder="Write your reply…" />
-          </span>
-          <small className="ad-hint">Sent by email (they can reply to it) and shown in the app under My support requests.</small>
-        </label>
-        <div className="ad-reply-actions">
+      {active ? (
+        <div className="ad-reply">
+          <ChatComposer sending={sending} placeholder="Reply to the user…" onSend={send} />
           <label className="ad-field ad-inline-field">
-            Then mark as
-            <select value={nextStatus} onChange={(event) => setNextStatus(event.target.value as TicketStatus)}>
-              <option value="in_review">In progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
+            After sending
+            <select value={nextStatus} onChange={(event) => setNextStatus(event.target.value as '' | TicketStatus)}>
+              <option value="">Keep the chat open</option>
+              <option value="resolved">Mark resolved</option>
+              <option value="closed">Mark closed</option>
             </select>
+            <small className="ad-hint">Resolved or closed ends the chat and emails the user the full conversation.</small>
           </label>
-          <button type="submit" className="mk-btn mk-btn-primary" disabled={sending}>
-            <Send size={16} /> {sending ? 'Sending…' : 'Send reply'}
-          </button>
         </div>
-        {status ? <p className={status.kind === 'error' ? 'ad-error' : 'ad-notice'}>{status.text}</p> : null}
-      </form>
+      ) : (
+        <p className="ad-notice ad-closed-note">
+          This chat is {STATUS_LABELS[ticket.status].toLowerCase()}. The user can start a new request from the app.
+        </p>
+      )}
+      {status ? <p className={status.kind === 'error' ? 'ad-error' : 'ad-notice'}>{status.text}</p> : null}
 
       <div className="ad-status-actions">
-        <span className="ad-muted">Change status without replying:</span>
+        <span className="ad-muted">Change status:</span>
         {(Object.keys(STATUS_LABELS) as TicketStatus[])
           .filter((option) => option !== ticket.status)
           .map((option) => (
-            <button key={option} type="button" className="ad-chip" onClick={() => void changeStatus(option)}>
-              {STATUS_LABELS[option]}
+            <button key={option} type="button" className="ad-chip" disabled={sending} onClick={() => void changeStatus(option)}>
+              {isActive(option) && !active ? `Reopen as ${STATUS_LABELS[option].toLowerCase()}` : STATUS_LABELS[option]}
             </button>
           ))}
       </div>
@@ -219,8 +272,10 @@ export default function SupportCentre() {
   const { ticketId } = useParams()
   const navigate = useNavigate()
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
+  const [contacts, setContacts] = useState<Record<string, Contact>>({})
   const [filter, setFilter] = useState<Filter>('active')
   const [version, setVersion] = useState(0)
+  const [chatVersion, setChatVersion] = useState(0)
   const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
@@ -231,31 +286,53 @@ export default function SupportCentre() {
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(300)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (!active) return
-        if (error) setLoadError(errorMessage(error, 'Could not load tickets.'))
-        else {
-          setLoadError('')
-          setTickets((data ?? []) as unknown as Ticket[])
+        if (error) {
+          setLoadError(errorMessage(error, 'Could not load tickets.'))
+          return
         }
+        const rows = (data ?? []) as unknown as Ticket[]
+        setLoadError('')
+        setTickets(rows)
+        if (!rows.length) return
+        const { data: contactRows } = await supabase.rpc('get_support_ticket_contacts', { ticket_ids: rows.map((row) => row.id) })
+        if (!active || !Array.isArray(contactRows)) return
+        setContacts(
+          Object.fromEntries(
+            (contactRows as Array<Contact & { ticket_id: string }>).map((row) => [row.ticket_id, { full_name: row.full_name, shop_name: row.shop_name }]),
+          ),
+        )
       })
     return () => {
       active = false
     }
   }, [version])
 
+  // Live inbox: new tickets, new messages and status changes.
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-support-inbox')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => setVersion((current) => current + 1))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_ticket_replies' }, () => setChatVersion((current) => current + 1))
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [])
+
   const counts = useMemo(() => {
     const result: Record<Filter, number> = { active: 0, open: 0, in_review: 0, resolved: 0, closed: 0, all: 0 }
     for (const ticket of tickets ?? []) {
       result[ticket.status] += 1
       result.all += 1
-      if (ticket.status === 'open' || ticket.status === 'in_review') result.active += 1
+      if (isActive(ticket.status)) result.active += 1
     }
     return result
   }, [tickets])
 
   const visible = (tickets ?? []).filter((ticket) =>
-    filter === 'all' ? true : filter === 'active' ? ticket.status === 'open' || ticket.status === 'in_review' : ticket.status === filter,
+    filter === 'all' ? true : filter === 'active' ? isActive(ticket.status) : ticket.status === filter,
   )
   const selected = tickets?.find((ticket) => ticket.id === ticketId) ?? null
 
@@ -270,7 +347,7 @@ export default function SupportCentre() {
           <RefreshCw size={16} /> Refresh
         </button>
       </div>
-      <p className="ad-muted ad-page-copy">Help requests sent from the app. Replies reach the user by email and in the app.</p>
+      <p className="ad-muted ad-page-copy">Live chat with users. Replies reach their phone as a push notification.</p>
 
       <div className="ad-filters" role="tablist" aria-label="Ticket status">
         {FILTERS.map((item) => (
@@ -304,16 +381,19 @@ export default function SupportCentre() {
                 <li key={ticket.id}>
                   <button
                     type="button"
-                    className={`ad-ticket-row${ticket.id === ticketId ? ' is-selected' : ''}`}
+                    className={`ad-ticket-row${ticket.id === ticketId ? ' is-selected' : ''}${awaitingSupport(ticket) ? ' is-unread' : ''}`}
                     onClick={() => navigate(`/admin/support/${ticket.id}`)}
                   >
                     <span className="ad-ticket-row-top">
-                      <b>{ticket.subject}</b>
+                      <b>{displayName(ticket, contacts[ticket.id])}</b>
+                      {awaitingSupport(ticket) ? <span className="ad-unread-dot" aria-label="Waiting for your reply" /> : null}
                       <StatusTag status={ticket.status} />
                     </span>
+                    <span className="ad-ticket-row-subject">{ticket.subject}</span>
                     <span className="ad-ticket-row-message">{ticket.message}</span>
                     <small className="ad-muted">
-                      {ticket.account_email || 'No email'} · {formatDate(ticket.created_at)}
+                      {contacts[ticket.id]?.shop_name && contacts[ticket.id]?.full_name ? `${contacts[ticket.id]?.shop_name} · ` : ''}
+                      {formatDate(ticket.last_reply_at ?? ticket.created_at)}
                       {ticket.priority === 'urgent' ? ' · Urgent' : ''}
                     </small>
                   </button>
@@ -324,7 +404,13 @@ export default function SupportCentre() {
         </div>
         <div className="ad-ticket-pane">
           {selected ? (
-            <TicketDetail key={selected.id} ticket={selected} onChanged={() => setVersion((current) => current + 1)} />
+            <TicketDetail
+              key={selected.id}
+              ticket={selected}
+              contact={contacts[selected.id]}
+              refreshKey={chatVersion}
+              onChanged={() => setVersion((current) => current + 1)}
+            />
           ) : ticketId && tickets ? (
             <div className="ad-empty mk-clay">
               <p className="ad-muted">This ticket was not found.</p>

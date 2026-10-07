@@ -636,6 +636,17 @@
   gap: 18px;
 }
 
+.ad-support-grid > *,
+.ad-ticket,
+.ad-reply {
+  min-width: 0;
+}
+
+.ad-inline-field select {
+  width: 100%;
+  max-width: 100%;
+}
+
 .ad-ticket-list {
   overflow: hidden;
   border-radius: var(--clay-radius-md);
@@ -693,6 +704,42 @@
   justify-content: space-between;
   gap: 8px;
   color: var(--text-h);
+}
+
+.ad-ticket-row-subject {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.ad-ticket-row.is-unread .ad-ticket-row-top b {
+  color: var(--primary);
+}
+
+.ad-unread-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.ad-ticket-contact span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.ad-closed-note {
+  text-align: center;
+}
+
+.ad-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .ad-ticket-row-message {

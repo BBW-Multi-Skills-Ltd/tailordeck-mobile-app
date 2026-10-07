@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/authContextCore'
 import { clearNativeJobReminders, registerNativeJobReminderTapHandler, syncNativeJobReminders } from '../../lib/nativeJobReminders'
+import { registerPushHandlers, registerPushIfPermitted } from '../../lib/pushNotifications'
 import { useJobReminderSchedulesQuery } from '../../hooks/useJobQueries'
 import { useSettingsQuery } from '../../hooks/useSettingsQueries'
 import { updateJobStatus } from '../../services/jobService'
@@ -33,6 +34,24 @@ export default function NativeNotificationBridge() {
       },
     })
   }, [navigate, queryClient])
+
+  // Support replies (Firebase push): tapping opens the chat; while the app is open, refresh it.
+  useEffect(() => {
+    return registerPushHandlers({
+      onOpen: (url) => navigate(url),
+      onReceived: () => {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.supportTickets })
+        void queryClient.invalidateQueries({ queryKey: queryKeys.notifications })
+      },
+    })
+  }, [navigate, queryClient])
+
+  useEffect(() => {
+    if (!user?.id) return
+    void registerPushIfPermitted().catch((error) => {
+      console.warn('Unable to register for push notifications:', error)
+    })
+  }, [user?.id])
 
   if (!user?.id) return null
 

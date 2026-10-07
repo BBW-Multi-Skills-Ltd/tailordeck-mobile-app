@@ -4660,6 +4660,20 @@ button.more-row {
   box-shadow: var(--clay-shadow-press);
 }
 
+.support-thread-closed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--clay-surface-muted);
+  text-align: center;
+}
+
+.support-thread-closed .btn {
+  margin-top: 6px;
+}
+
 .support-thread-note {
   display: flex;
   align-items: center;

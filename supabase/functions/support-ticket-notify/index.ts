@@ -61,7 +61,7 @@ Deno.serve(async (request) => {
     const { data: userData, error: userError } = await userSupabase.auth.getUser()
     if (userError || !userData.user) return jsonResponse({ error: 'Unauthorized' }, 401, request)
 
-    const { ticketId } = await request.json()
+    const { ticketId, replyId } = await request.json()
     if (typeof ticketId !== 'string' || !ticketId) {
       return jsonResponse({ error: 'Missing ticket id' }, 400, request)
     }
@@ -88,6 +88,38 @@ Deno.serve(async (request) => {
     const resendApiKey = requiredEnv('RESEND_API_KEY')
     const supportTo = Deno.env.get('SUPPORT_TO_EMAIL') || 'support@tailordeck.app'
     const from = Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <noreply@tailordeck.app>'
+    const inboxLink = `https://tailordeck.app/admin/support/${ticket.id}`
+
+    // Follow-up chat message from the user on an existing ticket.
+    if (typeof replyId === 'string' && replyId) {
+      const { data: reply, error: replyError } = await admin
+        .from('support_ticket_replies')
+        .select('body,attachments,author_role')
+        .eq('id', replyId)
+        .eq('ticket_id', ticket.id)
+        .eq('author_role', 'user')
+        .maybeSingle<{ body: string; attachments: Array<{ name?: string }> }>()
+      if (replyError) throw replyError
+      if (!reply) return jsonResponse({ error: 'Message not found' }, 404, request)
+      const files = (reply.attachments ?? []).map((file) => file.name ?? 'file')
+      const followUpResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from,
+          to: [supportTo],
+          subject: `[TailorDeck] New message on #${ticket.id.slice(0, 8).toUpperCase()}: ${ticket.subject}`,
+          html: `
+            <h2>New message from ${htmlEscape(ticket.account_email || userData.user.email || 'a user')}</h2>
+            <p>${htmlEscape(reply.body || '(attachment only)').replace(/\n/g, '<br />')}</p>
+            ${files.length ? `<p>📎 ${files.map(htmlEscape).join(', ')}</p>` : ''}
+            <p><a href="${inboxLink}">Open the ticket in the support centre</a></p>
+          `,
+        }),
+      })
+      if (!followUpResponse.ok) throw new Error(`Resend email failed: ${await followUpResponse.text()}`)
+      return jsonResponse({ ok: true }, 200, request)
+    }
 
     const html = `
       <h2>New TailorDeck Support Ticket</h2>
@@ -102,6 +134,7 @@ Deno.serve(async (request) => {
       <p>${htmlEscape(ticket.message).replace(/\n/g, '<br />')}</p>
       <hr />
       <pre>${htmlEscape(JSON.stringify(ticket.device_info ?? {}, null, 2))}</pre>
+      <p><a href="${inboxLink}">Open the ticket in the support centre</a></p>
       <hr />
       <p style="font-size:12px;color:#8B7A70;">TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.</p>
     `

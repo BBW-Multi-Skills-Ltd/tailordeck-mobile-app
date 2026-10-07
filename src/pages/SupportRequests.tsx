@@ -1,10 +1,15 @@
+import { useEffect, useRef, useState } from 'react'
 import { ChevronRight, Inbox, MessageCircle } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
-import { useMySupportTicketQuery, useMySupportTicketsQuery } from '../hooks/useSupportQueries'
+import { AttachmentList, ChatComposer } from '../components/support/SupportChatParts'
+import { useAttachmentLinks } from '../components/support/useAttachmentLinks'
+import { useMySupportTicketQuery, useMySupportTicketsQuery, useSendSupportMessageMutation } from '../hooks/useSupportQueries'
+import { requestSupportPushPermission } from '../lib/pushNotifications'
+import { getServiceErrorMessage } from '../services/serviceHelpers'
 import type { SupportTicketStatus } from '../services/types'
-import type { SupportTicketSummary } from '../services/supportService'
+import type { SupportTicketReply, SupportTicketSummary } from '../services/supportService'
 
 // "My support requests": the user's tickets and TailorDeck's replies (also emailed to them).
 
@@ -75,8 +80,8 @@ function RequestList() {
             </span>
             <span className="support-request-row-message">{ticket.message}</span>
             <small>
-              {ticketNumber(ticket.id)} · {formatDate(ticket.created_at)}
-              {ticket.last_reply_at ? ' · Support replied' : ''}
+              {ticketNumber(ticket.id)} · {formatDate(ticket.last_reply_at ?? ticket.created_at)}
+              {ticket.last_message_by === 'support' ? ' · Support replied' : ''}
             </small>
             <ChevronRight size={16} className="support-request-row-chevron" aria-hidden />
           </Link>
@@ -108,7 +113,32 @@ function RequestThread({ ticketId }: { ticketId: string }) {
     )
   }
 
-  const { ticket, replies } = data
+  return <ChatThread ticket={data.ticket} replies={data.replies} />
+}
+
+function ChatThread({ ticket, replies }: { ticket: SupportTicketSummary; replies: SupportTicketReply[] }) {
+  const sendMessage = useSendSupportMessageMutation(ticket.id)
+  const [sendError, setSendError] = useState('')
+  const endRef = useRef<HTMLDivElement>(null)
+  const links = useAttachmentLinks(replies.flatMap((reply) => reply.attachments))
+  const open = ticket.status === 'open' || ticket.status === 'in_review'
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: 'end' })
+  }, [replies.length])
+
+  async function send(body: string, files: File[]): Promise<boolean> {
+    setSendError('')
+    try {
+      await sendMessage.mutateAsync({ body, files })
+      void requestSupportPushPermission()
+      return true
+    } catch (error) {
+      setSendError(getServiceErrorMessage(error, 'Unable to send your message.'))
+      return false
+    }
+  }
+
   return (
     <article className="clay-card support-thread-card">
       <header className="support-thread-head">
@@ -124,20 +154,40 @@ function RequestThread({ ticketId }: { ticketId: string }) {
           <p>{ticket.message}</p>
           <small>You · {formatDate(ticket.created_at)}</small>
         </div>
-        {replies.map((reply) => (
-          <div key={reply.id} className="support-bubble support-bubble-team">
-            <p>{reply.body}</p>
-            <small>TailorDeck support · {formatDate(reply.created_at)}</small>
-          </div>
-        ))}
+        {replies.map((reply) => {
+          const mine = reply.author_role === 'user'
+          return (
+            <div key={reply.id} className={`support-bubble ${mine ? 'support-bubble-user' : 'support-bubble-team'}`}>
+              {reply.body ? <p>{reply.body}</p> : null}
+              <AttachmentList attachments={reply.attachments} links={links} />
+              <small>
+                {mine ? 'You' : 'TailorDeck support'} · {formatDate(reply.created_at)}
+              </small>
+            </div>
+          )
+        })}
+        {!replies.some((reply) => reply.author_role === 'support') && open ? (
+          <p className="settings-help-page-copy support-thread-note">
+            <MessageCircle size={14} aria-hidden /> We have your request. You’ll get a notification when we reply.
+          </p>
+        ) : null}
+        <div ref={endRef} />
       </div>
 
-      <p className="settings-help-page-copy support-thread-note">
-        <MessageCircle size={14} aria-hidden />
-        {replies.length
-          ? 'We also emailed you this reply. To answer, reply to that email.'
-          : 'We have your request. Our reply will appear here and in your email.'}
-      </p>
+      {open ? (
+        <>
+          <ChatComposer sending={sendMessage.isPending} placeholder="Write a message…" onSend={send} />
+          {sendError ? <span className="input-error-text">{sendError}</span> : null}
+        </>
+      ) : (
+        <div className="support-thread-closed">
+          <p className="settings-help-page-title">This request is {ticket.status === 'closed' ? 'closed' : 'resolved'}</p>
+          <p className="settings-help-page-copy">We emailed you the full conversation. Need more help? Start a new request.</p>
+          <Link to="/help" className="btn btn-primary btn-full">
+            Start a new request
+          </Link>
+        </div>
+      )}
     </article>
   )
 }

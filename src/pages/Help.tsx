@@ -9,6 +9,7 @@ import { useCreateSupportTicketMutation, useSupportCooldownQuery } from '../hook
 import type { SupportTicketCategory, SupportTicketPriority } from '../services/types'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
 import { formatSupportCooldown } from '../services/supportService'
+import { requestSupportPushPermission } from '../lib/pushNotifications'
 
 type SupportCategoryConfig = {
   id: SupportTicketCategory
@@ -195,6 +196,8 @@ export default function Help() {
       })
       showTicketSuccess(ticket.id)
       setMessage('')
+      // Replies arrive as push notifications, so ask now (only shown once by Android).
+      void requestSupportPushPermission()
       await refetchSupportCooldown()
     } catch (submitError) {
       const cooldownResult = await refetchSupportCooldown()
@@ -314,7 +317,8 @@ export default function Help() {
 
           {submittedTicketId ? (
             <p className="support-success-text" role="status">
-              Request sent. Ticket #{submittedTicketId.slice(0, 8).toUpperCase()}.
+              Request sent. Ticket #{submittedTicketId.slice(0, 8).toUpperCase()}.{' '}
+              <Link to={`/help/requests/${submittedTicketId}`}>Open chat</Link>
             </p>
           ) : null}
         </motion.form>

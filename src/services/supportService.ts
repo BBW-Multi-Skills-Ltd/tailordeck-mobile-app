@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import { reportError } from '../lib/monitoring'
+import { readSupportAttachments, uploadSupportAttachment, type SupportAttachment } from '../lib/supportAttachments'
 import { getFunctionInvokeErrorMessage, requireUserId, ServiceError } from './serviceHelpers'
 import type { SupportTicketCategory, SupportTicketPriority, SupportTicketRow } from './types'
 
@@ -104,11 +105,17 @@ export async function createSupportTicket(input: CreateSupportTicketInput): Prom
 export type SupportTicketSummary = Pick<
   SupportTicketRow,
   'id' | 'category' | 'status' | 'subject' | 'message' | 'created_at' | 'updated_at'
-> & { last_reply_at: string | null }
+> & { last_reply_at: string | null; last_message_by: 'support' | 'user' | null }
 
-export type SupportTicketReply = { id: string; body: string; created_at: string }
+export type SupportTicketReply = {
+  id: string
+  author_role: 'support' | 'user'
+  body: string
+  attachments: SupportAttachment[]
+  created_at: string
+}
 
-const SUMMARY_COLUMNS = 'id,category,status,subject,message,created_at,updated_at,last_reply_at'
+const SUMMARY_COLUMNS = 'id,category,status,subject,message,created_at,updated_at,last_reply_at,last_message_by'
 
 /** The signed-in user's own support requests, newest first. */
 export async function getMySupportTickets(): Promise<SupportTicketSummary[]> {
@@ -138,7 +145,7 @@ export async function getMySupportTicket(ticketId: string): Promise<{ ticket: Su
       .maybeSingle<SupportTicketSummary>(),
     supabase
       .from('support_ticket_replies')
-      .select('id,body,created_at')
+      .select('id,author_role,body,attachments,created_at')
       .eq('ticket_id', ticketId)
       .order('created_at', { ascending: true })
       .returns<SupportTicketReply[]>(),
@@ -146,7 +153,27 @@ export async function getMySupportTicket(ticketId: string): Promise<{ ticket: Su
   if (ticketResult.error) throw ticketResult.error
   if (repliesResult.error) throw repliesResult.error
   if (!ticketResult.data) return null
-  return { ticket: ticketResult.data, replies: repliesResult.data ?? [] }
+  const replies = (repliesResult.data ?? []).map((reply) => ({ ...reply, attachments: readSupportAttachments(reply.attachments) }))
+  return { ticket: ticketResult.data, replies }
+}
+
+/** Sends a chat message on the user's own open ticket (attachments are uploaded first). */
+export async function sendSupportMessage(input: { ticketId: string; body: string; files: File[] }): Promise<void> {
+  const attachments: SupportAttachment[] = []
+  for (const file of input.files) attachments.push(await uploadSupportAttachment(input.ticketId, file))
+
+  const { data, error } = await supabase.rpc('send_support_message', {
+    ticket: input.ticketId,
+    message_body: input.body,
+    message_attachments: attachments,
+  })
+  if (error) throw new ServiceError(error.message || 'Unable to send your message.')
+
+  // Let the support team know (best effort; the message is already saved).
+  const replyId = (data as { id?: string } | null)?.id
+  if (replyId) {
+    void supabase.functions.invoke('support-ticket-notify', { body: { ticketId: input.ticketId, replyId } }).catch(() => undefined)
+  }
 }
 
 async function notifySupportTeam(ticketId: string): Promise<void> {
