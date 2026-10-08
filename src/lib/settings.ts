@@ -7,9 +7,7 @@ export {
   TAILOR_ONBOARDING_SETUP_SKIPPED_KEY,
   TAILOR_ONBOARDING_SYNC_PENDING_KEY,
   TAILOR_PENDING_EMAIL_VERIFICATION_KEY,
-  TAILOR_SETTINGS_KEY,
   TAILOR_SIGNUP_PREFILL_KEY,
-  getDefaultTailorSettings,
 } from './settingsDefaults'
 export type {
   DocumentTemplateOption,
@@ -24,6 +22,10 @@ export type {
   SubscriptionPlan,
   TailorSettings,
 } from './settingsTypes'
+
+// The onboarding draft: shop details typed BEFORE the account exists (setup, sign-up, email verification).
+// It is synced to the account after verification (syncPendingOnboardingSettings). Signed-in screens must
+// not use it; they read server settings through useAppSettings / useSettingsQuery.
 
 export function loadTailorSettings(): TailorSettings {
   if (typeof window === 'undefined') return getDefaultTailorSettings()
@@ -42,7 +44,6 @@ export function saveTailorSettings(settings: TailorSettings): TailorSettings {
   const next: TailorSettings = { ...settings, updatedAt: new Date().toISOString() }
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(TAILOR_SETTINGS_KEY, JSON.stringify(next))
-    window.dispatchEvent(new Event('tailordeck-settings-updated'))
   }
   return next
 }

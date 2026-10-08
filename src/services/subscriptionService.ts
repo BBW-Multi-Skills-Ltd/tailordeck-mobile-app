@@ -1,4 +1,3 @@
-import { loadTailorSettings, saveTailorSettings } from '../lib/settings'
 import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import { supabase } from '../lib/supabase'
 import {
@@ -32,7 +31,6 @@ export async function getSubscription(): Promise<SubscriptionRow | null> {
   if (await syncGooglePlayPurchases(data)) {
     const { data: synced, error: syncedError } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle<SubscriptionRow>()
     if (syncedError) throw syncedError
-    if (synced) applySubscriptionToLocalSettings(synced)
     return synced
   }
 
@@ -53,7 +51,7 @@ export async function selectSubscriptionPlan(
   return data
 }
 
-export const PAID_PLANS_ANDROID_ONLY_MESSAGE = 'Paid plans are available through Google Play in the TailorDeck Android app.'
+const PAID_PLANS_ANDROID_ONLY_MESSAGE = 'Paid plans are available through Google Play in the TailorDeck Android app.'
 
 export async function startPaidPlanUpgrade(params: {
   planName: Exclude<SubscriptionPlan, 'free'>
@@ -94,20 +92,6 @@ export async function setFreeTrialCancellation(cancelAtPeriodEnd: boolean): Prom
     .single<SubscriptionRow>()
   if (error) throw error
   return data
-}
-
-export function applySubscriptionToLocalSettings(subscription: SubscriptionRow): void {
-  const settings = loadTailorSettings()
-  saveTailorSettings({
-    ...settings,
-    subscription: {
-      ...settings.subscription,
-      billingCycle: subscription.billing_cycle,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      plan: subscription.plan_name,
-    },
-    updatedAt: new Date().toISOString(),
-  })
 }
 
 const GOOGLE_PLAY_VERIFY_ATTEMPTS = 3
@@ -160,7 +144,6 @@ async function purchaseAndVerifyGooglePlaySubscription(params: {
 
   const subscription = await getSubscription()
   if (!subscription) throw new ServiceError('Unable to load subscription after Google Play purchase.')
-  applySubscriptionToLocalSettings(subscription)
   return { subscription }
 }
 
@@ -205,7 +188,7 @@ async function verifyGooglePlayPurchaseWithRetry(body: Parameters<typeof verifyG
  * It also re-checks the linked purchase once its period has ended, so Google renewals keep the plan.
  * Returns true when at least one purchase was newly linked or refreshed.
  */
-export function syncGooglePlayPurchases(subscription: SubscriptionRow | null): Promise<boolean> {
+function syncGooglePlayPurchases(subscription: SubscriptionRow | null): Promise<boolean> {
   if (!isGooglePlayBillingRuntime()) return Promise.resolve(false)
   if (googlePlaySyncInFlight) return googlePlaySyncInFlight
 
@@ -252,6 +235,19 @@ function shouldSyncGooglePlayPurchase(purchase: GooglePlayOwnedPurchase, subscri
   return !purchase.isAcknowledged || !linkedToken || planLapsed
 }
 
+/**
+ * Every feature key the user's current plan includes, in one call. Returns null when the database does not
+ * have get_my_enabled_features yet (migration 20261008100000 not applied), so callers can fall back.
+ */
+export async function getEnabledFeatures(): Promise<string[] | null> {
+  const { data, error } = await supabase.rpc('get_my_enabled_features')
+  if (error) {
+    if (error.code === 'PGRST202' || error.code === '42883') return null
+    throw error
+  }
+  return Array.isArray(data) ? (data as string[]) : []
+}
+
 export async function checkFeatureAccess(featureKey: string): Promise<boolean> {
   const { data, error } = await supabase.rpc('has_feature_access', {
     feature_key_value: featureKey,
@@ -283,20 +279,12 @@ export function getJobCreationBlockedMessage(entitlement?: Pick<JobCreationEntit
   return 'Your current plan cannot create jobs right now. View plans to continue.'
 }
 
-export function isSubscriptionUsable(subscription: SubscriptionRow): boolean {
-  if (subscription.plan_name === 'free') return subscription.status === 'active'
-  if (subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() <= Date.now()) return true
-  if (subscription.status === 'cancelled' && subscription.current_period_ends_at && new Date(subscription.current_period_ends_at).getTime() > Date.now()) return true
-  if (subscription.status === 'expired' || subscription.status === 'past_due' || subscription.status === 'cancelled') return false
-  return true
-}
-
 export function getTrialEnd(subscription: SubscriptionRow): string | null {
   const trialEnd = subscription.tester_trial_ends_at || subscription.trial_ends_at
   return trialEnd || null
 }
 
-export function isFreeTrialActive(subscription: SubscriptionRow, now = Date.now()): boolean {
+function isFreeTrialActive(subscription: SubscriptionRow, now = Date.now()): boolean {
   if (subscription.plan_name !== 'free' || subscription.status !== 'active') return false
   const trialEnd = getTrialEnd(subscription)
   if (!trialEnd) return false

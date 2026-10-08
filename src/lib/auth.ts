@@ -2,8 +2,8 @@ const LEGACY_AUTH_PREVIEW_KEY = 'tailordeck-auth-preview'
 const LEGACY_AUTH_ACTIVE_EMAIL_KEY = 'tailordeck-auth-active-email'
 const LEGACY_AUTH_ACCOUNTS_KEY = 'tailordeck-auth-accounts'
 
-export const ONBOARDING_DONE_KEY = 'tailordeck-onboarding-done'
-export const ONBOARDING_STAGE_KEY = 'tailordeck-onboarding-stage'
+const ONBOARDING_DONE_KEY = 'tailordeck-onboarding-done'
+const ONBOARDING_STAGE_KEY = 'tailordeck-onboarding-stage'
 
 export type OnboardingStage = 'welcome' | 'setup' | 'plan' | 'done'
 
@@ -33,16 +33,4 @@ export function markOnboardingStage(stage: OnboardingStage): void {
   } else {
     window.localStorage.removeItem(ONBOARDING_DONE_KEY)
   }
-}
-
-export function getOnboardingStage(): OnboardingStage {
-  if (typeof window === 'undefined') return 'welcome'
-  const doneLegacy = window.localStorage.getItem(ONBOARDING_DONE_KEY) === 'true'
-  const raw = window.localStorage.getItem(ONBOARDING_STAGE_KEY)
-  if (raw === 'setup' || raw === 'plan' || raw === 'done' || raw === 'welcome') return raw
-  if (doneLegacy) {
-    window.localStorage.setItem(ONBOARDING_STAGE_KEY, 'done')
-    return 'done'
-  }
-  return 'welcome'
 }

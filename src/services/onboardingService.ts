@@ -8,7 +8,7 @@ import { getDefaultTailorSettings } from '../lib/settingsDefaults'
 
 type SetupHandle = Pick<BusinessSocialHandleRow, 'platform' | 'handle'>
 
-export async function syncOnboardingSettings(settings: TailorSettings): Promise<boolean> {
+async function syncOnboardingSettings(settings: TailorSettings): Promise<boolean> {
   const { data } = await supabase.auth.getSession()
   if (!data.session) return false
 

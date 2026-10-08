@@ -17,8 +17,8 @@ import {
   UserRound,
   Wrench,
 } from 'lucide-react'
-import { formatNaira } from '../../../lib/utils'
-import { ReviewRow } from '../NewJobChrome'
+import { formatNaira } from '../../../lib/money'
+import { ReviewRow } from '../ReviewRow'
 import { ReferencePhotoPreviewGrid, type ReferencePreviewPhoto } from '../ReferencePhotoPreview'
 import { getReminderLabel } from '../../../lib/jobReminder'
 import { AmendmentReviewRows } from './AmendmentReviewRows'

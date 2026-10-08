@@ -1,34 +1,14 @@
-import { useEffect, useState } from 'react'
-import { loadTailorSettings, saveTailorSettings } from '../../lib/settings'
-import { useSettingsQuery } from '../../hooks/useSettingsQueries'
+import { useEffect } from 'react'
+import { useAppSettings } from '../../hooks/useSettingsQueries'
 import { preloadImages } from '../../lib/imagePreload'
 
+/** Settings for the app header; preloads the avatar, logo and signature once they are known. */
 export function useSyncedHeaderSettings() {
-  const [settings, setSettings] = useState(() => loadTailorSettings())
-  const settingsQuery = useSettingsQuery()
+  const settings = useAppSettings()
 
   useEffect(() => {
-    function syncSettings() {
-      setSettings(loadTailorSettings())
-    }
-
-    window.addEventListener('storage', syncSettings)
-    window.addEventListener('tailordeck-settings-updated', syncSettings)
-    return () => {
-      window.removeEventListener('storage', syncSettings)
-      window.removeEventListener('tailordeck-settings-updated', syncSettings)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!settingsQuery.data) return
-    const nextSettings = saveTailorSettings(settingsQuery.data)
-    preloadImages([
-      nextSettings.profile.avatarUrl,
-      nextSettings.brand.logoUrl,
-      nextSettings.brand.signatureUrl,
-    ])
-  }, [settingsQuery.data])
+    preloadImages([settings.profile.avatarUrl, settings.brand.logoUrl, settings.brand.signatureUrl])
+  }, [settings.brand.logoUrl, settings.brand.signatureUrl, settings.profile.avatarUrl])
 
   return settings
 }

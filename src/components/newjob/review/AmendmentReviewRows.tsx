@@ -1,5 +1,5 @@
 import { ClipboardList, FileText, Scissors, Wrench } from 'lucide-react'
-import { ReviewRow } from '../NewJobChrome'
+import { ReviewRow } from '../ReviewRow'
 import type { ReviewSummaryProps } from './reviewSummaryTypes'
 
 export function AmendmentReviewRows(props: ReviewSummaryProps) {

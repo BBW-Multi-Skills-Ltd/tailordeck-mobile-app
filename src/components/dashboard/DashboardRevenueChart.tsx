@@ -1,5 +1,5 @@
 import { Bar, BarChart, Cell, Rectangle, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { formatNaira } from '../../lib/utils'
+import { formatNaira } from '../../lib/money'
 import type { MonthStat } from './dashboardMetrics'
 
 type DashboardRevenueChartProps = {

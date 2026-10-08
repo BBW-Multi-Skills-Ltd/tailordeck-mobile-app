@@ -41,13 +41,7 @@ export type GooglePlayPrice = {
 // Mirrors com.android.billingclient.api.Purchase.PurchaseState.PURCHASED
 export const GOOGLE_PLAY_PURCHASE_STATE_PURCHASED = 1
 
-interface GooglePlayBillingStatus {
-  available: boolean
-  responseOkCode: number
-}
-
 interface TailorDeckBillingPlugin {
-  getBillingStatus(): Promise<GooglePlayBillingStatus>
   purchaseSubscription(options: {
     productId: GooglePlayProductId
     basePlanId: GooglePlayBasePlanId
@@ -67,11 +61,6 @@ export function isGooglePlayBillingRuntime(): boolean {
 
 export function toGooglePlayProductId(planName: GooglePlayPlanName): GooglePlayProductId {
   return planName === 'starter' ? 'tailordeck_starter' : 'tailordeck_pro'
-}
-
-export async function getGooglePlayBillingStatus(): Promise<GooglePlayBillingStatus> {
-  if (!isGooglePlayBillingRuntime()) return { available: false, responseOkCode: -1 }
-  return TailorDeckBilling.getBillingStatus()
 }
 
 export async function purchaseGooglePlaySubscription(params: {

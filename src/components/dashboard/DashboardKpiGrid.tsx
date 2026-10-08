@@ -1,5 +1,5 @@
 import { BriefcaseBusiness, ReceiptText, TrendingUp } from 'lucide-react'
-import { formatNaira } from '../../lib/utils'
+import { formatNaira } from '../../lib/money'
 import type { DashboardMetrics } from './dashboardMetrics'
 
 type DashboardKpiGridProps = {

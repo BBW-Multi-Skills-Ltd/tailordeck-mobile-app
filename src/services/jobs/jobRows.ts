@@ -4,7 +4,7 @@ import { mapJobCreateMoney } from '../mappers/jobMapper'
 import { mapJobStatusToDb } from '../mappers/statusMapper'
 import type { CreateFullJobInput, CreateJobInput } from './jobServiceTypes'
 
-export function buildJobRow(input: CreateJobInput, userId: string) {
+function buildJobRow(input: CreateJobInput, userId: string) {
   return {
     user_id: userId,
     client_id: input.clientId ?? null,

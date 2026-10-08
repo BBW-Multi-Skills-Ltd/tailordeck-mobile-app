@@ -1,6 +1,7 @@
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.107.0'
 import { handleOptions, jsonResponse } from '../_shared/cors.ts'
+import { emailShell, htmlEscape, paragraphs, sendEmail, supportInbox } from '../_shared/email.ts'
 import { sendPushToUser } from '../_shared/fcm.ts'
+import { createServiceClient, getRequestUser, hasAdminRole, type ServiceClient } from '../_shared/supabase.ts'
 
 // Support centre actions (/admin/support), only for admins with the 'support' role:
 // - a chat message (text and/or attachments): saved, pushed to the user's phone and listed in their
@@ -25,48 +26,17 @@ const ENDED = ['resolved', 'closed']
 const MAX_BODY = 4000
 const BUCKET = 'support-attachments'
 
-function requiredEnv(name: string): string {
-  const value = Deno.env.get(name)
-  if (!value) throw new Error(`Missing ${name}`)
-  return value
-}
-
-function htmlEscape(value: string): string {
-  return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char] ?? char)
-}
-
-const paragraphs = (value: string) => htmlEscape(value).replace(/\n/g, '<br />')
 const ticketNumber = (id: string) => id.slice(0, 8).toUpperCase()
 const formatDate = (value: string) =>
   new Date(value).toLocaleString('en-NG', { timeZone: 'Africa/Lagos', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 
-function emailShell(title: string, inner: string): string {
-  return `
-    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#2f241f;max-width:560px;margin:0 auto;padding:24px;">
-      <h2 style="color:#7B1E37;margin:0 0 12px;">${htmlEscape(title)}</h2>
-      ${inner}
-      <p style="font-size:12px;color:#8B7A70;margin-top:24px;">TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.</p>
-    </div>`
-}
-
-async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${requiredEnv('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from: Deno.env.get('RESEND_FROM_EMAIL') || 'TailorDeck Support <noreply@tailordeck.app>',
-      to: [to],
-      reply_to: Deno.env.get('SUPPORT_TO_EMAIL') || 'support@tailordeck.app',
-      subject,
-      html,
-    }),
-  })
-  if (!response.ok) console.error('support email failed:', response.status, await response.text())
-  return response.ok
+/** Emails the ticket owner; replies to the email go to the support inbox. */
+async function sendUserEmail(to: string, subject: string, html: string): Promise<boolean> {
+  return (await sendEmail({ to, subject, html, replyTo: supportInbox() })).ok
 }
 
 /** Attachments must be files already uploaded to this ticket's folder. */
-async function validAttachments(admin: SupabaseClient, ticketId: string, input: unknown): Promise<Attachment[] | null> {
+async function validAttachments(admin: ServiceClient, ticketId: string, input: unknown): Promise<Attachment[] | null> {
   if (input === undefined || input === null) return []
   if (!Array.isArray(input) || input.length > 5) return null
   const files: Attachment[] = []
@@ -86,7 +56,7 @@ async function validAttachments(admin: SupabaseClient, ticketId: string, input: 
   return files
 }
 
-async function userEmail(admin: SupabaseClient, ticket: Ticket): Promise<string> {
+async function userEmail(admin: ServiceClient, ticket: Ticket): Promise<string> {
   const { data } = await admin.auth.admin.getUserById(ticket.user_id)
   return data?.user?.email || ticket.account_email || ''
 }
@@ -125,20 +95,10 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return jsonResponse({ error: 'Method not allowed.' }, 405, request)
 
   try {
-    const header = request.headers.get('authorization') ?? ''
-    const accessToken = header.toLowerCase().startsWith('bearer ') ? header.slice('bearer '.length).trim() : ''
-    if (!accessToken) return jsonResponse({ error: 'Authentication required.' }, 401, request)
-
-    const admin = createClient(requiredEnv('SUPABASE_URL'), requiredEnv('SUPABASE_SERVICE_ROLE_KEY'), {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
-    const { data: userData, error: userError } = await admin.auth.getUser(accessToken)
-    if (userError || !userData.user) return jsonResponse({ error: 'Authentication required.' }, 401, request)
-
-    const { data: adminRow, error: adminError } = await admin.from('admin_users').select('roles').eq('user_id', userData.user.id).maybeSingle()
-    if (adminError) throw adminError
-    const roles = (adminRow as { roles: string[] } | null)?.roles ?? []
-    if (!roles.includes('support')) return jsonResponse({ error: 'Support admin access required.' }, 403, request)
+    const admin = createServiceClient()
+    const user = await getRequestUser(request, admin)
+    if (!user) return jsonResponse({ error: 'Authentication required.' }, 401, request)
+    if (!(await hasAdminRole(admin, user.id, 'support'))) return jsonResponse({ error: 'Support admin access required.' }, 403, request)
 
     const input = (await request.json().catch(() => ({}))) as { ticketId?: unknown; body?: unknown; attachments?: unknown; status?: unknown }
     const ticketId = typeof input.ticketId === 'string' ? input.ticketId : ''
@@ -175,7 +135,7 @@ Deno.serve(async (request) => {
     if (hasMessage) {
       const { data: reply, error: replyError } = await admin
         .from('support_ticket_replies')
-        .insert({ ticket_id: ticket.id, author_id: userData.user.id, author_role: 'support', body, attachments })
+        .insert({ ticket_id: ticket.id, author_id: user.id, author_role: 'support', body, attachments })
         .select('id,created_at')
         .single<{ id: string; created_at: string }>()
       if (replyError) throw replyError
@@ -200,7 +160,7 @@ Deno.serve(async (request) => {
       if (!result.pushed) {
         const to = await userEmail(admin, ticket)
         if (to) {
-          result.emailed = await sendEmail(
+          result.emailed = await sendUserEmail(
             to,
             `Re: ${ticket.subject} [#${ticketNumber(ticket.id)}]`,
             emailShell(
@@ -251,7 +211,7 @@ Deno.serve(async (request) => {
           .order('created_at', { ascending: true })
         const to = await userEmail(admin, ticket)
         if (to) {
-          result.transcriptEmailed = await sendEmail(
+          result.transcriptEmailed = await sendUserEmail(
             to,
             `Your TailorDeck support request #${ticketNumber(ticket.id)} is ${label}`,
             transcriptHtml(ticket, (messages ?? []) as Message[], nextStatus),

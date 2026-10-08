@@ -8,7 +8,6 @@ export interface ProfileRow {
   avatar_storage_path: string | null
   onboarding_complete: boolean | null
   account_status: string | null
-  role: string | null
   deactivation_reason: string | null
   deactivated_at: string | null
   deletion_requested_at: string | null

@@ -1,4 +1,6 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
+import { latestJobMeasurementSnapshot } from '../clientprofile/clientMeasurementMappers'
+import type { JobWithRelations } from '../../services/types'
 import type { Client } from '../../types/client'
 import {
   measurementNumbersToStrings,
@@ -8,7 +10,7 @@ import {
   type OrderMode,
   type PersonForm,
 } from './newJobConfig'
-import { latestMeasurementForClient, snapshotPersonsToForm } from './newJobFlow'
+import { snapshotPersonsToForm } from './newJobFlow'
 
 type RepeatClientPrefillSetters = {
   setClientName: Dispatch<SetStateAction<string>>
@@ -26,13 +28,21 @@ type RepeatClientPrefillSetters = {
   setStepOneMeasurementsOpen: Dispatch<SetStateAction<Record<string, boolean>>>
 }
 
-export function useRepeatClientPrefill(repeatClient: Client | undefined, setters: RepeatClientPrefillSetters): void {
+/**
+ * Pre-fills the wizard for a repeat order. `clientJobs` is undefined while the client's jobs are loading;
+ * prefill runs once, as soon as both the client and their jobs are available.
+ */
+export function useRepeatClientPrefill(
+  repeatClient: Client | undefined,
+  clientJobs: JobWithRelations[] | undefined,
+  setters: RepeatClientPrefillSetters,
+): void {
   const prefilledClientRef = useRef(false)
 
   useEffect(() => {
-    if (!repeatClient || prefilledClientRef.current) return
+    if (!repeatClient || !clientJobs || prefilledClientRef.current) return
 
-    const latestSnapshot = latestMeasurementForClient(repeatClient.id)
+    const latestSnapshot = latestJobMeasurementSnapshot(clientJobs)
 
     setters.setClientName(repeatClient.name)
     setters.setClientPhone(repeatClient.phone)
@@ -73,5 +83,5 @@ export function useRepeatClientPrefill(repeatClient: Client | undefined, setters
     }
 
     prefilledClientRef.current = true
-  }, [repeatClient, setters])
+  }, [clientJobs, repeatClient, setters])
 }

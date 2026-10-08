@@ -6,16 +6,22 @@ import { mergeSettingsRows } from './mappers/settingsMapper'
 import { getPreferences, updatePreferences } from './preferencesService'
 import { getProfile, updateProfile } from './profileService'
 import { getSubscription } from './subscriptionService'
-import type { BusinessSocialHandleRow } from './types'
+import type { BusinessSocialHandleRow, ProfileRow, SubscriptionRow } from './types'
 
-export async function getSettings(): Promise<TailorSettings> {
+type SettingsLoaders = {
+  /** Supply cached loaders so settings reuse the profile/subscription already fetched by the route guard. */
+  profile?: () => Promise<ProfileRow | null>
+  subscription?: () => Promise<SubscriptionRow | null>
+}
+
+export async function getSettings(loaders: SettingsLoaders = {}): Promise<TailorSettings> {
   const [profile, business, handles, preferences, brand, subscription] = await Promise.all([
-    getProfile(),
+    (loaders.profile ?? getProfile)(),
     getBusinessProfile(),
     getSocialHandles(),
     getPreferences(),
     getBrandSettings(),
-    getSubscription(),
+    (loaders.subscription ?? getSubscription)(),
   ])
   return mergeSettingsRows({ profile, business, handles, preferences, brand, subscription })
 }

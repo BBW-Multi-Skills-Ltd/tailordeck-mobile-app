@@ -1,9 +1,9 @@
-﻿import { toKobo, toNaira } from '../../lib/money'
-import type { MockJob } from '../../types/job'
+import { toKobo, toNaira } from '../../lib/money'
+import type { Job } from '../../types/job'
 import { mapJobStatusFromDb } from './statusMapper'
 import type { JobRow } from '../types'
 
-export function mapJobRow(row: JobRow): MockJob {
+export function mapJobRow(row: JobRow): Job {
   return {
     id: row.id,
     clientId: row.client_id ?? '',

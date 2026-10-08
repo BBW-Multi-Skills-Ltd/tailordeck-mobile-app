@@ -4,7 +4,7 @@ import type { BrandDetailKey, InvoiceSetupChecklistItem } from './invoiceReceipt
 
 export const DOCUMENT_PREVIEW_WIDTH = 1120
 export const DOCUMENT_PREVIEW_HEIGHT = 792
-export const DEFAULT_TAILORDECK_LOGO_PATH = '/branding/TailorDeck app logo for in app.png'
+const DEFAULT_TAILORDECK_LOGO_PATH = '/branding/TailorDeck app logo for in app.png'
 
 export const detailOptions: Array<{ key: BrandDetailKey; label: string; icon: LucideIcon }> = [
   { key: 'phone', label: 'Phone', icon: Phone },

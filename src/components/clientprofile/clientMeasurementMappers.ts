@@ -12,6 +12,20 @@ export function buildMeasurementDrafts(jobs: JobWithRelations[]): Record<string,
   return Object.fromEntries(entries)
 }
 
+/**
+ * Measurements to pre-fill a repeat order for a client: from their latest completed job if any,
+ * otherwise their newest non-draft job, otherwise their newest job.
+ */
+export function latestJobMeasurementSnapshot(jobs: JobWithRelations[]): JobMeasurementSnapshot | undefined {
+  const rank = (job: JobWithRelations) => (job.status === 'completed' ? 0 : job.status === 'draft' ? 2 : 1)
+  const ordered = [...jobs].sort((a, b) => rank(a) - rank(b) || (a.created_at < b.created_at ? 1 : -1))
+  for (const job of ordered) {
+    const snapshot = mapJobToMeasurementSnapshot(job)
+    if (snapshot) return snapshot
+  }
+  return undefined
+}
+
 function mapJobToMeasurementSnapshot(job: JobWithRelations): JobMeasurementSnapshot | null {
   const persons = [...(job.job_persons ?? [])].sort((a, b) => a.sort_order - b.sort_order)
   if (persons.length === 0) return null

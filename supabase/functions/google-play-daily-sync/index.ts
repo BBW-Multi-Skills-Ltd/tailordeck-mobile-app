@@ -12,6 +12,7 @@ import {
   saveEntitledSubscription,
   UpstreamGoogleError,
 } from '../_shared/googlePlay.ts'
+import { timingSafeEqual } from '../_shared/secrets.ts'
 
 // Daily safety net for Google Play subscriptions (scheduled by pg_cron, see the
 // google_play_daily_sync migration). Re-reads every linked purchase from Google so renewals,
@@ -161,16 +162,6 @@ async function syncRow(
     orderId: subscription.latestOrderId ?? null,
   })
   return 'active'
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const left = new TextEncoder().encode(a)
-  const right = new TextEncoder().encode(b)
-  let diff = left.length ^ right.length
-  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
-    diff |= (left[index] ?? 0) ^ (right[index] ?? 0)
-  }
-  return diff === 0
 }
 
 function json(body: unknown, status: number): Response {

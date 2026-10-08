@@ -30,9 +30,7 @@ export interface JobRow {
   charge_amount_kobo: number
   deposit_percent: number | null
   deposit_amount_kobo: number
-  balance_amount_kobo: number | null
   total_expenses_kobo: number
-  profit_kobo: number | null
   is_worth_it: boolean | null
   deadline_date: string | null
   deadline_time: string | null

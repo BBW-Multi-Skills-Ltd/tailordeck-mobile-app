@@ -1,7 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 export default defineConfig(({ mode }) => {
@@ -15,20 +14,9 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY),
       'import.meta.env.VITE_ALLOW_WEB_APP': JSON.stringify(env.VITE_ALLOW_WEB_APP),
     },
-    plugins: [
-      react(),
-      tailwindcss(),
-      // TailorDeck is installed from Google Play, not as a web app: no install manifest, and the service worker
-      // ships in "self-destroying" mode so browsers that installed the old PWA remove it and its offline cache.
-      VitePWA({
-        registerType: 'autoUpdate',
-        selfDestroying: true,
-        manifest: false,
-        devOptions: {
-          enabled: false,
-        },
-      }),
-    ],
+    // TailorDeck is installed from Google Play, not as a web app. public/sw.js only removes the service worker
+    // of the old PWA; main.tsx also unregisters it and clears its caches.
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),

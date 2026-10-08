@@ -1,4 +1,4 @@
-import { formatNaira } from '../../lib/utils'
+import { formatNaira } from '../../lib/money'
 import type { MonthStat } from './dashboardMetrics'
 
 type BestMonthCardProps = {

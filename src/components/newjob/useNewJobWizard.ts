@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useClientQuery } from '../../hooks/useClientQueries'
-import { useJobQuery } from '../../hooks/useJobQueries'
+import { useClientJobsQuery, useJobQuery } from '../../hooks/useJobQueries'
 import { useSettingsQuery } from '../../hooks/useSettingsQueries'
 import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import { useAuth } from '../../context/authContextCore'
@@ -31,6 +31,7 @@ export function useNewJobWizard() {
   const repeatClientId = searchParams.get('clientId')
   const draftId = searchParams.get('draftId')
   const repeatClientQuery = useClientQuery(repeatClientId ?? undefined)
+  const repeatClientJobsQuery = useClientJobsQuery(repeatClientId ?? undefined)
   const draftQuery = useJobQuery(draftId ?? undefined)
   const derived = getNewJobWizardDerived(state)
   const repeatClient = repeatClientQuery.data ?? undefined
@@ -64,7 +65,9 @@ export function useNewJobWizard() {
     return false
   }
 
-  useRepeatClientPrefill(repeatClient, {
+  // A failed history load still pre-fills the client's name, phone and stored measurements.
+  const repeatClientJobs = repeatClientJobsQuery.isError ? [] : repeatClientJobsQuery.data
+  useRepeatClientPrefill(repeatClient, repeatClientJobs, {
     setClientName: state.setClientName,
     setClientPhone: state.setClientPhone,
     setOrderMode: state.setOrderMode,

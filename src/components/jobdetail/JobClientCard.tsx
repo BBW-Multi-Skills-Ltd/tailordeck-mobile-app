@@ -1,9 +1,9 @@
 import { Phone } from 'lucide-react'
 import { getInitial } from '../../lib/utils'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 import { statusClass } from './jobDetailUtils'
 
-export function JobClientCard({ job }: { job: MockJob }) {
+export function JobClientCard({ job }: { job: Job }) {
   return (
     <article className="card stack gap-12">
       <div className="row-between">

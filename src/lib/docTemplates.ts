@@ -1,7 +1,7 @@
 import { InvoiceClassicWaveTemplate } from '../templates/invoice/invoiceClassicWave'
 import type { DocumentTemplateDefinition, DocumentTemplatePayload } from '../templates/types'
 
-export const documentTemplate: DocumentTemplateDefinition = {
+const documentTemplate: DocumentTemplateDefinition = {
   id: 'classic-wave',
   kind: 'invoice',
   displayName: 'Classic Wave',

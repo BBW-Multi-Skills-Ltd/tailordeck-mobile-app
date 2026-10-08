@@ -1,5 +1,5 @@
 import { AlertCircle, CheckCircle2, Clock, WalletCards } from 'lucide-react'
-import { formatNaira } from '../../../lib/utils'
+import { formatNaira } from '../../../lib/money'
 import type { ReminderSelection, ReminderUnit } from '../newJobConfig'
 import { getReminderLabel } from '../../../lib/jobReminder'
 

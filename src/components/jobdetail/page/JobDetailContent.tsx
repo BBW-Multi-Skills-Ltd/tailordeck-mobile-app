@@ -10,7 +10,7 @@ import { useUpdateJobStatusMutation } from '../../../hooks/useJobQueries'
 import { featureKeys } from '../../../lib/features'
 import { lazyWithReload } from '../../../lib/lazyWithReload'
 import { getServiceErrorMessage } from '../../../services/serviceHelpers'
-import type { MockJob } from '../../../types/job'
+import type { Job } from '../../../types/job'
 import type { DetailedJobData } from '../../../types/jobDetails'
 import { JobClientCard } from '../JobClientCard'
 import { JobCompletionSection } from '../JobCompletionSection'
@@ -32,7 +32,7 @@ type JobDetailContentProps = {
   brand: BrandConfig
   completedAt?: string | null
   details: DetailedJobData
-  job: MockJob
+  job: Job
   measurementOrderScope?: string
 }
 

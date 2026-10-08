@@ -1,16 +1,17 @@
 import { useNavigate } from 'react-router-dom'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { HomeKpiGrid } from '../components/home/HomeKpiGrid'
 import { HomeProfitCard } from '../components/home/HomeProfitCard'
 import { HomeRecentJobs } from '../components/home/HomeRecentJobs'
 import { HomeSetupGuide } from '../components/home/HomeSetupGuide'
 import { formatHomeSummaryProfit, getGreeting, getHomeSummaryKpiCards } from '../components/home/homeMetrics'
 import { useHomeSummaryQuery, useRecentJobsQuery } from '../hooks/useDashboardQueries'
-import { loadTailorSettings, TAILOR_ONBOARDING_SETUP_SKIPPED_KEY } from '../lib/settings'
+import { useAppSettings } from '../hooks/useSettingsQueries'
+import { TAILOR_ONBOARDING_SETUP_SKIPPED_KEY } from '../lib/settings'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [settings, setSettings] = useState(() => loadTailorSettings())
+  const settings = useAppSettings()
   const homeSummaryQuery = useHomeSummaryQuery()
   const recentJobsQuery = useRecentJobsQuery(3)
   const homeSummary = homeSummaryQuery.data
@@ -28,19 +29,6 @@ export default function Home() {
     ? 'Your workshop activity is ready for today.'
     : 'Your workspace is ready. Create your first job to begin.'
   const setupWasSkipped = typeof window !== 'undefined' && window.localStorage.getItem(TAILOR_ONBOARDING_SETUP_SKIPPED_KEY) === 'true'
-
-  useEffect(() => {
-    function syncSettings() {
-      setSettings(loadTailorSettings())
-    }
-
-    window.addEventListener('storage', syncSettings)
-    window.addEventListener('tailordeck-settings-updated', syncSettings)
-    return () => {
-      window.removeEventListener('storage', syncSettings)
-      window.removeEventListener('tailordeck-settings-updated', syncSettings)
-    }
-  }, [])
 
   return (
     <section className="section stack gap-16">

@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { BarChart3, BriefcaseBusiness, ChevronRight, CircleHelp, CreditCard, FileText, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { SmartImage } from '../components/shared/SmartImage'
-import { AVATAR_PLACEHOLDER, loadTailorSettings } from '../lib/settings'
+import { useAppSettings } from '../hooks/useSettingsQueries'
+import { AVATAR_PLACEHOLDER } from '../lib/settings'
 
 type MoreHubItem = {
   to: string
@@ -66,7 +67,7 @@ const moreGroups: MoreHubGroup[] = [
 ]
 
 export default function More() {
-  const settings = loadTailorSettings()
+  const settings = useAppSettings()
   const fullName = settings.profile.fullName || 'TailorDeck User'
   const email = settings.profile.email || 'Complete your profile in Settings'
   const initial = fullName.trim().charAt(0).toUpperCase() || 'T'

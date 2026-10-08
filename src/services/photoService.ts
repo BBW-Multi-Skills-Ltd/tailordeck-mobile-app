@@ -65,18 +65,3 @@ export async function uploadJobPhoto(input: UploadJobPhotoInput): Promise<JobRef
 
   return { ...data, signed_url: await createSignedUrl('job-photos', storagePath, JOB_PHOTO_SIGNED_URL_TTL) }
 }
-
-export async function getJobPhotoSignedUrls(jobId: string): Promise<string[]> {
-  const userId = await requireUserId()
-  const { data, error } = await supabase
-    .from('job_reference_photos')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('job_id', jobId)
-    .order('sort_order')
-    .returns<JobReferencePhotoRow[]>()
-
-  if (error) throw error
-
-  return Promise.all((data ?? []).map((photo) => createSignedUrl('job-photos', photo.storage_path, JOB_PHOTO_SIGNED_URL_TTL)))
-}

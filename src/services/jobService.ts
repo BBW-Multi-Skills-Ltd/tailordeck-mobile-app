@@ -1,19 +1,18 @@
-import type { MockJob, JobStatus } from '../types/job'
+import type { Job, JobStatus } from '../types/job'
 import { supabase } from '../lib/supabase'
 import { toLocalDateKey } from '../lib/localDate'
 import { normalizeNigerianPhone } from '../lib/phone'
 import { mapJobRow } from './mappers/jobMapper'
 import { mapJobStatusToDb } from './mappers/statusMapper'
 import { LIST_PAGE_SIZE, toIlikeTerm, toListPage, type ListPage } from './listPaging'
-import { createSignedUrl, requireUserId, ServiceError } from './serviceHelpers'
+import { createSignedUrl, getServiceErrorMessage, requireUserId, ServiceError } from './serviceHelpers'
 import type { JobRow, JobWithRelations } from './types'
 import { uploadJobReferencePhotos } from './jobs/jobRelationPersistence'
 import { buildJobExpenseRows, buildJobPersonRows } from './jobs/jobRelationRows'
-import { buildFullJobRow, buildJobRow } from './jobs/jobRows'
-import { buildJobUpdateRow } from './jobs/jobUpdateRows'
-import type { CreateFullJobInput, CreateJobInput } from './jobs/jobServiceTypes'
+import { buildFullJobRow } from './jobs/jobRows'
+import type { CreateFullJobInput } from './jobs/jobServiceTypes'
 import { validateCreateFullJobInput } from '../validation/jobSchemas'
-import { getJobCreationBlockedMessage, getJobCreationEntitlement } from './subscriptionService'
+import { getJobCreationBlockedMessage } from './subscriptionService'
 
 const JOB_PHOTO_SIGNED_URL_TTL = 60 * 60 * 24 * 7
 
@@ -34,7 +33,7 @@ export type JobReminderSchedule = Pick<
 >
 
 /** One page of jobs, newest first. Search runs on the server so it finds every job, not just loaded ones. */
-export async function getJobsPage(params: { status?: JobStatus; search?: string; offset?: number }): Promise<ListPage<MockJob>> {
+export async function getJobsPage(params: { status?: JobStatus; search?: string; offset?: number }): Promise<ListPage<Job>> {
   const userId = await requireUserId()
   const offset = params.offset ?? 0
   let query = supabase
@@ -107,20 +106,12 @@ export async function getClientJobs(clientId: string): Promise<JobWithRelations[
   return data ?? []
 }
 
-export async function createJob(input: CreateJobInput): Promise<MockJob> {
-  await assertCanCreateJob()
-  const userId = await requireUserId()
-  const { data, error } = await supabase.from('jobs').insert(buildJobRow(input, userId)).select('*').single<JobRow>()
-  if (error) throw error
-  return mapJobRow(data)
-}
-
 /**
  * Creates or updates a job with its persons, measurements and expenses in one database transaction
  * (save_full_job). `jobId` and `newClientId` are generated once per wizard, so retrying after a network
  * failure updates the same job instead of creating a duplicate job or client.
  */
-export async function saveFullJob(params: { jobId: string; newClientId: string; input: CreateFullJobInput }): Promise<MockJob> {
+export async function saveFullJob(params: { jobId: string; newClientId: string; input: CreateFullJobInput }): Promise<Job> {
   const { input, jobId, newClientId } = params
   validateCreateFullJobInput(input)
   const userId = await requireUserId()
@@ -133,8 +124,8 @@ export async function saveFullJob(params: { jobId: string; newClientId: string; 
     .maybeSingle<Pick<JobRow, 'id' | 'client_id' | 'deleted_at'>>()
   if (existingError) throw existingError
   if (existing?.deleted_at) throw new ServiceError('This job was deleted.')
-  // Only a brand-new job counts against the plan limit; a retry of an already-saved job must not be blocked.
-  if (!existing) await assertCanCreateJob()
+  // The plan limit is enforced by the enforce_free_plan_job_limit trigger inside save_full_job (new jobs only),
+  // so there is no separate entitlement round trip here; its error is translated below.
 
   const clientId = input.clientId || existing?.client_id || null
   const newClient = !clientId && !existing
@@ -157,7 +148,7 @@ export async function saveFullJob(params: { jobId: string; newClientId: string; 
       p_new_client: newClient,
     })
     .single<JobRow>()
-  if (error) throw error
+  if (error) throw toJobLimitError(error)
 
   try {
     await uploadJobReferencePhotos(input, jobId)
@@ -170,18 +161,23 @@ export async function saveFullJob(params: { jobId: string; newClientId: string; 
 }
 
 /** The job itself is saved; only photos failed. Saving again retries just the photos (same job, no duplicates). */
-export class JobPhotosNotSavedError extends ServiceError {
+class JobPhotosNotSavedError extends ServiceError {
   constructor() {
     super('Job saved, but some reference photos did not upload. Check your connection and tap the button again to retry the photos.')
     this.name = 'JobPhotosNotSavedError'
   }
 }
 
-async function assertCanCreateJob(): Promise<void> {
-  const entitlement = await getJobCreationEntitlement()
-  if (!entitlement.can_create_job) {
-    throw new ServiceError(getJobCreationBlockedMessage(entitlement))
+/** Turns the plan-limit errors raised by the jobs trigger into the app's upgrade message. */
+export function toJobLimitError(error: unknown): unknown {
+  const message = getServiceErrorMessage(error, '')
+  if (message.startsWith('Free plan job limit reached')) {
+    return new ServiceError(getJobCreationBlockedMessage({ effective_plan: 'free', job_limit: 3 }))
   }
+  if (message.startsWith('Your current plan cannot create jobs') || message.startsWith('An active subscription is required')) {
+    return new ServiceError(getJobCreationBlockedMessage(null))
+  }
+  return error
 }
 
 async function hydrateJobPhotoUrls(job: JobWithRelations): Promise<JobWithRelations> {
@@ -198,15 +194,7 @@ async function hydrateJobPhotoUrls(job: JobWithRelations): Promise<JobWithRelati
   return { ...job, job_reference_photos: signedPhotos }
 }
 
-export async function updateJob(id: string, updates: Partial<CreateJobInput>): Promise<MockJob> {
-  const userId = await requireUserId()
-  const row = buildJobUpdateRow(updates)
-  const { data, error } = await supabase.from('jobs').update(row).eq('user_id', userId).eq('id', id).select('*').single<JobRow>()
-  if (error) throw error
-  return mapJobRow(data)
-}
-
-export async function updateJobStatus(id: string, status: JobStatus): Promise<MockJob> {
+export async function updateJobStatus(id: string, status: JobStatus): Promise<Job> {
   const userId = await requireUserId()
   const dbStatus = mapJobStatusToDb(status)
   const { data, error } = await supabase
@@ -222,12 +210,6 @@ export async function updateJobStatus(id: string, status: JobStatus): Promise<Mo
     .single<JobRow>()
   if (error) throw error
   return mapJobRow(data)
-}
-
-export async function softDeleteJob(id: string): Promise<void> {
-  const userId = await requireUserId()
-  const { error } = await supabase.from('jobs').update({ deleted_at: new Date().toISOString() }).eq('user_id', userId).eq('id', id)
-  if (error) throw error
 }
 
 export async function softDeleteAllJobs(): Promise<void> {

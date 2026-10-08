@@ -1,4 +1,4 @@
-import type { JobType, MakeCategory, MaterialQuality, MaterialSource, OrderMode, PersonSex, Reminder } from './newJobTypes'
+import type { JobType, MakeCategory, MaterialQuality, MaterialSource, OrderMode, PersonSex } from './newJobTypes'
 
 export const stepLabels = [
   'Client Info & Measurements',
@@ -7,7 +7,6 @@ export const stepLabels = [
   'Deadline',
 ] as const
 
-export const reminders: Reminder[] = ['none', 'custom', '1 day before', '3 days before', '1 week before']
 export const qualities: MaterialQuality[] = ['Normal', 'Original', 'Fake', 'High Standard']
 export const materialSources: MaterialSource[] = ['Client is Providing Material', 'I Am Getting It']
 export const makeCategories: MakeCategory[] = ['Body Wear', 'Non-Body Item']
@@ -30,7 +29,7 @@ export const amendmentPartOptions = ['Zip', 'Button', 'Lining', 'Thread', 'Fabri
 
 // Body-wear items grouped by who usually wears them. Men/boys see men's + unisex items,
 // women/girls see women's + unisex items, and a shared "same item for everyone" field sees all.
-export const menWearItems = [
+const menWearItems = [
   'Agbada',
   'Kaftan',
   'Senator',
@@ -40,7 +39,7 @@ export const menWearItems = [
   'Waistcoat',
 ] as const
 
-export const womenWearItems = [
+const womenWearItems = [
   'Gown',
   'Wedding Gown',
   'Iro & Buba',
@@ -53,7 +52,7 @@ export const womenWearItems = [
   'Wrapper',
 ] as const
 
-export const unisexWearItems = [
+const unisexWearItems = [
   'T-shirt',
   'Shirt',
   '2-Piece (Up & Down)',

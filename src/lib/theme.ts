@@ -1,6 +1,6 @@
 export type AppTheme = 'light' | 'dark'
 
-export const TAILOR_THEME_KEY = 'tailordeck-theme'
+const TAILOR_THEME_KEY = 'tailordeck-theme'
 
 export function getSavedTheme(): AppTheme {
   if (typeof window === 'undefined') return 'light'

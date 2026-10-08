@@ -1,10 +1,11 @@
 import { CalendarDays, ClipboardList } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { formatDateShort, formatNaira } from '../../lib/utils'
-import type { MockJob } from '../../types/job'
+import { formatDateShort } from '../../lib/utils'
+import { formatNaira } from '../../lib/money'
+import type { Job } from '../../types/job'
 
 type ClientJobHistoryProps = {
-  jobs: MockJob[]
+  jobs: Job[]
 }
 
 export default function ClientJobHistory({ jobs }: ClientJobHistoryProps) {

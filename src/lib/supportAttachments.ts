@@ -5,8 +5,8 @@ import { supabase } from './supabase'
 
 export type SupportAttachment = { path: string; name: string; type: string; size: number }
 
-export const SUPPORT_ATTACHMENT_BUCKET = 'support-attachments'
-export const SUPPORT_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
+const SUPPORT_ATTACHMENT_BUCKET = 'support-attachments'
+const SUPPORT_ATTACHMENT_MAX_BYTES = 5 * 1024 * 1024
 export const SUPPORT_ATTACHMENT_MAX_FILES = 5
 export const SUPPORT_ATTACHMENT_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,application/pdf'
 

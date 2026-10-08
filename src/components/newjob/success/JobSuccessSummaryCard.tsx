@@ -1,4 +1,4 @@
-import { formatNaira } from '../../../lib/utils'
+import { formatNaira } from '../../../lib/money'
 
 export function JobSuccessSummaryCard({ charge, deadlineDate, jobType }: { charge: number; deadlineDate: string; jobType: string }) {
   return (

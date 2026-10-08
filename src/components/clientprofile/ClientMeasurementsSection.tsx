@@ -1,13 +1,13 @@
 import { Ruler } from 'lucide-react'
 import type { JobMeasurementSnapshot } from '../../types/measurements'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 import { BodyMeasurementCard } from './BodyMeasurementCard'
 import { NonBodyMeasurementCard } from './NonBodyMeasurementCard'
 import { blockKey } from './useClientMeasurements'
 
 type ClientMeasurementsSectionProps = {
   measurementDrafts: Record<string, JobMeasurementSnapshot>
-  measurementJobs: MockJob[]
+  measurementJobs: Job[]
   isEditing: (key: string) => boolean
   onToggleEdit: (key: string) => void
   onUpdateBodyMeasurement: (jobId: string, personId: string, field: string, value: string) => void

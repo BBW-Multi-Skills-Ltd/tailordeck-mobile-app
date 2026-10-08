@@ -1,5 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { RenderClientMeasurementStep, RenderCostingStep, RenderDeadlineReviewStep, RenderMaterialPricingStep } from './NewJobStepRenderers'
+import { RenderClientMeasurementStep } from './RenderClientMeasurementStep'
+import { RenderCostingStep } from './RenderCostingStep'
+import { RenderDeadlineReviewStep } from './RenderDeadlineReviewStep'
+import { RenderMaterialPricingStep } from './RenderMaterialPricingStep'
 import type { NewJobWizardModel } from './useNewJobWizard'
 
 type NewJobStepContentProps = {

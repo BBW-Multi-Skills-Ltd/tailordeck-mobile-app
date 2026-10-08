@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react'
-import { formatNaira } from '../../../lib/utils'
+import { formatNaira } from '../../../lib/money'
 import { numericValue, type ExpenseForm } from '../newJobConfig'
 
 export function ExpenseList({ expenses, onRemoveExpense }: { expenses: ExpenseForm[]; onRemoveExpense: (expenseId: string) => void }) {

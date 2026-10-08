@@ -6,7 +6,7 @@ import {
   buildWhatsAppURL,
 } from '../invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 import { buildDocumentNumber, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
 import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
@@ -17,7 +17,7 @@ export function useJobDocumentActions({
   balanceToCollect,
 }: {
   brand: BrandConfig
-  job: MockJob
+  job: Job
   details: DetailedJobData
   balanceToCollect: number
 }) {

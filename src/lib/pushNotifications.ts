@@ -11,7 +11,7 @@ const SUPPORT_CHANNEL_ID = 'support'
 let listenersReady = false
 let registering = false
 
-export function isPushSupported(): boolean {
+function isPushSupported(): boolean {
   return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('PushNotifications')
 }
 

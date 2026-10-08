@@ -1,6 +1,6 @@
 export type JobStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed'
 
-export interface MockJob {
+export interface Job {
   id: string
   clientId: string
   clientName: string

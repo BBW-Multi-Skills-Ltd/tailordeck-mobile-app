@@ -7,27 +7,17 @@ import { AttachmentList, ChatComposer } from '../components/support/SupportChatP
 import { useAttachmentLinks } from '../components/support/useAttachmentLinks'
 import { useMySupportTicketQuery, useMySupportTicketsQuery, useSendSupportMessageMutation } from '../hooks/useSupportQueries'
 import { requestSupportPushPermission } from '../lib/pushNotifications'
+import { formatSupportDate, ticketNumber, USER_SUPPORT_STATUS_LABELS } from '../lib/supportFormat'
 import { getServiceErrorMessage } from '../services/serviceHelpers'
 import type { SupportTicketStatus } from '../services/types'
 import type { SupportTicketReply, SupportTicketSummary } from '../services/supportService'
 
 // "My support requests": the user's tickets and TailorDeck's replies (also emailed to them).
 
-const STATUS_LABELS: Record<SupportTicketStatus, string> = {
-  open: 'Received',
-  in_review: 'In progress',
-  resolved: 'Resolved',
-  closed: 'Closed',
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
-}
-
-const ticketNumber = (id: string) => `#${id.slice(0, 8).toUpperCase()}`
+const formatDate = (value: string) => formatSupportDate(value, { short: true })
 
 function StatusBadge({ status }: { status: SupportTicketStatus }) {
-  return <span className={`support-status support-status-${status}`}>{STATUS_LABELS[status]}</span>
+  return <span className={`support-status support-status-${status}`}>{USER_SUPPORT_STATUS_LABELS[status]}</span>
 }
 
 function RequestList() {

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 
-export const CLASSIC_WAVE_PAGE_WIDTH = 1120
-export const CLASSIC_WAVE_PAGE_HEIGHT = 792
+const CLASSIC_WAVE_PAGE_WIDTH = 1120
+const CLASSIC_WAVE_PAGE_HEIGHT = 792
 
 export const styles = {
   page: (primary: string, secondary: string): CSSProperties => ({

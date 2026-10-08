@@ -1,7 +1,6 @@
 import { RiScissorsLine } from 'react-icons/ri'
 import { TbMoneybag } from 'react-icons/tb'
-import { toLocalMonthKey } from '../../lib/localDate'
-import { formatNaira } from '../../lib/money'
+import { formatKobo } from '../../lib/money'
 import type { HomeSummary, MonthlyStat } from '../../services/dashboardService'
 import type { JobStatus } from '../../types/job'
 
@@ -20,11 +19,6 @@ export function getGreeting(): string {
   return 'Good evening'
 }
 
-export function getCurrentMonthStats(monthlyStats: MonthlyStat[] = []): MonthlyStat | undefined {
-  const currentMonth = toLocalMonthKey()
-  return monthlyStats.find((stat) => stat.month === currentMonth)
-}
-
 export function getHomeKpiCards(currentMonth?: MonthlyStat) {
   return [
     { label: 'Jobs This Month', value: String(currentMonth?.jobs ?? 0), icon: RiScissorsLine },
@@ -40,11 +34,7 @@ export function getHomeSummaryKpiCards(summary?: HomeSummary) {
 }
 
 export function formatHomeSummaryProfit(summary?: HomeSummary): string {
-  return formatNaira(summary?.profitKobo ?? 0)
-}
-
-export function formatHomeProfit(currentMonth?: MonthlyStat): string {
-  return formatNaira(currentMonth?.profitKobo ?? 0)
+  return formatKobo(summary?.profitKobo ?? 0)
 }
 
 export function statusClass(status: JobStatus): string {
@@ -57,5 +47,5 @@ function formatCompactNaira(kobo: number): string {
   const naira = Math.round(kobo / 100)
   if (naira >= 1000000) return `₦${Math.round(naira / 100000) / 10}m`
   if (naira >= 100000) return `₦${Math.round(naira / 1000)}k`
-  return formatNaira(kobo)
+  return formatKobo(kobo)
 }

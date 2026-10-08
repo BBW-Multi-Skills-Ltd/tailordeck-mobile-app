@@ -31,7 +31,7 @@ export function findReminderPreset(customValue: string, customUnit: ReminderUnit
   return REMINDER_PRESETS.find((preset) => getReminderMinutes('custom', preset.value, preset.unit) === minutes) ?? null
 }
 
-export function getReminderMinutes(reminder: ReminderSelection, customValue?: string, customUnit?: ReminderUnit): number | null {
+function getReminderMinutes(reminder: ReminderSelection, customValue?: string, customUnit?: ReminderUnit): number | null {
   if (reminder === '1 day before') return 60 * 24
   if (reminder === '3 days before') return 60 * 24 * 3
   if (reminder === '1 week before') return 60 * 24 * 7

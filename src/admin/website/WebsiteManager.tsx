@@ -3,6 +3,7 @@ import { ArrowLeft, Eye, EyeOff, Pencil, Plus, Star, Trash2, Upload, X } from 'l
 import QRCode from 'qrcode'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { buildLinks, COMPANY_FIELDS, STORE_FIELDS, toParts, type LinkKey } from './linkFields'
 import PrefixedField from '../PrefixedField'
 import { DEFAULT_SITE_SETTINGS, qrImageSrc, reviewerInitials, type SiteSettings } from '../../marketing/siteContent'
@@ -27,10 +28,7 @@ const EMPTY_REVIEW: ReviewDraft = { name: '', shop: '', city: '', quote: '', rat
 
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024 // Cloudinary free plan limit per video.
 
-function errorMessage(error: unknown, fallback: string): string {
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message) return error.message
-  return fallback
-}
+const errorMessage = getServiceErrorMessage
 
 function qrSvg(url: string): Promise<string> {
   return QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#1f1612', light: '#ffffff' } })

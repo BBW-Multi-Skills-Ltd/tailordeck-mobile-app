@@ -1,20 +1,9 @@
 ﻿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { deactivateAccount, getProfile, requestAccountDeletion, restoreAccount, updateProfile, uploadAvatar } from '../services/profileService'
+import { deactivateAccount, getProfile, requestAccountDeletion, restoreAccount, uploadAvatar } from '../services/profileService'
 import { queryKeys } from './queryKeys'
 
 export function useProfileQuery(enabled = true) {
   return useQuery({ queryKey: queryKeys.profile, queryFn: getProfile, enabled })
-}
-
-export function useUpdateProfileMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.profile })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
-    },
-  })
 }
 
 export function useUploadAvatarMutation() {

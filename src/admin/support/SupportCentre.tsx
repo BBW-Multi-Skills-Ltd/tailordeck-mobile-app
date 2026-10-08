@@ -5,11 +5,19 @@ import { AttachmentList, ChatComposer } from '../../components/support/SupportCh
 import { useAttachmentLinks } from '../../components/support/useAttachmentLinks'
 import { supabase } from '../../lib/supabase'
 import { readSupportAttachments, uploadSupportAttachment, type SupportAttachment } from '../../lib/supportAttachments'
+import {
+  ADMIN_SUPPORT_STATUS_LABELS,
+  formatSupportDate,
+  SUPPORT_CATEGORY_LABELS,
+  ticketNumber,
+  type SupportStatus,
+} from '../../lib/supportFormat'
+import { getServiceErrorMessage } from '../../services/serviceHelpers'
 
 // Support centre (/admin/support). Support admins read every ticket (RLS) and chat through the
 // support-reply function: it pushes replies to the user's phone, and resolving/closing emails them the conversation.
 
-type TicketStatus = 'open' | 'in_review' | 'resolved' | 'closed'
+type TicketStatus = SupportStatus
 
 type Ticket = {
   id: string
@@ -32,20 +40,8 @@ type ChatMessage = { id: string; author_role: 'support' | 'user'; body: string; 
 
 type ReplyResult = { status: TicketStatus; pushed: number; emailed: boolean; transcriptEmailed: boolean; warning: string }
 
-const STATUS_LABELS: Record<TicketStatus, string> = {
-  open: 'New',
-  in_review: 'In progress',
-  resolved: 'Resolved',
-  closed: 'Closed',
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  billing: 'Billing',
-  bug: 'Bug report',
-  feedback: 'Feedback',
-  account: 'Account',
-  general: 'General',
-}
+const STATUS_LABELS = ADMIN_SUPPORT_STATUS_LABELS
+const CATEGORY_LABELS = SUPPORT_CATEGORY_LABELS
 
 type Filter = 'active' | TicketStatus | 'all'
 
@@ -64,16 +60,8 @@ const TICKET_COLUMNS =
 const isActive = (status: TicketStatus) => status === 'open' || status === 'in_review'
 const awaitingSupport = (ticket: Ticket) => isActive(ticket.status) && (ticket.status === 'open' || ticket.last_message_by === 'user')
 
-function errorMessage(error: unknown, fallback: string): string {
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message) return error.message
-  return fallback
-}
-
-function formatDate(value: string): string {
-  return new Date(value).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })
-}
-
-const ticketNumber = (id: string) => `#${id.slice(0, 8).toUpperCase()}`
+const errorMessage = getServiceErrorMessage
+const formatDate = (value: string) => formatSupportDate(value)
 
 function displayName(ticket: Ticket, contact?: Contact): string {
   return contact?.full_name || contact?.shop_name || ticket.account_email || 'TailorDeck user'

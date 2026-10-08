@@ -1,9 +1,14 @@
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requiredEnv } from './env.ts'
+import { DEFAULT_GOOGLE_TOKEN_URL, getServiceAccountAccessToken, GoogleTokenError, type ServiceAccount } from './googleAuth.ts'
+import { createServiceClient, type ServiceClient } from './supabase.ts'
 
-// Shared Google Play Billing helpers for google-play-verify-subscription and google-play-rtdn.
+// Shared Google Play Billing helpers for the google-play-* functions and account deletion.
+
+export { createServiceClient, requiredEnv as getRequiredEnv }
+export type { ServiceAccount }
+export type SupabaseServiceClient = ServiceClient
 
 const GOOGLE_SCOPE = 'https://www.googleapis.com/auth/androidpublisher'
-const DEFAULT_GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const ANDROID_PUBLISHER_URL = 'https://androidpublisher.googleapis.com/androidpublisher/v3/applications'
 
 export const SUPPORTED_PRODUCTS = {
@@ -16,16 +21,6 @@ const SUPPORTED_BASE_PLAN_IDS = new Set(['monthly', 'yearly'])
 export type SupportedProductId = keyof typeof SUPPORTED_PRODUCTS
 export type PlanName = (typeof SUPPORTED_PRODUCTS)[SupportedProductId]
 export type BillingCycle = 'monthly' | 'yearly'
-// No generated DB types for edge functions, so the schema is left untyped.
-// deno-lint-ignore no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type SupabaseServiceClient = SupabaseClient<any, 'public', any>
-
-export type ServiceAccount = {
-  client_email: string
-  private_key: string
-  token_uri: string
-}
 
 export type GoogleSubscriptionLineItem = {
   productId?: string
@@ -73,18 +68,6 @@ export class UpstreamGoogleError extends Error {
   }
 }
 
-export function getRequiredEnv(name: string): string {
-  const value = Deno.env.get(name)
-  if (!value) throw new Error(`Missing required environment variable: ${name}`)
-  return value
-}
-
-export function createServiceClient(): SupabaseServiceClient {
-  return createClient(getRequiredEnv('SUPABASE_URL'), getRequiredEnv('SUPABASE_SERVICE_ROLE_KEY'), {
-    auth: { persistSession: false, autoRefreshToken: false },
-  })
-}
-
 export function isSupportedProductId(productId: string): productId is SupportedProductId {
   return Object.prototype.hasOwnProperty.call(SUPPORTED_PRODUCTS, productId)
 }
@@ -96,7 +79,7 @@ export function isSupportedBasePlanId(basePlanId: string | null | undefined): ba
 export function getPlayServiceAccount(): ServiceAccount {
   let parsed: Partial<ServiceAccount>
   try {
-    parsed = JSON.parse(getRequiredEnv('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON')) as Partial<ServiceAccount>
+    parsed = JSON.parse(requiredEnv('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON')) as Partial<ServiceAccount>
   } catch {
     throw new Error('Invalid Google service account JSON.')
   }
@@ -112,27 +95,14 @@ export function getPlayServiceAccount(): ServiceAccount {
   }
 }
 
-let cachedAccessToken: { token: string; expiresAt: number } | null = null
-
 export async function getGoogleAccessToken(serviceAccount: ServiceAccount): Promise<string> {
-  if (cachedAccessToken && cachedAccessToken.expiresAt > Date.now() + 60_000) return cachedAccessToken.token
-
-  const response = await fetch(serviceAccount.token_uri, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: await createServiceAccountJwt(serviceAccount),
-    }),
-  })
-
-  if (!response.ok) throw await UpstreamGoogleError.fromResponse(response)
-
-  const data = (await response.json()) as { access_token?: string; expires_in?: number }
-  if (!data.access_token) throw new Error('Google OAuth response missing access token.')
-
-  cachedAccessToken = { token: data.access_token, expiresAt: Date.now() + (data.expires_in ?? 3600) * 1000 }
-  return data.access_token
+  try {
+    return await getServiceAccountAccessToken(serviceAccount, GOOGLE_SCOPE)
+  } catch (error) {
+    // Keep reporting Google sign-in failures as upstream errors (502), as before.
+    if (error instanceof GoogleTokenError) throw new UpstreamGoogleError(error.status, error.message)
+    throw error
+  }
 }
 
 export async function getGoogleSubscription(
@@ -291,7 +261,7 @@ export async function cancelLinkedSubscriptionForUser(
   if (!row) return { linked: false, cancelled: false }
 
   const cancelled = await cancelGoogleSubscriptionRenewal({
-    packageName: getRequiredEnv('GOOGLE_PLAY_PACKAGE_NAME'),
+    packageName: requiredEnv('GOOGLE_PLAY_PACKAGE_NAME'),
     purchaseToken: row.google_play_purchase_token,
     accessToken: await getGoogleAccessToken(getPlayServiceAccount()),
   })
@@ -325,7 +295,6 @@ export async function saveEntitledSubscription(
     payment_status: 'paid',
     cancel_at_period_end: entitlement.cancelAtPeriodEnd,
     billing_provider: 'google_play',
-    current_period_end: entitlement.expiryTime,
     current_period_ends_at: entitlement.expiryTime,
     google_play_product_id: entitlement.productId,
     google_play_base_plan_id: entitlement.basePlanId,
@@ -369,62 +338,12 @@ export async function markSubscriptionLapsed(
     .update({
       status: input.entitlement.status,
       payment_status: input.entitlement.status === 'past_due' ? 'failed' : 'none',
-      current_period_end: input.entitlement.expiryTime,
       google_play_subscription_state: input.entitlement.subscriptionState,
       google_play_last_verified_at: new Date().toISOString(),
     })
     .eq('id', input.subscriptionId)
     .neq('plan_name', 'free')
   if (error) throw error
-}
-
-async function createServiceAccountJwt(serviceAccount: ServiceAccount): Promise<string> {
-  const nowSeconds = Math.floor(Date.now() / 1000)
-  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))
-  const claim = base64UrlEncode(
-    JSON.stringify({
-      iss: serviceAccount.client_email,
-      scope: GOOGLE_SCOPE,
-      aud: serviceAccount.token_uri,
-      iat: nowSeconds,
-      exp: nowSeconds + 3600,
-    }),
-  )
-
-  const unsignedJwt = `${header}.${claim}`
-  const key = await crypto.subtle.importKey(
-    'pkcs8',
-    pemToArrayBuffer(serviceAccount.private_key),
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsignedJwt))
-  return `${unsignedJwt}.${base64UrlEncode(new Uint8Array(signature))}`
-}
-
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const base64 = pem
-    .replace(/-----BEGIN PRIVATE KEY-----/g, '')
-    .replace(/-----END PRIVATE KEY-----/g, '')
-    .replace(/\s/g, '')
-
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index)
-  }
-  return bytes.buffer
-}
-
-function base64UrlEncode(input: string | Uint8Array): string {
-  const bytes = typeof input === 'string' ? new TextEncoder().encode(input) : input
-  let binary = ''
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte)
-  })
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 export function getSafeErrorMessage(error: unknown): string {

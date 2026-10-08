@@ -1,10 +1,9 @@
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { SubscriptionBillingCycle, SubscriptionPlan } from '../lib/settingsTypes'
 import {
   checkFeatureAccess,
+  getEnabledFeatures,
   getJobCreationEntitlement,
   getSubscription,
-  selectSubscriptionPlan,
   setFreeTrialCancellation,
   startPaidPlanUpgrade,
 } from '../services/subscriptionService'
@@ -14,13 +13,14 @@ export function useSubscriptionQuery(enabled = true) {
   return useQuery({ queryKey: queryKeys.subscription, queryFn: getSubscription, enabled })
 }
 
-export function useFeatureAccess(featureKey: string) {
-  const subscriptionQuery = useSubscriptionQuery(Boolean(featureKey))
+/** All enabled feature keys for the current plan, fetched once and shared by every useFeatureAccess call. */
+function useEnabledFeaturesQuery(enabled: boolean) {
+  const subscriptionQuery = useSubscriptionQuery(enabled)
   const subscription = subscriptionQuery.data
-
   return useQuery({
     queryKey: [
-      ...queryKeys.feature(featureKey),
+      'feature-access',
+      'enabled',
       subscription?.plan_name ?? 'no-plan',
       subscription?.status ?? 'unknown',
       subscription?.trial_ends_at ?? null,
@@ -28,9 +28,33 @@ export function useFeatureAccess(featureKey: string) {
       subscription?.current_period_ends_at ?? null,
       subscription?.updated_at ?? null,
     ],
-    queryFn: () => (subscription ? checkFeatureAccess(featureKey) : false),
-    enabled: Boolean(featureKey) && subscriptionQuery.isSuccess,
+    queryFn: () => (subscription ? getEnabledFeatures() : Promise.resolve([] as string[])),
+    enabled: enabled && subscriptionQuery.isSuccess,
   })
+}
+
+export type FeatureAccess = {
+  /** true / false once known; undefined while loading. */
+  data: boolean | undefined
+  isLoading: boolean
+}
+
+export function useFeatureAccess(featureKey: string): FeatureAccess {
+  const featuresQuery = useEnabledFeaturesQuery(Boolean(featureKey))
+  const needsFallback = featuresQuery.isSuccess && featuresQuery.data === null
+
+  // Fallback while the get_my_enabled_features migration is not applied: one check per feature, as before.
+  const fallbackQuery = useQuery({
+    queryKey: [...queryKeys.feature(featureKey), 'fallback'],
+    queryFn: () => checkFeatureAccess(featureKey),
+    enabled: Boolean(featureKey) && needsFallback,
+  })
+
+  if (needsFallback) return { data: fallbackQuery.data, isLoading: fallbackQuery.isLoading }
+  return {
+    data: Array.isArray(featuresQuery.data) ? featuresQuery.data.includes(featureKey) : undefined,
+    isLoading: featuresQuery.isLoading,
+  }
 }
 
 export function useJobCreationEntitlementQuery(enabled = true) {
@@ -38,20 +62,6 @@ export function useJobCreationEntitlementQuery(enabled = true) {
     queryKey: queryKeys.jobCreationEntitlement,
     queryFn: getJobCreationEntitlement,
     enabled,
-  })
-}
-
-export function useSelectSubscriptionPlanMutation() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ billingCycle, planName }: { planName: SubscriptionPlan; billingCycle: SubscriptionBillingCycle }) =>
-      selectSubscriptionPlan(planName, billingCycle),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.subscription })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.settings })
-      void queryClient.invalidateQueries({ queryKey: ['feature-access'] })
-      void queryClient.invalidateQueries({ queryKey: queryKeys.jobCreationEntitlement })
-    },
   })
 }
 

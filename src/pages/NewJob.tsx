@@ -2,14 +2,11 @@ import { useLayoutEffect } from 'react'
 import { Lock } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { stepLabels } from '../components/newjob/newJobConfig'
-import {
-  JobSuccessView,
-  NewJobHeader,
-  ReviewProgressHeader,
-  StepProgress,
-  WizardFooter,
-  WizardLoadingOverlay,
-} from '../components/newjob/NewJobChrome'
+import { JobSuccessView } from '../components/newjob/JobSuccessView'
+import { NewJobHeader } from '../components/newjob/NewJobHeader'
+import { ReviewProgressHeader, StepProgress } from '../components/newjob/StepProgress'
+import { WizardFooter } from '../components/newjob/WizardFooter'
+import { WizardLoadingOverlay } from '../components/newjob/WizardLoadingOverlay'
 import NewJobStepContent from '../components/newjob/NewJobStepContent'
 import { useNewJobWizard } from '../components/newjob/useNewJobWizard'
 import EmptyState from '../components/shared/EmptyState'

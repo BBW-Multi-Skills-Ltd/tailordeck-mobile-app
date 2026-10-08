@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import type { DetailedJobData } from '../../../types/jobDetails'
-import type { MockJob } from '../../../types/job'
+import type { Job } from '../../../types/job'
 import { readBrandConfig } from '../../invoice/documentHelpers'
+import { useAppSettings } from '../../../hooks/useSettingsQueries'
 import { getReminderLabel } from '../../../lib/jobReminder'
 import type { JobSuccessViewProps } from './jobSuccessTypes'
 
@@ -28,7 +29,8 @@ export function useJobSuccessDocumentData({
   scopeLabel,
   totalYard,
 }: JobSuccessViewProps) {
-  const brand = useMemo(() => readBrandConfig(), [])
+  const settings = useAppSettings()
+  const brand = useMemo(() => readBrandConfig(settings), [settings])
   const balanceToCollect = Math.max(charge - deposit, 0)
   const service = effectiveItemType || 'Tailoring job'
   const successJobId = useMemo(() => {
@@ -39,7 +41,7 @@ export function useJobSuccessDocumentData({
       .replace(/^-+|-+$/g, '')
     return `new-job-${slug || 'draft'}`
   }, [clientName, createdJobId, deadlineDate])
-  const successJob = useMemo<MockJob>(
+  const successJob = useMemo<Job>(
     () => ({
       id: successJobId,
       clientId: 'new-client',

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
+import type { TailorSettings } from '../../lib/settings'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
 import { queryKeys } from '../../hooks/queryKeys'
 import { persistSettingsSection, type SettingsPersistenceMutations } from './settingsPersistence'
@@ -65,8 +65,10 @@ export function useSettingsSaveAction({
         saveReminderMutation,
       })
       if (settingsFingerprint(currentSettingsRef.current) !== saveFingerprint) return
-      const next = saveTailorSettings(nextSettings)
+      const next: TailorSettings = { ...nextSettings, updatedAt: new Date().toISOString() }
       queryClient.setQueryData(queryKeys.settings, next)
+      // Settings reuse the cached profile row, so refresh it after a save (name, email, phone).
+      void queryClient.invalidateQueries({ queryKey: queryKeys.profile })
       setSettings(next)
       setSavedTick(Date.now())
       setSavedSection(sectionLabel)

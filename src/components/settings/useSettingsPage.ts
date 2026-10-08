@@ -1,9 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  loadTailorSettings,
-  saveTailorSettings,
-} from '../../lib/settings'
+import { fallbackSettings } from '../../lib/settingsCache'
 import { applyTheme } from '../../lib/theme'
 import { useAuth } from '../../context/authContextCore'
 import {
@@ -34,7 +31,7 @@ export function useSettingsPage() {
   const saveReminderMutation = useSaveReminderSettingsMutation()
   const saveBrandMutation = useSaveBrandSettingsMutation()
   const { setTheme, theme } = useSettingsTheme()
-  const draft = useSettingsDraftState(loadTailorSettings())
+  const draft = useSettingsDraftState(settingsQuery.data ?? fallbackSettings())
   const lastAppliedSettingsQueryAtRef = useRef(0)
   const {
     confirmPasswordDraft, generatedPreviewKind, invoicePreviewGenerated, openBrandPreviewSheet, openColorPicker, panel,
@@ -79,7 +76,7 @@ export function useSettingsPage() {
     if (settingsSavePending) return
     if (lastAppliedSettingsQueryAtRef.current === settingsQuery.dataUpdatedAt) return
     lastAppliedSettingsQueryAtRef.current = settingsQuery.dataUpdatedAt
-    const next = saveTailorSettings(settingsQuery.data)
+    const next = settingsQuery.data
     setSettings(next)
     applyTheme(next.preferences.darkMode ? 'dark' : 'light')
   }, [settingsQuery.data, settingsQuery.dataUpdatedAt, settingsSavePending, setSettings])

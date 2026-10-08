@@ -40,7 +40,7 @@ export function useSettingsAccountActions({
   async function clearJobHistory(): Promise<boolean> {
     const confirmed = await feedback.confirm({
       title: 'Clear job history?',
-      message: 'This hides all current jobs from your TailorDeck account. Clients and settings stay safe.',
+      message: 'This removes every job from your TailorDeck account, on all your devices. It cannot be undone in the app. Your clients and settings are kept.',
       confirmLabel: 'Clear history',
       tone: 'danger',
     })

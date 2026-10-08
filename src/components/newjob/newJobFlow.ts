@@ -1,19 +1,6 @@
-import { appJobMeasurementById, appJobs } from '../../data/appData'
 import type { JobMeasurementSnapshot } from '../../types/measurements'
 import type { Client } from '../../types/client'
 import { measurementNumbersToStrings, newPerson, type JobType, type PersonForm } from './newJobConfig'
-
-export function latestMeasurementForClient(clientId: string): JobMeasurementSnapshot | undefined {
-  const clientJobs = appJobs
-    .filter((job) => job.clientId === clientId && appJobMeasurementById[job.id])
-    .sort((a, b) => {
-      if (a.status === 'Completed' && b.status !== 'Completed') return -1
-      if (a.status !== 'Completed' && b.status === 'Completed') return 1
-      return a.createdDate < b.createdDate ? 1 : -1
-    })
-
-  return clientJobs[0] ? appJobMeasurementById[clientJobs[0].id] : undefined
-}
 
 export function snapshotPersonsToForm(snapshot: Extract<JobMeasurementSnapshot, { kind: 'body' }>, client: Client): PersonForm[] {
   return snapshot.persons.map((person, index) =>

@@ -50,11 +50,11 @@ const STEP1_FEMALE_FIELDS = [
   'wrist',
 ]
 
-export const COMMON_MALE_FIELDS = STEP1_MALE_FIELDS.slice(0, 8)
-export const COMMON_FEMALE_FIELDS = STEP1_FEMALE_FIELDS.slice(0, 8)
+const COMMON_MALE_FIELDS = STEP1_MALE_FIELDS.slice(0, 8)
+const COMMON_FEMALE_FIELDS = STEP1_FEMALE_FIELDS.slice(0, 8)
 
-export const CHILD_FIELDS = ['chest', 'shoulder', 'sleeve', 'waist', 'hip', 'inseam', 'ankle']
-export const COMMON_CHILD_FIELDS = CHILD_FIELDS.slice(0, 5)
+const CHILD_FIELDS = ['chest', 'shoulder', 'sleeve', 'waist', 'hip', 'inseam', 'ankle']
+const COMMON_CHILD_FIELDS = CHILD_FIELDS.slice(0, 5)
 
 export const nonBodyMeasurementTemplate: Record<string, string[]> = {
   Bedcover: ['length', 'width', 'drop'],

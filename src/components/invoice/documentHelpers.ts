@@ -1,22 +1,16 @@
-import { loadTailorSettings } from '../../lib/settings'
-import { formatDateShort, formatNaira } from '../../lib/utils'
+import type { TailorSettings } from '../../lib/settingsTypes'
+import { formatDateShort } from '../../lib/utils'
+import { formatNaira } from '../../lib/money'
+import { normalizeNigerianPhone } from '../../lib/phone'
 import type { BrandConfig, InvoiceType } from './documentTypes'
-
-export function normalizeNigerianPhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.startsWith('234')) return digits
-  if (digits.startsWith('0')) return `234${digits.slice(1)}`
-  return `234${digits}`
-}
 
 export function buildWhatsAppURL(phone: string, message: string): string {
   const normalized = normalizeNigerianPhone(phone)
   return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`
 }
 
-export function readBrandConfig(): BrandConfig {
-  const settings = loadTailorSettings()
+/** Business details and branding printed on invoices/receipts, from the user's settings. */
+export function readBrandConfig(settings: TailorSettings): BrandConfig {
   return {
     shopName: settings.businessInfo.shopName || settings.brand.name,
     primaryColor: settings.brand.colors[0],

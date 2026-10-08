@@ -4,10 +4,6 @@ export function getInitial(value: string): string {
   return trimmed.charAt(0).toUpperCase()
 }
 
-export function formatNaira(amount: number): string {
-  return `\u20A6${amount.toLocaleString('en-NG')}`
-}
-
 export function formatDateShort(date: string): string {
   const parsed = new Date(date)
   if (Number.isNaN(parsed.getTime())) return date

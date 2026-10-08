@@ -3,7 +3,7 @@ import { useEffect, useState, type RefObject } from 'react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import type { DetailedJobData } from '../../types/jobDetails'
 import type { DocumentTemplateLineItem } from '../../templates/types'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import { buildDocumentNumber } from './jobDocumentHelpers'
@@ -22,7 +22,7 @@ export function JobDocumentDrawer({
 }: {
   type: InvoiceType
   brand: BrandConfig
-  job: MockJob
+  job: Job
   details: DetailedJobData
   balanceToCollect: number
   docPreviewRef: RefObject<HTMLDivElement | null>
@@ -169,7 +169,7 @@ function buildClientFacingLineItems({
   job,
 }: {
   details: DetailedJobData
-  job: MockJob
+  job: Job
 }): DocumentTemplateLineItem[] {
   const descriptionParts = [
     details.orderMode,

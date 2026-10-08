@@ -874,13 +874,6 @@
   gap: 12px;
 }
 
-.ad-reply-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
 
 .ad-inline-field select {
   min-height: 42px;

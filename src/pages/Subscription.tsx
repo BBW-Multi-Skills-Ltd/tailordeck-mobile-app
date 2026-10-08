@@ -8,22 +8,22 @@ import PageHeader from '../components/shared/PageHeader'
 import SegmentedControl from '../components/shared/SegmentedControl'
 import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
-import { loadTailorSettings } from '../lib/settings'
 import { billingCycles, getCurrentPlanCopy, paidSubscriptionPlans, type BillingCycle, type PaidPlan } from '../lib/subscriptionPlans'
 import { isGooglePlayBillingRuntime } from '../services/googlePlayBillingService'
 import { getEffectiveSubscriptionPlan, getTrialEnd } from '../services/subscriptionService'
 
 export default function SubscriptionPage() {
-  const [settings] = useState(() => loadTailorSettings())
-  const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
-  const [selectedPlan, setSelectedPlan] = useState<PaidPlan>(settings.subscription.plan === 'starter' ? 'starter' : 'pro')
+  const subscriptionQuery = useSubscriptionQuery()
+  const [cycleChoice, setCycle] = useState<BillingCycle | null>(null)
+  const [planChoice, setSelectedPlan] = useState<PaidPlan | null>(null)
   const { message: planError, showError: showPlanError, clear: clearPlanError } = usePurchaseFeedback()
   const storePlans = useStorePricedPlans(paidSubscriptionPlans)
   const paidPlansAvailable = isGooglePlayBillingRuntime()
   const checkoutMutation = useStartSubscriptionCheckoutMutation()
-  const subscriptionQuery = useSubscriptionQuery()
   const entitlementQuery = useJobCreationEntitlementQuery()
-  const currentPlan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
+  const currentPlan = subscriptionQuery.data?.plan_name ?? 'free'
+  const cycle = cycleChoice ?? subscriptionQuery.data?.billing_cycle ?? 'monthly'
+  const selectedPlan: PaidPlan = planChoice ?? (currentPlan === 'starter' ? 'starter' : 'pro')
   const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : currentPlan
   const currentPlanCopy = getCurrentPlanCopy(currentPlan, effectivePlan)
   const freeJobLimit = entitlementQuery.data?.job_limit ?? null

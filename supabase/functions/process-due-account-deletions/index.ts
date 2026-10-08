@@ -1,6 +1,7 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.107.0'
 import { jsonResponse } from '../_shared/cors.ts'
-import { cancelLinkedSubscriptionForUser, createServiceClient } from '../_shared/googlePlay.ts'
+import { cancelLinkedSubscriptionForUser } from '../_shared/googlePlay.ts'
+import { timingSafeEqual } from '../_shared/secrets.ts'
+import { createServiceClient, type ServiceClient } from '../_shared/supabase.ts'
 
 type StorageTarget = {
   bucket: 'avatars' | 'brand-assets' | 'job-photos' | 'documents'
@@ -26,26 +27,6 @@ type CleanupResult = {
   error: string | null
 }
 
-function requiredEnv(name: string): string {
-  const value = Deno.env.get(name)
-  if (!value) throw new Error(`Missing ${name}`)
-  return value
-}
-
-function adminClient() {
-  return createClient(requiredEnv('SUPABASE_URL'), requiredEnv('SUPABASE_SERVICE_ROLE_KEY'))
-}
-
-function timingSafeEqual(a: string, b: string): boolean {
-  const left = new TextEncoder().encode(a)
-  const right = new TextEncoder().encode(b)
-  let diff = left.length ^ right.length
-  for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
-    diff |= (left[index] ?? 0) ^ (right[index] ?? 0)
-  }
-  return diff === 0
-}
-
 function parseBoolean(value: unknown, fallback: boolean): boolean {
   if (typeof value === 'boolean') return value
   if (typeof value === 'string') return value.toLowerCase() === 'true'
@@ -63,7 +44,7 @@ function groupStorageTargets(targets: StorageTarget[]): Map<StorageTarget['bucke
   return grouped
 }
 
-async function deleteStorageTargets(admin: ReturnType<typeof adminClient>, targets: StorageTarget[]): Promise<number> {
+async function deleteStorageTargets(admin: ServiceClient, targets: StorageTarget[]): Promise<number> {
   let deleted = 0
   const grouped = groupStorageTargets(targets)
 
@@ -78,7 +59,7 @@ async function deleteStorageTargets(admin: ReturnType<typeof adminClient>, targe
   return deleted
 }
 
-async function insertDeletionAudit(admin: ReturnType<typeof adminClient>, account: DueAccount, deletedStorageTargets: number): Promise<void> {
+async function insertDeletionAudit(admin: ServiceClient, account: DueAccount, deletedStorageTargets: number): Promise<void> {
   const { error } = await admin.from('account_audit_logs').insert({
     user_id: account.userId,
     event_type: 'account_deleted',
@@ -114,8 +95,7 @@ Deno.serve(async (request) => {
     const body = await request.json().catch(() => ({}))
     const dryRun = parseBoolean(body.dryRun, true)
     const batchSize = Math.max(1, Math.min(Number(body.batchSize) || 25, 100))
-    const admin = adminClient()
-    const googlePlayClient = createServiceClient()
+    const admin = createServiceClient()
 
     const { data, error } = await admin.rpc('list_due_account_deletions', { batch_size: batchSize })
     if (error) throw error
@@ -137,7 +117,7 @@ Deno.serve(async (request) => {
         if (!dryRun) {
           // Never delete an account that Google Play would keep billing. If Google is unreachable this
           // throws, the account is skipped, and the next daily run tries again.
-          await cancelLinkedSubscriptionForUser(googlePlayClient, account.userId)
+          await cancelLinkedSubscriptionForUser(admin, account.userId)
           result.deletedStorageTargets = await deleteStorageTargets(admin, account.storage ?? [])
           await insertDeletionAudit(admin, account, result.deletedStorageTargets)
           const { error: deleteUserError } = await admin.auth.admin.deleteUser(account.userId)

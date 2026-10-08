@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { DetailedJobData } from '../../../types/jobDetails'
-import type { MockJob } from '../../../types/job'
+import type { Job } from '../../../types/job'
 import type { BrandConfig, InvoiceType } from '../../invoice/documentTypes'
 import { useJobDocumentActions } from '../useJobDocumentActions'
 import { useJobImageViewer } from '../useJobImageViewer'
@@ -12,7 +12,7 @@ export function useJobDetailInteractions({
   job,
 }: {
   brand: BrandConfig
-  job: MockJob
+  job: Job
   details: DetailedJobData
   balanceToCollect: number
 }) {

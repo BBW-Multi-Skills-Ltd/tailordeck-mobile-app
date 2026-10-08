@@ -8,7 +8,6 @@ import {
 } from '../../../hooks/useFeatureAccess'
 import { usePurchaseFeedback } from '../../../hooks/usePurchaseFeedback'
 import { useStorePricedPlans } from '../../../hooks/useStorePricedPlans'
-import { loadTailorSettings, saveTailorSettings } from '../../../lib/settings'
 import { subscriptionPlans, type BillingCycle, type PaidPlan } from '../../../lib/subscriptionPlans'
 import {
   getEffectiveSubscriptionPlan,
@@ -24,24 +23,20 @@ export function useManagePlanState() {
   const queryClient = useQueryClient()
   const noticeTimerRef = useRef<number | null>(null)
   const awaitingPlayReturnRef = useRef(false)
-  const [settings, setSettings] = useState(() => loadTailorSettings())
   const [cycleOverride, setCycleOverride] = useState<BillingCycle | null>(null)
   const [cancelOpen, setCancelOpen] = useState(false)
   const { message: actionError, showError, clear: clearActionError } = usePurchaseFeedback()
   const pricedPlans = useStorePricedPlans(subscriptionPlans)
   const [actionNotice, setActionNotice] = useState('')
-  const plan = subscriptionQuery.data?.plan_name ?? settings.subscription.plan
-  const cycle = cycleOverride ?? subscriptionQuery.data?.billing_cycle ?? settings.subscription.billingCycle
-  const [selectedPlanState, setSelectedPlanState] = useState(() => ({
-    plan: settings.subscription.plan,
-    selectedPlan: getDefaultManagePlan(settings.subscription.plan),
-  }))
+  const plan = subscriptionQuery.data?.plan_name ?? 'free'
+  const cycle = cycleOverride ?? subscriptionQuery.data?.billing_cycle ?? 'monthly'
+  const [selectedPlanState, setSelectedPlanState] = useState(() => ({ plan, selectedPlan: getDefaultManagePlan(plan) }))
   const currentPlan = useMemo(() => pricedPlans.find((item) => item.id === plan) ?? pricedPlans[0], [plan, pricedPlans])
   const changePlanOptions = useStorePricedPlans(useMemo(() => getManagePlanOptions(plan), [plan]))
   const isPaidPlan = plan === 'starter' || plan === 'pro'
   const effectivePlan = subscriptionQuery.data ? getEffectiveSubscriptionPlan(subscriptionQuery.data) : plan
   const isTrialActive = effectivePlan === 'trial'
-  const cancelScheduled = subscriptionQuery.data?.cancel_at_period_end ?? settings.subscription.cancelAtPeriodEnd
+  const cancelScheduled = subscriptionQuery.data?.cancel_at_period_end ?? false
   const trialEndDate = formatIsoDate(subscriptionQuery.data?.tester_trial_ends_at || subscriptionQuery.data?.trial_ends_at) || formatRelativeDate(14)
   const renewalDate = formatIsoDate(subscriptionQuery.data?.current_period_ends_at) || formatRelativeDate(cycle === 'yearly' ? 365 : 30)
   const selectedPlan = selectedPlanState.plan === plan ? selectedPlanState.selectedPlan : getDefaultManagePlan(plan)
@@ -80,17 +75,7 @@ export function useManagePlanState() {
     setSelectedPlanState({ plan: nextPlan, selectedPlan: nextPlan })
 
     try {
-      const { subscription } = await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
-      setSettings(saveTailorSettings({
-        ...settings,
-        subscription: {
-          ...settings.subscription,
-          plan: subscription.plan_name,
-          billingCycle: subscription.billing_cycle,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        },
-        updatedAt: new Date().toISOString(),
-      }))
+      await checkoutMutation.mutateAsync({ planName: nextPlan, billingCycle: cycle })
       showNotice('Plan updated.')
     } catch (error) {
       showError(error, 'Unable to start checkout.')
@@ -122,12 +107,6 @@ export function useManagePlanState() {
 
     try {
       await trialCancellationMutation.mutateAsync(true)
-      const nextSettings = saveTailorSettings({
-        ...settings,
-        subscription: { ...settings.subscription, cancelAtPeriodEnd: true },
-        updatedAt: new Date().toISOString(),
-      })
-      setSettings(nextSettings)
       setCancelOpen(false)
       showNotice('Cancellation successful')
     } catch (error) {
@@ -146,12 +125,6 @@ export function useManagePlanState() {
 
     try {
       await trialCancellationMutation.mutateAsync(false)
-      const nextSettings = saveTailorSettings({
-        ...settings,
-        subscription: { ...settings.subscription, cancelAtPeriodEnd: false },
-        updatedAt: new Date().toISOString(),
-      })
-      setSettings(nextSettings)
       showNotice('Plan kept active.')
     } catch (error) {
       showError(error, 'Unable to keep plan active.')

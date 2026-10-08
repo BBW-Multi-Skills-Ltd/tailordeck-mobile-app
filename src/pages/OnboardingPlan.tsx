@@ -10,7 +10,7 @@ import SegmentedControl from '../components/shared/SegmentedControl'
 import PaymentTrustNote from '../components/subscription/PaymentTrustNote'
 import { SubscriptionPlanCarousel } from '../components/subscription/SubscriptionPlanCarousel'
 import { markOnboardingCompleted } from '../lib/auth'
-import { loadTailorSettings, saveTailorSettings, type SubscriptionPlan } from '../lib/settings'
+import type { SubscriptionPlan } from '../lib/settings'
 import { billingCycles, subscriptionPlans, type BillingCycle } from '../lib/subscriptionPlans'
 import { updateProfile } from '../services/profileService'
 import { isGooglePlayBillingRuntime } from '../services/googlePlayBillingService'
@@ -19,8 +19,7 @@ import { selectSubscriptionPlan } from '../services/subscriptionService'
 export default function OnboardingPlan() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [settings, setSettings] = useState(() => loadTailorSettings())
-  const [cycle, setCycle] = useState<BillingCycle>(settings.subscription.billingCycle)
+  const [cycle, setCycle] = useState<BillingCycle>('monthly')
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>('free')
   const [savingPlan, setSavingPlan] = useState<SubscriptionPlan | null>(null)
   const { message: errorMessage, showError, clear: clearError } = usePurchaseFeedback()
@@ -33,21 +32,10 @@ export default function OnboardingPlan() {
     setSavingPlan(plan)
     try {
       if (plan === 'free') {
-        const next = saveTailorSettings({
-          ...settings,
-          subscription: { ...settings.subscription, plan, billingCycle: cycle, cancelAtPeriodEnd: false },
-          updatedAt: new Date().toISOString(),
-        })
-        setSettings(next)
         await selectSubscriptionPlan(plan, cycle)
         await updateProfile({ onboarding_complete: true })
         markOnboardingCompleted()
       } else {
-        setSettings(saveTailorSettings({
-          ...settings,
-          subscription: { ...settings.subscription, billingCycle: cycle },
-          updatedAt: new Date().toISOString(),
-        }))
         await checkoutMutation.mutateAsync({ planName: plan, billingCycle: cycle })
         await updateProfile({ onboarding_complete: true })
         markOnboardingCompleted()
@@ -56,6 +44,7 @@ export default function OnboardingPlan() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.profile }),
         queryClient.invalidateQueries({ queryKey: queryKeys.subscription }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.settings }),
       ])
       markOnboardingCompleted()
       navigate('/')

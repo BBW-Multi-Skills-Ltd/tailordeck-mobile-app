@@ -119,7 +119,7 @@ export default function SettingsPage() {
         <section className="stack gap-8">
           <p className="more-group-title">Session</p>
           <div className="clay-card more-group-card">
-            <SettingsHubRow icon={Database} title="Clear Job History" desc="Remove local job history from this device." onClick={() => void handleClearJobHistory()} tone="danger" />
+            <SettingsHubRow icon={Database} title="Clear Job History" desc="Remove all jobs from your account on every device. Clients stay." onClick={() => void handleClearJobHistory()} tone="danger" />
             {historyCleared ? (
               <div className="settings-inline-success" role="status">
                 <CheckCircle2 size={15} />

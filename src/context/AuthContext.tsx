@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import type { Session } from '@supabase/supabase-js'
 import { unregisterPushToken } from '../lib/pushNotifications'
+import { clearUserLocalData } from '../lib/settingsCache'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue } from './authContextCore'
 import { syncPendingOnboardingSettings } from '../services/onboardingService'
@@ -9,6 +11,7 @@ import { syncProfileEmailFromAuth } from '../services/profileService'
 const AUTH_BOOT_TIMEOUT_MS = 5000
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient()
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -51,6 +54,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // A different account signed in (e.g. the session expired and someone else logged in): drop the previous
+  // account's cached queries before any screen reads them.
+  const userId = session?.user.id ?? null
+  const previousUserIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (userId && previousUserIdRef.current && previousUserIdRef.current !== userId) queryClient.clear()
+    if (userId) previousUserIdRef.current = userId
+  }, [queryClient, userId])
+
   useEffect(() => {
     if (!session?.user.id) return
     syncPendingOnboardingSettings().catch((error) => {
@@ -69,10 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut: async () => {
         await unregisterPushToken()
         await supabase.auth.signOut()
+        // Nothing of this account may stay on a shared phone: cached server data and local copies.
+        queryClient.clear()
+        clearUserLocalData()
         setSession(null)
       },
     }),
-    [loading, session],
+    [loading, queryClient, session],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -2,9 +2,9 @@ import type { DetailedJobData } from '../../types/jobDetails'
 import { toNaira } from '../../lib/money'
 import { mapJobRow } from '../../services/mappers/jobMapper'
 import type { JobWithRelations } from '../../services/types'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 
-export function getDefaultJobDetails(job?: MockJob): DetailedJobData {
+export function getDefaultJobDetails(job?: Job): DetailedJobData {
   if (!job) {
     return {
       jobType: 'Body Wear',
@@ -67,7 +67,7 @@ export function getJobDetailsFromRow(job: JobWithRelations): DetailedJobData {
   }
 }
 
-export function getMockJobFromRow(job: JobWithRelations): MockJob {
+export function getMockJobFromRow(job: JobWithRelations): Job {
   return mapJobRow(job)
 }
 

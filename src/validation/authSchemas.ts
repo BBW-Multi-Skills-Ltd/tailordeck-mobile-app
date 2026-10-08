@@ -16,15 +16,6 @@ export const signUpSchema = z.object({
   password: passwordSchema,
 })
 
-export const signUpFormSchema = signUpSchema.extend({
-  confirmPassword: z.string().min(1, 'Confirm your password.'),
-  agree: z.boolean().refine(Boolean, 'Accept the terms before creating your account.'),
-}).superRefine((input, context) => {
-  if (input.password !== input.confirmPassword) {
-    context.addIssue({ code: 'custom', path: ['confirmPassword'], message: 'Passwords do not match.' })
-  }
-})
-
 export const passwordResetSchema = z.object({
   email: emailSchema,
 })

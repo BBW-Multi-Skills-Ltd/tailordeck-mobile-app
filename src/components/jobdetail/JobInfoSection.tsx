@@ -12,7 +12,7 @@ import {
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import type { DetailedJobData } from '../../types/jobDetails'
-import type { MockJob } from '../../types/job'
+import type { Job } from '../../types/job'
 
 function InfoRow({
   icon,
@@ -39,7 +39,7 @@ export function JobInfoSection({
   details,
   measurementScopeText,
 }: {
-  job: MockJob
+  job: Job
   details: DetailedJobData
   measurementScopeText: string
 }) {

@@ -1,4 +1,4 @@
-import { formatNaira } from '../../../lib/utils'
+import { formatNaira } from '../../../lib/money'
 
 export function CostingSummary({
   charge,

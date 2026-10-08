@@ -1,29 +1,14 @@
+import type { ServiceClient } from './supabase.ts'
+
 export class RateLimitError extends Error {
   status = 429
-}
-
-type RateLimitClient = {
-  from: (table: string) => {
-    select: (columns: string) => {
-      eq: (column: string, value: string) => {
-        eq: (column: string, value: string) => {
-          maybeSingle: () => Promise<{ data: { window_start: string; request_count: number } | null; error: Error | null }>
-        }
-      }
-    }
-    upsert: (row: Record<string, unknown>, options?: Record<string, unknown>) => Promise<{ error: Error | null }>
-    update: (row: Record<string, unknown>) => {
-      eq: (column: string, value: string) => {
-        eq: (column: string, value: string) => Promise<{ error: Error | null }>
-      }
-    }
-  }
 }
 
 export function isRateLimitError(error: unknown): error is RateLimitError {
   return error instanceof RateLimitError
 }
 
+/** Per-user request limit stored in edge_rate_limits (service role only). */
 export async function enforceRateLimit({
   action,
   actorId,
@@ -33,7 +18,7 @@ export async function enforceRateLimit({
 }: {
   action: string
   actorId: string
-  admin: RateLimitClient
+  admin: ServiceClient
   limit: number
   windowSeconds: number
 }) {
@@ -43,7 +28,7 @@ export async function enforceRateLimit({
     .select('window_start, request_count')
     .eq('action', action)
     .eq('actor_id', actorId)
-    .maybeSingle()
+    .maybeSingle<{ window_start: string; request_count: number }>()
 
   if (error) throw error
 

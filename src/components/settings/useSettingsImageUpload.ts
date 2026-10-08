@@ -1,5 +1,5 @@
 import type { ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { saveTailorSettings, type TailorSettings } from '../../lib/settings'
+import type { TailorSettings } from '../../lib/settings'
 import { useUploadAvatarMutation } from '../../hooks/useProfileQueries'
 import { useUploadLogoMutation, useUploadSignatureMutation } from '../../hooks/useSettingsQueries'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
@@ -38,21 +38,14 @@ export function useSettingsImageUpload({ setSettings, setSettingsError }: UseSet
       if (field === 'avatarUrl') {
         const { signedUrl } = await uploadAvatarMutation.mutateAsync(file)
         preloadImage(signedUrl)
-        setSettings((prev) => {
-          const next = { ...prev, profile: { ...prev.profile, avatarUrl: signedUrl } }
-          saveTailorSettings(next)
-          return next
-        })
+        setSettings((prev) => ({ ...prev, profile: { ...prev.profile, avatarUrl: signedUrl } }))
         return
       }
 
       const { signedUrl } = field === 'logoUrl' ? await uploadLogoMutation.mutateAsync(file) : await uploadSignatureMutation.mutateAsync(file)
       preloadImage(signedUrl)
-      setSettings((prev) => {
-        const next = { ...prev, brand: { ...prev.brand, [field]: signedUrl } }
-        saveTailorSettings(next)
-        return next
-      })
+      // The upload mutations refresh the settings query, which updates the header and documents.
+      setSettings((prev) => ({ ...prev, brand: { ...prev.brand, [field]: signedUrl } }))
     } catch (error) {
       setSettingsError(getServiceErrorMessage(error, 'Unable to upload image.'))
     }

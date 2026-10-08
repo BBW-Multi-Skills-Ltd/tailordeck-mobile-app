@@ -1,4 +1,4 @@
-import { formatNaira } from '../../../lib/utils'
+import { formatNaira } from '../../../lib/money'
 import type { DocumentTemplateLineItem, DocumentTemplatePayload } from '../../types'
 import { styles } from './invoiceClassicWaveStyles'
 

@@ -27,7 +27,7 @@ export type DashboardMetrics = {
   totalRevenue: number
 }
 
-export function monthLabel(key: string, format: 'short' | 'long' = 'short'): string {
+function monthLabel(key: string, format: 'short' | 'long' = 'short'): string {
   const [year, month] = key.split('-').map(Number)
   const date = new Date(year, month - 1, 1)
   return date.toLocaleDateString('en-NG', { month: format })

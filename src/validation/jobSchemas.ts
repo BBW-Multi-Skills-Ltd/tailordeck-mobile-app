@@ -90,7 +90,7 @@ export const newJobPersonSchema = z.object({
   sortOrder: z.number().int().positive(),
 })
 
-export const createFullJobSchema = newJobClientStepSchema
+const createFullJobSchema = newJobClientStepSchema
   .merge(newJobMaterialStepSchema)
   .merge(newJobCostingStepSchema)
   .merge(newJobDeadlineStepSchema)
