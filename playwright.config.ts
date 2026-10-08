@@ -2,8 +2,9 @@ import { defineConfig } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
+// .env.e2e by default; `npm run test:e2e:staging` passes E2E_ENV_FILE=.env.staging.
 function loadE2eEnv() {
-  const envPath = resolve(process.cwd(), '.env.e2e')
+  const envPath = resolve(process.cwd(), process.env.E2E_ENV_FILE || '.env.e2e')
   if (!existsSync(envPath)) return
 
   for (const line of readFileSync(envPath, 'utf8').split(/\r?\n/)) {

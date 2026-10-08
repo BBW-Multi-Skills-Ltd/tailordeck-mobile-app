@@ -5,6 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging",
+    "staging:start": "node scripts/staging.mjs start",
+    "staging:reset": "node scripts/staging.mjs reset",
+    "staging:stop": "node scripts/staging.mjs stop",
+    "staging:restore": "node scripts/staging-restore.mjs",
+    "test:e2e:staging": "node scripts/staging.mjs e2e",
+    "test:db:staging": "node scripts/staging.mjs db-test",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",

@@ -18,7 +18,7 @@ export async function getProfile(): Promise<ProfileRow | null> {
 }
 
 export async function updateProfile(
-  updates: Partial<Pick<ProfileRow, 'full_name' | 'email' | 'phone' | 'avatar_url' | 'avatar_storage_path' | 'onboarding_complete' | 'account_status' | 'deleted_at'>>,
+  updates: Partial<Pick<ProfileRow, 'full_name' | 'email' | 'phone' | 'avatar_url' | 'avatar_storage_path' | 'onboarding_complete'>>,
 ): Promise<ProfileRow> {
   const userId = await requireUserId()
   const safeUpdates = parseSettingsUpdate(profileUpdateSchema, updates)

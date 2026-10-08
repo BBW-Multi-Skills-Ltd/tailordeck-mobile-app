@@ -25,13 +25,8 @@ export const profileUpdateSchema = z.object({
   avatar_url: optionalText,
   avatar_storage_path: optionalText,
   onboarding_complete: z.boolean().optional(),
-  account_status: z.enum(['pending_verification', 'active', 'deactivated', 'pending_deletion', 'deleted']).optional(),
-  deleted_at: optionalText,
-  deactivation_reason: optionalText,
-  deactivated_at: optionalText,
-  deletion_requested_at: optionalText,
-  deletion_scheduled_at: optionalText,
-  reactivated_at: optionalText,
+  // Account status and deletion dates are not here: the database only lets users change the fields above.
+  // They change through the account RPCs (deactivate_account, request_account_deletion, restore_account).
 }).partial()
 
 export const businessProfileUpdateSchema = z.object({
