@@ -5,7 +5,7 @@ export function buildDocumentNumber(type: InvoiceType, jobId: string): string {
   return `${prefix}-${jobId.slice(0, 8).toUpperCase()}`
 }
 
-function documentFileName(brand: BrandConfig, type: InvoiceType, jobId: string): string {
+export function documentFileName(brand: BrandConfig, type: InvoiceType, jobId: string): string {
   const shopSlug = (brand.shopName || 'tailordeck')
     .replace(/[^a-z0-9]+/gi, '-')
     .replace(/^-+|-+$/g, '')

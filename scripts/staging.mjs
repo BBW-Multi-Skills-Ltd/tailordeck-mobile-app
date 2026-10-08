@@ -11,7 +11,7 @@
 // Emails (sign-up codes, password reset) are not sent; they appear in Mailpit (URL printed below).
 
 import { spawnSync } from 'node:child_process'
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
 
@@ -48,6 +48,14 @@ function assertLocal(url) {
   }
 }
 
+// Local Edge Function settings (git-ignored). Test values only; real secrets live in Supabase, never here.
+function writeLocalFunctionEnv() {
+  const file = 'supabase/functions/.env'
+  if (existsSync(file)) return false
+  writeFileSync(file, '# Local staging only (written by scripts/staging.mjs)\nACCOUNT_CLEANUP_SECRET=local-staging-cleanup-secret\n')
+  return true
+}
+
 async function prepare() {
   const status = localStatus()
   assertLocal(status.API_URL)
@@ -76,6 +84,7 @@ async function prepare() {
       'VITE_SENTRY_DSN=',
       `E2E_TEST_EMAIL=${QA_EMAIL}`,
       `E2E_TEST_PASSWORD=${QA_PASSWORD}`,
+      `E2E_MAILPIT_URL=${status.MAILPIT_URL}`,
       '',
     ].join('\n'),
   )
@@ -89,6 +98,7 @@ async function prepare() {
 
 const command = process.argv[2]
 if (command === 'start') {
+  writeLocalFunctionEnv()
   run('npx supabase start')
   await prepare()
 } else if (command === 'reset') {

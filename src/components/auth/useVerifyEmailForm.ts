@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { resendSignUpEmailOtp, verifySignUpEmailOtp } from '../../services/authService'
 import { EMAIL_OTP_LENGTH } from '../../validation/authSchemas'
@@ -22,6 +23,7 @@ import { readClipboardText } from '../../lib/clipboard'
 
 export function useVerifyEmailForm() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const pending = useMemo(() => loadPendingVerification(), [])
   const [email, setEmail] = useState(pending.email)
   const [loading, setLoading] = useState(false)
@@ -127,7 +129,7 @@ export function useVerifyEmailForm() {
     }
 
     try {
-      await completeVerifiedEmail({ email, navigate, pending })
+      await completeVerifiedEmail({ email, navigate, pending, queryClient })
     } catch (activationError) {
       console.error('Email verified, but profile activation failed:', activationError)
       showError('Email verified. Please sign in to finish setup.')

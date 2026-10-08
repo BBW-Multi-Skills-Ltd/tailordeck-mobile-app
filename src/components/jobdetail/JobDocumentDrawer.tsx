@@ -6,6 +6,7 @@ import type { DocumentTemplateLineItem } from '../../templates/types'
 import type { Job } from '../../types/job'
 import { DocumentPreview } from '../invoice/DocumentPreview'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
+import { isNativePdfSupported } from '../../lib/nativePdf'
 import { buildDocumentNumber } from './jobDocumentHelpers'
 import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
@@ -27,10 +28,13 @@ export function JobDocumentDrawer({
   balanceToCollect: number
   docPreviewRef: RefObject<HTMLDivElement | null>
   onClose: () => void
-  onDownload: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
-  onWhatsApp: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void> | void
+  /** May return a confirmation to show (e.g. where the file was saved on the phone). */
+  onDownload: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<string | void> | void
+  onWhatsApp: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<unknown> | void
 }) {
   const lineItems = buildClientFacingLineItems({ details, job })
+  const sendsFile = isNativePdfSupported()
+  const [pdfNotice, setPdfNotice] = useState('')
   const [zoom, setZoom] = useState(1)
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
   const [pdfPreparing, setPdfPreparing] = useState(true)
@@ -74,13 +78,20 @@ export function JobDocumentDrawer({
     try {
       setPdfAction(action)
       setPdfError('')
+      setPdfNotice('')
       if (action === 'download') {
-        await onDownload(type, pdfBlob)
+        setPdfNotice((await onDownload(type, pdfBlob)) || '')
       } else {
         await onWhatsApp(type, pdfBlob)
       }
     } catch {
-      setPdfError(action === 'download' ? 'Unable to download this PDF. Please try again.' : 'Unable to open WhatsApp. Please try again.')
+      setPdfError(
+        action === 'download'
+          ? 'Unable to download this PDF. Please try again.'
+          : sendsFile
+            ? 'Unable to send this PDF. Please try again.'
+            : 'Unable to open WhatsApp. Please try again.',
+      )
     } finally {
       setPdfAction(null)
     }
@@ -137,6 +148,7 @@ export function JobDocumentDrawer({
           </div>
 
           {pdfError ? <p className="inline-error side-sheet-pdf-error">{pdfError}</p> : null}
+          {pdfNotice ? <p className="side-sheet-pdf-notice" role="status">{pdfNotice}</p> : null}
 
           <div className="stack gap-8 side-sheet-actions">
             <button
@@ -155,7 +167,15 @@ export function JobDocumentDrawer({
               onClick={() => void runPdfAction('whatsapp')}
             >
               <FaWhatsapp size={18} />
-              {pdfPreparing ? 'Preparing PDF...' : pdfAction === 'whatsapp' ? 'Opening WhatsApp...' : 'Message Client on WhatsApp'}
+              {pdfPreparing
+                ? 'Preparing PDF...'
+                : sendsFile
+                  ? pdfAction === 'whatsapp'
+                    ? 'Opening...'
+                    : 'Send PDF to Client'
+                  : pdfAction === 'whatsapp'
+                    ? 'Opening WhatsApp...'
+                    : 'Message Client on WhatsApp'}
             </button>
           </div>
         </div>

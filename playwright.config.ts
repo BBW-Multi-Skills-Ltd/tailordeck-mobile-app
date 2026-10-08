@@ -33,7 +33,7 @@ const hasAuthenticatedE2eCredentials = Boolean(process.env.E2E_TEST_EMAIL && pro
 const authStorageState = '.playwright/.auth/qa-user.json'
 const publicProjects = mobileViewports.map(({ name, viewport }) => ({
   name,
-  testIgnore: ['**/auth.setup.ts', '**/authenticated-flow.e2e.ts'],
+  testIgnore: ['**/auth.setup.ts', '**/authenticated-flow.e2e.ts', '**/signup-flow.e2e.ts'],
   use: {
     channel: 'chrome',
     deviceScaleFactor: 2,
@@ -86,5 +86,12 @@ export default defineConfig({
     port: 4173,
     reuseExistingServer: !process.env.CI,
   },
-  projects: [...publicProjects, ...authenticatedProjects],
+  projects: [
+    ...publicProjects,
+    ...authenticatedProjects,
+    // Real sign-up with an emailed code: local staging only (creates an account each run).
+    ...(process.env.E2E_MAILPIT_URL
+      ? [{ name: 'signup-staging', testMatch: '**/signup-flow.e2e.ts', use: { channel: 'chrome', hasTouch: true, viewport: { width: 390, height: 844 } } }]
+      : []),
+  ],
 })

@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase'
 import { compressImageFile } from '../lib/imageCompression'
 import { brandSettingsUpdateSchema, fileUploadSchema, parseSettingsUpdate } from '../validation/settingsSchemas'
 import type { BrandSettingsRow } from './types'
-import { createSignedUrl, fileExtension, requireUserId, uploadPrivateFile } from './serviceHelpers'
+import { createSignedUrl, fileExtension, removeReplacedFile, requireUserId, uploadPrivateFile } from './serviceHelpers'
 
 const BRAND_ASSET_SIGNED_URL_TTL = 60 * 60 * 24 * 7
 
@@ -35,9 +35,11 @@ export async function uploadLogo(file: File): Promise<{ storagePath: string; sig
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 720, maxBytes: 260_000, initialQuality: 0.82, minQuality: 0.58 })
   const storagePath = `${userId}/logo-${Date.now()}.${fileExtension(uploadFile)}`
+  const previous = await currentBrandPaths(userId)
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ logo_storage_path: storagePath, logo_url: null })
+  await removeReplacedFile('brand-assets', previous?.logo_storage_path, storagePath)
   return { storagePath, signedUrl }
 }
 
@@ -46,8 +48,20 @@ export async function uploadSignature(file: File): Promise<{ storagePath: string
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 900, maxBytes: 280_000, initialQuality: 0.82, minQuality: 0.58 })
   const storagePath = `${userId}/signature-${Date.now()}.${fileExtension(uploadFile)}`
+  const previous = await currentBrandPaths(userId)
   await uploadPrivateFile({ bucket: 'brand-assets', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('brand-assets', storagePath, BRAND_ASSET_SIGNED_URL_TTL)
   await updateBrandSettings({ signature_storage_path: storagePath, signature_url: null })
+  await removeReplacedFile('brand-assets', previous?.signature_storage_path, storagePath)
   return { storagePath, signedUrl }
+}
+
+async function currentBrandPaths(userId: string): Promise<Pick<BrandSettingsRow, 'logo_storage_path' | 'signature_storage_path'> | null> {
+  const { data, error } = await supabase
+    .from('brand_settings')
+    .select('logo_storage_path, signature_storage_path')
+    .eq('user_id', userId)
+    .maybeSingle<Pick<BrandSettingsRow, 'logo_storage_path' | 'signature_storage_path'>>()
+  if (error) throw error
+  return data
 }

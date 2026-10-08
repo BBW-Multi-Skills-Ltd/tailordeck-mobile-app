@@ -11,7 +11,8 @@ async function expectNoHorizontalOverflow(page: Page) {
 }
 
 async function expectReadyAuthenticatedShell(page: Page) {
-  await expect(page.locator('.app-shell-header')).toBeVisible({ timeout: 15_000 })
+  // The real header, not the loading placeholder's copy (.app-boot-header).
+  await expect(page.locator('.app-shell-header:not(.app-boot-header)')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByText('TailorDeck').first()).toBeVisible()
   await expectNoHorizontalOverflow(page)
 }

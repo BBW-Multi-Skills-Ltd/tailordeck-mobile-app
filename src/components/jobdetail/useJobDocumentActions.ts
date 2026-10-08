@@ -7,7 +7,8 @@ import {
 } from '../invoice/documentHelpers'
 import type { BrandConfig, InvoiceType } from '../invoice/documentTypes'
 import type { Job } from '../../types/job'
-import { buildDocumentNumber, createPdfFile, triggerPdfDownload } from './jobDocumentHelpers'
+import { isNativePdfSupported, savePdf, sharePdf } from '../../lib/nativePdf'
+import { buildDocumentNumber, createPdfFile, documentFileName, triggerPdfDownload } from './jobDocumentHelpers'
 import { buildJobDocumentPdfBlob } from './jobPdfExport'
 
 export function useJobDocumentActions({
@@ -62,17 +63,34 @@ export function useJobDocumentActions({
     [canPersistDocument, createDocumentMutation, job.id],
   )
 
+  /** Returns a short confirmation to show, if any. */
   const handleDownload = useCallback(
-    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<string | void> => {
       const blob = await buildPdfBlob(preparedBlob)
       if (!blob) return
+      if (isNativePdfSupported()) {
+        const fileName = documentFileName(brand, type, job.id)
+        const outcome = await savePdf(blob, fileName)
+        return outcome === 'saved' ? `Saved to Documents/TailorDeck/${fileName}` : undefined
+      }
       triggerPdfDownload(blob, brand, type, job.id)
     },
     [brand, buildPdfBlob, job.id],
   )
 
+  /** Returns false when nothing was sent (the tailor closed the share sheet). */
   const handleWhatsAppToClient = useCallback(
-    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<void> => {
+    async (type: InvoiceType, preparedBlob?: Blob | null): Promise<boolean> => {
+      // Android app: attach the real PDF through the share sheet; the tailor picks WhatsApp and the client.
+      if (isNativePdfSupported()) {
+        const blob = await buildPdfBlob(preparedBlob)
+        if (!blob) throw new Error('Could not prepare the PDF.')
+        const label = type === 'invoice' ? 'Send invoice' : 'Send receipt'
+        const shared = await sharePdf(blob, documentFileName(brand, type, job.id), shareText(type), label)
+        if (shared) await saveDocumentRecord(type, createPdfFile(blob, brand, type, job.id), { markSent: true, sentViaWhatsApp: true })
+        return shared
+      }
+
       const whatsappUrl = buildWhatsAppURL(job.clientPhone, shareText(type))
       const whatsappWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
       const blob = await buildPdfBlob(preparedBlob)
@@ -85,6 +103,7 @@ export function useJobDocumentActions({
       if (!whatsappWindow) {
         window.location.href = whatsappUrl
       }
+      return true
     },
     [brand, buildPdfBlob, job, saveDocumentRecord, shareText],
   )

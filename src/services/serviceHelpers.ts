@@ -113,6 +113,20 @@ export async function uploadPrivateFile(params: {
   return params.path
 }
 
+/**
+ * Deletes the file a new upload replaced (old avatar, logo or signature). Best effort: a failure never
+ * blocks the upload, and account deletion removes everything under the user's folder anyway.
+ */
+export async function removeReplacedFile(
+  bucket: 'avatars' | 'brand-assets',
+  previousPath: string | null | undefined,
+  newPath: string,
+): Promise<void> {
+  if (!previousPath || previousPath === newPath) return
+  const { error } = await supabase.storage.from(bucket).remove([previousPath])
+  if (error) console.warn('Could not delete the replaced file:', error.message)
+}
+
 export async function createSignedUrl(bucket: string, path: string | null | undefined, expiresIn = 60 * 60): Promise<string> {
   if (!path) return ''
   const cacheKey = `tailordeck:signed-url:${bucket}:${path}:${expiresIn}`

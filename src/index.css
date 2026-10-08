@@ -851,6 +851,11 @@ body {
   margin: 0;
 }
 
+/* Scrolled into view clear of the fixed wizard header and footer. */
+.wizard-inline-error {
+  scroll-margin: 160px 0;
+}
+
 .job-completion-error {
   grid-column: 1 / -1;
   width: 100%;
@@ -6972,6 +6977,13 @@ button.more-row {
 
 .side-sheet-pdf-error {
   margin: 8px 2px 0;
+}
+
+.side-sheet-pdf-notice {
+  margin: 8px 2px 0;
+  font-size: 13px;
+  color: var(--success, #1f8a4c);
+  overflow-wrap: anywhere;
 }
 
 .whatsapp-send-btn {

@@ -3,10 +3,14 @@ import { cancelLinkedSubscriptionForUser } from '../_shared/googlePlay.ts'
 import { timingSafeEqual } from '../_shared/secrets.ts'
 import { createServiceClient, type ServiceClient } from '../_shared/supabase.ts'
 
+// Every stored file of the user (list_due_account_deletions reads storage.objects by folder), not only
+// the files rows still point to.
 type StorageTarget = {
-  bucket: 'avatars' | 'brand-assets' | 'job-photos' | 'documents'
+  bucket: 'avatars' | 'brand-assets' | 'job-photos' | 'documents' | 'support-attachments'
   path: string
 }
+
+const REMOVE_CHUNK = 100
 
 type DueAccount = {
   userId: string
@@ -50,13 +54,23 @@ async function deleteStorageTargets(admin: ServiceClient, targets: StorageTarget
 
   for (const [bucket, paths] of grouped.entries()) {
     const uniquePaths = [...new Set(paths)]
-    if (uniquePaths.length === 0) continue
-    const { data, error } = await admin.storage.from(bucket).remove(uniquePaths)
-    if (error) throw error
-    deleted += data?.length ?? uniquePaths.length
+    for (let start = 0; start < uniquePaths.length; start += REMOVE_CHUNK) {
+      const chunk = uniquePaths.slice(start, start + REMOVE_CHUNK)
+      const { data, error } = await admin.storage.from(bucket).remove(chunk)
+      if (error) throw error
+      deleted += data?.length ?? chunk.length
+    }
   }
 
   return deleted
+}
+
+/** Personal data that outlives the auth user (no foreign key): free-text reasons and rate-limit rows. */
+async function scrubLeftoverPersonalData(admin: ServiceClient, userId: string): Promise<void> {
+  const { error: auditError } = await admin.from('account_audit_logs').update({ reason: null }).eq('user_id', userId)
+  if (auditError) throw auditError
+  const { error: rateLimitError } = await admin.from('edge_rate_limits').delete().eq('actor_id', userId)
+  if (rateLimitError) throw rateLimitError
 }
 
 async function insertDeletionAudit(admin: ServiceClient, account: DueAccount, deletedStorageTargets: number): Promise<void> {
@@ -123,6 +137,7 @@ Deno.serve(async (request) => {
           const { error: deleteUserError } = await admin.auth.admin.deleteUser(account.userId)
           if (deleteUserError) throw deleteUserError
           result.authUserDeleted = true
+          await scrubLeftoverPersonalData(admin, account.userId)
         }
       } catch (error) {
         result.error = error instanceof Error ? error.message : 'Unknown cleanup error.'

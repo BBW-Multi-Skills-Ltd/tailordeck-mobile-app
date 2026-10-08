@@ -35,11 +35,11 @@ export function useJobDetailInteractions({
 
   async function handleSharedDocument(
     type: InvoiceType,
-    shareAction: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<void>,
+    shareAction: (type: InvoiceType, preparedBlob?: Blob | null) => Promise<boolean>,
     preparedBlob?: Blob | null,
   ): Promise<void> {
-    await shareAction(type, preparedBlob)
-    setSentDocuments((prev) => ({ ...prev, [type]: true }))
+    const sent = await shareAction(type, preparedBlob)
+    if (sent) setSentDocuments((prev) => ({ ...prev, [type]: true }))
   }
 
   return {

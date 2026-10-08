@@ -72,10 +72,8 @@ export function setMonitoringUser(user: User | null, loading = false) {
     return
   }
 
-  Sentry.setUser({
-    email: user.email,
-    id: user.id,
-  })
+  // Only the account id: the privacy policy promises crash reports carry no email or name (docs/05 SEC-07).
+  Sentry.setUser({ id: user.id })
 }
 
 export function setMonitoringRouteContext(context: MonitoringContext) {
@@ -137,10 +135,10 @@ function trackAction(action: Omit<LastAction, 'at'>) {
   Sentry.setContext('tailordeck_last_action', lastAction)
 }
 
+// Explicit labels only. Visible text is never sent: buttons and cards can show client names and amounts.
 function getElementLabel(element: Element): string {
   const explicit = element.getAttribute('data-monitoring-action') || element.getAttribute('aria-label') || ''
-  const text = explicit || element.textContent || ''
-  return sanitizeLabel(text)
+  return sanitizeLabel(explicit) || (element.tagName.toLowerCase() === 'a' ? 'link' : 'button')
 }
 
 function sanitizeLabel(value: string): string {

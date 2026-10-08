@@ -163,7 +163,7 @@ export async function saveFullJob(params: { jobId: string; newClientId: string; 
 /** The job itself is saved; only photos failed. Saving again retries just the photos (same job, no duplicates). */
 class JobPhotosNotSavedError extends ServiceError {
   constructor() {
-    super('Job saved, but some reference photos did not upload. Check your connection and tap the button again to retry the photos.')
+    super('Job saved, but some reference photos could not be saved. Tap the button again to retry the photos.')
     this.name = 'JobPhotosNotSavedError'
   }
 }

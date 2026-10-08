@@ -2,96 +2,113 @@ import { Link } from 'react-router-dom'
 import HistoryBackButton from '../components/shared/HistoryBackButton'
 import PageHeader from '../components/shared/PageHeader'
 
-const effectiveDate = 'August 4, 2026'
+// Source and reasoning: docs/13-Privacy-Policy-Draft.md. Keep it in line with the Google Play Data safety form
+// (docs/12-Play-Declarations.md) and with what the app actually does.
+const effectiveDate = 'October 8, 2026'
 
 const sections = [
   {
-    title: 'Product Ownership',
+    title: '1. Who We Are',
     body: [
-      'TailorDeck is a product of BBW Tech Innovations, a technology division under BBW Multi-Skills Ltd.',
+      'TailorDeck is a product of BBW Tech Innovations, a technology division of BBW Multi-Skills Ltd (RC 8603105), a company registered in Nigeria. BBW Multi-Skills Ltd is the data controller for the personal data of TailorDeck account holders.',
+      'Privacy contact: support@tailordeck.app (subject "Privacy").',
     ],
   },
   {
-    title: 'Information We Collect',
+    title: '2. Data We Collect',
     body: [
-      'Account details such as your name, email address, phone number, password authentication data, and profile photo.',
-      'Business details such as business name, shop address, business phone, business email, website, social handles, logo, signature, and CAC/RC number if provided.',
-      'Client and job records such as client names, phone numbers, measurements, order details, pricing, deposits, expenses, deadlines, notes, photos, invoices, receipts, and job status.',
-      'Subscription and payment records connected to your TailorDeck plan. Payment details are processed by Google Play, not stored directly by TailorDeck.',
-      'Technical data such as device type, browser, app version, session state, and basic diagnostic information needed to keep the app secure and reliable.',
+      'Account: your name, email address, phone number, profile photo, and your password (stored only as a secure hash by our sign-in provider).',
+      'Business: shop name, address, phone, email, website, social handles, logo, signature image and CAC/RC number, if you add them.',
+      "Your clients' data: client names, phone numbers, sex, children's ages, body measurements, order details, prices, deposits, expenses, deadlines, reference photos, invoices and receipts that you record.",
+      'Subscription: your plan, billing cycle, trial dates and Google Play order and purchase identifiers. We never receive card details; Google Play handles payment.',
+      'Support: ticket subjects and messages, attachments you send (screenshots or PDFs), the app screen you were on and basic device information.',
+      'Notifications: a push token for your device, so we can deliver support replies.',
+      'Diagnostics: crash and error reports with your account identifier (not your name or email), the app screen, and device and app version.',
+      'On your phone: a cached copy of your settings and a draft of an unfinished job, to make the app faster. They are cleared when you sign out.',
+      'We do not collect your location, your contacts list or your activity in other apps.',
     ],
   },
   {
-    title: 'How We Use Information',
+    title: '3. Why We Use It (Lawful Basis)',
     body: [
-      'To create and secure your TailorDeck account.',
-      'To help you manage clients, measurements, jobs, expenses, deadlines, invoices, receipts, and shop records.',
-      'To show your business details on documents when you choose to include them.',
-      'To send authentication emails, verification codes, password reset messages, billing messages, reminders, and important service notices.',
-      'To improve app reliability, prevent abuse, troubleshoot issues, and protect users from unauthorized access.',
+      'To create your account, run the app, store your records and produce invoices and receipts: performance of our contract with you.',
+      'To verify your email, reset passwords and send account and billing messages: contract.',
+      'To process subscriptions through Google Play and check purchases with Google: contract.',
+      'To answer support requests and send replies to your phone: contract and our legitimate interest in helping you.',
+      'Job deadline reminders and alarms: your choice in the app; you can turn them off in Settings.',
+      'Security, preventing abuse, rate limits and crash reports to fix bugs: our legitimate interest in a safe, working service.',
+      'Keeping records required by law, such as payment records: legal obligation.',
+      "We do not use your data or your clients' data for advertising, and we do not sell it.",
     ],
   },
   {
-    title: 'Client Data Responsibility',
+    title: '4. Who We Share It With',
     body: [
-      'TailorDeck is built for tailors and fashion designers. You are responsible for getting permission from your clients before storing their names, phone numbers, measurements, photos, or job details in the app.',
-      'Do not upload private, sensitive, illegal, or unrelated files. Only upload information needed to manage your tailoring business.',
+      'We use these service providers to run TailorDeck. They process data on our instructions and only for these purposes:',
+      'Supabase: database, sign-in, file storage and server functions (London, United Kingdom).',
+      'Google Play: subscription payments.',
+      'Google Firebase Cloud Messaging: delivers support replies to your phone.',
+      'Resend: sends emails such as verification codes and account and support emails.',
+      'Sentry: crash and error reports.',
+      'GitHub: stores our encrypted nightly backups.',
+      'Vercel: hosts the website and admin portal.',
+      'Cloudinary: hosts videos and images shown on the website (no user data).',
+      "When you send an invoice or receipt through WhatsApp or another app, that app's own terms and privacy policy apply.",
+      'We may disclose data if required by Nigerian law or a court order, or to protect users from fraud or harm.',
     ],
   },
   {
-    title: 'Third-Party Services',
+    title: "5. Your Clients' Data",
     body: [
-      'Supabase provides authentication, database, storage, and backend infrastructure.',
-      'Google Play processes subscription payments. TailorDeck receives a purchase confirmation from Google to activate your plan. Payments may show BBW Tech Innovations because it is the company behind TailorDeck.',
-      'Vercel hosts the TailorDeck web application.',
-      'Resend may be used to deliver email verification and account messages.',
-      'WhatsApp sharing opens your device sharing flow or WhatsApp link so you can send invoices, receipts, or job messages to clients.',
+      "You decide what client information to record. For that data you act as the controller and TailorDeck processes it on your behalf. You are responsible for telling your clients that you keep their details and for having a lawful reason to do so, such as making and delivering their order.",
+      "Record children's measurements only with the permission of a parent or guardian. Do not upload anything that is not needed for your business.",
     ],
   },
   {
-    title: 'Storage and Security',
+    title: '6. International Transfers',
     body: [
-      'Uploaded files are stored in private Supabase Storage buckets where possible. The app generates temporary signed links so authorized users can view their own files.',
-      'Row Level Security is used so users should only access records belonging to their own account.',
-      'No frontend code should contain Supabase service-role secrets, Google service account keys, or other private backend credentials.',
-      'No internet-based system is completely risk-free, but we design TailorDeck to reduce unauthorized access and protect user data.',
+      'Our main database is in London, United Kingdom. Some providers listed above process data in the United States or other countries. We use providers that commit to protecting data under contract, and we transfer only what each service needs.',
     ],
   },
   {
-    title: 'Data Sharing',
+    title: '7. How Long We Keep Data',
     body: [
-      'We do not sell your personal, business, or client data.',
-      'We share data only with service providers needed to run TailorDeck, comply with law, prevent fraud, process payments, deliver emails, or support features you request.',
-      "When you share an invoice, receipt, or client message through WhatsApp or another app, that sharing is controlled by the receiving platform's own terms and privacy practices.",
+      'Your account, business details, clients, jobs, documents, files and support conversations: while your account is open.',
+      'Clients and jobs you delete in the app are hidden immediately and permanently erased when your account is deleted.',
+      'Replaced profile photos, logos and signatures are erased when you upload a new one.',
+      'When you ask to delete your account, you have 14 days to restore it. After that, the account, all records and all files are permanently erased.',
+      'Encrypted backups are kept for up to 30 days and then automatically erased.',
+      'A record that an account was deleted (dates and counts only, no names or reasons) is kept for up to 6 years.',
+      'Rate-limit counters are kept for up to 2 days.',
+      'Crash reports and email delivery logs are kept by Sentry and Resend according to their retention settings. Google keeps Play order records under its own policy.',
     ],
   },
   {
-    title: 'Data Retention and Deletion',
+    title: '8. Your Rights',
     body: [
-      'We keep account, business, client, job, document, billing, and support records while your account is active or as needed for legal, security, backup, billing, or operational reasons.',
-      'You may request account deletion or use in-app deletion features where available. Some records may be retained temporarily in backups, logs, or payment records where required.',
-      'Deleted jobs and clients may use soft deletion first so mistakes can be investigated and business records remain consistent.',
+      'Under the Nigeria Data Protection Act 2023 you can ask us to give you a copy of your data, correct it, erase it, restrict or object to some uses, give it to you in a portable format, and withdraw consent where we rely on consent.',
+      'You can edit most of your data and delete your account yourself in the app (Settings, Account & Security). For anything else, contact support@tailordeck.app or use Help & Support in the app. We will reply within 30 days.',
+      'You can also complain to the Nigeria Data Protection Commission (NDPC) at ndpc.gov.ng.',
     ],
   },
   {
-    title: 'Your Choices',
+    title: '9. Security',
     body: [
-      'You can update your profile, business details, branding, reminders, and subscription information in the app.',
-      'You can choose which business details appear on invoices and receipts.',
-      'You can request support for access, correction, export, or deletion of your account data.',
+      'Your data is protected by sign-in with an emailed verification code, database rules that let each account see only its own records, private file storage opened only through short-lived links, payments verified with Google on our servers, and encrypted, access-restricted backups.',
+      'No system is perfectly secure. If a breach is likely to put your rights at risk, we will notify the NDPC within 72 hours and inform affected users without undue delay.',
     ],
   },
   {
-    title: 'Children',
-    body: [
-      'TailorDeck is intended for business users and is not directed to children. Tailors may store child measurement records only where they have appropriate permission from the parent, guardian, or responsible client.',
-    ],
+    title: '10. Children',
+    body: ['TailorDeck is for business owners and is not intended for anyone under 18.'],
   },
   {
-    title: 'Contact',
-    body: [
-      'For privacy requests, support, or data deletion, use the Help & Support page inside TailorDeck or contact BBW Multi-Skills Ltd at support@tailordeck.app.',
-    ],
+    title: '11. Changes',
+    body: ['We will show changes in the app and update the effective date. For important changes we will tell you before they take effect.'],
+  },
+  {
+    title: '12. Contact',
+    body: ['BBW Multi-Skills Ltd (RC 8603105), Nigeria. Email: support@tailordeck.app, or use Help & Support in the app.'],
   },
 ]
 
@@ -110,7 +127,7 @@ export default function PrivacyPolicy() {
           </div>
           <p>Effective date: {effectiveDate}</p>
           <p>
-            This Privacy Policy explains how TailorDeck collects, uses, stores, shares, and protects information when you use the app, website, and related services.
+            This policy explains how TailorDeck collects, uses, stores, shares and protects personal data when you use the TailorDeck Android app, the website tailordeck.app and our support services.
           </p>
         </section>
 

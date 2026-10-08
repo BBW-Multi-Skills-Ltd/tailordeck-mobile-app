@@ -2,7 +2,7 @@ import { normalizeNigerianPhone } from '../lib/phone'
 import { supabase } from '../lib/supabase'
 import { compressImageFile } from '../lib/imageCompression'
 import type { ProfileRow } from './types'
-import { ServiceError, createSignedUrl, fileExtension, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
+import { ServiceError, createSignedUrl, fileExtension, removeReplacedFile, requireUserId, uploadPrivateFile, userScopedPath } from './serviceHelpers'
 import { fileUploadSchema, parseSettingsUpdate, profileUpdateSchema } from '../validation/settingsSchemas'
 import { reportError } from '../lib/monitoring'
 
@@ -73,9 +73,16 @@ export async function uploadAvatar(file: File): Promise<{ storagePath: string; s
   const userId = await requireUserId()
   const uploadFile = await compressImageFile(file, { maxDimension: 520, maxBytes: 180_000, initialQuality: 0.82, minQuality: 0.58 })
   const storagePath = userScopedPath(userId, `avatar-${Date.now()}.${fileExtension(uploadFile)}`)
+  const { data: previous, error: previousError } = await supabase
+    .from('profiles')
+    .select('avatar_storage_path')
+    .eq('user_id', userId)
+    .maybeSingle<Pick<ProfileRow, 'avatar_storage_path'>>()
+  if (previousError) throw previousError
   await uploadPrivateFile({ bucket: 'avatars', path: storagePath, file: uploadFile })
   const signedUrl = await createSignedUrl('avatars', storagePath, AVATAR_SIGNED_URL_TTL)
   await updateProfile({ avatar_storage_path: storagePath, avatar_url: null })
+  await removeReplacedFile('avatars', previous?.avatar_storage_path, storagePath)
   return { storagePath, signedUrl }
 }
 

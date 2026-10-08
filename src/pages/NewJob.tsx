@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Lock } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { stepLabels } from '../components/newjob/newJobConfig'
@@ -28,6 +28,11 @@ export default function NewJob() {
   useLayoutEffect(() => {
     scrollAppToTop('auto')
   }, [state.step, state.stepFourReviewMode])
+
+  const wizardErrorRef = useRef<HTMLParagraphElement | null>(null)
+  useEffect(() => {
+    if (state.wizardError) wizardErrorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [state.wizardError])
 
   if (state.successOpen) {
     return (
@@ -80,8 +85,14 @@ export default function NewJob() {
         {hasStepProgress ? <StepProgress step={state.step} labels={stepLabels} /> : <ReviewProgressHeader />}
       </div>
 
-      {state.wizardError ? <p className="inline-feedback-error wizard-inline-error" role="alert">{state.wizardError}</p> : null}
       <NewJobStepContent wizard={wizard} />
+
+      {/* Next to the buttons the user just tapped (not at the top, where the fixed header covers it). */}
+      {state.wizardError ? (
+        <p ref={wizardErrorRef} className="inline-feedback-error wizard-inline-error" role="alert">
+          {state.wizardError}
+        </p>
+      ) : null}
 
       <WizardFooter
         step={state.step}

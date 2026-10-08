@@ -141,6 +141,7 @@ test('authenticate QA user', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign In', exact: true }).click()
 
   await expect(page.getByRole('alert')).toHaveCount(0)
-  await expect(page.locator('.app-shell-header')).toBeVisible({ timeout: 20_000 })
+  // The real header, not the loading placeholder's copy (.app-boot-header).
+  await expect(page.locator('.app-shell-header:not(.app-boot-header)')).toBeVisible({ timeout: 20_000 })
   await page.context().storageState({ path: authStorageState })
 })

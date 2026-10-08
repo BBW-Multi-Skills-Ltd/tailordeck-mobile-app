@@ -243,6 +243,11 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
+# Local staging: sign-up email shows the 8-digit code like production, so the sign-up e2e test can read it.
+[auth.email.template.confirmation]
+subject = "Confirm your TailorDeck account"
+content_path = "./supabase/templates/confirmation.html"
+
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
