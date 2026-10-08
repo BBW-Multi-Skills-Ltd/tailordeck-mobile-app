@@ -312,6 +312,12 @@
   gap: 12px;
 }
 
+.ad-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .ad-page-copy {
   margin: 6px 0 24px;
 }

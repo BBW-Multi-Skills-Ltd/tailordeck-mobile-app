@@ -1,7 +1,29 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart } from 'lucide-react'
+import { App as CapacitorApp } from '@capacitor/app'
+import { Capacitor } from '@capacitor/core'
+
+/** The installed app's version from Android (versionName and versionCode in android/app/build.gradle). */
+function useInstalledVersion(): string {
+  const [version, setVersion] = useState('')
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return undefined
+    let active = true
+    CapacitorApp.getInfo()
+      .then((info) => {
+        if (active) setVersion(`${info.version} (build ${info.build})`)
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
+    }
+  }, [])
+  return version
+}
 
 export default function AboutTailorDeckPanel() {
+  const version = useInstalledVersion()
   return (
     <div className="settings-about-content">
       <section className="settings-about-section settings-about-hero">
@@ -16,7 +38,7 @@ export default function AboutTailorDeckPanel() {
           <p className="app-shell-logo-text settings-about-brand-text">TailorDeck</p>
         </div>
         <h2>Your shop, in your pocket.</h2>
-        <p>Version 1.0.0</p>
+        {version ? <p>Version {version}</p> : null}
       </section>
 
       <section className="settings-about-section">

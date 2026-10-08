@@ -39,11 +39,14 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Missing ticket id' }, 400, request)
     }
 
+    // New tickets and chat messages have separate limits, so an active conversation never stops the
+    // ticket emails (or the reverse). A chat can easily pass 10 messages an hour.
+    const isChatMessage = typeof replyId === 'string' && replyId.length > 0
     await enforceRateLimit({
-      action: 'support_ticket_notify',
+      action: isChatMessage ? 'support_message_notify' : 'support_ticket_notify',
       actorId: user.id,
       admin,
-      limit: 10,
+      limit: isChatMessage ? 60 : 10,
       windowSeconds: 60 * 60,
     })
 
@@ -61,7 +64,7 @@ Deno.serve(async (request) => {
     const fromAddress = htmlEscape(ticket.account_email || user.email || 'a user')
 
     // Follow-up chat message from the user on an existing ticket.
-    if (typeof replyId === 'string' && replyId) {
+    if (isChatMessage) {
       const { data: reply, error: replyError } = await admin
         .from('support_ticket_replies')
         .select('body,attachments,author_role')

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Inbox, Mail, Phone, RefreshCw, Store, User } from 'lucide-react'
+import { ArrowLeft, Bell, BellOff, Inbox, Mail, Phone, RefreshCw, Store, User } from 'lucide-react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AttachmentList, ChatComposer } from '../../components/support/SupportChatParts'
 import { useAttachmentLinks } from '../../components/support/useAttachmentLinks'
@@ -13,6 +13,15 @@ import {
   type SupportStatus,
 } from '../../lib/supportFormat'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import {
+  desktopAlertsBlocked,
+  playAlertSound,
+  readAlertsPreference,
+  requestDesktopAlerts,
+  saveAlertsPreference,
+  showDesktopAlert,
+  unlockAlertSound,
+} from './supportAlerts'
 
 // Support centre (/admin/support). Support admins read every ticket (RLS) and chat through the
 // support-reply function: it pushes replies to the user's phone, and resolving/closing emails them the conversation.
@@ -297,17 +306,59 @@ export default function SupportCentre() {
     }
   }, [version])
 
-  // Live inbox: new tickets, new messages and status changes.
+  const [alertsOn, setAlertsOn] = useState(readAlertsPreference)
+  const alertsOnRef = useRef(alertsOn)
   useEffect(() => {
+    alertsOnRef.current = alertsOn
+  }, [alertsOn])
+
+  // After a reload the browser blocks sound until the first click on the page.
+  useEffect(() => {
+    if (!alertsOn) return undefined
+    const unlock = () => unlockAlertSound()
+    window.addEventListener('pointerdown', unlock, { once: true })
+    return () => window.removeEventListener('pointerdown', unlock)
+  }, [alertsOn])
+
+  async function toggleAlerts() {
+    const next = !alertsOn
+    if (next) {
+      unlockAlertSound()
+      await requestDesktopAlerts()
+    }
+    saveAlertsPreference(next)
+    setAlertsOn(next)
+  }
+
+  // Live inbox: new tickets, new messages and status changes. Users' new tickets and messages also alert staff.
+  useEffect(() => {
+    function alertStaff(title: string, body: string, ticketId: string | undefined) {
+      if (!alertsOnRef.current) return
+      playAlertSound()
+      showDesktopAlert(title, body, ticketId ?? 'support', () => {
+        if (ticketId) navigate(`/admin/support/${ticketId}`)
+      })
+    }
+
     const channel = supabase
       .channel('admin-support-inbox')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, () => setVersion((current) => current + 1))
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_ticket_replies' }, () => setChatVersion((current) => current + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'support_tickets' }, (payload) => {
+        setVersion((current) => current + 1)
+        if (payload.eventType !== 'INSERT') return
+        const ticket = payload.new as Partial<Ticket>
+        alertStaff(`New ticket${ticket.priority === 'urgent' ? ' (urgent)' : ''}`, ticket.subject ?? 'A user opened a ticket', ticket.id)
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_ticket_replies' }, (payload) => {
+        setChatVersion((current) => current + 1)
+        const reply = payload.new as { ticket_id?: string; author_role?: string; body?: string }
+        if (reply.author_role !== 'user') return
+        alertStaff('New message', reply.body?.trim() || 'Sent an attachment', reply.ticket_id)
+      })
       .subscribe()
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [])
+  }, [navigate])
 
   const counts = useMemo(() => {
     const result: Record<Filter, number> = { active: 0, open: 0, in_review: 0, resolved: 0, closed: 0, all: 0 }
@@ -331,11 +382,25 @@ export default function SupportCentre() {
       </Link>
       <div className="ad-page-head">
         <h1>Support centre</h1>
-        <button type="button" className="mk-btn mk-btn-secondary" onClick={() => setVersion((current) => current + 1)}>
-          <RefreshCw size={16} /> Refresh
-        </button>
+        <div className="ad-page-actions">
+          <button
+            type="button"
+            className="mk-btn mk-btn-secondary"
+            aria-pressed={alertsOn}
+            onClick={() => void toggleAlerts()}
+            title="Chime and desktop notification for new tickets and messages while this page is open"
+          >
+            {alertsOn ? <Bell size={16} /> : <BellOff size={16} />} {alertsOn ? 'Alerts on' : 'Turn on alerts'}
+          </button>
+          <button type="button" className="mk-btn mk-btn-secondary" onClick={() => setVersion((current) => current + 1)}>
+            <RefreshCw size={16} /> Refresh
+          </button>
+        </div>
       </div>
-      <p className="ad-muted ad-page-copy">Live chat with users. Replies reach their phone as a push notification.</p>
+      <p className="ad-muted ad-page-copy">
+        Live chat with users. Replies reach their phone as a push notification.
+        {alertsOn && desktopAlertsBlocked() ? ' Desktop notifications are blocked in this browser, so you will only hear the chime.' : ''}
+      </p>
 
       <div className="ad-filters" role="tablist" aria-label="Ticket status">
         {FILTERS.map((item) => (
