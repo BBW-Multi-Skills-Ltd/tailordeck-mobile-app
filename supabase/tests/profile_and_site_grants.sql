@@ -83,6 +83,8 @@ reset role;
 -- 6. A website admin can still edit content.
 insert into public.admin_users (user_id, roles) values (current_setting('test.uid')::uuid, array['website']);
 select pg_temp.act_as('authenticated');
+-- Admins act only after two-step login (aal2), see admin_two_step_login.sql.
+select set_config('request.jwt.claims', json_build_object('sub', current_setting('test.uid'), 'role', 'authenticated', 'aal', 'aal2')::text, true);
 update public.site_settings set company_site = 'https://admin-edit.example.com' where id = 1;
 insert into public.site_reviews (name, quote, rating) values ('Grant Test', 'Works', 5);
 do $$ begin

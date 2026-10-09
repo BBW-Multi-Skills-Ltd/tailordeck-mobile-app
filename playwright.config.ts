@@ -33,7 +33,7 @@ const hasAuthenticatedE2eCredentials = Boolean(process.env.E2E_TEST_EMAIL && pro
 const authStorageState = '.playwright/.auth/qa-user.json'
 const publicProjects = mobileViewports.map(({ name, viewport }) => ({
   name,
-  testIgnore: ['**/auth.setup.ts', '**/authenticated-flow.e2e.ts', '**/signup-flow.e2e.ts'],
+  testIgnore: ['**/auth.setup.ts', '**/authenticated-flow.e2e.ts', '**/signup-flow.e2e.ts', '**/admin-two-step.e2e.ts'],
   use: {
     channel: 'chrome',
     deviceScaleFactor: 2,
@@ -91,7 +91,16 @@ export default defineConfig({
     ...authenticatedProjects,
     // Real sign-up with an emailed code: local staging only (creates an account each run).
     ...(process.env.E2E_MAILPIT_URL
-      ? [{ name: 'signup-staging', testMatch: '**/signup-flow.e2e.ts', use: { channel: 'chrome', hasTouch: true, viewport: { width: 390, height: 844 } } }]
+      ? [
+          { name: 'signup-staging', testMatch: '**/signup-flow.e2e.ts', use: { channel: 'chrome', hasTouch: true, viewport: { width: 390, height: 844 } } },
+          // Runs after the signed-in tests: it adds a two-step factor to the QA account (removed by staging:reset).
+          {
+            name: 'admin-staging',
+            testMatch: '**/admin-two-step.e2e.ts',
+            dependencies: hasAuthenticatedE2eCredentials ? mobileViewports.map(({ name }) => `auth-${name}`) : [],
+            use: { channel: 'chrome', isMobile: false, viewport: { width: 1280, height: 800 } },
+          },
+        ]
       : []),
   ],
 })

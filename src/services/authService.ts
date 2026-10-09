@@ -120,6 +120,19 @@ export async function verifyLoginEmailChangeOtp(input: { email: string; token: s
   return data
 }
 
+/**
+ * Proves the person holding the phone knows the account password before a destructive action
+ * (delete or deactivate the account). Signs in again as the same user; throws the Supabase error if wrong.
+ */
+export async function verifyCurrentPassword(password: string): Promise<void> {
+  const { data, error: userError } = await supabase.auth.getUser()
+  if (userError) throw userError
+  const email = data.user?.email
+  if (!email) throw new Error('Sign in again to continue.')
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error) throw error
+}
+
 export async function requestPasswordSecurityCode() {
   const { data, error } = await supabase.auth.reauthenticate()
   if (error) throw error

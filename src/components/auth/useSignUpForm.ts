@@ -15,6 +15,7 @@ import {
 } from '../../lib/settings'
 import { signUpWithEmail } from '../../services/authService'
 import { completeAuthenticatedSignUp, savePendingSignUpHandoff } from './signUpHandoff'
+import { friendlyAuthError } from '../../lib/authErrors'
 
 type SignUpFieldKey = 'fullName' | 'email' | 'phone' | 'password' | 'confirmPassword' | 'agree' | 'form'
 type ConfirmPasswordState = 'idle' | 'partial' | 'match' | 'mismatch'
@@ -118,7 +119,7 @@ export function useSignUpForm() {
 
       await completeAuthenticatedSignUp({ navigate, nextSettings, setupWasCompleted })
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : 'Unable to create account.' })
+      setErrors({ form: friendlyAuthError(error, 'Unable to create account.') })
       setErrorKey((prev) => prev + 1)
     } finally {
       setLoading(false)

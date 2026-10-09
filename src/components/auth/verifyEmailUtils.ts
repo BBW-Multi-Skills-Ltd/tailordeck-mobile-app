@@ -1,3 +1,5 @@
+import { friendlyAuthError } from '../../lib/authErrors'
+
 export function formatSeconds(totalSeconds: number): string {
   const safeSeconds = Math.max(0, totalSeconds)
   const minutes = Math.floor(safeSeconds / 60)
@@ -18,5 +20,5 @@ export function getFriendlyOtpError(error: unknown, secondsUntilExpiry: number):
   if (message.includes('rate') || message.includes('security')) {
     return 'Please wait before requesting another code.'
   }
-  return rawMessage || 'Unable to verify this code.'
+  return friendlyAuthError(error, 'Unable to verify this code.')
 }

@@ -38,6 +38,26 @@ for (const route of protectedRoutes) {
   })
 }
 
+test('deleting the account asks for the password and refuses a wrong one', async ({ page }) => {
+  await gotoAppRoute(page, '/settings/security')
+  await expectReadyAuthenticatedShell(page)
+
+  await page.getByRole('button', { name: 'Delete Account Permanently' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Delete account?' })
+  await expect(dialog).toBeVisible()
+  const confirmButton = dialog.getByRole('button', { name: 'Request deletion' })
+
+  await dialog.locator('input[type="text"]').fill('DELETE')
+  await expect(confirmButton).toBeDisabled() // the password is required too
+  await dialog.locator('input[type="password"]').fill('not-the-password-1')
+  await confirmButton.click()
+  await expect(dialog.getByRole('alert')).toHaveText('That password is incorrect.')
+  await expect(dialog).toBeVisible() // nothing was deleted
+
+  await dialog.getByRole('button', { name: 'Cancel' }).click()
+  await expect(dialog).toBeHidden()
+})
+
 test('reference image viewer stays above notification drawer layer', async ({ page }) => {
   await gotoAppRoute(page, '/')
   await expectReadyAuthenticatedShell(page)

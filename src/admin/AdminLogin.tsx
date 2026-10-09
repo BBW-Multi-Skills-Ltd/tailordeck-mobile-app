@@ -4,6 +4,7 @@ import { passwordChecks, passwordStrength } from '../lib/formValidation'
 import { supabase } from '../lib/supabase'
 import { sendPasswordReset, updateLoginPassword, verifyPasswordResetCode } from '../services/authService'
 import { EMAIL_OTP_LENGTH } from '../validation/authSchemas'
+import { friendlyAuthError } from '../lib/authErrors'
 
 type Mode = 'sign-in' | 'request-code' | 'set-password'
 
@@ -43,7 +44,7 @@ export default function AdminLogin({ onHold }: { onHold: (hold: boolean) => void
       // Same message for unknown email and wrong password, so the form does not reveal which accounts exist.
       if (signInError) throw new Error('Email or password is incorrect.')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to sign in.')
+      setError(friendlyAuthError(caught, 'Unable to sign in.'))
     } finally {
       setBusy(false)
     }
@@ -58,7 +59,7 @@ export default function AdminLogin({ onHold }: { onHold: (hold: boolean) => void
       switchMode('set-password')
       setNotice(`If this is an admin email, a ${EMAIL_OTP_LENGTH}-digit code is on its way to ${normalizedEmail}.`)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to send a code.')
+      setError(friendlyAuthError(caught, 'Unable to send a code.'))
     } finally {
       setBusy(false)
     }
@@ -85,7 +86,7 @@ export default function AdminLogin({ onHold }: { onHold: (hold: boolean) => void
       await updateLoginPassword({ password, confirmPassword })
       onHold(false)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to set the password.')
+      setError(friendlyAuthError(caught, 'Unable to set the password.'))
     } finally {
       setBusy(false)
     }

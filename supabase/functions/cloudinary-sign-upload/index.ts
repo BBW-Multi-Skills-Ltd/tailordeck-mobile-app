@@ -21,7 +21,9 @@ Deno.serve(async (request) => {
     const admin = createServiceClient()
     const user = await getRequestUser(request, admin)
     if (!user) return jsonResponse({ error: 'Authentication required.' }, 401, request)
-    if (!(await hasAdminRole(admin, user.id, 'website'))) return jsonResponse({ error: 'Website admin access required.' }, 403, request)
+    if (!(await hasAdminRole(admin, request, user.id, 'website'))) {
+      return jsonResponse({ error: 'Website admin access with two-step login required.' }, 403, request)
+    }
 
     const timestamp = Math.floor(Date.now() / 1000)
     // Cloudinary signature: alphabetically sorted params joined with &, then the API secret appended.

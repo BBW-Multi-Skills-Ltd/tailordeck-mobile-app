@@ -8,6 +8,7 @@ import { scrollFirstFormErrorIntoView } from '../lib/scroll'
 import { supabase } from '../lib/supabase'
 import { sendPasswordReset, updateLoginPassword, verifyPasswordResetCode } from '../services/authService'
 import { EMAIL_OTP_LENGTH } from '../validation/authSchemas'
+import { friendlyAuthError } from '../lib/authErrors'
 
 type ResetPasswordErrors = {
   form?: string
@@ -114,7 +115,7 @@ export default function ResetPassword() {
         void supabase.auth.signOut().finally(() => navigate('/auth/signin', { replace: true }))
       }, 1000)
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : 'Unable to reset password.' })
+      setErrors({ form: friendlyAuthError(error, 'Unable to reset password.') })
       setErrorKey((value) => value + 1)
     } finally {
       setLoading(false)
@@ -129,7 +130,7 @@ export default function ResetPassword() {
       setResendState('sent')
     } catch (error) {
       setResendState('idle')
-      setErrors({ form: error instanceof Error ? error.message : 'Unable to send a new code.' })
+      setErrors({ form: friendlyAuthError(error, 'Unable to send a new code.') })
     }
   }
 

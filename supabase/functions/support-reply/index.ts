@@ -98,7 +98,9 @@ Deno.serve(async (request) => {
     const admin = createServiceClient()
     const user = await getRequestUser(request, admin)
     if (!user) return jsonResponse({ error: 'Authentication required.' }, 401, request)
-    if (!(await hasAdminRole(admin, user.id, 'support'))) return jsonResponse({ error: 'Support admin access required.' }, 403, request)
+    if (!(await hasAdminRole(admin, request, user.id, 'support'))) {
+      return jsonResponse({ error: 'Support admin access with two-step login required.' }, 403, request)
+    }
 
     const input = (await request.json().catch(() => ({}))) as { ticketId?: unknown; body?: unknown; attachments?: unknown; status?: unknown }
     const ticketId = typeof input.ticketId === 'string' ? input.ticketId : ''

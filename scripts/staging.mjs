@@ -18,7 +18,7 @@ import { createClient } from '@supabase/supabase-js'
 const ENV_FILE = '.env.staging'
 // Local-only test account. These values exist only in the Docker database on this computer.
 const QA_EMAIL = 'qa@staging.local'
-const QA_PASSWORD = 'staging-qa-password'
+const QA_PASSWORD = 'staging-qa-password-1'
 
 function run(command, env = process.env) {
   const result = spawnSync(command, { stdio: 'inherit', shell: true, env })
@@ -122,6 +122,9 @@ if (command === 'start') {
   }
 } else if (command === 'e2e') {
   assertLocal(localStatus().API_URL)
+  // The admin two-step test sets up an authenticator on the QA account; start every run without one.
+  spawnSync('docker', ['exec', 'supabase_db_tailordeck', 'psql', '-U', 'postgres', '-c',
+    `delete from auth.mfa_factors where user_id = (select id from auth.users where email = '${QA_EMAIL}')`], { stdio: 'ignore' })
   run('npm run build -- --mode staging')
   // Fewer parallel browsers: the whole Supabase stack is running on the same computer.
   run(`npx playwright test --workers=2 ${process.argv.slice(3).join(' ')}`, { ...process.env, E2E_ENV_FILE: ENV_FILE })

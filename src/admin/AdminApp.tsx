@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
 import { ArrowRight, Globe, LifeBuoy, LogOut, ShieldAlert } from 'lucide-react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import AdminLogin from './AdminLogin'
+import AdminTwoStep from './AdminTwoStep'
 import { useAdminSession, type AdminRole } from './useAdminSession'
 import '../marketing/marketing.css'
 import './admin.css'
@@ -118,6 +119,8 @@ export default function AdminApp() {
         </div>
       </div>
     )
+  } else if (state.twoStep !== 'verified') {
+    content = <AdminTwoStep mode={state.twoStep} email={state.session.user.email ?? ''} onSignOut={() => void signOut()} />
   } else {
     const { roles } = state
     content = (

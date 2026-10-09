@@ -4,10 +4,16 @@ import { supabase } from '../lib/supabase'
 
 export type AdminRole = 'website' | 'support'
 
+/**
+ * Two-step login state of an admin session: 'verified' (aal2, code entered), 'challenge' (has an
+ * authenticator app set up, must enter its code) or 'enroll' (must set one up first).
+ */
+export type TwoStepState = 'verified' | 'challenge' | 'enroll'
+
 export type AdminSessionState =
   | { status: 'loading' }
   | { status: 'signed-out' }
-  | { status: 'signed-in'; session: Session; roles: AdminRole[] }
+  | { status: 'signed-in'; session: Session; roles: AdminRole[]; twoStep: TwoStepState }
 
 async function loadRoles(): Promise<AdminRole[]> {
   // Server-side check (admin_users + RLS); the UI only reflects what the database allows.
@@ -16,7 +22,14 @@ async function loadRoles(): Promise<AdminRole[]> {
   return (Array.isArray(data) ? data : []).filter((role): role is AdminRole => role === 'website' || role === 'support')
 }
 
-/** Current Supabase session plus the signed-in user's admin roles. */
+async function loadTwoStepState(): Promise<TwoStepState> {
+  const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (error) throw error
+  if (data.currentLevel === 'aal2') return 'verified'
+  return data.nextLevel === 'aal2' ? 'challenge' : 'enroll'
+}
+
+/** Current Supabase session, the signed-in user's admin roles and their two-step login state. */
 export function useAdminSession() {
   const [state, setState] = useState<AdminSessionState>({ status: 'loading' })
 
@@ -26,9 +39,10 @@ export function useAdminSession() {
       return
     }
     try {
-      setState({ status: 'signed-in', session, roles: await loadRoles() })
+      const [roles, twoStep] = await Promise.all([loadRoles(), loadTwoStepState()])
+      setState({ status: 'signed-in', session, roles, twoStep })
     } catch {
-      setState({ status: 'signed-in', session, roles: [] })
+      setState({ status: 'signed-in', session, roles: [], twoStep: 'enroll' })
     }
   }, [])
 
@@ -37,6 +51,7 @@ export function useAdminSession() {
     void supabase.auth.getSession().then(({ data }) => {
       if (active) void refresh(data.session)
     })
+    // MFA_CHALLENGE_VERIFIED arrives after the code is accepted and moves the session to aal2.
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') return
       void refresh(session)

@@ -1,7 +1,14 @@
 import { z } from 'zod'
 
 const emailSchema = z.string().trim().toLowerCase().email('Enter a valid email address.')
-const passwordSchema = z.string().min(6, 'Password must be at least 6 characters.')
+// Same rule as Supabase Auth (minimum length 8, "letters and digits"). Uppercase and symbols are strength hints only.
+// Sign-in does not use it, so older 6-character passwords still sign in; they must meet it when changed.
+export const PASSWORD_RULE_MESSAGE = 'Use at least 8 characters with letters and numbers.'
+const passwordSchema = z
+  .string()
+  .min(8, PASSWORD_RULE_MESSAGE)
+  .regex(/[A-Za-z]/, PASSWORD_RULE_MESSAGE)
+  .regex(/\d/, PASSWORD_RULE_MESSAGE)
 export const EMAIL_OTP_LENGTH = 8
 
 export const signInSchema = z.object({

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { type FieldErrors, isValidEmailFormat } from '../../lib/formValidation'
 import { scrollFirstFormErrorIntoView } from '../../lib/scroll'
 import { signInWithEmail } from '../../services/authService'
+import { friendlyAuthError } from '../../lib/authErrors'
 
 type SignInFieldKey = 'email' | 'password' | 'form'
 
@@ -53,7 +54,7 @@ export function useSignInForm() {
       await signInWithEmail({ email: email.trim().toLowerCase(), password })
       navigate('/')
     } catch (error) {
-      setErrors({ form: error instanceof Error ? error.message : 'Unable to sign in.' })
+      setErrors({ form: friendlyAuthError(error, 'Unable to sign in.') })
       setErrorKey((prev) => prev + 1)
     } finally {
       setLoading(false)

@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
 import { sendPasswordReset } from '../services/authService'
+import { friendlyAuthError } from '../lib/authErrors'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
@@ -21,7 +22,7 @@ export default function ForgotPassword() {
       // The reset is finished in the app with the emailed code (email links can't open the Android app).
       navigate(`/auth/reset-password?email=${encodeURIComponent(normalizedEmail)}`)
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Unable to send reset code.')
+      setErrorMessage(friendlyAuthError(error, 'Unable to send reset code.'))
     } finally {
       setLoading(false)
     }

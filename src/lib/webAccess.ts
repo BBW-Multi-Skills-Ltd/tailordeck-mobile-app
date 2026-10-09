@@ -8,7 +8,8 @@ import { Capacitor } from '@capacitor/core'
 export function isFullAppAllowed(): boolean {
   if (Capacitor.isNativePlatform()) return true
   if (import.meta.env.DEV) return !isMarketingPreviewInDev()
-  return import.meta.env.VITE_ALLOW_WEB_APP === 'true'
+  // Staging and test builds (VITE_ALLOW_WEB_APP) can also switch to the website, so tests can reach /admin.
+  return import.meta.env.VITE_ALLOW_WEB_APP === 'true' && !isMarketingPreviewInDev()
 }
 
 const MARKETING_PREVIEW_KEY = 'tailordeck-dev-marketing-preview'

@@ -8,6 +8,11 @@ export type ConfirmOptions = {
   requiredText?: string
   requiredTextLabel?: string
   tone?: 'default' | 'danger'
+  /** Asks for the account password; `verify` returns an error message to show, or null when it is correct. */
+  passwordCheck?: {
+    label: string
+    verify: (password: string) => Promise<string | null>
+  }
 }
 
 export type AppFeedbackValue = {

@@ -3,11 +3,12 @@ import type { NavigateFunction } from 'react-router-dom'
 import { clearPreviewSession } from '../../lib/auth'
 import type { TailorSettings } from '../../lib/settings'
 import { useDeactivateAccountMutation, useRequestAccountDeletionMutation } from '../../hooks/useProfileQueries'
-import { requestPasswordSecurityCode, updateLoginEmail, updateLoginPassword, verifyLoginEmailChangeOtp } from '../../services/authService'
+import { requestPasswordSecurityCode, updateLoginEmail, updateLoginPassword, verifyCurrentPassword, verifyLoginEmailChangeOtp } from '../../services/authService'
 import { supabase } from '../../lib/supabase'
 import { syncProfileEmailFromAuth } from '../../services/profileService'
 import { softDeleteAllJobs } from '../../services/jobService'
 import { getServiceErrorMessage } from '../../services/serviceHelpers'
+import { friendlyAuthError } from '../../lib/authErrors'
 import { useAppFeedback } from '../shared/appFeedbackCore'
 import { getSecurityDangerMessage } from './settingsSecurityActions'
 import { createAccountSecurityNotification } from '../../services/notificationService'
@@ -85,7 +86,7 @@ export function useSettingsAccountActions({
       setSecurityFeedback('')
       return { emailChangePending, pendingEmail: emailChanged ? nextEmail : undefined }
     } catch (error) {
-      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to save account details.'))
+      setSecurityFeedback(friendlyAuthError(error, 'Unable to save account details.'))
       throw error
     }
   }
@@ -104,7 +105,7 @@ export function useSettingsAccountActions({
       })
       setSecurityFeedback('')
     } catch (error) {
-      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to confirm email change.'))
+      setSecurityFeedback(friendlyAuthError(error, 'Unable to confirm email change.'))
       throw error
     }
   }
@@ -114,7 +115,7 @@ export function useSettingsAccountActions({
       await requestPasswordSecurityCode()
       setSecurityFeedback('')
     } catch (error) {
-      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to send security code.'))
+      setSecurityFeedback(friendlyAuthError(error, 'Unable to send security code.'))
       throw error
     }
   }
@@ -129,7 +130,7 @@ export function useSettingsAccountActions({
       await notifySecurityEvent('password_updated')
       setSecurityFeedback('')
     } catch (error) {
-      setSecurityFeedback(getServiceErrorMessage(error, 'Unable to update password.'))
+      setSecurityFeedback(friendlyAuthError(error, 'Unable to update password.'))
       throw error
     }
   }
@@ -143,6 +144,19 @@ export function useSettingsAccountActions({
       requiredText,
       requiredTextLabel: 'Type',
       tone: 'danger',
+      // Someone else holding an unlocked phone must not be able to delete or lock the account (docs/05 SEC-17).
+      passwordCheck: {
+        label: 'Enter your password to confirm.',
+        verify: async (password) => {
+          try {
+            await verifyCurrentPassword(password)
+            return null
+          } catch (error) {
+            const message = friendlyAuthError(error, 'Unable to check your password. Please try again.')
+            return message === 'Email or password is incorrect.' ? 'That password is incorrect.' : message
+          }
+        },
+      },
     })
     if (!confirmed) return
 

@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const CLEANUP_SECRET = 'local-staging-cleanup-secret' // matches supabase/functions/.env (local only)
 const EMAIL = `delete-me-${Date.now()}@staging.local`
-const PASSWORD = 'staging-delete-test'
+const PASSWORD = 'staging-delete-test-1'
 const PNG = Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='), (c) => c.charCodeAt(0))
 const PDF = new TextEncoder().encode('%PDF-1.4\n%%EOF\n')
 

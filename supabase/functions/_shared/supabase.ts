@@ -4,9 +4,10 @@ import { requiredEnv } from './env.ts'
 // Service-role client and request authentication shared by all Edge Functions.
 
 // No generated DB types for edge functions, so the schema is left untyped.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // deno-lint-ignore no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ServiceClient = SupabaseClient<any, 'public', any>
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export function createServiceClient(): ServiceClient {
   return createClient(requiredEnv('SUPABASE_URL'), requiredEnv('SUPABASE_SERVICE_ROLE_KEY'), {
@@ -29,8 +30,27 @@ export async function getRequestUser(request: Request, admin: ServiceClient): Pr
   return data.user
 }
 
-/** True when the user is listed in admin_users with the given role. */
-export async function hasAdminRole(admin: ServiceClient, userId: string, role: 'website' | 'support'): Promise<boolean> {
+/**
+ * The session's authenticator assurance level ('aal1' password only, 'aal2' after a two-step code).
+ * Read from the token payload; only call after getRequestUser has verified the token.
+ */
+export function sessionAssuranceLevel(request: Request): string {
+  const payload = bearerToken(request).split('.')[1]
+  if (!payload) return ''
+  try {
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(payload.length / 4) * 4, '='))
+    return String((JSON.parse(json) as { aal?: unknown }).aal ?? '')
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * True when the user is listed in admin_users with the given role AND signed in with two-step login (aal2),
+ * matching public.is_admin() in the database.
+ */
+export async function hasAdminRole(admin: ServiceClient, request: Request, userId: string, role: 'website' | 'support'): Promise<boolean> {
+  if (sessionAssuranceLevel(request) !== 'aal2') return false
   const { data, error } = await admin.from('admin_users').select('roles').eq('user_id', userId).maybeSingle()
   if (error) throw error
   return ((data as { roles: string[] } | null)?.roles ?? []).includes(role)
